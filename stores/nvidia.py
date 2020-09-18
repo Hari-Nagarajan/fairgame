@@ -1,5 +1,6 @@
 import logging
 import webbrowser
+from datetime import date
 
 import requests
 
@@ -17,7 +18,11 @@ DIGITAL_RIVER_API_KEY = "9485fa7b159e42edb08a83bde0d83dia"
 DIGITAL_RIVER_PRODUCT_LIST_URL = "https://api.digitalriver.com/v1/shoppers/me/products"
 DIGITAL_RIVER_STOCK_CHECK_URL = "https://api.digitalriver.com/v1/shoppers/me/products/{product_id}/inventory-status?"
 
+DIGITAL_RIVER_ADD_TO_CART_URL = "https://api.digitalriver.com/v1/shoppers/me/carts/active/line-items"
+
 NVIDIA_CART_URL = "https://store.nvidia.com/store/nvidia/en_US/buy/productID.{product_id}/clearCart.yes/nextPage.QuickBuyCartPage"
+
+NVIDIA_TOKEN_URL = "https://store.nvidia.com/store/nvidia/SessionToken"
 
 GPU_DISPLAY_NAMES = {
     "2060S": "NVIDIA GEFORCE RTX 2060 SUPER",
@@ -27,8 +32,42 @@ GPU_DISPLAY_NAMES = {
 
 
 def add_to_cart(product_id):
+    """
+
+    Old nvidia cart link. Broke around 5pm 2020-09-18
+    """
     log.info(f"Adding {product_id} to cart!")
     webbrowser.open_new(NVIDIA_CART_URL.format(product_id=product_id))
+
+
+def get_nividia_access_token():
+    payload = {
+        "apiKey": DIGITAL_RIVER_API_KEY,
+        "format": "json",
+        "locale": "en-us",
+        "currency": "USD",
+        "_": date.today()
+    }
+    response = requests.get(NVIDIA_TOKEN_URL, headers={"Accept": "application/json"}, params=payload)
+    return response.json()['access_token']
+
+
+def add_to_cart_silent(product_id):
+    log.debug("Getting session token")
+    access_token = get_nividia_access_token()
+    payload = {
+        "apiKey": DIGITAL_RIVER_API_KEY,
+        "format": "json",
+        "method": "post",
+        "productId": product_id,
+        "quantity": 1,
+        "token": access_token,
+        "_": date.today()
+    }
+    log.debug("Adding to cart")
+    response = requests.get(DIGITAL_RIVER_ADD_TO_CART_URL, headers={"Accept": "application/json"}, params=payload)
+    log.debug(response.status_code)
+    webbrowser.open_new(f"https://api.digitalriver.com/v1/shoppers/me/carts/active/web-checkout?token={access_token}")
 
 
 def is_in_stock(product_id):
@@ -80,4 +119,4 @@ class NvidiaBuyer:
         log.info(f"Checking stock for {GPU_DISPLAY_NAMES[gpu]}...")
         while not is_in_stock(product_id):
             sleep(5)
-        add_to_cart(product_id)
+        add_to_cart_silent(product_id)
