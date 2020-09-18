@@ -30,6 +30,11 @@ GPU_DISPLAY_NAMES = {
     "3090": "NVIDIA GEFORCE RTX 3090",
 }
 
+DEFAULT_HEADERS = {
+    "Accept": "application/json",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36",
+}
+
 
 def add_to_cart(product_id):
     """
@@ -48,7 +53,7 @@ def get_nividia_access_token():
         "currency": "USD",
         "_": date.today()
     }
-    response = requests.get(NVIDIA_TOKEN_URL, headers={"Accept": "application/json"}, params=payload)
+    response = requests.get(NVIDIA_TOKEN_URL, headers=DEFAULT_HEADERS, params=payload)
     return response.json()['access_token']
 
 
@@ -65,7 +70,7 @@ def add_to_cart_silent(product_id):
         "_": date.today()
     }
     log.debug("Adding to cart")
-    response = requests.get(DIGITAL_RIVER_ADD_TO_CART_URL, headers={"Accept": "application/json"}, params=payload)
+    response = requests.get(DIGITAL_RIVER_ADD_TO_CART_URL, headers=DEFAULT_HEADERS, params=payload)
     log.debug(response.status_code)
     webbrowser.open_new(f"https://api.digitalriver.com/v1/shoppers/me/carts/active/web-checkout?token={access_token}")
 
@@ -78,7 +83,7 @@ def is_in_stock(product_id):
     url = DIGITAL_RIVER_STOCK_CHECK_URL.format(product_id=product_id)
 
     log.debug(f"Calling {url}")
-    response = requests.get(url, headers={"Accept": "application/json"}, params=payload)
+    response = requests.get(url, headers=DEFAULT_HEADERS, params=payload)
     log.debug(f"Returned {response.status_code}")
     response_json = response.json()
     product_status_message = response_json["inventoryStatus"]["status"]
@@ -100,7 +105,7 @@ class NvidiaBuyer:
             "fields": "product.id,product.displayName,product.pricing",
         }
         response = requests.get(
-            url, headers={"Accept": "application/json"}, params=payload
+            url, headers=DEFAULT_HEADERS, params=payload
         )
 
         log.debug(response.status_code)
