@@ -5,11 +5,13 @@ verify_ssl = true
 
 [dev-packages]
 pyinstaller = "*"
-black = "*"
 
 [packages]
 requests = "*"
 click = "*"
+selenium = "*"
+chromedriver-py = "==85.0.4183.87"
+guizero = "*"
 
 [requires]
 python_version = "3.7"
