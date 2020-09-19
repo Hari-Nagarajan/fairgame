@@ -37,6 +37,17 @@ GPU_DISPLAY_NAMES = {
     "3090": "NVIDIA GEFORCE RTX 3090",
 }
 
+ACCEPTED_LOCALES = ["fr_be",
+                    "es_es",
+                    "fr_fr",
+                    "it_it",
+                    "nl_nl",
+                    "sv_se",
+                    "de_at",
+                    "en_gb",
+                    "en_us"
+                    ]
+
 DEFAULT_HEADERS = {
     "Accept": "application/json",
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36",
@@ -46,6 +57,8 @@ DEFAULT_HEADERS = {
 class NvidiaBuyer:
     def __init__(self, locale="en_us"):
         self.product_data = {}
+        self.cli_locale = locale
+        self.locale = self.map_locales()
         self.session = requests.Session()
 
         adapter = HTTPAdapter(
@@ -60,6 +73,13 @@ class NvidiaBuyer:
         self.session.mount("http://", adapter)
         self.locale = locale
         self.get_product_ids()
+
+    def map_locales(self):
+        if self.cli_locale.lower() == "de_at":
+            return "de_DE"
+        if self.cli_locale.lower() == "fr_be":
+            return "fr_FR"
+        return self.cli_locale
 
     def get_product_ids(self, url=DIGITAL_RIVER_PRODUCT_LIST_URL):
         log.debug(f"Calling {url}")
@@ -77,7 +97,7 @@ class NvidiaBuyer:
         response_json = response.json()
         for product_obj in response_json["products"]["product"]:
             if product_obj["displayName"] in GPU_DISPLAY_NAMES.values():
-                if self.check_if_locale_corresponds(product_obj["id"]):
+                if self.check_if_locale_corresponds(product_obj["id"], self.cli_locale):
                     self.product_data[product_obj["displayName"]] = {
                         "id": product_obj["id"],
                         "price": product_obj["pricing"]["formattedListPrice"],
@@ -92,9 +112,9 @@ class NvidiaBuyer:
             sleep(5)
         self.add_to_cart_silent(product_id)
 
-    def check_if_locale_corresponds(self, product_id):
-        special_locales = ["en_gb", "de_de"]  # TODO add support for all EU locales
-        if self.locale.lower() in special_locales:
+    def check_if_locale_corresponds(self, product_id, cli_locale):
+        special_locales = ["en_gb", "de_de", "de_de", "fr_be"]
+        if self.locale in special_locales:
             url = f'{DIGITAL_RIVER_PRODUCT_LIST_URL}/{product_id}'
             log.debug(f"Calling {url}")
             payload = {
@@ -107,7 +127,7 @@ class NvidiaBuyer:
             response = self.session.get(url, headers=DEFAULT_HEADERS, params=payload)
             log.debug(response.status_code)
             response_json = response.json()
-            return self.locale[3:].upper() in response_json["product"]["name"]
+            return cli_locale[3:].upper() in response_json["product"]["name"]
         return True
 
     def is_in_stock(self, product_id):

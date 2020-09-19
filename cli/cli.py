@@ -2,7 +2,7 @@ import os
 
 import click
 
-from cli.gpu import GPU
+from cli.utils import GPU, Locale
 from stores.amazon import Amazon
 from stores.nvidia import NvidiaBuyer
 
@@ -14,7 +14,7 @@ def main():
 
 @click.command()
 @click.option("--gpu", type=GPU(), prompt="What GPU are you after?")
-@click.option("--locale", type=str, prompt="What locale shall we use?", default="en_us")
+@click.option("--locale", type=Locale(), prompt="What locale shall we use?", default="en_us")
 def nvidia(gpu, locale):
     nv = NvidiaBuyer(locale)
     nv.buy(gpu)
