@@ -1,3 +1,4 @@
 /dist/
 /.idea/
 /build/
+/Pipfile.lock
