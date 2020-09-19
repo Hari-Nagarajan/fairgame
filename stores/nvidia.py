@@ -118,7 +118,8 @@ class NvidiaBuyer:
         log.info(f"Checking stock for {GPU_DISPLAY_NAMES[gpu]}...")
         while not self.is_in_stock(product_id):
             sleep(5)
-        self.add_to_cart_silent(product_id)
+        cart_url = self.add_to_cart_silent(product_id)
+        self.notification_handler.send_notification(f"{GPU_DISPLAY_NAMES[gpu]} in stock: {cart_url}")
 
     def check_if_locale_corresponds(self, product_id):
         special_locales = ["en_gb", "de_at", "de_de", "fr_fr", "fr_be"]
@@ -189,5 +190,5 @@ class NvidiaBuyer:
         log.debug(self.session.cookies)
         params = {"token": access_token}
         url = furl(DIGITAL_RIVER_CHECKOUT_URL).set(params)
-        self.notification_handler.send_notification(f"{GPU_DISPLAY_NAMES[gpu]} in stock: {url}")
         webbrowser.open_new(url.url)
+        return url.url
