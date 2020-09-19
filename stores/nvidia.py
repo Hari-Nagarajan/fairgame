@@ -67,6 +67,7 @@ class NvidiaBuyer:
             "apiKey": DIGITAL_RIVER_API_KEY,
             "expand": "product",
             "fields": "product.id,product.displayName,product.pricing",
+            "locale": self.locale
         }
         headers = DEFAULT_HEADERS.copy()
         headers['locale'] = self.locale
@@ -93,6 +94,7 @@ class NvidiaBuyer:
     def is_in_stock(self, product_id):
         payload = {
             "apiKey": DIGITAL_RIVER_API_KEY,
+            "locale": self.locale
         }
 
         url = DIGITAL_RIVER_STOCK_CHECK_URL.format(product_id=product_id)
