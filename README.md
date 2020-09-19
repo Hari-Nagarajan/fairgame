@@ -83,8 +83,8 @@ valid, the notification handler will send you an sms when it carts or purchases 
 {
   "account_sid": "ACCOUNT_SID",
   "auth_token": "AUTH_TOKEN",
-  "from": "YOUR TWILIO NUMBER", # +19993334444
-  "to": "THE NUMBER YOU WANT TO SEND SMS TO" # +18048289123
+  "from": "YOUR TWILIO NUMBER",
+  "to": "THE NUMBER YOU WANT TO SEND SMS TO"
 }
 ```
 

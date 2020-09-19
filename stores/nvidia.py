@@ -66,7 +66,7 @@ class NvidiaBuyer:
 
         adapter = HTTPAdapter(
             max_retries=Retry(
-                total=3,
+                total=10,
                 backoff_factor=1,
                 status_forcelist=[429, 500, 502, 503, 504],
                 method_whitelist=["HEAD", "GET", "OPTIONS"],

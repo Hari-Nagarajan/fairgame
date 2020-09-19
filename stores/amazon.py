@@ -78,7 +78,7 @@ class Amazon:
             time.sleep(delay)
 
         log.info("Item in stock, buy now button found!")
-        price_str = self.driver.find_element_by_id("price_inside_buybox").text
+        price_str = self.driver.find_element_by_id("priceblock_ourprice").text
         price_int = int(round(float(price_str.strip("$"))))
         if price_int < price_limit:
             log.info(f"Attempting to buy item for {price_int}")
