@@ -2,7 +2,7 @@
 
 Tool to help us buy a GPU in 2020
 
-[Installation](#Installation) | [Usage Guide](#Usage Guide) 
+[Installation](#Installation) | [Usage](#Usage) 
 ## Installation
 
 This project uses [Pipenv](https://pypi.org/project/pipenv/) to manage dependencies. 

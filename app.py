@@ -3,6 +3,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from guizero import App, PushButton, Box, TextBox, Text, Combo
 
+from cli import cli
 from stores.amazon import Amazon
 from stores.nvidia import GPU_DISPLAY_NAMES
 from stores.nvidia import NvidiaBuyer
@@ -112,5 +113,6 @@ class MainUI:
 
 
 if __name__ == "__main__":
-    main_ui = MainUI()
-    main_ui.app.display()
+    # main_ui = MainUI()
+    # main_ui.app.display()
+    cli.main()

@@ -44,7 +44,7 @@ DEFAULT_HEADERS = {
 
 
 class NvidiaBuyer:
-    def __init__(self):
+    def __init__(self, locale="en_us"):
         self.product_data = {}
         self.session = requests.Session()
 
@@ -58,7 +58,7 @@ class NvidiaBuyer:
         )
         self.session.mount("https://", adapter)
         self.session.mount("http://", adapter)
-
+        self.locale = locale
         self.get_product_ids()
 
     def get_product_ids(self, url=DIGITAL_RIVER_PRODUCT_LIST_URL):
@@ -68,7 +68,9 @@ class NvidiaBuyer:
             "expand": "product",
             "fields": "product.id,product.displayName,product.pricing",
         }
-        response = self.session.get(url, headers=DEFAULT_HEADERS, params=payload)
+        headers = DEFAULT_HEADERS.copy()
+        headers['locale'] = self.locale
+        response = self.session.get(url, headers=headers, params=payload)
 
         log.debug(response.status_code)
         response_json = response.json()
@@ -108,7 +110,7 @@ class NvidiaBuyer:
         payload = {
             "apiKey": DIGITAL_RIVER_API_KEY,
             "format": "json",
-            "locale": "en-us",
+            "locale": self.locale,
             "currency": "USD",
             "_": datetime.today(),
         }
@@ -125,6 +127,7 @@ class NvidiaBuyer:
             "format": "json",
             "method": "post",
             "productId": product_id,
+            "locale": self.locale,
             "quantity": 1,
             "token": access_token,
             "_": datetime.now(),
