@@ -2,7 +2,7 @@
 
 Tool to help us buy a GPU in 2020
 
-[Installation](#Installation) | [Usage Guide](#Usage Guide) 
+[Installation](#Installation) | [Usage](#Usage) 
 ## Installation
 
 This project uses [Pipenv](https://pypi.org/project/pipenv/) to manage dependencies. 
@@ -18,7 +18,7 @@ Run it
 python app.py
 ```
 
-## Usage Guide
+## Usage
 
 Ok now we have a basic GUI. GUIs aren't my strong suit, but pretty much the top box is the settings for amazon and
 the bottom box is the settings for Nvidia. 
