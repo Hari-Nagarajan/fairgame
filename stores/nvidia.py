@@ -113,7 +113,7 @@ class NvidiaBuyer:
         self.add_to_cart_silent(product_id)
 
     def check_if_locale_corresponds(self, product_id, cli_locale):
-        special_locales = ["en_gb", "de_de", "de_de", "fr_be"]
+        special_locales = ["en_gb", "de_at", "de_de", "fr_be"]
         if self.locale in special_locales:
             url = f'{DIGITAL_RIVER_PRODUCT_LIST_URL}/{product_id}'
             log.debug(f"Calling {url}")
