@@ -9,6 +9,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.expected_conditions import presence_of_element_located
 from selenium.webdriver.support.ui import WebDriverWait
 
+from notifications.notifications import NotificationHandler
 from utils.logger import log
 
 options = Options()
@@ -25,6 +26,7 @@ LOGIN_URL = "https://www.amazon.com/ap/signin?openid.pape.max_auth_age=0&openid.
 
 class Amazon:
     def __init__(self, username, password, debug=False):
+        self.notification_handler = NotificationHandler()
         if not debug:
             chrome_options.add_argument("--headless")
         self.driver = webdriver.Chrome(
@@ -82,6 +84,7 @@ class Amazon:
             log.info(f"Attempting to buy item for {price_int}")
             self.buy_now()
         else:
+            self.notification_handler.send_notification(f"Item was found, but price is at {price_int} so we did not buy it.")
             log.info(f"Price was too high {price_int}")
 
     def buy_now(self):
@@ -100,6 +103,7 @@ class Amazon:
 
         log.info("Clicking 'Place Your Order'.")
         place_order.click()
+        self.notification_handler.send_notification(f"Item was purchased! Check your Amazon account.")
 
     def force_stop(self):
         self.driver.stop_client()
