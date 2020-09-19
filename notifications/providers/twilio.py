@@ -44,5 +44,6 @@ class TwilioHandler:
             )
             log.info("SMS Sent: " + message.sid)
         except Exception as e:
+            log.error(e)
             log.warn("Twilio send message failed. Disabling Twilio notifications.")
             self.enabled = False
