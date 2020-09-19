@@ -93,8 +93,8 @@ class NvidiaBuyer:
         self.add_to_cart_silent(product_id)
 
     def check_if_locale_corresponds(self, product_id):
-        special_locales = ["en_GB", "de_DE"]  # TODO add support for all EU locales
-        if self.locale in special_locales:
+        special_locales = ["en_gb", "de_de"]  # TODO add support for all EU locales
+        if self.locale.lower() in special_locales:
             url = f'{DIGITAL_RIVER_PRODUCT_LIST_URL}/{product_id}'
             log.debug(f"Calling {url}")
             payload = {
@@ -107,7 +107,7 @@ class NvidiaBuyer:
             response = self.session.get(url, headers=DEFAULT_HEADERS, params=payload)
             log.debug(response.status_code)
             response_json = response.json()
-            return self.locale[3:] in response_json["product"]["name"]
+            return self.locale[3:].upper() in response_json["product"]["name"]
         return True
 
     def is_in_stock(self, product_id):
