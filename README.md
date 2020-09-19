@@ -72,6 +72,21 @@ What locale shall we use? [en_us]:
 
 ```
 
+### Notifications
+This uses a notifications handler that will support multiple notification channels. 
+
+#### Twilio
+To enable Twilio notifications, first go to https://www.twilio.com/ and create a free account and get a Twilio number.
+Then make a copy of twilio_config.template_json and name it twilio_config.json. If this file exists and the credentials are
+valid, the notification handler will send you an sms when it carts or purchases an item.
+```
+{
+  "account_sid": "ACCOUNT_SID",
+  "auth_token": "AUTH_TOKEN",
+  "from": "YOUR TWILIO NUMBER", # +19993334444
+  "to": "THE NUMBER YOU WANT TO SEND SMS TO" # +18048289123
+}
+```
 
 ## Troubleshooting
 
