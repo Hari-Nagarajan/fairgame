@@ -111,9 +111,10 @@ class NvidiaBuyer:
     def buy(self, gpu):
         try:
             product_id = self.product_data.get(GPU_DISPLAY_NAMES[gpu])["id"]
-        except TypeError:
+        except TypeError as e:
             log.error("Cant get product ID")
             log.error(f"Product data for {GPU_DISPLAY_NAMES[gpu]}: {self.product_data.get(GPU_DISPLAY_NAMES[gpu])}")
+            raise e
         log.info(f"Checking stock for {GPU_DISPLAY_NAMES[gpu]}...")
         while not self.is_in_stock(product_id):
             sleep(5)
