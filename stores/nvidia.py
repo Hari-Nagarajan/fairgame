@@ -97,7 +97,7 @@ class NvidiaBuyer:
         response_json = response.json()
         for product_obj in response_json["products"]["product"]:
             if product_obj["displayName"] in GPU_DISPLAY_NAMES.values():
-                if self.check_if_locale_corresponds(product_obj["id"], self.cli_locale):
+                if self.check_if_locale_corresponds(product_obj["id"]):
                     self.product_data[product_obj["displayName"]] = {
                         "id": product_obj["id"],
                         "price": product_obj["pricing"]["formattedListPrice"],
@@ -112,9 +112,9 @@ class NvidiaBuyer:
             sleep(5)
         self.add_to_cart_silent(product_id)
 
-    def check_if_locale_corresponds(self, product_id, cli_locale):
+    def check_if_locale_corresponds(self, product_id):
         special_locales = ["en_gb", "de_at", "de_de", "fr_be"]
-        if self.locale in special_locales:
+        if self.cli_locale in special_locales:
             url = f'{DIGITAL_RIVER_PRODUCT_LIST_URL}/{product_id}'
             log.debug(f"Calling {url}")
             payload = {
@@ -127,7 +127,7 @@ class NvidiaBuyer:
             response = self.session.get(url, headers=DEFAULT_HEADERS, params=payload)
             log.debug(response.status_code)
             response_json = response.json()
-            return cli_locale[3:].upper() in response_json["product"]["name"]
+            return self.cli_locale[3:].upper() in response_json["product"]["name"]
         return True
 
     def is_in_stock(self, product_id):
