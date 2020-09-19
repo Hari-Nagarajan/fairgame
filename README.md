@@ -2,10 +2,10 @@
 
 Tool to help us buy a GPU in 2020
 
-[Installation](#Installation) | [Usage](#Usage) 
+[Installation](#Installation) | [Usage](#Usage) | [Discord](https://discord.gg/hQeUbRv) 
 ## Installation
 
-This project uses [Pipenv](https://pypi.org/project/pipenv/) to manage dependencies. 
+This project uses [Pipenv](https://pypi.org/project/pipenv/) to manage dependencies. Hop in my [Discord](https://discord.gg/hQeUbRv) if you have ideas, need help or just want to tell me about how you got your new 3080.
 
 ```
 pip install pipenv
