@@ -109,7 +109,11 @@ class NvidiaBuyer:
             self.get_product_ids(url=response_json["products"]["nextPage"]["uri"])
 
     def buy(self, gpu):
-        product_id = self.product_data.get(GPU_DISPLAY_NAMES[gpu])["id"]
+        try:
+            product_id = self.product_data.get(GPU_DISPLAY_NAMES[gpu])["id"]
+        except TypeError:
+            log.error("Cant get product ID")
+            log.error(f"Product data for {GPU_DISPLAY_NAMES[gpu]}: {self.product_data.get(GPU_DISPLAY_NAMES[gpu])}")
         log.info(f"Checking stock for {GPU_DISPLAY_NAMES[gpu]}...")
         while not self.is_in_stock(product_id):
             sleep(5)
