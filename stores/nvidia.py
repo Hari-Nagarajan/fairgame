@@ -1,9 +1,12 @@
 import logging
 import webbrowser
-from datetime import date
+from datetime import datetime
 from time import sleep
 
 import requests
+from furl import furl
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 
 log = logging.getLogger(__name__)
 formatter = logging.Formatter(
@@ -18,13 +21,14 @@ DIGITAL_RIVER_OUT_OF_STOCK_MESSAGE = "PRODUCT_INVENTORY_OUT_OF_STOCK"
 DIGITAL_RIVER_API_KEY = "9485fa7b159e42edb08a83bde0d83dia"
 DIGITAL_RIVER_PRODUCT_LIST_URL = "https://api.digitalriver.com/v1/shoppers/me/products"
 DIGITAL_RIVER_STOCK_CHECK_URL = "https://api.digitalriver.com/v1/shoppers/me/products/{product_id}/inventory-status?"
-
 DIGITAL_RIVER_ADD_TO_CART_URL = (
     "https://api.digitalriver.com/v1/shoppers/me/carts/active/line-items"
 )
+DIGITAL_RIVER_CHECKOUT_URL = (
+    "https://api.digitalriver.com/v1/shoppers/me/carts/active/web-checkout"
+)
 
 NVIDIA_CART_URL = "https://store.nvidia.com/store/nvidia/en_US/buy/productID.{product_id}/clearCart.yes/nextPage.QuickBuyCartPage"
-
 NVIDIA_TOKEN_URL = "https://store.nvidia.com/store/nvidia/SessionToken"
 
 GPU_DISPLAY_NAMES = {
@@ -39,70 +43,23 @@ DEFAULT_HEADERS = {
 }
 
 
-def add_to_cart(product_id):
-    """
-
-    Old nvidia cart link. Broke around 5pm 2020-09-18
-    """
-    log.info(f"Adding {product_id} to cart!")
-    webbrowser.open_new(NVIDIA_CART_URL.format(product_id=product_id))
-
-
-def get_nividia_access_token():
-    payload = {
-        "apiKey": DIGITAL_RIVER_API_KEY,
-        "format": "json",
-        "locale": "en-us",
-        "currency": "USD",
-        "_": date.today(),
-    }
-    response = requests.get(NVIDIA_TOKEN_URL, headers=DEFAULT_HEADERS, params=payload)
-    return response.json()["access_token"]
-
-
-def add_to_cart_silent(product_id):
-    log.debug("Getting session token")
-    access_token = get_nividia_access_token()
-    payload = {
-        "apiKey": DIGITAL_RIVER_API_KEY,
-        "format": "json",
-        "method": "post",
-        "productId": product_id,
-        "quantity": 1,
-        "token": access_token,
-        "_": date.today(),
-    }
-    log.debug("Adding to cart")
-    response = requests.get(
-        DIGITAL_RIVER_ADD_TO_CART_URL, headers=DEFAULT_HEADERS, params=payload
-    )
-    log.debug(response.status_code)
-    webbrowser.open_new(
-        f"https://api.digitalriver.com/v1/shoppers/me/carts/active/web-checkout?token={access_token}"
-    )
-
-
-def is_in_stock(product_id):
-    payload = {
-        "apiKey": DIGITAL_RIVER_API_KEY,
-    }
-
-    url = DIGITAL_RIVER_STOCK_CHECK_URL.format(product_id=product_id)
-
-    log.debug(f"Calling {url}")
-    response = requests.get(url, headers=DEFAULT_HEADERS, params=payload)
-    log.debug(f"Returned {response.status_code}")
-    response_json = response.json()
-    product_status_message = response_json["inventoryStatus"]["status"]
-    log.info(f"Stock status is {product_status_message}")
-    return product_status_message != DIGITAL_RIVER_OUT_OF_STOCK_MESSAGE
-
-
 class NvidiaBuyer:
     def __init__(self):
         self.product_data = {}
+        self.session = requests.Session()
+
+        adapter = HTTPAdapter(
+            max_retries=Retry(
+                total=3,
+                backoff_factor=1,
+                status_forcelist=[429, 500, 502, 503, 504],
+                method_whitelist=["HEAD", "GET", "OPTIONS"],
+            )
+        )
+        self.session.mount("https://", adapter)
+        self.session.mount("http://", adapter)
+
         self.get_product_ids()
-        print(self.product_data)
 
     def get_product_ids(self, url=DIGITAL_RIVER_PRODUCT_LIST_URL):
         log.debug(f"Calling {url}")
@@ -111,7 +68,7 @@ class NvidiaBuyer:
             "expand": "product",
             "fields": "product.id,product.displayName,product.pricing",
         }
-        response = requests.get(url, headers=DEFAULT_HEADERS, params=payload)
+        response = self.session.get(url, headers=DEFAULT_HEADERS, params=payload)
 
         log.debug(response.status_code)
         response_json = response.json()
@@ -127,6 +84,57 @@ class NvidiaBuyer:
     def buy(self, gpu):
         product_id = self.product_data.get(GPU_DISPLAY_NAMES[gpu])["id"]
         log.info(f"Checking stock for {GPU_DISPLAY_NAMES[gpu]}...")
-        while not is_in_stock(product_id):
+        while not self.is_in_stock(product_id):
             sleep(5)
-        add_to_cart_silent(product_id)
+        self.add_to_cart_silent(product_id)
+
+    def is_in_stock(self, product_id):
+        payload = {
+            "apiKey": DIGITAL_RIVER_API_KEY,
+        }
+
+        url = DIGITAL_RIVER_STOCK_CHECK_URL.format(product_id=product_id)
+
+        log.debug(f"Calling {url}")
+        response = self.session.get(url, headers=DEFAULT_HEADERS, params=payload)
+        log.debug(f"Returned {response.status_code}")
+        response_json = response.json()
+        product_status_message = response_json["inventoryStatus"]["status"]
+        log.info(f"Stock status is {product_status_message}")
+        return product_status_message != DIGITAL_RIVER_OUT_OF_STOCK_MESSAGE
+
+    def get_nividia_access_token(self):
+        log.debug("Getting session token")
+        payload = {
+            "apiKey": DIGITAL_RIVER_API_KEY,
+            "format": "json",
+            "locale": "en-us",
+            "currency": "USD",
+            "_": datetime.today(),
+        }
+        response = self.session.get(
+            NVIDIA_TOKEN_URL, headers=DEFAULT_HEADERS, params=payload
+        )
+        log.debug(response.status_code)
+        return response.json()["access_token"]
+
+    def add_to_cart_silent(self, product_id):
+        access_token = self.get_nividia_access_token()
+        payload = {
+            "apiKey": DIGITAL_RIVER_API_KEY,
+            "format": "json",
+            "method": "post",
+            "productId": product_id,
+            "quantity": 1,
+            "token": access_token,
+            "_": datetime.now(),
+        }
+        log.debug("Adding to cart")
+        response = self.session.get(
+            DIGITAL_RIVER_ADD_TO_CART_URL, headers=DEFAULT_HEADERS, params=payload
+        )
+        log.debug(response.status_code)
+        log.debug(self.session.cookies)
+        params = {"token": access_token}
+        url = furl(DIGITAL_RIVER_CHECKOUT_URL).set(params)
+        webbrowser.open_new(url.url)
