@@ -58,7 +58,7 @@ DEFAULT_HEADERS = {
 class NvidiaBuyer:
     def __init__(self, locale="en_us"):
         self.product_data = {}
-        self.cli_locale = locale
+        self.cli_locale = locale.lower()
         self.locale = self.map_locales()
         self.session = requests.Session()
 
@@ -72,14 +72,13 @@ class NvidiaBuyer:
         )
         self.session.mount("https://", adapter)
         self.session.mount("http://", adapter)
-        self.locale = locale
         self.get_product_ids()
 
     def map_locales(self):
-        if self.cli_locale.lower() == "de_at":
-            return "de_DE"
-        if self.cli_locale.lower() == "fr_be":
-            return "fr_FR"
+        if self.cli_locale == "de_at":
+            return "de_de"
+        if self.cli_locale == "fr_be":
+            return "fr_fr"
         return self.cli_locale
 
     def get_product_ids(self, url=DIGITAL_RIVER_PRODUCT_LIST_URL):
