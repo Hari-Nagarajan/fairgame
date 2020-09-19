@@ -8,6 +8,8 @@ from furl import furl
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
+from notifications.notifications import NotificationHandler
+
 log = logging.getLogger(__name__)
 formatter = logging.Formatter(
     "%(asctime)s : %(message)s : %(levelname)s -%(name)s", datefmt="%d%m%Y %I:%M:%S %p"
@@ -60,6 +62,7 @@ class NvidiaBuyer:
         self.session.mount("http://", adapter)
         self.locale = locale
         self.get_product_ids()
+        self.notification_handler = NotificationHandler()
 
     def get_product_ids(self, url=DIGITAL_RIVER_PRODUCT_LIST_URL):
         log.debug(f"Calling {url}")
@@ -89,6 +92,7 @@ class NvidiaBuyer:
         log.info(f"Checking stock for {GPU_DISPLAY_NAMES[gpu]}...")
         while not self.is_in_stock(product_id):
             sleep(5)
+        self.notification_handler.send_notification(f"Opened checkout page for {GPU_DISPLAY_NAMES[gpu]}")
         self.add_to_cart_silent(product_id)
 
     def is_in_stock(self, product_id):
