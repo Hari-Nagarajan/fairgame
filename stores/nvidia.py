@@ -43,6 +43,7 @@ ACCEPTED_LOCALES = ["fr_be",
                     "it_it",
                     "nl_nl",
                     "sv_se",
+                    "de_de",
                     "de_at",
                     "en_gb",
                     "en_us"
