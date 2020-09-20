@@ -4,7 +4,6 @@ from utils.logger import log
 
 
 class NotificationHandler:
-
     def __init__(self):
         log.info("Initializing notifcation handler")
         self.twilio_handler = TwilioHandler()

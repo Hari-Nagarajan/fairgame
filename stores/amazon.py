@@ -69,11 +69,9 @@ class Amazon:
         while not self.driver.find_elements_by_xpath('//*[@id="buy-now-button"]'):
             self.driver.refresh()
             log.info("Refreshing page.")
-            availability = (
-                self.wait
-                .until(presence_of_element_located((By.ID, "availability")))
-                .text.replace("\n", " ")
-            )
+            availability = self.wait.until(
+                presence_of_element_located((By.ID, "availability"))
+            ).text.replace("\n", " ")
             log.info(f"Current availability message is: {availability}")
             time.sleep(delay)
 
@@ -84,7 +82,9 @@ class Amazon:
             log.info(f"Attempting to buy item for {price_int}")
             self.buy_now()
         else:
-            self.notification_handler.send_notification(f"Item was found, but price is at {price_int} so we did not buy it.")
+            self.notification_handler.send_notification(
+                f"Item was found, but price is at {price_int} so we did not buy it."
+            )
             log.info(f"Price was too high {price_int}")
 
     def buy_now(self):
@@ -103,7 +103,9 @@ class Amazon:
 
         log.info("Clicking 'Place Your Order'.")
         place_order.click()
-        self.notification_handler.send_notification(f"Item was purchased! Check your Amazon account.")
+        self.notification_handler.send_notification(
+            f"Item was purchased! Check your Amazon account."
+        )
 
     def force_stop(self):
         self.driver.stop_client()
