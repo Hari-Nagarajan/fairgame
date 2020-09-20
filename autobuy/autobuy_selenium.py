@@ -29,7 +29,7 @@ from utils.logger import log
 
 
 AUTOBUY_CONFIG_PATH = "autobuy_config.json"
-AUTOBUY_CONFIG_KEYS = ['NVIDIA_LOGIN', 'NVIDIA_PASSWORD', 'FULL_AUTOBUY','CREDITCARD_NUMBER','CREDITCARD_EXP','CREDITCARD_SECURITY_CODE']
+AUTOBUY_CONFIG_KEYS = ['NVIDIA_LOGIN', 'NVIDIA_PASSWORD', 'FULL_AUTOBUY','CREDITCARD_NUMBER','CREDITCARD_EXP','CREDITCARD_SECURITY_CODE',"AUTOBUY_COUNTRY_SELECT"]
 
 autobuy_locale_btns = {
     "fr_be":["continuer","envoyer"],
@@ -59,6 +59,7 @@ class AutoBuy:
                     self.ccNum = self.config['CREDITCARD_NUMBER'].replace(' ','')
                     self.ccExpDate = self.config['CREDITCARD_EXP'].split('/')
                     self.ccSecCode = self.config['CREDITCARD_SECURITY_CODE']
+                    self.countrySelection = self.config['AUTOBUY_COUNTRY_SELECT']
                     self.enabled = True
         else:
             log.info("No Autobuy creds found.")
@@ -71,12 +72,13 @@ class AutoBuy:
 
     def auto_buy(self,url,locale):
         log.debug("Initialize autobuy")
-        # Create firefox instance
+        # Create chrome instance
         self.driver = webdriver.Chrome(
             executable_path=binary_path, options=options, chrome_options=chrome_options
         )
         self.driver.get(url)
         self.wait = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, "dr_cc_login")))
+
         self.driver.find_element_by_xpath('//*[@id="loginID"]').send_keys(
             self.nvidia_login
         )
@@ -88,6 +90,10 @@ class AutoBuy:
         self.wait = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, "cCardNew")))
 
         log.info(f"Logged in as {self.nvidia_login}")
+
+        if self.countrySelection != '':
+            Select(self.driver.find_element_by_id('dr_shipCountry')).select_by_value(self.countrySelection)
+            self.wait = WebDriverWait(self.driver, 15).until(EC.presence_of_element_located((By.ID, "cCardNew")))
 
         # Card info
         self.driver.find_element_by_xpath('//*[@id="cCardNew"]').click()
