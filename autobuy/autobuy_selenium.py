@@ -31,8 +31,18 @@ from utils.logger import log
 AUTOBUY_CONFIG_PATH = "autobuy_config.json"
 AUTOBUY_CONFIG_KEYS = ['NVIDIA_LOGIN', 'NVIDIA_PASSWORD', 'FULL_AUTOBUY','CREDITCARD_NUMBER','CREDITCARD_EXP','CREDITCARD_SECURITY_CODE']
 
-AUTOBUY_CONTINUE_VAL_FR = ["continuer","envoyer"]
-AUTOBUY_CONTINUE_VAL_EN = ["continue","submit"]
+autobuy_locale_btns = {
+    "fr_be":["continuer","envoyer"],
+    "es_es":["continuar","enviar"],
+    "fr_fr":["continuer","envoyer"],
+    "it_it":["continua","invia"],
+    "nl_nl":["doorgaan","indienen"],
+    "sv_se":["continue","submit"],
+    "de_de":["Weiter","Senden"],
+    "de_at":["Weiter","Senden"],
+    "en_gb":["Continue Checkout","submit"],
+    "en_us":["continue","submit"],
+}
 
 class AutoBuy:
     enabled = False
@@ -91,7 +101,7 @@ class AutoBuy:
             self.ccSecCode
         )
 
-        autobuy_btns = AUTOBUY_CONTINUE_VAL_FR if locale=="fr_fr" else AUTOBUY_CONTINUE_VAL_EN
+        autobuy_btns = autobuy_locale_btns[locale]
 
         self.driver.find_element_by_xpath(f'//*[@value="{autobuy_btns[0]}"]').click()
         if self.full_autobuy:
