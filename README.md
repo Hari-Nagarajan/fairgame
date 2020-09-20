@@ -127,13 +127,13 @@ Make a copy of the `discord_config.template_json` file and name it `discord_conf
 }
 ```
 
-### Telegram
+#### Telegram
 To enable Telegram notifications, you have to create a new bot and get your chat id. Use the directions [here](https://medium.com/@ManHay_Hong/how-to-create-a-telegram-bot-and-send-messages-with-python-4cf314d9fa3e) (Creating your bot and Getting your Chat id sections).
 
 Make a copy of the `telegram_config.template_json` file and name it `telegram_config.json` and place your `BOT_TOKEN` and `BOT_CHAT_ID` values here. 
 ```
 {
-    "BOT_TOKEN" : "1234567890:abcdefghijklmnopqrstuvwxyz"
+    "BOT_TOKEN" : "1234567890:abcdefghijklmnopqrstuvwxyz",
     "BOT_CHAT_ID" : "111222333"
 }
 ```
@@ -142,7 +142,7 @@ It is possible to notify multiple users at once. Just add a list as the `BOT_CHA
 
 ```
 {
-    "BOT_TOKEN" : "1234567890:abcdefghijklmnopqrstuvwxyz"
+    "BOT_TOKEN" : "1234567890:abcdefghijklmnopqrstuvwxyz",
     "BOT_CHAT_ID" : ["111222333", "444555666"]
 }
 ```
