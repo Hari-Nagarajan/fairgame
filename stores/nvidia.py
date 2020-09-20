@@ -41,17 +41,18 @@ GPU_DISPLAY_NAMES = {
     "3090": "NVIDIA GEFORCE RTX 3090",
 }
 
-ACCEPTED_LOCALES = ["fr_be",
-                    "es_es",
-                    "fr_fr",
-                    "it_it",
-                    "nl_nl",
-                    "sv_se",
-                    "de_de",
-                    "de_at",
-                    "en_gb",
-                    "en_us"
-                    ]
+ACCEPTED_LOCALES = [
+    "fr_be",
+    "es_es",
+    "fr_fr",
+    "it_it",
+    "nl_nl",
+    "sv_se",
+    "de_de",
+    "de_at",
+    "en_gb",
+    "en_us",
+]
 
 DEFAULT_HEADERS = {
     "Accept": "application/json",
@@ -93,10 +94,10 @@ class NvidiaBuyer:
             "apiKey": DIGITAL_RIVER_API_KEY,
             "expand": "product",
             "fields": "product.id,product.displayName,product.pricing",
-            "locale": self.locale
+            "locale": self.locale,
         }
         headers = DEFAULT_HEADERS.copy()
-        headers['locale'] = self.locale
+        headers["locale"] = self.locale
         response = self.session.get(url, headers=headers, params=payload)
 
         log.debug(response.status_code)
@@ -116,24 +117,28 @@ class NvidiaBuyer:
             product_id = self.product_data.get(GPU_DISPLAY_NAMES[gpu])["id"]
         except TypeError as e:
             log.error("Cant get product ID")
-            log.error(f"Product data for {GPU_DISPLAY_NAMES[gpu]}: {self.product_data.get(GPU_DISPLAY_NAMES[gpu])}")
+            log.error(
+                f"Product data for {GPU_DISPLAY_NAMES[gpu]}: {self.product_data.get(GPU_DISPLAY_NAMES[gpu])}"
+            )
             raise e
         log.info(f"Checking stock for {GPU_DISPLAY_NAMES[gpu]}...")
         while not self.is_in_stock(product_id):
             sleep(5)
         cart_url = self.add_to_cart_silent(product_id)
-        self.notification_handler.send_notification(f"{GPU_DISPLAY_NAMES[gpu]} in stock: {cart_url}")
+        self.notification_handler.send_notification(
+            f"{GPU_DISPLAY_NAMES[gpu]} in stock: {cart_url}"
+        )
 
     def check_if_locale_corresponds(self, product_id):
         special_locales = ["en_gb", "de_at", "de_de", "fr_fr", "fr_be"]
         if self.cli_locale in special_locales:
-            url = f'{DIGITAL_RIVER_PRODUCT_LIST_URL}/{product_id}'
+            url = f"{DIGITAL_RIVER_PRODUCT_LIST_URL}/{product_id}"
             log.debug(f"Calling {url}")
             payload = {
                 "apiKey": DIGITAL_RIVER_API_KEY,
                 "expand": "product",
                 "locale": self.locale,
-                "format": "json"
+                "format": "json",
             }
 
             response = self.session.get(url, headers=DEFAULT_HEADERS, params=payload)
@@ -143,10 +148,7 @@ class NvidiaBuyer:
         return True
 
     def is_in_stock(self, product_id):
-        payload = {
-            "apiKey": DIGITAL_RIVER_API_KEY,
-            "locale": self.locale
-        }
+        payload = {"apiKey": DIGITAL_RIVER_API_KEY, "locale": self.locale}
 
         url = DIGITAL_RIVER_STOCK_CHECK_URL.format(product_id=product_id)
 
@@ -199,3 +201,4 @@ class NvidiaBuyer:
         else:
             webbrowser.open_new(url.url)
         return url.url    
+
