@@ -31,7 +31,8 @@ from utils.logger import log
 AUTOBUY_CONFIG_PATH = "autobuy_config.json"
 AUTOBUY_CONFIG_KEYS = ['NVIDIA_LOGIN', 'NVIDIA_PASSWORD', 'FULL_AUTOBUY','CREDITCARD_NUMBER','CREDITCARD_EXP','CREDITCARD_SECURITY_CODE']
 
-AUTOBUY_CONTINUE_VAL = ["continuer","envoyer"]
+AUTOBUY_CONTINUE_VAL_FR = ["continuer","envoyer"]
+AUTOBUY_CONTINUE_VAL_EN = ["continue","submit"]
 
 class AutoBuy:
     enabled = False
@@ -58,7 +59,7 @@ class AutoBuy:
         else:
             return False
 
-    def auto_buy(self,url):
+    def auto_buy(self,url,locale):
         log.debug("Initialize autobuy")
         # Create firefox instance
         self.driver = webdriver.Chrome(
@@ -89,9 +90,12 @@ class AutoBuy:
         self.driver.find_element_by_xpath('//*[@id="cardSecurityCode"]').send_keys(
             self.ccSecCode
         )
-        self.driver.find_element_by_xpath(f'//*[@value="{AUTOBUY_CONTINUE_VAL[0]}"]').click()
+
+        autobuy_btns = AUTOBUY_CONTINUE_VAL_FR if locale=="fr_fr" else AUTOBUY_CONTINUE_VAL_EN
+
+        self.driver.find_element_by_xpath(f'//*[@value="{autobuy_btns[0]}"]').click()
         if self.full_autobuy:
             self.wait = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, "dr_confirmProducts")))
-            self.driver.find_element_by_xpath(f'//*[@value="{AUTOBUY_CONTINUE_VAL[1]}"]').click()
+            self.driver.find_element_by_xpath(f'//*[@value="{autobuy_btns[1]}"]').click()
         
         

@@ -14,9 +14,8 @@ class NotificationHandler:
 
     def send_notification(self, message):
          if self.twilio_handler.enabled:
-             self.twilio_handler.send(message)
+            self.twilio_handler.send(message)
          if self.discord_handler.enabled:
-             self.discord_handler.send(message)
+            self.discord_handler.send(message)
          if self.telegram_handler.enabled:
-             self.telegram_handler.send(message)
-        log.debug("disabled notifications")
+            self.telegram_handler.send(message)
