@@ -41,16 +41,16 @@ GPU_DISPLAY_NAMES = {
 }
 
 ACCEPTED_LOCALES = [
-    "fr_be",
-    "es_es",
+    "en_us",
+    "en_gb",
+    "de_de",
     "fr_fr",
     "it_it",
+    "es_es",
     "nl_nl",
     "sv_se",
-    "de_de",
     "de_at",
-    "en_gb",
-    "en_us",
+    "fr_be",
 ]
 
 DEFAULT_HEADERS = {
