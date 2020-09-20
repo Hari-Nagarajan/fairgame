@@ -19,8 +19,8 @@ def main():
     "--locale", type=Locale(), prompt="What locale shall we use?", default="en_us"
 )
 def nvidia(gpu, locale):
-    nv = NvidiaBuyer(locale)
-    nv.buy(gpu)
+    nv = NvidiaBuyer(gpu, locale)
+    nv.run_items()
 
 
 @click.command()

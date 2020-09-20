@@ -1,5 +1,6 @@
 import logging
 import webbrowser
+from concurrent.futures.thread import ThreadPoolExecutor
 from datetime import datetime
 from time import sleep
 
@@ -59,11 +60,17 @@ DEFAULT_HEADERS = {
 
 
 class NvidiaBuyer:
-    def __init__(self, locale="en_us"):
-        self.product_data = {}
+    def __init__(self, gpu, locale="en_us"):
+        self.product_ids = []
         self.cli_locale = locale.lower()
         self.locale = self.map_locales()
         self.session = requests.Session()
+        self.gpu = gpu
+        try:
+            self.gpu_long_name = GPU_DISPLAY_NAMES[gpu]
+        except Exception as e:
+            log.error("Invalid GPU name.")
+            raise e
 
         adapter = HTTPAdapter(
             max_retries=Retry(
@@ -75,8 +82,15 @@ class NvidiaBuyer:
         )
         self.session.mount("https://", adapter)
         self.session.mount("http://", adapter)
-        self.get_product_ids()
         self.notification_handler = NotificationHandler()
+
+        log.info("Getting product IDs")
+        self.get_product_ids()
+        while len(self.product_ids) == 0:
+            log.info(f"We have no product IDs for {self.gpu_long_name}, retrying until we get a product ID")
+            self.get_product_ids()
+            sleep(5)
+
 
     def map_locales(self):
         if self.cli_locale == "de_at":
@@ -100,30 +114,25 @@ class NvidiaBuyer:
         log.debug(response.status_code)
         response_json = response.json()
         for product_obj in response_json["products"]["product"]:
-            if product_obj["displayName"] in GPU_DISPLAY_NAMES.values():
+            if product_obj["displayName"] == self.gpu_long_name:
                 if self.check_if_locale_corresponds(product_obj["id"]):
-                    self.product_data[product_obj["displayName"]] = {
-                        "id": product_obj["id"],
-                        "price": product_obj["pricing"]["formattedListPrice"],
-                    }
+                    self.product_ids.append(product_obj["id"])
         if response_json["products"].get("nextPage"):
             self.get_product_ids(url=response_json["products"]["nextPage"]["uri"])
 
-    def buy(self, gpu):
-        try:
-            product_id = self.product_data.get(GPU_DISPLAY_NAMES[gpu])["id"]
-        except TypeError as e:
-            log.error("Cant get product ID")
-            log.error(
-                f"Product data for {GPU_DISPLAY_NAMES[gpu]}: {self.product_data.get(GPU_DISPLAY_NAMES[gpu])}"
-            )
-            raise e
-        log.info(f"Checking stock for {GPU_DISPLAY_NAMES[gpu]}...")
+    def run_items(self):
+        log.info(f"We have {len(self.product_ids)} product IDs for {self.gpu_long_name}")
+        log.info(f"Product IDs: {self.product_ids}")
+        with ThreadPoolExecutor(max_workers=len(self.product_ids)) as executor:
+            [executor.submit(self.buy, product_id) for product_id in self.product_ids]
+
+    def buy(self, product_id):
+        log.info(f"Checking stock for {self.gpu_long_name} with product ID: {product_id}...")
         while not self.is_in_stock(product_id):
             sleep(5)
         cart_url = self.add_to_cart_silent(product_id)
         self.notification_handler.send_notification(
-            f"{GPU_DISPLAY_NAMES[gpu]} in stock: {cart_url}"
+            f" {self.gpu_long_name} with product ID: {product_id} in stock: {cart_url}"
         )
 
     def check_if_locale_corresponds(self, product_id):
@@ -154,7 +163,7 @@ class NvidiaBuyer:
         log.debug(f"Returned {response.status_code}")
         response_json = response.json()
         product_status_message = response_json["inventoryStatus"]["status"]
-        log.info(f"Stock status is {product_status_message}")
+        log.info(f"Stock status is {product_status_message} for product ID: {product_id}")
         return product_status_message != DIGITAL_RIVER_OUT_OF_STOCK_MESSAGE
 
     def get_nividia_access_token(self):
@@ -184,7 +193,7 @@ class NvidiaBuyer:
             "token": access_token,
             "_": datetime.now(),
         }
-        log.debug("Adding to cart")
+        log.debug(f"Adding {self.gpu_long_name} ({product_id}) to cart")
         response = self.session.get(
             DIGITAL_RIVER_ADD_TO_CART_URL, headers=DEFAULT_HEADERS, params=payload
         )
