@@ -4,7 +4,6 @@ from stores.nvidia import GPU_DISPLAY_NAMES, ACCEPTED_LOCALES
 
 
 class GPU(click.ParamType):
-
     def convert(self, value, param, ctx):
         if value.upper() not in GPU_DISPLAY_NAMES.keys():
             self.fail(
@@ -17,7 +16,6 @@ class GPU(click.ParamType):
 
 
 class Locale(click.ParamType):
-
     def convert(self, value, param, ctx):
         if value.lower() not in ACCEPTED_LOCALES:
             self.fail(

@@ -6,7 +6,7 @@ from twilio.rest import Client
 from utils.logger import log
 
 TWILIO_CONFIG_PATH = "twilio_config.json"
-TWILIO_CONFIG_KEYS = ['account_sid', 'auth_token', 'from', 'to']
+TWILIO_CONFIG_KEYS = ["account_sid", "auth_token", "from", "to"]
 
 
 class TwilioHandler:
@@ -22,9 +22,13 @@ class TwilioHandler:
                 if self.has_valid_creds():
                     self.enabled = True
                     try:
-                        self.client = Client(self.config['account_sid'], self.config['auth_token'])
+                        self.client = Client(
+                            self.config["account_sid"], self.config["auth_token"]
+                        )
                     except Exception as e:
-                        log.warn("Twilio client creation failed. Disabling Twilio notifications.")
+                        log.warn(
+                            "Twilio client creation failed. Disabling Twilio notifications."
+                        )
                         self.enabled = False
         else:
             log.info("No Twilio creds found.")
@@ -38,9 +42,7 @@ class TwilioHandler:
     def send(self, message_body):
         try:
             message = self.client.messages.create(
-                from_=self.config['from'],
-                body=message_body,
-                to=self.config['to']
+                from_=self.config["from"], body=message_body, to=self.config["to"]
             )
             log.info("SMS Sent: " + message.sid)
         except Exception as e:

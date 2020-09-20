@@ -6,7 +6,7 @@ from discord_webhook import DiscordWebhook
 from utils.logger import log
 
 DISCORD_CONFIG_PATH = "discord_config.json"
-DISCORD_CONFIG_KEYS = ['webhook_url']
+DISCORD_CONFIG_KEYS = ["webhook_url"]
 
 
 class DiscordHandler:
@@ -18,8 +18,8 @@ class DiscordHandler:
         if path.exists(DISCORD_CONFIG_PATH):
             with open(DISCORD_CONFIG_PATH) as json_file:
                 self.config = json.load(json_file)
-                if self.config['webhook_url']:
-                    self.webhook_url = self.config['webhook_url']
+                if self.config["webhook_url"]:
+                    self.webhook_url = self.config["webhook_url"]
                     self.enabled = True
         else:
             log.info("No Discord creds found.")
