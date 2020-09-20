@@ -2,10 +2,10 @@ import os
 
 import click
 
-from cli.utils import GPU, Locale
+from cli.utils import QuestionaryOption
 from stores.amazon import Amazon
 from stores.bestbuy import BestBuyHandler
-from stores.nvidia import NvidiaBuyer
+from stores.nvidia import NvidiaBuyer, GPU_DISPLAY_NAMES, ACCEPTED_LOCALES
 
 
 @click.group()
@@ -14,13 +14,15 @@ def main():
 
 
 @click.command()
-@click.option("--gpu", type=GPU(), prompt="What GPU are you after?")
+@click.option("--gpu", type=click.Choice(GPU_DISPLAY_NAMES, case_sensitive=False), prompt="What GPU are you after?",
+              cls=QuestionaryOption)
 @click.option(
-    "--locale", type=Locale(), prompt="What locale shall we use?", default="en_us"
+    "--locale", type=click.Choice(ACCEPTED_LOCALES, case_sensitive=False), prompt="What locale shall we use?",
+    cls=QuestionaryOption
 )
 def nvidia(gpu, locale):
-    nv = NvidiaBuyer(locale)
-    nv.buy(gpu)
+    nv = NvidiaBuyer(gpu, locale)
+    nv.run_items()
 
 
 @click.command()
@@ -63,10 +65,7 @@ def amazon(amazon_email, amazon_password, amazon_item_url, amazon_price_limit):
 
 
 @click.command()
-@click.option(
-    "--sku",
-    type=str, required=True
-)
+@click.option("--sku", type=str, required=True)
 def bestbuy(sku):
     bb = BestBuyHandler(sku)
     bb.run_item()
