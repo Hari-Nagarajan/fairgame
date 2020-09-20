@@ -115,6 +115,16 @@ valid, the notification handler will send you an sms when it carts or purchases 
 }
 ```
 
+#### Discord
+To enable Discord notifications, first get your wehbook url. Use the directions [here](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) to get the webhook url.
+Make a copy of the discord_config.template_json file and name it discord_config.json and place the webhook url here. 
+```
+{
+  "webhook_url": "Discord webhook url here"
+}
+```
+
+
 ## Troubleshooting
 
 I suggest joining the #Support channel in [Discord](https://discord.gg/hQeUbRv) for personal assistance if these common fixes don't help.
