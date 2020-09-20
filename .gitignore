@@ -5,3 +5,5 @@
 twilio_config.json
 /discord_config.json
 telegram_config.json
+autobuy_config.json
+geckodriver.log
