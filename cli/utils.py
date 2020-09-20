@@ -1,27 +1,11 @@
 import click
-
-from stores.nvidia import GPU_DISPLAY_NAMES, ACCEPTED_LOCALES
-
-
-class GPU(click.ParamType):
-    def convert(self, value, param, ctx):
-        if value.upper() not in GPU_DISPLAY_NAMES.keys():
-            self.fail(
-                f"{value} is not a valid GPU, valid GPUs are {list(GPU_DISPLAY_NAMES.keys())}",
-                param,
-                ctx,
-            )
-
-        return value.upper()
+import questionary
 
 
-class Locale(click.ParamType):
-    def convert(self, value, param, ctx):
-        if value.lower() not in ACCEPTED_LOCALES:
-            self.fail(
-                f"{value} is not a valid Locale, valid Locales are {ACCEPTED_LOCALES}",
-                param,
-                ctx,
-            )
+class QuestionaryOption(click.Option):
 
-        return value.lower()
+    def __init__(self, param_decls=None, **attrs):
+        click.Option.__init__(self, param_decls, **attrs)
+
+    def prompt_for_value(self, ctx):
+        return questionary.select(self.prompt, choices=self.type.choices).unsafe_ask()
