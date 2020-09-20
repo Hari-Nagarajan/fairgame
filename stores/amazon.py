@@ -70,7 +70,7 @@ class Amazon:
             self.driver.refresh()
             log.info("Refreshing page.")
             availability = (
-                WebDriverWait(self.driver, 2)
+                self.wait
                 .until(presence_of_element_located((By.ID, "availability")))
                 .text.replace("\n", " ")
             )
