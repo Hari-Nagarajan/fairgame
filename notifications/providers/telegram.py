@@ -26,9 +26,15 @@ class TelegramHandler:
 
     def send(self, message_body):
         try:
-            send_text = f'https://api.telegram.org/bot{self.bot_token}/sendMessage?' \
-                        f'chat_id={self.bot_chat_id}&parse_mode=Markdown&text={message_body}'
-            requests.get(send_text)
+            if type(self.bot_chat_id) is list:
+                for chat_id in self.bot_chat_id:
+                    send_text = f'https://api.telegram.org/bot{self.bot_token}/sendMessage?' \
+                                f'chat_id={chat_id}&parse_mode=Markdown&text={message_body}'
+                    requests.get(send_text)
+            else:
+                send_text = f'https://api.telegram.org/bot{self.bot_token}/sendMessage?' \
+                            f'chat_id={self.bot_chat_id}&parse_mode=Markdown&text={message_body}'
+                requests.get(send_text)
         except Exception as e:
             log.error(e)
             log.warn("Telegram send message failed. Disabling Telegram notifications.")

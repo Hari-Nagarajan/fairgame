@@ -130,10 +130,20 @@ To enable Telegram notifications, you have to create a new bot and get your chat
 Make a copy of the `telegram_config.template_json` file and name it `telegram_config.json` and place your `BOT_TOKEN` and `BOT_CHAT_ID` values here. 
 ```
 {
-    "BOT_TOKEN" : "bot token here"
-    "BOT_CHAT_ID" : "your chat id here"
+    "BOT_TOKEN" : "1234567890:abcdefghijklmnopqrstuvwxyz"
+    "BOT_CHAT_ID" : "111222333"
 }
 ```
+
+It is possible to notify multiple users at once. Just add a list as the `BOT_CHAT_ID` value:
+
+```
+{
+    "BOT_TOKEN" : "1234567890:abcdefghijklmnopqrstuvwxyz"
+    "BOT_CHAT_ID" : ["111222333", "444555666"]
+}
+```
+
 
 ## Troubleshooting
 
