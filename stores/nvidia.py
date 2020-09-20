@@ -87,10 +87,11 @@ class NvidiaBuyer:
         log.info("Getting product IDs")
         self.get_product_ids()
         while len(self.product_ids) == 0:
-            log.info(f"We have no product IDs for {self.gpu_long_name}, retrying until we get a product ID")
+            log.info(
+                f"We have no product IDs for {self.gpu_long_name}, retrying until we get a product ID"
+            )
             self.get_product_ids()
             sleep(5)
-
 
     def map_locales(self):
         if self.cli_locale == "de_at":
@@ -121,13 +122,17 @@ class NvidiaBuyer:
             self.get_product_ids(url=response_json["products"]["nextPage"]["uri"])
 
     def run_items(self):
-        log.info(f"We have {len(self.product_ids)} product IDs for {self.gpu_long_name}")
+        log.info(
+            f"We have {len(self.product_ids)} product IDs for {self.gpu_long_name}"
+        )
         log.info(f"Product IDs: {self.product_ids}")
         with ThreadPoolExecutor(max_workers=len(self.product_ids)) as executor:
             [executor.submit(self.buy, product_id) for product_id in self.product_ids]
 
     def buy(self, product_id):
-        log.info(f"Checking stock for {self.gpu_long_name} with product ID: {product_id}...")
+        log.info(
+            f"Checking stock for {self.gpu_long_name} with product ID: {product_id}..."
+        )
         while not self.is_in_stock(product_id):
             sleep(5)
         cart_url = self.add_to_cart_silent(product_id)
@@ -163,7 +168,9 @@ class NvidiaBuyer:
         log.debug(f"Returned {response.status_code}")
         response_json = response.json()
         product_status_message = response_json["inventoryStatus"]["status"]
-        log.info(f"Stock status is {product_status_message} for product ID: {product_id}")
+        log.info(
+            f"Stock status is {product_status_message} for product ID: {product_id}"
+        )
         return product_status_message != DIGITAL_RIVER_OUT_OF_STOCK_MESSAGE
 
     def get_nividia_access_token(self):

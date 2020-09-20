@@ -11,5 +11,5 @@ def find_values(json_repr, id):
             pass
         return a_dict
 
-    json.loads(json_repr, object_hook=_decode_dict) # Return value ignored.
+    json.loads(json_repr, object_hook=_decode_dict)  # Return value ignored.
     return results

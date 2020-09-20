@@ -63,10 +63,7 @@ def amazon(amazon_email, amazon_password, amazon_item_url, amazon_price_limit):
 
 
 @click.command()
-@click.option(
-    "--sku",
-    type=str, required=True
-)
+@click.option("--sku", type=str, required=True)
 def bestbuy(sku):
     bb = BestBuyHandler(sku)
     bb.run_item()
