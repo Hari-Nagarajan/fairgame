@@ -55,6 +55,33 @@ INFO: "2020-09-19 00:07:06,494 - Refreshing page.
 INFO: "2020-09-19 00:07:07,695 - Current availability message is: Currently unavailable. We don't know when or if this item will be back in stock.
 ```
 
+You can also save your amazon config to your environment variables. This will set them as the defaults in the CLI to save time entering them each time.
+
+**MacOS and Linux Bash Shells**
+```
+export  amazon_email=user@email.com
+export  amazon_password=supersecurepassword
+export  amazon_item_url=https://www.amazon.com/dp/B08HHDP9DW?
+export  amazon_price_limit=1000
+```
+
+**Linux csh/tcsh**
+```
+setenv  amazon_email user@email.com
+setenv  amazon_password supersecurepassword
+setenv  amazon_item_url https://www.amazon.com/dp/B08HHDP9DW?
+setenv  amazon_price_limit 1000
+```
+
+**Windows**
+```
+set amazon_email=user@email.com
+set amazon_password=supersecurepassword
+set amazon_item_url=https://www.amazon.com/dp/B08HHDP9DW?
+set amazon_price_limit=1000
+```
+
+
 ### Nvidia 
 - Call Digitalriver API to get product number for the GPU selected (2060S, 3080, 3090)
 - Call Digitalriver API to check if the GPU is in stock until it is in stock
