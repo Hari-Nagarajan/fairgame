@@ -13,7 +13,7 @@ class TelegramHandler:
     enabled = False
 
     def __init__(self):
-        log.info("Initializing telegram handler")
+        log.debug("Initializing telegram handler")
 
         if path.exists(TELEGRAM_CONFIG_PATH):
             with open(TELEGRAM_CONFIG_PATH) as json_file:
@@ -23,7 +23,7 @@ class TelegramHandler:
                     self.bot_chat_id = self.config["BOT_CHAT_ID"]
                     self.enabled = True
         else:
-            log.info("No Telegram config found.")
+            log.debug("No Telegram config found.")
 
     def send(self, message_body):
         try:

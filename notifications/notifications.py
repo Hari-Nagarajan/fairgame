@@ -10,6 +10,17 @@ class NotificationHandler:
         self.twilio_handler = TwilioHandler()
         self.discord_handler = DiscordHandler()
         self.telegram_handler = TelegramHandler()
+        log.info(f"Enabled Handlers: {self.get_enabled_handlers()}")
+
+    def get_enabled_handlers(self):
+        enabled_handlers = []
+        if self.twilio_handler.enabled:
+            enabled_handlers.append("Twilio")
+        if self.discord_handler.enabled:
+            enabled_handlers.append("Discord")
+        if self.telegram_handler.enabled:
+            enabled_handlers.append("Telegram")
+        return enabled_handlers
 
     def send_notification(self, message):
         if self.twilio_handler.enabled:

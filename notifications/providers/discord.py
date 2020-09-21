@@ -13,7 +13,7 @@ class DiscordHandler:
     enabled = False
 
     def __init__(self):
-        log.info("Initializing discord handler")
+        log.debug("Initializing discord handler")
 
         if path.exists(DISCORD_CONFIG_PATH):
             with open(DISCORD_CONFIG_PATH) as json_file:
@@ -22,7 +22,7 @@ class DiscordHandler:
                     self.webhook_url = self.config["webhook_url"]
                     self.enabled = True
         else:
-            log.info("No Discord creds found.")
+            log.debug("No Discord creds found.")
 
     def send(self, message_body):
         try:
