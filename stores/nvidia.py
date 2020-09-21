@@ -1,3 +1,4 @@
+import concurrent
 import json
 import logging
 import webbrowser
@@ -88,6 +89,11 @@ CART_SUCCESS_CODES = {201, requests.codes.ok}
 
 AUTOBUY_CONFIG_PATH = "autobuy_config.json"
 AUTOBUY_CONFIG_KEYS = ["NVIDIA_LOGIN", "NVIDIA_PASSWORD"]
+
+
+class ProductIDChangedException(Exception):
+    def __init__(self):
+        super().__init__("Product IDS changed. We need to re run.")
 
 
 class NvidiaBuyer:
@@ -198,8 +204,17 @@ class NvidiaBuyer:
             f"We have {len(self.product_ids)} product IDs for {self.gpu_long_name}"
         )
         log.info(f"Product IDs: {self.product_ids}")
-        with ThreadPoolExecutor(max_workers=len(self.product_ids)) as executor:
-            [executor.submit(self.buy, product_id) for product_id in self.product_ids]
+        try:
+            with ThreadPoolExecutor(max_workers=len(self.product_ids)) as executor:
+                product_futures = [executor.submit(self.buy, product_id) for product_id in self.product_ids]
+                concurrent.futures.wait(product_futures)
+                for fut in product_futures:
+                    log.info(fut.result())
+        except ProductIDChangedException as ex:
+            log.warning("Product IDs changed.")
+            self.product_ids = []
+            self.get_product_ids()
+            self.run_items()
 
     def buy(self, product_id):
         while not self.add_to_cart(product_id) and self.enabled:
@@ -273,6 +288,7 @@ class NvidiaBuyer:
         except TimeoutException:
             logging.error("Address validation not required?")
 
+
     def add_to_cart(self, product_id):
         log.info(f"Checking if item ({product_id}) in stock")
         params = {
@@ -284,9 +300,15 @@ class NvidiaBuyer:
         response = self.session.post(
             DIGITAL_RIVER_ADD_TO_CART_API_URL, headers=DEFAULT_HEADERS, params=params
         )
+        response_json = response.json()
         if response.status_code == 200:
             log.info("Item in stock!")
             return True
+        elif response.status_code == 409:
+            log.info(f"Error: {response_json['errors']['error']}")
+            for error in response_json['errors']['error']:
+                if error['code'] == 'invalid-product-id':
+                    raise ProductIDChangedException()
         else:
             log.info("item not in stock")
             return False
