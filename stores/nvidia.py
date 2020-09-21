@@ -302,6 +302,9 @@ class NvidiaBuyer:
                 log.info("Auto buy enabled.")
                 # self.submit_cart()
                 self.selenium_checkout()
+                self.notification_handler.send_notification(
+                    f" {self.gpu_long_name} with product ID: {product_id} ordered!"
+                )
             else:
                 log.info("Auto buy disabled.")
                 cart_url = self.open_cart_url()
