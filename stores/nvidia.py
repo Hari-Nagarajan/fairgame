@@ -84,8 +84,8 @@ PAGE_TITLES_BY_LOCALE = {
         "order_completed": "NVIDIA Online Store - Order Completed",
     },
     "es_es": {
-        "signed_in_help": "NVIDIA Online Store - Help",
-        "checkout": "NVIDIA Online Store - Checkout",
+        "signed_in_help": "NVIDIA Tienda electrónica - Ayuda",
+        "checkout": "NVIDIA Online Store - Caja",
         "verify_order": "NVIDIA Online Store - Verify Order",
         "address_validation": "NVIDIA Online Store - Address Validation Suggestion Page",
         "order_completed": "NVIDIA Online Store - Order Completed",
