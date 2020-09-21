@@ -16,6 +16,7 @@ from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver import ActionChains
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
+from spinlog import Spinner
 
 from notifications.notifications import NotificationHandler
 from utils import selenium_utils
@@ -295,7 +296,8 @@ class NvidiaBuyer:
     def buy(self, product_id, delay=3):
         log.info(f"Checking stock for {product_id} at {delay} second intervals.")
         while not self.add_to_cart(product_id) and self.enabled:
-            sleep(delay)
+            with Spinner.get("Still working...") as s:
+                sleep(delay)
         if self.enabled:
             self.apply_shopper_details()
             if self.auto_buy_enabled:
