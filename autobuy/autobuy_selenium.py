@@ -61,6 +61,9 @@ class AutoBuy:
                     self.nvidia_login = self.config["NVIDIA_LOGIN"]
                     self.nvidia_password = self.config["NVIDIA_PASSWORD"]
                     self.full_autobuy = self.config["FULL_AUTOBUY"]
+                    # Disable FULL_AUTOBUY if the user does not provide a bool.
+                    if type(self.full_autobuy) != bool:
+                        self.full_autobuy = False
                     self.ccNum = self.config["CREDITCARD_NUMBER"].replace(" ", "")
                     self.ccExpDate = self.config["CREDITCARD_EXP"].split("/")
                     self.ccSecCode = self.config["CREDITCARD_SECURITY_CODE"]
