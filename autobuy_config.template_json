@@ -1,9 +1,9 @@
 {
-  "NVIDIA_LOGIN": "fuckthescalpers",
-  "NVIDIA_PASSWORD": "12345",
-  "FULL_AUTOBUY":false,
-  "CREDITCARD_NUMBER":"0000 0000 0000 0000",
-  "CREDITCARD_EXP":"09/2020",
-  "CREDITCARD_SECURITY_CODE":"101",
-  "AUTOBUY_COUNTRY_SELECT":""
+  "NVIDIA_LOGIN": "fuckthesc@lpers.com",        # Your NVIDIA Store login
+  "NVIDIA_PASSWORD": "12345",                   # Your NVIDIA Store password
+  "FULL_AUTOBUY":false,                         # FALSE : Fill your infos but dont click on the last button / TRUE : Buy the card
+  "CREDITCARD_NUMBER":"0000 0000 0000 0000",    # CC number
+  "CREDITCARD_EXP":"09/2020",                   # CC expiration date
+  "CREDITCARD_SECURITY_CODE":"101",             # CCV code
+  "AUTOBUY_COUNTRY_SELECT":""                   # Leave it like that except if you have additional prompts in the Nvidia Store (like in UK)
 }
