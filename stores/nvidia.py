@@ -172,7 +172,7 @@ class ProductIDChangedException(Exception):
 
 class NvidiaBuyer:
     def __init__(self, gpu, locale="en_us"):
-        self.product_ids = []
+        self.product_ids = set([])
         self.cli_locale = locale.lower()
         self.locale = self.map_locales()
         self.session = requests.Session()
@@ -190,13 +190,12 @@ class NvidiaBuyer:
                     self.nvidia_password = self.config["NVIDIA_PASSWORD"]
                     self.auto_buy_enabled = self.config["FULL_AUTOBUY"]
                     self.cvv = self.config["CVV"]
+        else:
+            log.info("No Autobuy creds found.")
 
         # Disable auto_buy_enabled if the user does not provide a bool.
         if type(self.auto_buy_enabled) != bool:
             self.auto_buy_enabled = False
-
-        else:
-            log.info("No Autobuy creds found.")
 
         adapter = HTTPAdapter(
             max_retries=Retry(
@@ -269,7 +268,7 @@ class NvidiaBuyer:
         for product_obj in response_json["products"]["product"]:
             if product_obj["displayName"] == self.gpu_long_name:
                 if self.check_if_locale_corresponds(product_obj["id"]):
-                    self.product_ids.append(product_obj["id"])
+                    self.product_ids.add(product_obj["id"])
         if response_json["products"].get("nextPage"):
             self.get_product_ids(url=response_json["products"]["nextPage"]["uri"])
 
@@ -286,7 +285,7 @@ class NvidiaBuyer:
                     log.info(fut.result())
         except ProductIDChangedException as ex:
             log.warning("Product IDs changed.")
-            self.product_ids = []
+            self.product_ids = set([])
             self.get_product_ids()
             self.run_items()
 
