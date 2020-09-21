@@ -227,7 +227,9 @@ class NvidiaBuyer:
                 self.selenium_checkout()
             else:
                 log.info("Auto buy disabled.")
-                self.open_cart_url()
+                cart_url = self.open_cart_url()
+                self.notification_handler.send_notification(
+                    f" {self.gpu_long_name} with product ID: {product_id} in stock: {cart_url}")
             self.enabled = False
 
     def open_cart_url(self):
@@ -235,6 +237,7 @@ class NvidiaBuyer:
         params = {"token": self.access_token}
         url = furl(DIGITAL_RIVER_CHECKOUT_URL).set(params)
         webbrowser.open_new_tab(url.url)
+        return url.url
 
     def selenium_checkout(self):
         log.info("Opening cart.")
@@ -267,7 +270,7 @@ class NvidiaBuyer:
         self.driver.save_screenshot("nvidia-order-validation.png")
         self.driver.find_element_by_xpath(f'//*[@value="{autobuy_btns[1]}"]').click()
         selenium_utils.wait_for_page(
-            self.driver, "NVIDIA Online Store - Verify Order", 5
+            self.driver, "NVIDIA Online Store - Order Completed", 5
         )
         self.driver.save_screenshot("nvidia-order-finshed.png")
 
