@@ -5,5 +5,6 @@
   "CREDITCARD_NUMBER":"0000 0000 0000 0000",    # CC number
   "CREDITCARD_EXP":"09/2020",                   # CC expiration date
   "CREDITCARD_SECURITY_CODE":"101",             # CCV code
-  "AUTOBUY_COUNTRY_SELECT":""                   # Leave it like that except if you have additional prompts in the Nvidia Store (like in UK)
+  "AUTOBUY_COUNTRY_SELECT":"",                  # Leave it like that except if you have additional prompts in the Nvidia Store (like in UK)
+  "BYPASS_ADDRESS_SUGGESTION":false             # Selects the address you entered not the one suggested
 }

@@ -33,6 +33,7 @@ AUTOBUY_CONFIG_KEYS = [
     "CREDITCARD_EXP",
     "CREDITCARD_SECURITY_CODE",
     "AUTOBUY_COUNTRY_SELECT",
+    "BYPASS_ADDRESS_SUGGESTION",
 ]
 
 autobuy_locale_btns = {
@@ -68,6 +69,7 @@ class AutoBuy:
                     self.ccExpDate = self.config["CREDITCARD_EXP"].split("/")
                     self.ccSecCode = self.config["CREDITCARD_SECURITY_CODE"]
                     self.countrySelection = self.config["AUTOBUY_COUNTRY_SELECT"]
+                    self.bypassAddressSuggestion = self.config["BYPASS_ADDRESS_SUGGESTION"]
                     self.enabled = True
         else:
             log.info("No Autobuy creds found.")
@@ -128,6 +130,14 @@ class AutoBuy:
         autobuy_btns = autobuy_locale_btns[locale]
 
         self.driver.find_element_by_xpath(f'//*[@value="{autobuy_btns[0]}"]').click()
+
+        if self.bypassAddressSuggestion:
+            self.wait = WebDriverWait(self.driver, 15).until(
+                EC.presence_of_element_located((By.ID, "selectionButton"))
+            )
+            if self.driver.find_element_by_id('billingAddressOptionRow2'):
+                self.driver.find_element_by_id('billingAddressOptionRow2').click()
+            self.driver.find_element_by_id('selectionButton').click()
         if self.full_autobuy:
             self.wait = WebDriverWait(self.driver, 10).until(
                 EC.presence_of_element_located((By.ID, "dr_confirmProducts"))
