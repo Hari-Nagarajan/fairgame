@@ -102,6 +102,23 @@ What locale shall we use? [en_us]:
 
 ```
 
+### Nvidia Auto-Checkout Guide
+First be sure to have a [Nvidia store](https://www.nvidia.com/en-us/shop/) account with all of your infos (billing address etc ...) already filled in). 
+Then make a copy of `autobuy_config.template_json` and name it `autobuy_config.json`.
+If this file exists and the credentials are valid, the bot will make a purchase for you.
+
+```
+{
+  "NVIDIA_LOGIN": "fuckthesc@lpers.com",        # Your NVIDIA Store login
+  "NVIDIA_PASSWORD": "12345",                   # Your NVIDIA Store password
+  "FULL_AUTOBUY":false,                         # FALSE : Fill your infos but dont click on the last button / TRUE : Buy the card
+  "CREDITCARD_NUMBER":"0000 0000 0000 0000",    # CC number
+  "CREDITCARD_EXP":"09/2020",                   # CC expiration date
+  "CREDITCARD_SECURITY_CODE":"101",             # CCV code
+  "AUTOBUY_COUNTRY_SELECT":""                   # Leave it like that except if you have additional prompts in the Nvidia Store (like in UK)
+}
+```
+
 ### Notifications
 This uses a notifications handler that will support multiple notification channels. 
 
