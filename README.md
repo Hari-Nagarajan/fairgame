@@ -104,7 +104,7 @@ What locale shall we use? [en_us]:
 
 ### Nvidia Auto-Checkout Guide
 First be sure to have a [Nvidia store](https://www.nvidia.com/en-us/shop/) account with all of your infos (billing address etc ...) already filled in). 
-Then make a copy of `autobuy_config.template_json` and name it `autobuy_config.json`.
+Then make a copy of `autobuy_config.template_json` and name it `autobuy_config.json`. Be sure to remove all the single-line comments, which are denoted with `#`.
 If this file exists and the credentials are valid, the bot will make a purchase for you.
 
 ```
