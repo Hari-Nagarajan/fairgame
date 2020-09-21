@@ -117,6 +117,8 @@ If this file exists and the credentials are valid, the bot will make a purchase 
 }
 ```
 
+![Nvidia Workflow Diagram](nvidia-workflow.png)
+
 ### Notifications
 This uses a notifications handler that will support multiple notification channels. 
 
