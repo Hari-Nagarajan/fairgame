@@ -188,7 +188,7 @@ class NvidiaBuyer:
                     self.nvidia_login = self.config["NVIDIA_LOGIN"]
                     self.nvidia_password = self.config["NVIDIA_PASSWORD"]
                     self.auto_buy_enabled = self.config["FULL_AUTOBUY"]
-                    self.cvv = self.config["CVV"]
+                    self.cvv = self.config.get("CVV")
         else:
             log.info("No Autobuy creds found.")
 
@@ -219,8 +219,8 @@ class NvidiaBuyer:
         log.info("Getting product IDs")
         self.access_token = self.get_nividia_access_token()
         self.payment_option = self.get_payment_options()
-        if not self.payment_option.get("id"):
-            log.error("No payment option on account. Disable Autobuy")
+        if not self.payment_option.get("id") or not self.cvv:
+            log.error("No payment option on account or missing CVV. Disable Autobuy")
             self.auto_buy_enabled = False
         else:
             log.debug(self.payment_option)

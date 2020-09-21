@@ -119,6 +119,21 @@ If this file exists and the credentials are valid, the bot will make a purchase 
 
 ![Nvidia Workflow Diagram](nvidia-workflow.png)
 
+
+## Best Buy
+This is fairly basic right now. Just login to the best buy website in your default browser and then run the command as follows:
+
+```
+app.py bestbuy --sku [SKU]
+```
+
+Example:
+```
+app.py bestbuy --sku 6429440
+```
+
+![Nvidia Workflow Diagram](nvidia-workflow.png)
+
 ### Notifications
 This uses a notifications handler that will support multiple notification channels. 
 
