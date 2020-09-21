@@ -2,7 +2,6 @@ import json
 import webbrowser
 from time import sleep
 
-from chromedriver_py import binary_path  # this will get you the path variable
 from selenium import webdriver
 from selenium.webdriver import ChromeOptions
 from selenium.webdriver.chrome.options import Options

@@ -7,7 +7,6 @@ from os import path
 from time import sleep
 
 import requests
-from chromedriver_py import binary_path  # this will get you the path variable
 from furl import furl
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
