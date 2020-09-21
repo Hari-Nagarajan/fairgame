@@ -121,16 +121,16 @@ PAGE_TITLES_BY_LOCALE = {
     },
     "de_de": {
         "signed_in_help": "NVIDIA Online-Shop - Hilfe",
-        "checkout": "NVIDIA Online Store - einkaufswagen",
+        "checkout": "NVIDIA Online-Shop - einkaufswagen",
         "verify_order": "NVIDIA Online-Shop - bestellung überprüfen und bestätigen",
         "address_validation": "NVIDIA Online-Shop - Adressüberprüfung Vorschlagsseite",
         "order_completed": "NVIDIA Online Store - Order Completed",
     },
     "de_at": {
-        "signed_in_help": "NVIDIA Online Store - Help",
-        "checkout": "NVIDIA Online Store - Checkout",
-        "verify_order": "NVIDIA Online Store - Verify Order",
-        "address_validation": "NVIDIA Online Store - Address Validation Suggestion Page",
+        "signed_in_help": "NVIDIA Online-Shop - Hilfe",
+        "checkout": "NVIDIA Online-Shop - einkaufswagen",
+        "verify_order": "NVIDIA Online-Shop - bestellung überprüfen und bestätigen",
+        "address_validation": "NVIDIA Online-Shop - Adressüberprüfung Vorschlagsseite",
         "order_completed": "NVIDIA Online Store - Order Completed",
     },
     "en_gb": {
@@ -381,7 +381,7 @@ class NvidiaBuyer:
             )
             log.debug("Setting suggested shipping information.")
             selenium_utils.wait_for_element(
-                self.driver, "billingAddressOptionRow1"
+                self.driver, "billingAddressOptionRow2"
             ).click()
             selenium_utils.button_click_using_xpath(
                 self.driver, "//input[@id='selectionButton']"
