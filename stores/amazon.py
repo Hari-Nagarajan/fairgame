@@ -6,6 +6,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.expected_conditions import presence_of_element_located
 from selenium.webdriver.support.ui import WebDriverWait
+from webdriver_manager.chrome import ChromeDriverManager
 
 from notifications.notifications import NotificationHandler
 from utils.logger import log
@@ -20,7 +21,9 @@ class Amazon:
         if not debug:
             chrome_options.add_argument("--headless")
         self.driver = webdriver.Chrome(
-            executable_path=binary_path, options=options, chrome_options=chrome_options
+            executable_path=ChromeDriverManager().install(),
+            options=options,
+            chrome_options=chrome_options
         )
         self.wait = WebDriverWait(self.driver, 10)
         self.username = username

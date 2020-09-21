@@ -16,6 +16,7 @@ from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver import ActionChains
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
+from webdriver_manager.chrome import ChromeDriverManager
 
 from notifications.notifications import NotificationHandler
 from utils import selenium_utils
@@ -210,7 +211,9 @@ class NvidiaBuyer:
 
         log.info("Opening Webdriver")
         self.driver = webdriver.Chrome(
-            executable_path=binary_path, options=options, chrome_options=chrome_options
+            executable_path=ChromeDriverManager().install(),
+            options=options,
+            chrome_options=chrome_options
         )
         self.sign_in()
         selenium_utils.add_cookies_to_session_from_driver(self.driver, self.session)

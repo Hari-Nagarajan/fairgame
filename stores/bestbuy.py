@@ -7,6 +7,7 @@ from selenium import webdriver
 from selenium.webdriver import ChromeOptions
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
+from webdriver_manager.chrome import ChromeDriverManager
 
 try:
     from Crypto.PublicKey import RSA
@@ -87,7 +88,7 @@ class BestBuyHandler:
             )
 
             self.driver = webdriver.Chrome(
-                executable_path=binary_path,
+                executable_path=ChromeDriverManager().install(),
                 options=options,
                 chrome_options=chrome_options,
             )
