@@ -439,7 +439,7 @@ class NvidiaBuyer:
             try:
                 return response_json["paymentOptions"]["paymentOption"][0]
             except:
-                return None
+                return {}
 
     def apply_shopper_details(self):
         log.info("Apply shopper details")
