@@ -504,7 +504,7 @@ class NvidiaBuyer:
     def sign_in(self):
         log.info("Signing in.")
         self.driver.get(
-            "https://store.nvidia.com/DRHM/store?Action=Logout&SiteID=nvidia&Locale=en_US&ThemeID=326200&Env=BASE&nextAction=help"
+            f"https://store.nvidia.com/DRHM/store?Action=Logout&SiteID=nvidia&Locale={self.locale}&ThemeID=326200&Env=BASE&nextAction=help"
         )
         selenium_utils.wait_for_page(self.driver, PAGE_TITLES_BY_LOCALE[self.locale]['signed_in_help'])
 
