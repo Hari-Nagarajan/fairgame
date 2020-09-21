@@ -132,8 +132,6 @@ Example:
 app.py bestbuy --sku 6429440
 ```
 
-![Nvidia Workflow Diagram](nvidia-workflow.png)
-
 ### Notifications
 This uses a notifications handler that will support multiple notification channels. 
 
