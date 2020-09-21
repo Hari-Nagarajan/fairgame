@@ -2,8 +2,6 @@ import time
 
 from chromedriver_py import binary_path  # this will get you the path variable
 from selenium import webdriver
-from selenium.webdriver import ChromeOptions
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.expected_conditions import presence_of_element_located
@@ -11,15 +9,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from notifications.notifications import NotificationHandler
 from utils.logger import log
-
-options = Options()
-options.page_load_strategy = "eager"
-chrome_options = ChromeOptions()
-chrome_options.add_argument("--disable-application-cache")
-chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
-chrome_options.add_experimental_option("useAutomationExtension", False)
-prefs = {"profile.managed_default_content_settings.images": 2}
-chrome_options.add_experimental_option("prefs", prefs)
+from utils.selenium_utils import options, chrome_options
 
 LOGIN_URL = "https://www.amazon.com/ap/signin?openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2Fwww.amazon.com%2F%3Fref_%3Dnav_custrec_signin&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.assoc_handle=usflex&openid.mode=checkid_setup&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&"
 
