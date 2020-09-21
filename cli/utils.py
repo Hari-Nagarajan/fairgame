@@ -3,7 +3,6 @@ import questionary
 
 
 class QuestionaryOption(click.Option):
-
     def __init__(self, param_decls=None, **attrs):
         click.Option.__init__(self, param_decls, **attrs)
 
