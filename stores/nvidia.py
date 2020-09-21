@@ -9,9 +9,8 @@ from furl import furl
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
-from notifications.notifications import NotificationHandler
-
 from autobuy.autobuy_selenium import AutoBuy
+from notifications.notifications import NotificationHandler
 
 log = logging.getLogger(__name__)
 formatter = logging.Formatter(
@@ -59,6 +58,7 @@ DEFAULT_HEADERS = {
     "Accept": "application/json",
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36",
 }
+CART_SUCCESS_CODES = {201, requests.codes.ok}
 
 
 class NvidiaBuyer:
@@ -68,6 +68,7 @@ class NvidiaBuyer:
         self.locale = self.map_locales()
         self.session = requests.Session()
         self.gpu = gpu
+        self.enabled = True
         try:
             self.gpu_long_name = GPU_DISPLAY_NAMES[gpu]
         except Exception as e:
@@ -86,6 +87,7 @@ class NvidiaBuyer:
         self.session.mount("http://", adapter)
         self.notification_handler = NotificationHandler()
         self.autobuy_handler = AutoBuy()
+
 
         log.info("Getting product IDs")
         self.get_product_ids()
@@ -136,12 +138,51 @@ class NvidiaBuyer:
         log.info(
             f"Checking stock for {self.gpu_long_name} with product ID: {product_id}..."
         )
-        while not self.is_in_stock(product_id):
+        cart_url = self.get_cart_url(product_id)
+        while cart_url is None and self.enabled:
+            log.debug(f"{self.gpu_long_name} with product ID: {product_id} not in stock.")
             sleep(5)
-        cart_url = self.add_to_cart_silent(product_id)
-        self.notification_handler.send_notification(
-            f" {self.gpu_long_name} with product ID: {product_id} in stock: {cart_url}"
+            cart_url = self.get_cart_url(product_id)
+
+        log.info(f" {self.gpu_long_name} with product ID: {product_id} in stock: {cart_url}")
+        self.notification_handler.send_notification(f" {self.gpu_long_name} with product ID: {product_id} in stock: {cart_url}")
+        if self.autobuy_handler.enabled:
+            log.info("Starting auto buy.")
+            self.autobuy_handler.auto_buy(cart_url, self.locale)
+            log.info("Auto buy complete.")
+            self.enabled = False
+        else:
+            webbrowser.open_new(cart_url)
+            log.info(f"Opened {cart_url}.")
+            self.enabled = False
+
+    def get_cart_url(self, product_id):
+        access_token = self.get_nividia_access_token()
+
+        payload = {
+            "apiKey": DIGITAL_RIVER_API_KEY,
+            "format": "json",
+            "method": "post",
+            "productId": product_id,
+            "locale": self.locale,
+            "quantity": 1,
+            "token": access_token,
+            "_": datetime.now(),
+        }
+        log.debug(f"Adding {self.gpu_long_name} ({product_id}) to cart")
+        response = self.session.get(
+            DIGITAL_RIVER_ADD_TO_CART_URL, headers=DEFAULT_HEADERS, params=payload
         )
+        log.debug(response.status_code)
+
+        if response.status_code not in CART_SUCCESS_CODES:
+            return
+
+        log.debug(self.session.cookies)
+        params = {"token": access_token}
+        url = furl(DIGITAL_RIVER_CHECKOUT_URL).set(params)
+        return url.url
+
 
     def check_if_locale_corresponds(self, product_id):
         special_locales = ["en_gb", "de_at", "de_de", "fr_fr", "fr_be"]
@@ -161,21 +202,6 @@ class NvidiaBuyer:
             return self.cli_locale[3:].upper() in response_json["product"]["name"]
         return True
 
-    def is_in_stock(self, product_id):
-        payload = {"apiKey": DIGITAL_RIVER_API_KEY, "locale": self.locale}
-
-        url = DIGITAL_RIVER_STOCK_CHECK_URL.format(product_id=product_id)
-
-        log.debug(f"Calling {url}")
-        response = self.session.get(url, headers=DEFAULT_HEADERS, params=payload)
-        log.debug(f"Returned {response.status_code}")
-        response_json = response.json()
-        product_status_message = response_json["inventoryStatus"]["status"]
-        log.info(
-            f"Stock status is {product_status_message} for product ID: {product_id}"
-        )
-        return product_status_message != DIGITAL_RIVER_OUT_OF_STOCK_MESSAGE
-
     def get_nividia_access_token(self):
         log.debug("Getting session token")
         payload = {
@@ -190,32 +216,3 @@ class NvidiaBuyer:
         )
         log.debug(response.status_code)
         return response.json()["access_token"]
-
-    def add_to_cart_silent(self, product_id):
-        access_token = self.get_nividia_access_token()
-        payload = {
-            "apiKey": DIGITAL_RIVER_API_KEY,
-            "format": "json",
-            "method": "post",
-            "productId": product_id,
-            "locale": self.locale,
-            "quantity": 1,
-            "token": access_token,
-            "_": datetime.now(),
-        }
-        log.debug(f"Adding {self.gpu_long_name} ({product_id}) to cart")
-        response = self.session.get(
-            DIGITAL_RIVER_ADD_TO_CART_URL, headers=DEFAULT_HEADERS, params=payload
-        )
-        log.debug(response.status_code)
-        log.debug(self.session.cookies)
-        params = {"token": access_token}
-        url = furl(DIGITAL_RIVER_CHECKOUT_URL).set(params)
-
-        if self.autobuy_handler.enabled:
-            log.info("Starting auto buy.")
-            self.autobuy_handler.auto_buy(url.url, self.locale)
-        else:
-            webbrowser.open_new(url.url)
-        return url.url    
-
