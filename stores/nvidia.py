@@ -88,14 +88,14 @@ PAGE_TITLES_BY_LOCALE = {
         "checkout": "NVIDIA Tienda electrónica - Caja",
         "verify_order": "NVIDIA Tienda electrónica - Verificar pedido",
         "address_validation": "NVIDIA Tienda electrónica - Página de sugerencia para la validación de la dirección",
-        "order_completed": "NVIDIA Online Store - Order Completed"
+        "order_completed": "NVIDIA Online Store - Order Completed",
     },
     "fr_fr": {
         "signed_in_help": "NVIDIA Online Store - Help",
-        "checkout": "NVIDIA Online Store - Checkout",
-        "verify_order": "NVIDIA Online Store - Verify Order",
+        "checkout": "NVIDIA Boutique en ligne - panier et informations de facturation",
+        "verify_order": "NVIDIA Boutique en ligne - vérification de commande",
         "address_validation": "NVIDIA Online Store - Address Validation Suggestion Page",
-        "order_completed": "NVIDIA Online Store - Order Completed",
+        "order_completed": "NVIDIA Boutique en ligne - confirmation de commande",
     },
     "it_it": {
         "signed_in_help": "NVIDIA Online Store - Help",
@@ -119,10 +119,10 @@ PAGE_TITLES_BY_LOCALE = {
         "order_completed": "NVIDIA Online Store - Order Completed",
     },
     "de_de": {
-        "signed_in_help": "NVIDIA Online Store - Help",
-        "checkout": "NVIDIA Online Store - Checkout",
-        "verify_order": "NVIDIA Online Store - Verify Order",
-        "address_validation": "NVIDIA Online Store - Address Validation Suggestion Page",
+        "signed_in_help": "NVIDIA Online-Shop - Hilfe",
+        "checkout": "NVIDIA Online Store - einkaufswagen",
+        "verify_order": "NVIDIA Online-Shop - bestellung überprüfen und bestätigen",
+        "address_validation": "NVIDIA Online-Shop - Adressüberprüfung Vorschlagsseite",
         "order_completed": "NVIDIA Online Store - Order Completed",
     },
     "de_at": {
@@ -323,7 +323,9 @@ class NvidiaBuyer:
         params = {"token": self.access_token}
         url = furl(DIGITAL_RIVER_CHECKOUT_URL).set(params)
         self.driver.get(url.url)
-        log.debug(f"Waiting for page title: {PAGE_TITLES_BY_LOCALE[self.locale]['checkout']}")
+        log.debug(
+            f"Waiting for page title: {PAGE_TITLES_BY_LOCALE[self.locale]['checkout']}"
+        )
         selenium_utils.wait_for_page(
             self.driver, PAGE_TITLES_BY_LOCALE[self.locale]["checkout"]
         )
@@ -339,7 +341,9 @@ class NvidiaBuyer:
         self.driver.find_element_by_xpath(f'//*[@value="{autobuy_btns[0]}"]').click()
 
         try:
-            log.debug(f"Waiting for page title: {PAGE_TITLES_BY_LOCALE[self.locale]['verify_order']}")
+            log.debug(
+                f"Waiting for page title: {PAGE_TITLES_BY_LOCALE[self.locale]['verify_order']}"
+            )
             selenium_utils.wait_for_page(
                 self.driver, PAGE_TITLES_BY_LOCALE[self.locale]["verify_order"], 5
             )
@@ -347,7 +351,9 @@ class NvidiaBuyer:
             log.debug("Address validation required?")
             self.address_validation_page()
 
-        log.debug(f"Waiting for page title: {PAGE_TITLES_BY_LOCALE[self.locale]['verify_order']}")
+        log.debug(
+            f"Waiting for page title: {PAGE_TITLES_BY_LOCALE[self.locale]['verify_order']}"
+        )
         selenium_utils.wait_for_page(
             self.driver, PAGE_TITLES_BY_LOCALE[self.locale]["verify_order"], 5
         )
