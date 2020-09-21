@@ -11,6 +11,8 @@ from requests.packages.urllib3.util.retry import Retry
 
 from notifications.notifications import NotificationHandler
 
+from autobuy.autobuy_selenium import AutoBuy
+
 log = logging.getLogger(__name__)
 formatter = logging.Formatter(
     "%(asctime)s : %(message)s : %(levelname)s -%(name)s", datefmt="%d%m%Y %I:%M:%S %p"
@@ -83,6 +85,7 @@ class NvidiaBuyer:
         self.session.mount("https://", adapter)
         self.session.mount("http://", adapter)
         self.notification_handler = NotificationHandler()
+        self.autobuy_handler = AutoBuy()
 
         log.info("Getting product IDs")
         self.get_product_ids()
@@ -208,5 +211,10 @@ class NvidiaBuyer:
         log.debug(self.session.cookies)
         params = {"token": access_token}
         url = furl(DIGITAL_RIVER_CHECKOUT_URL).set(params)
-        webbrowser.open_new(url.url)
-        return url.url
+
+        if self.autobuy_handler.enabled:
+            self.autobuy_handler.auto_buy(url.url,self.locale)
+        else:
+            webbrowser.open_new(url.url)
+        return url.url    
+

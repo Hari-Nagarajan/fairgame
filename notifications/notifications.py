@@ -12,9 +12,9 @@ class NotificationHandler:
         self.telegram_handler = TelegramHandler()
 
     def send_notification(self, message):
-        if self.twilio_handler.enabled:
+         if self.twilio_handler.enabled:
             self.twilio_handler.send(message)
-        if self.discord_handler.enabled:
+         if self.discord_handler.enabled:
             self.discord_handler.send(message)
-        if self.telegram_handler.enabled:
+         if self.telegram_handler.enabled:
             self.telegram_handler.send(message)
