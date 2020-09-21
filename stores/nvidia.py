@@ -85,10 +85,10 @@ PAGE_TITLES_BY_LOCALE = {
     },
     "es_es": {
         "signed_in_help": "NVIDIA Tienda electrónica - Ayuda",
-        "checkout": "NVIDIA Online Store - Caja",
-        "verify_order": "NVIDIA Online Store - Verify Order",
-        "address_validation": "NVIDIA Online Store - Address Validation Suggestion Page",
-        "order_completed": "NVIDIA Online Store - Order Completed",
+        "checkout": "NVIDIA Tienda electrónica - Caja",
+        "verify_order": "NVIDIA Tienda electrónica - Verificar pedido",
+        "address_validation": "NVIDIA Tienda electrónica - Página de sugerencia para la validación de la dirección",
+        "order_completed": "NVIDIA Online Store - Order Completed"
     },
     "fr_fr": {
         "signed_in_help": "NVIDIA Online Store - Help",
