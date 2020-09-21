@@ -91,10 +91,10 @@ PAGE_TITLES_BY_LOCALE = {
         "order_completed": "NVIDIA Online Store - Order Completed",
     },
     "fr_fr": {
-        "signed_in_help": "NVIDIA Online Store - Help",
+        "signed_in_help": "NVIDIA Boutique en ligne - Aide",
         "checkout": "NVIDIA Boutique en ligne - panier et informations de facturation",
         "verify_order": "NVIDIA Boutique en ligne - vérification de commande",
-        "address_validation": "NVIDIA Online Store - Address Validation Suggestion Page",
+        "address_validation": "NVIDIA Boutique en ligne - Page de suggestion et de validation d’adresse",
         "order_completed": "NVIDIA Boutique en ligne - confirmation de commande",
     },
     "it_it": {
