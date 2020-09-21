@@ -336,6 +336,7 @@ class NvidiaBuyer:
             )
         except TimeoutException:
             logging.error("Address validation required?")
+            self.address_validation_page()
 
         selenium_utils.wait_for_page(
             self.driver, PAGE_TITLES_BY_LOCALE[self.locale]['verify_order'], 5
