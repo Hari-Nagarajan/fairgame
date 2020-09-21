@@ -213,7 +213,8 @@ class NvidiaBuyer:
         url = furl(DIGITAL_RIVER_CHECKOUT_URL).set(params)
 
         if self.autobuy_handler.enabled:
-            self.autobuy_handler.auto_buy(url.url,self.locale)
+            log.info("Starting auto buy.")
+            self.autobuy_handler.auto_buy(url.url, self.locale)
         else:
             webbrowser.open_new(url.url)
         return url.url    
