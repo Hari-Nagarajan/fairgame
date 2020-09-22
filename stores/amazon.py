@@ -6,6 +6,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.expected_conditions import presence_of_element_located
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import TimeoutException
 
 from notifications.notifications import NotificationHandler
 from utils.logger import log
@@ -57,13 +58,16 @@ class Amazon:
         log.info(f"Initial availability message is: {availability}")
 
         while not self.driver.find_elements_by_xpath('//*[@id="buy-now-button"]'):
-            self.driver.refresh()
-            log.info("Refreshing page.")
-            availability = self.wait.until(
-                presence_of_element_located((By.ID, "availability"))
-            ).text.replace("\n", " ")
-            log.info(f"Current availability message is: {availability}")
-            time.sleep(delay)
+            try:
+                self.driver.refresh()
+                log.info("Refreshing page.")
+                availability = self.wait.until(
+                    presence_of_element_located((By.ID, "availability"))
+                ).text.replace("\n", " ")
+                log.info(f"Current availability message is: {availability}")
+                time.sleep(delay)
+            except TimeoutException as _: 
+                log.warn("A polling request timed out. Retrying.")
 
         log.info("Item in stock, buy now button found!")
         price_str = self.driver.find_element_by_id("priceblock_ourprice").text
