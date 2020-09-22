@@ -67,6 +67,8 @@ ACCEPTED_LOCALES = [
     "sv_se",
     "de_at",
     "fr_be",
+    "da_dk",
+    "cs_cz",
 ]
 
 PAGE_TITLES_BY_LOCALE = {
@@ -140,11 +142,18 @@ PAGE_TITLES_BY_LOCALE = {
         "address_validation": "NVIDIA Online Store - Address Validation Suggestion Page",
         "order_completed": "NVIDIA Online Store - Order Completed",
     },
-    "da_dek": {
-        "signed_in_help": "NVIDIA Online-butik - Hjælp",
-        "checkout": "NVIDIA Online-butik - Udcheckning",
-        "verify_order": "NVIDIA Online-Shop - bestellung überprüfen und bestätigen",
-        "address_validation": "NVIDIA Online-Shop - Adressüberprüfung Vorschlagsseite",
+    "da_dk": {
+        "signed_in_help": "NVIDIA Online Store - Help",
+        "checkout": "NVIDIA Online Store - Checkout",
+        "verify_order": "NVIDIA Online Store - Verify Order",
+        "address_validation": "NVIDIA Online Store - Address Validation Suggestion Page",
+        "order_completed": "NVIDIA Online Store - Order Completed",
+    },
+    "cs_cz": {
+        "signed_in_help": "NVIDIA Online Store - Help",
+        "checkout": "NVIDIA Online Store - Checkout",
+        "verify_order": "NVIDIA Online Store - Verify Order",
+        "address_validation": "NVIDIA Online Store - Address Validation Suggestion Page",
         "order_completed": "NVIDIA Online Store - Order Completed",
     },
 }
@@ -160,6 +169,8 @@ autobuy_locale_btns = {
     "de_at": ["Weiter", "Senden"],
     "en_gb": ["Continue Checkout", "submit"],
     "en_us": ["continue", "submit"],
+    "da_dk": ["continue", "submit"],
+    "cs_cz": ["continue", "submit"],
 }
 
 DEFAULT_HEADERS = {
@@ -257,6 +268,10 @@ class NvidiaBuyer:
             return "de_de"
         if self.cli_locale == "fr_be":
             return "fr_fr"
+        if self.cli_locale == "da_dk":
+            return "en_gb"
+        if self.cli_locale == "cs_cz":
+            return "en_gb"
         return self.cli_locale
 
     def get_product_ids(self, url=DIGITAL_RIVER_PRODUCT_LIST_URL):
@@ -493,7 +508,7 @@ class NvidiaBuyer:
             log.info("Success submit_cart")
 
     def check_if_locale_corresponds(self, product_id):
-        special_locales = ["en_gb", "de_at", "de_de", "fr_fr", "fr_be"]
+        special_locales = ["en_gb", "de_at", "de_de", "fr_fr", "fr_be", "da_dk", "cs_cz"]
         if self.cli_locale in special_locales:
             url = f"{DIGITAL_RIVER_PRODUCT_LIST_URL}/{product_id}"
             log.debug(f"Calling {url}")
