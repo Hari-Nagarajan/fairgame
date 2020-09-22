@@ -191,7 +191,10 @@ class ProductIDChangedException(Exception):
 
 class InvalidAutoBuyConfigException(Exception):
     def __init__(self, provided_json):
-        super().__init__(f"Check the README and update your `autobuy_config.json` file. Your autobuy config is {json.dumps(provided_json, indent=2)}")
+        super().__init__(
+            f"Check the README and update your `autobuy_config.json` file. Your autobuy config is {json.dumps(provided_json, indent=2)}"
+        )
+
 
 class NvidiaBuyer:
     def __init__(self, gpu, locale="en_us"):
@@ -249,7 +252,7 @@ class NvidiaBuyer:
         log.info("Adding driver cookies to session")
 
         log.info("Getting product IDs")
-        self.access_token = self.get_nividia_access_token()
+        self.token_data = self.get_nvidia_access_token()
         self.payment_option = self.get_payment_options()
         if not self.payment_option.get("id") or not self.cvv:
             log.error("No payment option on account or missing CVV. Disable Autobuy")
@@ -269,6 +272,13 @@ class NvidiaBuyer:
             )
             self.get_product_ids()
             sleep(5)
+
+    @property
+    def access_token(self):
+        if datetime.today().timestamp() >= self.token_data.get('expires_at'):
+            log.debug('Access token expired')
+            self.token_data = self.get_nvidia_access_token()
+        return self.token_data['access_token']
 
     def has_valid_creds(self):
         if all(item in self.config.keys() for item in AUTOBUY_CONFIG_KEYS):
@@ -294,6 +304,7 @@ class NvidiaBuyer:
             "expand": "product",
             "fields": "product.id,product.displayName,product.pricing",
             "locale": self.locale,
+            "format": "json"
         }
         headers = DEFAULT_HEADERS.copy()
         headers["locale"] = self.locale
@@ -445,7 +456,9 @@ class NvidiaBuyer:
                 "format": "json",
             }
             response = self.session.post(
-                DIGITAL_RIVER_ADD_TO_CART_API_URL, headers=DEFAULT_HEADERS, params=params
+                DIGITAL_RIVER_ADD_TO_CART_API_URL,
+                headers=DEFAULT_HEADERS,
+                params=params,
             )
 
             if response.status_code == 200:
@@ -562,21 +575,24 @@ class NvidiaBuyer:
             return self.cli_locale[3:].upper() in response_json["product"]["name"]
         return True
 
-    def get_nividia_access_token(self):
+    def get_nvidia_access_token(self):
         log.debug("Getting session token")
+        now = datetime.today()
         payload = {
             "apiKey": DIGITAL_RIVER_API_KEY,
             "format": "json",
             "locale": self.locale,
             "currency": "USD",
-            "_": datetime.today(),
+            "_": now,
         }
         response = self.session.get(
             NVIDIA_TOKEN_URL, headers=DEFAULT_HEADERS, params=payload
         )
         log.debug(response.status_code)
-        log.debug(f"Nvidia access token: {response.json()['access_token']}")
-        return response.json()["access_token"]
+        data = response.json()
+        log.debug(f"Nvidia access token: {data['access_token']}")
+        data['expires_at'] = round(now.timestamp() + data['expires_in']) - 60
+        return data
 
     def is_signed_in(self):
         try:

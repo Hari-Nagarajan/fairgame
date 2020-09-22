@@ -9,6 +9,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
 
+import pickle
+
 from utils import selenium_utils
 from utils.logger import log
 from utils.selenium_utils import options, chrome_options
@@ -46,7 +48,7 @@ class Evga:
 
     def login(self, username, password):
         """
-        We're just going to enter the user info and let the user handle the captcha
+        We're just going to attempt to load cookies, else enter the user info and let the user handle the captcha
         :param username:
         :param password:
         :return:
@@ -61,25 +63,44 @@ class Evga:
             "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"
         )
 
-        self.driver.get(LOGIN_URL)
-        selenium_utils.wait_for_page(self.driver, "EVGA - Intelligent Innovation")
+        if path.isfile("evga-cookies.pkl"):  # check for cookies file
+            self.driver.get("https://www.evga.com")
+            selenium_utils.wait_for_page(
+                self.driver, "EVGA - Intelligent Innovation - Official Website", 300
+            )
+            cookies = pickle.load(open("evga-cookies.pkl", "rb"))
+            for cookie in cookies:
+                self.driver.add_cookie(cookie)
 
-        selenium_utils.field_send_keys(self.driver, "evga_login", username)
-        selenium_utils.field_send_keys(self.driver, "password", password)
-
-        log.info("Go do the captcha and log in")
-
+        self.driver.get("https://www.evga.com")
         selenium_utils.wait_for_page(
-            self.driver, "EVGA - Intelligent Innovation - Official Website", 300
-        )
+                self.driver, "EVGA - Intelligent Innovation - Official Website", 300
+            )
+        if len(self.driver.find_elements_by_id("svg-login")) > 0:  # cookies did not provide logged in state
+            self.driver.get(LOGIN_URL)
+            selenium_utils.wait_for_page(self.driver, "EVGA - Intelligent Innovation")
+
+            selenium_utils.field_send_keys(self.driver, "evga_login", username)
+            selenium_utils.field_send_keys(self.driver, "password", password)
+
+            log.info("Go do the captcha and log in")
+
+            selenium_utils.wait_for_page(
+                self.driver, "EVGA - Intelligent Innovation - Official Website", 300
+            )
+            pickle.dump(self.driver.get_cookies(), open ("evga-cookies.pkl", "wb"))  # save cookies
+
         log.info("Logged in!")
 
     def buy(self, delay=5, test=False):
         if test:
             self.driver.get(
-                "https://www.evga.com/products/ProductList.aspx?type=0&family=GeForce+16+Series+Family&chipset=GTX+1660")
-            selenium_utils.wait_for_page(self.driver,
-                                         "EVGA - Products - Graphics - GeForce 16 Series Family - GTX 1660")
+                "https://www.evga.com/products/ProductList.aspx?type=0&family=GeForce+16+Series+Family&chipset=GTX+1660"
+            )
+            selenium_utils.wait_for_page(
+                self.driver,
+                "EVGA - Products - Graphics - GeForce 16 Series Family - GTX 1660",
+            )
         else:
             self.driver.get(
                 "https://www.evga.com/products/productlist.aspx?type=0&family=GeForce+30+Series+Family&chipset=RTX+3080"

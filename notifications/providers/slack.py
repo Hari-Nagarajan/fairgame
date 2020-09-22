@@ -11,6 +11,7 @@ from utils.logger import log
 SLACK_CONFIG_PATH = "slack_config.json"
 SLACK_CONFIG_KEYS = ["slack_user", "slack_channel", "slack_token"]
 
+
 class SlackHandler:
 
     enabled = False
@@ -37,19 +38,16 @@ class SlackHandler:
         if all(item in self.config.keys() for item in SLACK_CONFIG_KEYS):
             return True
         else:
-            return False    
+            return False
 
     def send(self, message_body):
         try:
             response = self.client.chat_postMessage(
-                channel = self.config["slack_channel"],
-                text = message_body
+                channel=self.config["slack_channel"], text=message_body
             )
 
             log.info(f"Slack message sent: {response.status_code}")
         except SlackApiError as e:
             log.error(e)
-            log.warn(
-                "Slack send message failed. Disabling Slack notifications."
-            )
+            log.warn("Slack send message failed. Disabling Slack notifications.")
             self.enabled = False
