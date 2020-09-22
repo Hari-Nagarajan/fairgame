@@ -74,17 +74,18 @@ class Evga:
         )
         log.info("Logged in!")
 
-    def buy(self, delay=5):
-        self.driver.get(
-            "https://www.evga.com/products/productlist.aspx?type=0&family=GeForce+30+Series+Family&chipset=RTX+3080"
-        )
-        # self.driver.get("https://www.evga.com/products/ProductList.aspx?type=0&family=GeForce+16+Series+Family&chipset=GTX+1660")
-
-        selenium_utils.wait_for_page(
-            self.driver,
-            "EVGA - Products - Graphics - GeForce 30 Series Family - RTX 3080",
-        )
-        # selenium_utils.wait_for_page(self.driver, "EVGA - Products - Graphics - GeForce 16 Series Family - GTX 1660")
+    def buy(self, delay=5, test=False):
+        if test:
+            self.driver.get("https://www.evga.com/products/ProductList.aspx?type=0&family=GeForce+16+Series+Family&chipset=GTX+1660")
+            selenium_utils.wait_for_page(self.driver, "EVGA - Products - Graphics - GeForce 16 Series Family - GTX 1660")
+        else:
+            self.driver.get(
+                "https://www.evga.com/products/productlist.aspx?type=0&family=GeForce+30+Series+Family&chipset=RTX+3080"
+            )
+            selenium_utils.wait_for_page(
+                self.driver,
+                "EVGA - Products - Graphics - GeForce 30 Series Family - RTX 3080",
+            )
 
         #  Check for stock
         log.info("On GPU Page")
@@ -162,8 +163,10 @@ class Evga:
         ).click()
 
         selenium_utils.wait_for_element(self.driver, "ctl00_LFrame_btncontinue")
-        WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable((By.ID, "ctl00_LFrame_btncontinue"))
-        ).click()
+
+        if not test:
+            WebDriverWait(self.driver, 10).until(
+                EC.element_to_be_clickable((By.ID, "ctl00_LFrame_btncontinue"))
+            ).click()
 
         log.info("Finalized Order!")

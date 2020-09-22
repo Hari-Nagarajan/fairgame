@@ -79,9 +79,10 @@ def bestbuy(sku):
 
 
 @click.command()
-def evga():
+@click.option('--test', is_flag=True)
+def evga(test):
     ev = Evga()
-    ev.buy()
+    ev.buy(test)
 
 
 main.add_command(nvidia)
