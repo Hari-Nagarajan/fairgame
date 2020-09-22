@@ -140,6 +140,13 @@ PAGE_TITLES_BY_LOCALE = {
         "address_validation": "NVIDIA Online Store - Address Validation Suggestion Page",
         "order_completed": "NVIDIA Online Store - Order Completed",
     },
+    "da_dek": {
+        "signed_in_help": "NVIDIA Online-butik - Hjælp",
+        "checkout": "NVIDIA Online-butik - Udcheckning",
+        "verify_order": "NVIDIA Online-Shop - bestellung überprüfen und bestätigen",
+        "address_validation": "NVIDIA Online-Shop - Adressüberprüfung Vorschlagsseite",
+        "order_completed": "NVIDIA Online Store - Order Completed",
+    },
 }
 
 autobuy_locale_btns = {
@@ -301,12 +308,12 @@ class NvidiaBuyer:
         if self.enabled:
             self.apply_shopper_details()
             if self.auto_buy_enabled:
+                self.notification_handler.send_notification(
+                    f" {self.gpu_long_name} with product ID: {product_id} available!"
+                )
                 log.info("Auto buy enabled.")
                 # self.submit_cart()
                 self.selenium_checkout()
-                self.notification_handler.send_notification(
-                    f" {self.gpu_long_name} with product ID: {product_id} ordered!"
-                )
             else:
                 log.info("Auto buy disabled.")
                 cart_url = self.open_cart_url()
