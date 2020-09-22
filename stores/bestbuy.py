@@ -108,7 +108,7 @@ class BestBuyHandler:
                 for cookie in cookies
             ]
 
-            self.driver.quit()
+            # self.driver.quit()
 
             log.info("Calling location/v1/US/approximate")
             log.info(
@@ -194,11 +194,9 @@ class BestBuyHandler:
         return BEST_BUY_CART_URL.format(sku=self.sku_id)
 
     def auto_checkout(self):
-        tas_data = self.get_tas_data()
         self.auto_add_to_cart()
         self.start_checkout()
-        self.submit_shipping()
-        self.submit_payment(tas_data)
+        self.driver.get("https://www.bestbuy.com/checkout/c/r/fast-track")
 
     def auto_add_to_cart(self):
         log.info("Attempting to auto add to cart...")
