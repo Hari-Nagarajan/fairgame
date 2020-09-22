@@ -460,8 +460,12 @@ class NvidiaBuyer:
             else:
                 log.debug("item not in stock")
                 return False
-        except (ConnectionResetError, requests.exceptions.ConnectionError,) as ex:
-            log.warning(f"The connection has been reset: {ex}.")
+        except (
+            ConnectionResetError,
+            requests.exceptions.ConnectionError,
+            requests.exceptions.Timeout,  # covers ConnectTimeout + ReadTimeout
+        ) as ex:
+            log.warning(f"The connection experienced a problem: {ex}.")
             return False
 
     def get_ext_ip(self):
