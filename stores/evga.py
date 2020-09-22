@@ -63,12 +63,12 @@ class Evga:
             "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"
         )
 
-        if path.isfile("cookies.pkl"):  # check for cookies file
+        if path.isfile("evga-cookies.pkl"):  # check for cookies file
             self.driver.get("https://www.evga.com")
             selenium_utils.wait_for_page(
                 self.driver, "EVGA - Intelligent Innovation - Official Website", 300
             )
-            cookies = pickle.load(open("cookies.pkl", "rb"))
+            cookies = pickle.load(open("evga-cookies.pkl", "rb"))
             for cookie in cookies:
                 self.driver.add_cookie(cookie)
 
@@ -88,7 +88,7 @@ class Evga:
             selenium_utils.wait_for_page(
                 self.driver, "EVGA - Intelligent Innovation - Official Website", 300
             )
-            pickle.dump(self.driver.get_cookies(), open ("cookies.pkl", "wb"))  # save cookies
+            pickle.dump(self.driver.get_cookies(), open ("evga-cookies.pkl", "wb"))  # save cookies
 
         log.info("Logged in!")
 
