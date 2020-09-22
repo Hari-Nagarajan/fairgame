@@ -66,7 +66,7 @@ class Amazon:
                 ).text.replace("\n", " ")
                 log.info(f"Current availability message is: {availability}")
                 time.sleep(delay)
-            except TimeoutException as _: 
+            except TimeoutException as _:
                 log.warn("A polling request timed out. Retrying.")
 
         log.info("Item in stock, buy now button found!")

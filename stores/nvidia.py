@@ -191,7 +191,10 @@ class ProductIDChangedException(Exception):
 
 class InvalidAutoBuyConfigException(Exception):
     def __init__(self, provided_json):
-        super().__init__(f"Check the README and update your `autobuy_config.json` file. Your autobuy config is {json.dumps(provided_json, indent=2)}")
+        super().__init__(
+            f"Check the README and update your `autobuy_config.json` file. Your autobuy config is {json.dumps(provided_json, indent=2)}"
+        )
+
 
 class NvidiaBuyer:
     def __init__(self, gpu, locale="en_us"):
@@ -405,15 +408,18 @@ class NvidiaBuyer:
         selenium_utils.wait_for_page(
             self.driver, PAGE_TITLES_BY_LOCALE[self.locale]["verify_order"], 5
         )
-        log.info("Submit.")
-        log.debug("Reached order validation page.")
-        self.driver.save_screenshot("nvidia-order-validation.png")
-        self.driver.find_element_by_xpath(f'//*[@value="{autobuy_btns[1]}"]').click()
-        selenium_utils.wait_for_page(
-            self.driver, PAGE_TITLES_BY_LOCALE[self.locale]["order_completed"], 5
-        )
-        self.driver.save_screenshot("nvidia-order-finshed.png")
-        log.info("Done.")
+
+        log.info("F this captcha lmao. Submitting cart.")
+        self.submit_cart()
+        # log.info("Submit.")
+        # log.debug("Reached order validation page.")
+        # self.driver.save_screenshot("nvidia-order-validation.png")
+        # self.driver.find_element_by_xpath(f'//*[@value="{autobuy_btns[1]}"]').click()
+        # selenium_utils.wait_for_page(
+        #     self.driver, PAGE_TITLES_BY_LOCALE[self.locale]["order_completed"], 5
+        # )
+        # self.driver.save_screenshot("nvidia-order-finshed.png")
+        # log.info("Done.")
 
     def address_validation_page(self):
         try:
@@ -442,7 +448,9 @@ class NvidiaBuyer:
                 "format": "json",
             }
             response = self.session.post(
-                DIGITAL_RIVER_ADD_TO_CART_API_URL, headers=DEFAULT_HEADERS, params=params
+                DIGITAL_RIVER_ADD_TO_CART_API_URL,
+                headers=DEFAULT_HEADERS,
+                params=params,
             )
 
             if response.status_code == 200:

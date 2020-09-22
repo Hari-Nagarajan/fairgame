@@ -174,7 +174,10 @@ class BestBuyHandler:
             )
             item_state = item_json[0][0]["buttonState"]
             log.info(f"Item state is: {item_state}")
-            if item_json[0][0]["skuId"] == self.sku_id and item_state in ['ADD_TO_CART', 'PRE_ORDER']:
+            if item_json[0][0]["skuId"] == self.sku_id and item_state in [
+                "ADD_TO_CART",
+                "PRE_ORDER",
+            ]:
                 return True
             else:
                 return False

@@ -79,7 +79,7 @@ def bestbuy(sku):
 
 
 @click.command()
-@click.option('--test', is_flag=True)
+@click.option("--test", is_flag=True)
 def evga(test):
     ev = Evga()
     ev.buy(test=test)
