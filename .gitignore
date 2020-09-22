@@ -10,4 +10,6 @@ slack_config.json
 geckodriver.log
 .profile
 *.log
+__pycache__/
+*.py[cod]
 /evga_config.json
