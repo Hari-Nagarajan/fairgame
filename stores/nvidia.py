@@ -101,11 +101,11 @@ PAGE_TITLES_BY_LOCALE = {
         "order_completed": "NVIDIA Boutique en ligne - confirmation de commande",
     },
     "it_it": {
-        "signed_in_help": "NVIDIA Online Store - Help",
-        "checkout": "NVIDIA Online Store - Checkout",
-        "verify_order": "NVIDIA Online Store - Verify Order",
-        "address_validation": "NVIDIA Online Store - Address Validation Suggestion Page",
-        "order_completed": "NVIDIA Online Store - Order Completed",
+        "signed_in_help": "NVIDIA Negozio Online - Guida",
+        "checkout": "NVIDIA Negozio Online - Vai alla cassa",
+        "verify_order": "NVIDIA Negozio Online - Verifica ordine",
+        "address_validation": "NVIDIA Negozio Online - Pagina di suggerimento per la validazione dell'indirizzo",
+        "order_completed": "NVIDIA Negozio Online - Ordine completato",
     },
     "nl_nl": {
         "signed_in_help": "NVIDIA Online winkel - Help",
