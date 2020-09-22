@@ -1,8 +1,15 @@
-# README.md
+# nvidia-bot
 
-Tool to help us buy a GPU in 2020
+[Installation](#Installation) | [Installation](#Installation) | [Usage](#Usage) | [Discord](https://discord.gg/hQeUbRv)  | [Troubleshooting](#Troubleshooting)
 
-[Installation](#Installation) | [Usage](#Usage) | [Discord](https://discord.gg/hQeUbRv)  | [Troubleshooting](#Troubleshooting)
+## Why???
+
+I built this in response to the severe tech scalping situation that's happening right now. Almost every tech product that's coming
+out right now is being instantly brought out by scalping groups and then resold at at insane prices. $699 GPUs are being listed
+for $1700 on eBay, and these scalpers are buying 40 carts while normal consumers can't get a single one. Preorders for the PS5 are
+being resold for nearly $1000. My take on this is that if I release a bot that anyone can use, for free, then the number of items 
+that scalpers can buy goes down and normal consumers can buy items for MSRP. If everyone is botting, then no one is botting. 
+
 ## Installation
 
 This project uses [Pipenv](https://pypi.org/project/pipenv/) to manage dependencies. Hop in my [Discord](https://discord.gg/hQeUbRv) if you have ideas, need help or just want to tell me about how you got your new 3080. [TerryFrench](https://github.com/TerryFrench) has also created a youtube video detailing how to get this project running on Windows 10 as well. Huge thanks to him. 
