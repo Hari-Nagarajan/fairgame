@@ -197,6 +197,8 @@ class NvidiaBuyer:
         self.gpu = gpu
         self.enabled = True
         self.auto_buy_enabled = False
+        self.attempt = 0
+        self.started_at = datetime.now()
 
         self.gpu_long_name = GPU_DISPLAY_NAMES[gpu]
 
@@ -318,7 +320,11 @@ class NvidiaBuyer:
     def buy(self, product_id, delay=3):
         log.info(f"Checking stock for {product_id} at {delay} second intervals.")
         while not self.add_to_cart(product_id) and self.enabled:
-            with Spinner.get("Still working...") as s:
+            self.attempt = self.attempt + 1
+            time_delta = str(datetime.now() - self.started_at).split(".")[0]
+            with Spinner.get(
+                f"Still working (attempt {self.attempt}, have been running for {time_delta})..."
+            ) as s:
                 sleep(delay)
         if self.enabled:
             self.apply_shopper_details()
@@ -508,7 +514,15 @@ class NvidiaBuyer:
             log.info("Success submit_cart")
 
     def check_if_locale_corresponds(self, product_id):
-        special_locales = ["en_gb", "de_at", "de_de", "fr_fr", "fr_be", "da_dk", "cs_cz"]
+        special_locales = [
+            "en_gb",
+            "de_at",
+            "de_de",
+            "fr_fr",
+            "fr_be",
+            "da_dk",
+            "cs_cz",
+        ]
         if self.cli_locale in special_locales:
             url = f"{DIGITAL_RIVER_PRODUCT_LIST_URL}/{product_id}"
             log.debug(f"Calling {url}")
