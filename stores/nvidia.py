@@ -9,7 +9,6 @@ from time import sleep
 import requests
 from chromedriver_py import binary_path  # this will get you the path variable
 from furl import furl
-from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
@@ -20,6 +19,7 @@ from spinlog import Spinner
 
 from notifications.notifications import NotificationHandler
 from utils import selenium_utils
+from utils.http import TimeoutHTTPAdapter
 from utils.logger import log
 from utils.selenium_utils import options, chrome_options
 
@@ -188,6 +188,10 @@ class ProductIDChangedException(Exception):
         super().__init__("Product IDS changed. We need to re run.")
 
 
+class InvalidAutoBuyConfigException(Exception):
+    def __init__(self, provided_json):
+        super().__init__(f"Check the README and update your `autobuy_config.json` file. Your autobuy config is {json.dumps(provided_json, indent=2)}")
+
 class NvidiaBuyer:
     def __init__(self, gpu, locale="en_us"):
         self.product_ids = set([])
@@ -204,12 +208,18 @@ class NvidiaBuyer:
 
         if path.exists(AUTOBUY_CONFIG_PATH):
             with open(AUTOBUY_CONFIG_PATH) as json_file:
-                self.config = json.load(json_file)
+                try:
+                    self.config = json.load(json_file)
+                except Exception as e:
+                    log.error("Your `autobuy_config.json` file is not valid json.")
+                    raise e
                 if self.has_valid_creds():
                     self.nvidia_login = self.config["NVIDIA_LOGIN"]
                     self.nvidia_password = self.config["NVIDIA_PASSWORD"]
                     self.auto_buy_enabled = self.config["FULL_AUTOBUY"]
                     self.cvv = self.config.get("CVV")
+                else:
+                    raise InvalidAutoBuyConfigException(self.config)
         else:
             log.info("No Autobuy creds found.")
 
@@ -217,7 +227,7 @@ class NvidiaBuyer:
         if type(self.auto_buy_enabled) != bool:
             self.auto_buy_enabled = False
 
-        adapter = HTTPAdapter(
+        adapter = TimeoutHTTPAdapter(
             max_retries=Retry(
                 total=10,
                 backoff_factor=1,
@@ -418,31 +428,35 @@ class NvidiaBuyer:
             log.error("Address validation not required?")
 
     def add_to_cart(self, product_id):
-        log.debug(f"Checking if item ({product_id}) in stock")
-        params = {
-            "apiKey": DIGITAL_RIVER_API_KEY,
-            "token": self.access_token,
-            "productId": product_id,
-            "format": "json",
-        }
-        response = self.session.post(
-            DIGITAL_RIVER_ADD_TO_CART_API_URL, headers=DEFAULT_HEADERS, params=params
-        )
+        try:
+            log.debug(f"Checking if item ({product_id}) in stock")
+            params = {
+                "apiKey": DIGITAL_RIVER_API_KEY,
+                "token": self.access_token,
+                "productId": product_id,
+                "format": "json",
+            }
+            response = self.session.post(
+                DIGITAL_RIVER_ADD_TO_CART_API_URL, headers=DEFAULT_HEADERS, params=params
+            )
 
-        if response.status_code == 200:
-            log.info(f"{self.gpu_long_name} ({product_id}) in stock!")
-            return True
-        elif response.status_code == 409:
-            try:
-                response_json = response.json()
-                log.debug(f"Error: {response_json['errors']['error']}")
-                for error in response_json["errors"]["error"]:
-                    if error["code"] == "invalid-product-id":
-                        raise ProductIDChangedException()
-            except json.decoder.JSONDecodeError as er:
-                log.warning(f"Failed to decode json: {response.text}")
-        else:
-            log.debug("item not in stock")
+            if response.status_code == 200:
+                log.info(f"{self.gpu_long_name} ({product_id}) in stock!")
+                return True
+            elif response.status_code == 409:
+                try:
+                    response_json = response.json()
+                    log.debug(f"Error: {response_json['errors']['error']}")
+                    for error in response_json["errors"]["error"]:
+                        if error["code"] == "invalid-product-id":
+                            raise ProductIDChangedException()
+                except json.decoder.JSONDecodeError as er:
+                    log.warning(f"Failed to decode json: {response.text}")
+            else:
+                log.debug("item not in stock")
+                return False
+        except ConnectionResetError as ex:
+            log.warning("The connection has been reset.")
             return False
 
     def get_ext_ip(self):
@@ -575,10 +589,12 @@ class NvidiaBuyer:
         if not self.is_signed_in():
             email = selenium_utils.wait_for_element(self.driver, "loginEmail")
             pwd = selenium_utils.wait_for_element(self.driver, "loginPassword")
-
-            email.send_keys(self.nvidia_login)
-            pwd.send_keys(self.nvidia_password)
-
+            try:
+                email.send_keys(self.nvidia_login)
+                pwd.send_keys(self.nvidia_password)
+            except AttributeError as e:
+                log.error("Missing 'nvidia_login' or 'nvidia_password'")
+                raise e
             try:
                 action = ActionChains(self.driver)
                 button = self.driver.find_element_by_xpath(
