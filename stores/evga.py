@@ -77,9 +77,12 @@ class Evga:
     def buy(self, delay=5, test=False):
         if test:
             self.driver.get(
-                "https://www.evga.com/products/ProductList.aspx?type=0&family=GeForce+16+Series+Family&chipset=GTX+1660")
-            selenium_utils.wait_for_page(self.driver,
-                                         "EVGA - Products - Graphics - GeForce 16 Series Family - GTX 1660")
+                "https://www.evga.com/products/ProductList.aspx?type=0&family=GeForce+16+Series+Family&chipset=GTX+1660"
+            )
+            selenium_utils.wait_for_page(
+                self.driver,
+                "EVGA - Products - Graphics - GeForce 16 Series Family - GTX 1660",
+            )
         else:
             self.driver.get(
                 "https://www.evga.com/products/productlist.aspx?type=0&family=GeForce+30+Series+Family&chipset=RTX+3080"

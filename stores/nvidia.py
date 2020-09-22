@@ -191,7 +191,10 @@ class ProductIDChangedException(Exception):
 
 class InvalidAutoBuyConfigException(Exception):
     def __init__(self, provided_json):
-        super().__init__(f"Check the README and update your `autobuy_config.json` file. Your autobuy config is {json.dumps(provided_json, indent=2)}")
+        super().__init__(
+            f"Check the README and update your `autobuy_config.json` file. Your autobuy config is {json.dumps(provided_json, indent=2)}"
+        )
+
 
 class NvidiaBuyer:
     def __init__(self, gpu, locale="en_us"):
@@ -445,7 +448,9 @@ class NvidiaBuyer:
                 "format": "json",
             }
             response = self.session.post(
-                DIGITAL_RIVER_ADD_TO_CART_API_URL, headers=DEFAULT_HEADERS, params=params
+                DIGITAL_RIVER_ADD_TO_CART_API_URL,
+                headers=DEFAULT_HEADERS,
+                params=params,
             )
 
             if response.status_code == 200:
