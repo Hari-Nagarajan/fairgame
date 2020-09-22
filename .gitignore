@@ -8,3 +8,4 @@ telegram_config.json
 autobuy_config.json
 geckodriver.log
 .profile
+/evga_config.json

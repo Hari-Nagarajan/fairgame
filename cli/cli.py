@@ -5,6 +5,7 @@ import click
 from cli.utils import QuestionaryOption
 from stores.amazon import Amazon
 from stores.bestbuy import BestBuyHandler
+from stores.evga import Evga
 from stores.nvidia import NvidiaBuyer, GPU_DISPLAY_NAMES, ACCEPTED_LOCALES
 
 
@@ -77,6 +78,13 @@ def bestbuy(sku):
     bb.run_item()
 
 
+@click.command()
+def evga():
+    ev = Evga()
+    ev.buy()
+
+
 main.add_command(nvidia)
 main.add_command(amazon)
 main.add_command(bestbuy)
+main.add_command(evga)
