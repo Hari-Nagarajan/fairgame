@@ -12,3 +12,4 @@ geckodriver.log
 *.log
 __pycache__/
 *.py[cod]
+/evga_config.json

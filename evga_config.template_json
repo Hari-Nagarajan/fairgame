@@ -1,0 +1,11 @@
+{
+  "username": "",
+  "password": "",
+  "credit_card" : {
+            "name": "",
+            "number": "",
+            "cvv": "",
+            "expiration_month": "",
+            "expiration_year": ""
+        }
+}
