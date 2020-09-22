@@ -101,11 +101,11 @@ PAGE_TITLES_BY_LOCALE = {
         "order_completed": "NVIDIA Boutique en ligne - confirmation de commande",
     },
     "it_it": {
-        "signed_in_help": "NVIDIA Negozio Online - Guida",
-        "checkout": "NVIDIA Negozio Online - Vai alla cassa",
-        "verify_order": "NVIDIA Negozio Online - Verifica ordine",
-        "address_validation": "NVIDIA Negozio Online - Pagina di suggerimento per la validazione dell'indirizzo",
-        "order_completed": "NVIDIA Negozio Online - Ordine completato",
+        "signed_in_help": "NVIDIA Online Store - Help",
+        "checkout": "NVIDIA Online Store - Checkout",
+        "verify_order": "NVIDIA Online Store - Verify Order",
+        "address_validation": "NVIDIA Online Store - Address Validation Suggestion Page",
+        "order_completed": "NVIDIA Online Store - Order Completed",
     },
     "nl_nl": {
         "signed_in_help": "NVIDIA Online winkel - Help",
@@ -190,7 +190,10 @@ class ProductIDChangedException(Exception):
 
 class InvalidAutoBuyConfigException(Exception):
     def __init__(self, provided_json):
-        super().__init__(f"Check the README and update your `autobuy_config.json` file. Your autobuy config is {json.dumps(provided_json, indent=2)}")
+        super().__init__(
+            f"Check the README and update your `autobuy_config.json` file. Your autobuy config is {json.dumps(provided_json, indent=2)}"
+        )
+
 
 class NvidiaBuyer:
     def __init__(self, gpu, locale="en_us"):
@@ -437,7 +440,9 @@ class NvidiaBuyer:
                 "format": "json",
             }
             response = self.session.post(
-                DIGITAL_RIVER_ADD_TO_CART_API_URL, headers=DEFAULT_HEADERS, params=params
+                DIGITAL_RIVER_ADD_TO_CART_API_URL,
+                headers=DEFAULT_HEADERS,
+                params=params,
             )
 
             if response.status_code == 200:
@@ -451,13 +456,12 @@ class NvidiaBuyer:
                         if error["code"] == "invalid-product-id":
                             raise ProductIDChangedException()
                 except json.decoder.JSONDecodeError as er:
-                    log.warning(f"Failed to decode json: {response.text}")
+                    log.warning(f"Failed to decode json: {response.text}, due to {er}")
             else:
                 log.debug("item not in stock")
                 return False
-        except Exception as ex:
-            log.warning(str(ex))
-            log.warning("The connection has been reset.")
+        except (ConnectionResetError, requests.exceptions.ConnectionError,) as ex:
+            log.warning(f"The connection has been reset: {ex}.")
             return False
 
     def get_ext_ip(self):
