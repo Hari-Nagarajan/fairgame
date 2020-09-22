@@ -6,5 +6,7 @@ twilio_config.json
 discord_config.json
 telegram_config.json
 autobuy_config.json
+slack_config.json
 geckodriver.log
 .profile
+*.log
