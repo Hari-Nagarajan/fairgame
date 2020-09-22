@@ -1,6 +1,7 @@
 from notifications.providers.discord import DiscordHandler
 from notifications.providers.telegram import TelegramHandler
 from notifications.providers.twilio import TwilioHandler
+from notifications.providers.slack import SlackHandler
 from utils.logger import log
 
 
@@ -10,6 +11,20 @@ class NotificationHandler:
         self.twilio_handler = TwilioHandler()
         self.discord_handler = DiscordHandler()
         self.telegram_handler = TelegramHandler()
+        self.slack_handler = SlackHandler()
+        log.info(f"Enabled Handlers: {self.get_enabled_handlers()}")
+
+    def get_enabled_handlers(self):
+        enabled_handlers = []
+        if self.twilio_handler.enabled:
+            enabled_handlers.append("Twilio")
+        if self.discord_handler.enabled:
+            enabled_handlers.append("Discord")
+        if self.telegram_handler.enabled:
+            enabled_handlers.append("Telegram")
+        if self.slack_handler.enabled:
+            enabled_handlers.append("Slack")
+        return enabled_handlers
 
     def send_notification(self, message):
         if self.twilio_handler.enabled:
@@ -18,3 +33,5 @@ class NotificationHandler:
             self.discord_handler.send(message)
         if self.telegram_handler.enabled:
             self.telegram_handler.send(message)
+        if self.slack_handler.enabled:
+            self.slack_handler.send(message)

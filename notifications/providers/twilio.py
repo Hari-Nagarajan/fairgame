@@ -14,7 +14,7 @@ class TwilioHandler:
     enabled = False
 
     def __init__(self):
-        log.info("Initializing twilio handler")
+        log.debug("Initializing twilio handler")
 
         if path.exists(TWILIO_CONFIG_PATH):
             with open(TWILIO_CONFIG_PATH) as json_file:
@@ -31,7 +31,7 @@ class TwilioHandler:
                         )
                         self.enabled = False
         else:
-            log.info("No Twilio creds found.")
+            log.debug("No Twilio creds found.")
 
     def has_valid_creds(self):
         if all(item in self.config.keys() for item in TWILIO_CONFIG_KEYS):

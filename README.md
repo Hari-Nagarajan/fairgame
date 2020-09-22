@@ -112,11 +112,24 @@ If this file exists and the credentials are valid, the bot will make a purchase 
   "NVIDIA_LOGIN": "fuckthesc@lpers.com",        # Your NVIDIA Store login
   "NVIDIA_PASSWORD": "12345",                   # Your NVIDIA Store password
   "FULL_AUTOBUY":false,                         # FALSE : Fill your infos but dont click on the last button / TRUE : Buy the card
-  "CREDITCARD_NUMBER":"0000 0000 0000 0000",    # CC number
-  "CREDITCARD_EXP":"09/2020",                   # CC expiration date
-  "CREDITCARD_SECURITY_CODE":"101",             # CCV code
-  "AUTOBUY_COUNTRY_SELECT":""                   # Leave it like that except if you have additional prompts in the Nvidia Store (like in UK)
+  "CVV":"101",             # CCV code
+  "BYPASS_ADDRESS_SUGGESTION":false             # Selects the address you entered not the one suggested
 }
+```
+
+![Nvidia Workflow Diagram](nvidia-workflow.png)
+
+
+## Best Buy
+This is fairly basic right now. Just login to the best buy website in your default browser and then run the command as follows:
+
+```
+app.py bestbuy --sku [SKU]
+```
+
+Example:
+```
+app.py bestbuy --sku 6429440
 ```
 
 ### Notifications
