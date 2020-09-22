@@ -11,3 +11,5 @@ geckodriver.log
 .profile
 *.log
 /evga_config.json
+*.pkl
+.vscode/
