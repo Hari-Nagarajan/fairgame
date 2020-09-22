@@ -132,6 +132,28 @@ Example:
 app.py bestbuy --sku 6429440
 ```
 
+## EVGA
+Make a copy of `evga_config.template_json` to `evga_config.json`:
+```
+{
+  "username": "hari@",
+  "password": "password!",
+  "credit_card" : {
+            "name": "Hari ",
+            "number": "234234",
+            "cvv": "123",
+            "expiration_month": "12",
+            "expiration_year": "2023"
+        }
+}
+```
+
+Test run command (Uses old gpu list and then stops before finishing the order)
+`python app.py evga --test`
+
+Autobuy command:
+`python app.py evga`
+
 ### Notifications
 This uses a notifications handler that will support multiple notification channels. 
 
