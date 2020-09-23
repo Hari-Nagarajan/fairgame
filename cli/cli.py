@@ -67,7 +67,12 @@ def nvidia(gpu, locale, test, headless):
 @click.option("--no-image", is_flag=True)
 @click.option("--headless", is_flag=True)
 def amazon(
-    amazon_email, amazon_password, amazon_item_url, amazon_price_limit, no_image, headless
+    amazon_email,
+    amazon_password,
+    amazon_item_url,
+    amazon_price_limit,
+    no_image,
+    headless,
 ):
     os.environ.setdefault("amazon_email", amazon_email)
     os.environ.setdefault("amazon_password", amazon_password)
@@ -77,7 +82,9 @@ def amazon(
     if no_image:
         selenium_utils.no_amazon_image()
 
-    amzn_obj = Amazon(username=amazon_email, password=amazon_password, headless=headless)
+    amzn_obj = Amazon(
+        username=amazon_email, password=amazon_password, headless=headless
+    )
     amzn_obj.run_item(item_url=amazon_item_url, price_limit=amazon_price_limit)
 
     if no_image:

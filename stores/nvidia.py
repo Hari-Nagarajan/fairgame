@@ -249,9 +249,7 @@ class NvidiaBuyer:
         log.info("Opening Webdriver")
         if headless:
             enable_headless()
-        self.driver = webdriver.Chrome(
-            executable_path=binary_path, options=options
-        )
+        self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
         self.sign_in()
         selenium_utils.add_cookies_to_session_from_driver(self.driver, self.session)
         log.info("Adding driver cookies to session")
@@ -423,7 +421,7 @@ class NvidiaBuyer:
         selenium_utils.wait_for_page(
             self.driver, PAGE_TITLES_BY_LOCALE[self.locale]["verify_order"], 5
         )
-        
+
         if not self.test:
             log.info("F this captcha lmao. Submitting cart.")
             self.submit_cart()

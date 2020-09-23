@@ -21,9 +21,7 @@ class Amazon:
         self.notification_handler = NotificationHandler()
         if headless:
             enable_headless()
-        self.driver = webdriver.Chrome(
-            executable_path=binary_path, options=options
-        )
+        self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
         self.wait = WebDriverWait(self.driver, 10)
         self.username = username
         self.password = password

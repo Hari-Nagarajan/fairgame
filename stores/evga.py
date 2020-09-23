@@ -27,9 +27,7 @@ class Evga:
     def __init__(self, headless=False):
         if headless:
             enable_headless()
-        self.driver = webdriver.Chrome(
-            executable_path=binary_path, options=options
-        )
+        self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
         self.credit_card = {}
         try:
             if path.exists(CONFIG_PATH):
