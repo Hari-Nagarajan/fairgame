@@ -26,7 +26,7 @@ class Amazon:
         self.username = username
         self.password = password
         self.login()
-        time.sleep(3)
+        time.sleep(30)
 
     def login(self):
         self.driver.get(LOGIN_URL)
