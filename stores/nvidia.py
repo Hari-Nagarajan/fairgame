@@ -223,7 +223,7 @@ class NvidiaBuyer:
                     self.nvidia_password = self.config["NVIDIA_PASSWORD"]
                     self.auto_buy_enabled = self.config["FULL_AUTOBUY"]
                     self.cvv = self.config.get("CVV")
-                    self.interval=int(self.config.get("INTERVAL", 5))
+                    self.interval = int(self.config.get("INTERVAL", 5))
                 else:
                     raise InvalidAutoBuyConfigException(self.config)
         else:
@@ -246,8 +246,6 @@ class NvidiaBuyer:
         self.notification_handler = NotificationHandler()
 
         log.info("Opening Webdriver")
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])
         self.driver = webdriver.Chrome(
             executable_path=binary_path, options=options, chrome_options=chrome_options
         )
@@ -336,7 +334,7 @@ class NvidiaBuyer:
                 ]
                 concurrent.futures.wait(product_futures)
                 for fut in product_futures:
-                    log.info(fut.result())
+                    log.debug(f"Future Result: {fut.result()}")
         except ProductIDChangedException as ex:
             log.warning("Product IDs changed.")
             self.product_ids = set([])
@@ -345,7 +343,9 @@ class NvidiaBuyer:
 
     def buy(self, product_id):
         try:
-            log.info(f"Checking stock for {product_id} at {self.interval} second intervals.")
+            log.info(
+                f"Checking stock for {product_id} at {self.interval} second intervals."
+            )
             while not self.add_to_cart(product_id) and self.enabled:
                 self.attempt = self.attempt + 1
                 time_delta = str(datetime.now() - self.started_at).split(".")[0]
@@ -355,6 +355,7 @@ class NvidiaBuyer:
                     sleep(self.interval)
             if self.enabled:
                 self.apply_shopper_details()
+                self.apply_shipping()
                 if self.auto_buy_enabled:
                     self.notification_handler.send_notification(
                         f" {self.gpu_long_name} with product ID: {product_id} available!"
@@ -533,6 +534,25 @@ class NvidiaBuyer:
             log.info("Error applying shopper details")
             log.debug(json.dumps(response.json(), indent=1))
 
+    def apply_shipping(self):
+        log.info("Apply shipping")
+        DIGITAL_RIVER_UPDATE_SHIPPING_API_URL = "https://api.digitalriver.com/v1/shoppers/me/carts/active/apply-shipping-option"
+        shipping_id = "6186200"
+        params = {
+            "apiKey": DIGITAL_RIVER_API_KEY,
+            "token": self.access_token,
+            "format": "json",
+            "shippingOptionId": shipping_id,
+        }
+
+        response = self.session.post(
+            DIGITAL_RIVER_UPDATE_SHIPPING_API_URL,
+            headers=DEFAULT_HEADERS,
+            params=params,
+        )
+        log.debug(f"apply_shipping response: {response.status_code}")
+        log.debug(f"apply_shipping response: {response.text}")
+
     def submit_cart(self):
         params = {
             "apiKey": DIGITAL_RIVER_API_KEY,
@@ -552,6 +572,8 @@ class NvidiaBuyer:
         log.debug(response.json())
         if response.status_code == 200:
             log.info("Success submit_cart")
+        else:
+            log.info(response.json())
 
     def check_if_locale_corresponds(self, product_id):
         special_locales = [
