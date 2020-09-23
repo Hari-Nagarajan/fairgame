@@ -1,6 +1,6 @@
 # nvidia-bot
 
-[Installation](#Installation) | [Installation](#Installation) | [Usage](#Usage) | [Discord](https://discord.gg/hQeUbRv)  | [Troubleshooting](#Troubleshooting)
+[Installation](#Installation) | [Raspberry Pi Installation and Setup](#Raspberry-Pi-Setup) | [Installation](#Installation) | [Usage](#Usage) | [Discord](https://discord.gg/hQeUbRv)  | [Troubleshooting](#Troubleshooting)
 
 ## Why???
 
@@ -11,6 +11,8 @@ being resold for nearly $1000. My take on this is that if I release a bot that a
 that scalpers can buy goes down and normal consumers can buy items for MSRP. If everyone is botting, then no one is botting. 
 
 ## Installation
+
+For Raspberry Pi installation and setup, go [here](#Raspberry-Pi-Setup).
 
 This project uses [Pipenv](https://pypi.org/project/pipenv/) to manage dependencies. Hop in my [Discord](https://discord.gg/hQeUbRv) if you have ideas, need help or just want to tell me about how you got your new 3080. [TerryFrench](https://github.com/TerryFrench) has also created a youtube video detailing how to get this project running on Windows 10 as well. Huge thanks to him. 
 
@@ -234,3 +236,27 @@ chrome_options.binary_location="C:\Users\%USERNAME%\AppData\Local\Google\Chrome\
 **Error: ```selenium.common.exceptions.SessionNotCreatedException: Message: session not created: This version of ChromeDriver only supports Chrome version 85```**
 
 You are not running the proper version of Chrome this requires. As of this update, the current version is Chrome 85. Check your version by going to ```chrome://version/``` in your browser. We are going to be targeting the current stable build of chrome. If you are behind, please update, if you are on a beta or canary branch, you'll have to build your own version of chromedriver-py.
+
+## Raspberry-Pi-Setup
+
+Prereqs and Setup
+```
+sudo apt update
+sudo apt upgrade
+sudo apt install chromium-chromedriver
+git clone https://github.com/Hari-Nagarajan/nvidia-bot
+cd nvidia-bot/
+pip3 install pipenv
+pipenv shell 
+pipenv install
+```
+
+Modify `/home/USERNAME/.local/share/virtualenvs/nvidia-bot-RANDOMCHARS/lib/python3.7/site-packages/selenium/webdriver/common/service.py`
+Edit line 38 from `self.path = executable` to `self.path = "chromedriver"`
+
+Back in Terminal...
+```
+python app.py
+```
+
+Follow the regular steps to configure the bot as needed.
