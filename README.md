@@ -37,6 +37,16 @@ Commands:
   nvidia
 ```
 
+## Current Functionality
+
+| **Website** | **Auto Checkout** | **Open Cart Link** | **Test flag** |
+|:---:|:---:|:---:|:---:|
+| nvidia.com |`✔`|`✔`| |
+| amazon.com |`✔`| | |
+| bestbuy.com | |`✔`| |
+| evga.com |`✔` | |`✔`|
+
+
 ## Usage
 
 Ok now we have a basic GUI. GUIs aren't my strong suit, but pretty much the top box is the settings for amazon and
