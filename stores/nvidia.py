@@ -52,6 +52,7 @@ NVIDIA_CART_URL = "https://store.nvidia.com/store/nvidia/en_US/buy/productID.{pr
 NVIDIA_TOKEN_URL = "https://store.nvidia.com/store/nvidia/SessionToken"
 
 GPU_DISPLAY_NAMES = {
+    "Black_shirt": "NVIDIA Logo Graphic Tee - Black",
     "2060S": "NVIDIA GEFORCE RTX 2060 SUPER",
     "3080": "NVIDIA GEFORCE RTX 3080",
     "3090": "NVIDIA GEFORCE RTX 3090",
@@ -222,6 +223,7 @@ class NvidiaBuyer:
                     self.nvidia_password = self.config["NVIDIA_PASSWORD"]
                     self.auto_buy_enabled = self.config["FULL_AUTOBUY"]
                     self.cvv = self.config.get("CVV")
+                    self.interval=int(self.config.get("INTERVAL", 5))
                 else:
                     raise InvalidAutoBuyConfigException(self.config)
         else:
@@ -341,16 +343,16 @@ class NvidiaBuyer:
             self.get_product_ids()
             self.run_items()
 
-    def buy(self, product_id, delay=5):
+    def buy(self, product_id):
         try:
-            log.info(f"Checking stock for {product_id} at {delay} second intervals.")
+            log.info(f"Checking stock for {product_id} at {self.interval} second intervals.")
             while not self.add_to_cart(product_id) and self.enabled:
                 self.attempt = self.attempt + 1
                 time_delta = str(datetime.now() - self.started_at).split(".")[0]
                 with Spinner.get(
                     f"Still working (attempt {self.attempt}, have been running for {time_delta})..."
                 ) as s:
-                    sleep(delay)
+                    sleep(self.interval)
             if self.enabled:
                 self.apply_shopper_details()
                 if self.auto_buy_enabled:
@@ -479,8 +481,8 @@ class NvidiaBuyer:
                 log.debug("item not in stock")
                 return False
         except Exception as ex:
-            log.warning(str(ex))
-            log.warning("The connection has been reset.")
+            log.debug(str(ex))
+            log.debug("The connection has been reset.")
             return False
 
     def get_ext_ip(self):
