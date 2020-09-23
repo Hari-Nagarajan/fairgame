@@ -105,7 +105,6 @@ class Evga:
         selector = '//a[@id="LFrame_btnAddToCart"]'
         associate_code = ""
         if test:
-            model_name = "test"
             url = "https://www.evga.com/products/product.aspx?pn=08G-P4-3289-KR"
             self.driver.get(url + associate_code)
             selenium_utils.wait_for_page(
@@ -163,7 +162,7 @@ class Evga:
 
         # send notification
         self.notification_handler.send_notification(
-            f"EVGA BOT: " + model_name + " in stock! Attempting to place order..."
+            f"EVGA BOT: In stock! Attempting to place order..."
         )
 
         #  Add to cart
