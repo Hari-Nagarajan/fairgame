@@ -28,8 +28,9 @@ def main():
     prompt="What locale shall we use?",
     cls=QuestionaryOption,
 )
-def nvidia(gpu, locale):
-    nv = NvidiaBuyer(gpu, locale)
+@click.option("--test", is_flag=True)
+def nvidia(gpu, locale, test):
+    nv = NvidiaBuyer(gpu, locale, test)
     nv.run_items()
 
 
