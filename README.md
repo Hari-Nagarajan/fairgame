@@ -1,6 +1,6 @@
 # nvidia-bot
 
-[Installation](#Installation) | [Installation](#Installation) | [Usage](#Usage) | [Discord](https://discord.gg/hQeUbRv)  | [Troubleshooting](#Troubleshooting)
+[Installation](#Installation) | [Usage](#Usage) | [Discord](https://discord.gg/hQeUbRv)  | [Troubleshooting](#Troubleshooting)
 
 ## Why???
 
@@ -11,6 +11,8 @@ being resold for nearly $1000. My take on this is that if I release a bot that a
 that scalpers can buy goes down and normal consumers can buy items for MSRP. If everyone is botting, then no one is botting. 
 
 ## Installation
+
+For Raspberry Pi installation and setup, go [here](#Raspberry-Pi-Setup).
 
 This project uses [Pipenv](https://pypi.org/project/pipenv/) to manage dependencies. Hop in my [Discord](https://discord.gg/hQeUbRv) if you have ideas, need help or just want to tell me about how you got your new 3080. [TerryFrench](https://github.com/TerryFrench) has also created a youtube video detailing how to get this project running on Windows 10 as well. Huge thanks to him. 
 
@@ -131,12 +133,12 @@ If this file exists and the credentials are valid, the bot will make a purchase 
 This is fairly basic right now. Just login to the best buy website in your default browser and then run the command as follows:
 
 ```
-app.py bestbuy --sku [SKU]
+python app.py bestbuy --sku [SKU]
 ```
 
 Example:
 ```
-app.py bestbuy --sku 6429440
+python app.py bestbuy --sku 6429440
 ```
 
 ## EVGA
@@ -234,3 +236,33 @@ chrome_options.binary_location="C:\Users\%USERNAME%\AppData\Local\Google\Chrome\
 **Error: ```selenium.common.exceptions.SessionNotCreatedException: Message: session not created: This version of ChromeDriver only supports Chrome version 85```**
 
 You are not running the proper version of Chrome this requires. As of this update, the current version is Chrome 85. Check your version by going to ```chrome://version/``` in your browser. We are going to be targeting the current stable build of chrome. If you are behind, please update, if you are on a beta or canary branch, you'll have to build your own version of chromedriver-py.
+
+## Raspberry-Pi-Setup
+
+1. Prereqs and Setup
+```
+sudo apt update
+sudo apt upgrade
+sudo apt install chromium-chromedriver
+git clone https://github.com/Hari-Nagarajan/nvidia-bot
+cd nvidia-bot/
+pip3 install pipenv
+export PATH=$PATH:/home/<YOURUSERNAME>/.local/bin
+pipenv shell 
+pipenv install
+```
+2. Leave this Terminal window open.
+
+3. Open the following file in a text editor: 
+```
+/home/<YOURUSERNAME>/.local/share/virtualenvs/nvidia-bot-<RANDOMCHARS>/lib/python3.7/site-packages/selenium/webdriver/common/service.py
+```
+4. Edit line 38 from `self.path = executable` to `self.path = "chromedriver"`, then save and close the file.
+
+
+5. Back in Terminal...
+```
+python app.py
+```
+
+6. Follow [Usage](#Usage) to configure the bot as needed.
