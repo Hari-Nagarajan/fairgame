@@ -27,8 +27,8 @@ class Evga:
             executable_path=binary_path, options=options, chrome_options=chrome_options
         )
         self.credit_card = {}
-        self.card_pn = '';
-        self.card_series = '';
+        self.card_pn = ""
+        self.card_series = ""
         try:
             if path.exists(CONFIG_PATH):
                 with open(CONFIG_PATH) as json_file:
@@ -113,14 +113,16 @@ class Evga:
             )
         else:
             self.driver.get(
-                "https://www.evga.com/products/productlist.aspx?type=0&family=GeForce+30+Series+Family&chipset=RTX+" + self.card_series
+                "https://www.evga.com/products/productlist.aspx?type=0&family=GeForce+30+Series+Family&chipset=RTX+"
+                + self.card_series
             )
             selenium_utils.wait_for_page(
                 self.driver,
-                "EVGA - Products - Graphics - GeForce 30 Series Family - RTX " + self.card_series,
+                "EVGA - Products - Graphics - GeForce 30 Series Family - RTX "
+                + self.card_series,
             )
 
-        #check for card
+        # check for card
         log.info("On GPU list Page")
         card_btn = self.driver.find_elements_by_xpath(
             "//a[@href='/products/product.aspx?pn=" + self.card_pn + "']"
@@ -134,8 +136,6 @@ class Evga:
             sleep(delay)
 
         card_btn[0].click()
-
-
 
         #  Check for stock
         log.info("On GPU Page")
