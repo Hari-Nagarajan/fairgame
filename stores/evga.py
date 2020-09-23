@@ -9,8 +9,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
 
-import pickle
-
 from utils import selenium_utils
 from utils.logger import log
 from utils.selenium_utils import options, chrome_options
@@ -48,7 +46,7 @@ class Evga:
 
     def login(self, username, password):
         """
-        We're just going to attempt to load cookies, else enter the user info and let the user handle the captcha
+        We're just going to enter the user info and let the user handle the captcha
         :param username:
         :param password:
         :return:
@@ -63,72 +61,51 @@ class Evga:
             "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"
         )
 
-        if path.isfile("evga-cookies.pkl"):  # check for cookies file
-            self.driver.get("https://www.evga.com")
-            selenium_utils.wait_for_page(
-                self.driver, "EVGA - Intelligent Innovation - Official Website", 300
-            )
-            cookies = pickle.load(open("evga-cookies.pkl", "rb"))
-            for cookie in cookies:
-                self.driver.add_cookie(cookie)
+        self.driver.get(LOGIN_URL)
+        selenium_utils.wait_for_page(self.driver, "EVGA - Intelligent Innovation")
 
-        self.driver.get("https://www.evga.com")
+        selenium_utils.field_send_keys(self.driver, "evga_login", username)
+        selenium_utils.field_send_keys(self.driver, "password", password)
+
+        log.info("Go do the captcha and log in")
+
         selenium_utils.wait_for_page(
             self.driver, "EVGA - Intelligent Innovation - Official Website", 300
         )
-        if (
-            len(self.driver.find_elements_by_id("svg-login")) > 0
-        ):  # cookies did not provide logged in state
-            self.driver.get(LOGIN_URL)
-            selenium_utils.wait_for_page(self.driver, "EVGA - Intelligent Innovation")
-
-            selenium_utils.field_send_keys(self.driver, "evga_login", username)
-            selenium_utils.field_send_keys(self.driver, "password", password)
-
-            log.info("Go do the captcha and log in")
-
-            selenium_utils.wait_for_page(
-                self.driver, "EVGA - Intelligent Innovation - Official Website", 300
-            )
-            pickle.dump(
-                self.driver.get_cookies(), open("evga-cookies.pkl", "wb")
-            )  # save cookies
-
         log.info("Logged in!")
 
     def buy(self, delay=5, test=False):
         if test:
-            self.driver.get(
-                "https://www.evga.com/products/ProductList.aspx?type=0&family=GeForce+16+Series+Family&chipset=GTX+1660"
-            )
-            selenium_utils.wait_for_page(
-                self.driver,
-                "EVGA - Products - Graphics - GeForce 16 Series Family - GTX 1660",
-            )
+            self.driver.get("https://www.evga.com/products/product.aspx?pn=10G-P5-3897-KR&associatecode=2QME1VF65K9ZY8B")
+            selenium_utils.wait_for_page(self.driver, "EVGA - Products - EVGA GeForce RTX 3080 FTW3 ULTRA GAMING, 10G-P5-3897-KR, 10GB GDDR6X, iCX3 Technology, ARGB LED, Metal Backplate - 10G-P5-3897-KR")
         else:
             self.driver.get(
-                "https://www.evga.com/products/productlist.aspx?type=0&family=GeForce+30+Series+Family&chipset=RTX+3080"
+                "https://www.evga.com/products/product.aspx?pn=10G-P5-3897-KR&associatecode=2QME1VF65K9ZY8B"
             )
             selenium_utils.wait_for_page(
                 self.driver,
-                "EVGA - Products - Graphics - GeForce 30 Series Family - RTX 3080",
+                "EVGA - Products - EVGA GeForce RTX 3080 FTW3 ULTRA GAMING, 10G-P5-3897-KR, 10GB GDDR6X, iCX3 Technology, ARGB LED, Metal Backplate - 10G-P5-3897-KR",
             )
 
-        #  Check for stock
+        #Check for stock
         log.info("On GPU Page")
         atc_buttons = self.driver.find_elements_by_xpath(
             '//input[@class="btnBigAddCart"]'
         )
         while not atc_buttons:
-            log.debug("Refreshing page for GPU")
-            self.driver.refresh()
+            log.info("Refreshing GPU and checking for add to cart button")
+            # self.driver.refresh()
+            self.driver.get("https://www.evga.com/products/product.aspx?pn=10G-P5-3897-KR&associatecode=2QME1VF65K9ZY8B")
             atc_buttons = self.driver.find_elements_by_xpath(
                 '//input[@class="btnBigAddCart"]'
             )
-            sleep(delay)
+            sleep(3)
 
-        #  Add to cart
-        atc_buttons[0].click()
+        # #  Add to cart
+        # atc_buttons[0].click() 
+        selenium_utils.button_click_using_xpath(
+            self.driver, '//*[@id="LFrame_btnAddToCart"]'
+        ) 		
 
         #  Go to checkout
         selenium_utils.wait_for_page(self.driver, "EVGA - Checkout")
@@ -145,7 +122,6 @@ class Evga:
         selenium_utils.wait_for_page(self.driver, "EVGA - Checkout - Billing Options")
 
         log.info("Ensure that we are paying with credit card")
-        sleep(1)  # Fix this.
         WebDriverWait(self.driver, 10).until(
             EC.element_to_be_clickable((By.XPATH, './/input[@value="rdoCreditCard"]'))
         ).click()
@@ -174,6 +150,7 @@ class Evga:
         Select(self.driver.find_element_by_id("ctl00_LFrame_ddlYear")).select_by_value(
             self.credit_card["expiration_year"]
         )
+		
         WebDriverWait(self.driver, 10).until(
             EC.element_to_be_clickable(
                 (
@@ -196,5 +173,6 @@ class Evga:
             WebDriverWait(self.driver, 10).until(
                 EC.element_to_be_clickable((By.ID, "ctl00_LFrame_btncontinue"))
             ).click()
-
+        selenium_utils.wait_for_page(self.driver, "EVGA - Checkout - Order Successful")
         log.info("Finalized Order!")
+		
