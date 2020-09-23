@@ -4,7 +4,6 @@ from time import sleep
 
 from chromedriver_py import binary_path  # this will get you the path variable
 from selenium import webdriver
-from selenium.webdriver import ChromeOptions
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 
@@ -22,6 +21,7 @@ from requests.packages.urllib3.util.retry import Retry
 from notifications.notifications import NotificationHandler
 from utils.json_utils import find_values
 from utils.logger import log
+from utils.selenium_utils import enable_headless
 
 BEST_BUY_PDP_URL = "https://api.bestbuy.com/click/5592e2b895800000/{sku}/pdp"
 BEST_BUY_CART_URL = "https://api.bestbuy.com/click/5592e2b895800000/{sku}/cart"
@@ -39,16 +39,15 @@ DEFAULT_HEADERS = {
 
 options = Options()
 options.page_load_strategy = "eager"
-chrome_options = ChromeOptions()
-chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
-chrome_options.add_experimental_option("useAutomationExtension", False)
+options.add_experimental_option("excludeSwitches", ["enable-automation"])
+options.add_experimental_option("useAutomationExtension", False)
 prefs = {"profile.managed_default_content_settings.images": 2}
-chrome_options.add_experimental_option("prefs", prefs)
-chrome_options.add_argument("user-data-dir=.profile")
+options.add_experimental_option("prefs", prefs)
+options.add_argument("user-data-dir=.profile")
 
 
 class BestBuyHandler:
-    def __init__(self, sku_id):
+    def __init__(self, sku_id, headless=False):
         self.notification_handler = NotificationHandler()
         self.sku_id = sku_id
         self.session = requests.Session()
@@ -78,18 +77,15 @@ class BestBuyHandler:
 
         if self.auto_buy:
             log.info("Loading headless driver.")
-            # options.add_argument('headless')  # This messes up the cookies for some reason.
+            if headless:
+                enable_headless()  # TODO - check if this still messes up the cookies.
             options.add_argument(
-                "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
-            )
-            chrome_options.add_argument(
                 "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
             )
 
             self.driver = webdriver.Chrome(
                 executable_path=binary_path,
                 options=options,
-                chrome_options=chrome_options,
             )
             log.info("Loading https://www.bestbuy.com.")
             self.login()
