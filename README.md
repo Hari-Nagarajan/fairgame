@@ -114,7 +114,7 @@ set amazon_price_limit=1000
 - Call Digitalriver API to check if the GPU is in stock until it is in stock
 - Will open a window in your default browser with the GPU in your cart when it is stock.
 
-**Nvidia Flags**
+**Nvidia flags**
 ```
 --test : runs a test of the checkout process, without actually making the purchase
 ```
