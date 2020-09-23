@@ -181,7 +181,11 @@ Test run command (Uses old gpu list and then stops before finishing the order)
 `python app.py evga --test`
 
 Autobuy command:
-`python app.py evga`
+`python app.py evga --model [indentifier]`
+
+These are the available identifiers: xc3, xc3black, xc3ultra, ftw3, ftw3ultra
+
+If model is not specified, it will select the first available card on the page.
 
 ### Notifications
 This uses a notifications handler that will support multiple notification channels. 
