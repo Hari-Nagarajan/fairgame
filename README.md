@@ -1,6 +1,6 @@
 # nvidia-bot
 
-[Installation](#Installation) | [Raspberry Pi Installation and Setup](#Raspberry-Pi-Setup) | [Installation](#Installation) | [Usage](#Usage) | [Discord](https://discord.gg/hQeUbRv)  | [Troubleshooting](#Troubleshooting)
+[Installation](#Installation) | [Usage](#Usage) | [Discord](https://discord.gg/hQeUbRv)  | [Troubleshooting](#Troubleshooting)
 
 ## Why???
 
