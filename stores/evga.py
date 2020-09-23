@@ -143,6 +143,7 @@ class Evga:
                 self.driver.get(models[model][0] + associate_code)
                 selenium_utils.wait_for_page(self.driver, models[model][1])
             else:
+                model = "any"
                 selector = '//input[@class="btnBigAddCart"]'
                 self.driver.get(models["any"][0] + associate_code)
                 selenium_utils.wait_for_page(self.driver, models["any"][1])
