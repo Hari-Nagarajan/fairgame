@@ -1,9 +1,5 @@
 # nvidia-bot
 
-[Installation](#Installation) | [Installation](#Installation) | [Usage](#Usage) | [Discord](https://discord.gg/hQeUbRv)  | [Troubleshooting](#Troubleshooting)
-
-## Why???
-
 [Installation](#Installation) | [Usage](#Usage) | [Discord](https://discord.gg/hQeUbRv)  | [Troubleshooting](#Troubleshooting)
 
 ## Why???
