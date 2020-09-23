@@ -142,7 +142,7 @@ class Evga:
             selector
         )
         while not atc_buttons:
-            if self.driver.current_url == models[model][0]:
+            if self.driver.current_url == models[model][0] + associate_code:
                 log.debug("Refreshing page for " + model)
                 self.driver.refresh()
             else:
