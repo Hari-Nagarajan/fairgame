@@ -131,12 +131,12 @@ If this file exists and the credentials are valid, the bot will make a purchase 
 This is fairly basic right now. Just login to the best buy website in your default browser and then run the command as follows:
 
 ```
-app.py bestbuy --sku [SKU]
+python app.py bestbuy --sku [SKU]
 ```
 
 Example:
 ```
-app.py bestbuy --sku 6429440
+python app.py bestbuy --sku 6429440
 ```
 
 ## EVGA
