@@ -247,6 +247,7 @@ sudo apt install chromium-chromedriver
 git clone https://github.com/Hari-Nagarajan/nvidia-bot
 cd nvidia-bot/
 pip3 install pipenv
+export PATH=$PATH:/home/<YOURUSERNAME>/.local/bin
 pipenv shell 
 pipenv install
 ```
@@ -254,7 +255,7 @@ pipenv install
 
 3. Open the following file in a text editor: 
 ```
-/home/USERNAME/.local/share/virtualenvs/nvidia-bot-RANDOMCHARS/lib/python3.7/site-packages/selenium/webdriver/common/service.py
+/home/<YOURUSERNAME>/.local/share/virtualenvs/nvidia-bot-<RANDOMCHARS>/lib/python3.7/site-packages/selenium/webdriver/common/service.py
 ```
 4. Edit line 38 from `self.path = executable` to `self.path = "chromedriver"`, then save and close the file.
 
