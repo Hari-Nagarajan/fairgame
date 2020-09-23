@@ -19,8 +19,8 @@ from utils.selenium_utils import options, chrome_options
 LOGIN_URL = "https://secure.evga.com/us/login.asp"
 CONFIG_PATH = "evga_config.json"
 
-prefs = {"profile.managed_default_content_settings.images": 2}
-chrome_options.add_experimental_option("prefs", prefs)
+#prefs = {"profile.managed_default_content_settings.images": 2}
+#chrome_options.add_experimental_option("prefs", prefs)
 
 class Evga:
     def __init__(self, debug=False):
@@ -98,97 +98,56 @@ class Evga:
 
     def buy(self, delay=5, test=False, model=""):
         selector = '//a[@id="LFrame_btnAddToCart"]'
+        associate_code = '&associatecode=2QME1VF65K9ZY8B'
         if test:
             model_name = "test"
             url = "https://www.evga.com/products/product.aspx?pn=08G-P4-3289-KR"
             self.driver.get(
-                url
+                url + associate_code
             )
             selenium_utils.wait_for_page(
                 self.driver,
                 "EVGA - Products - EVGA GeForce RTX 2080 SUPER FTW3 HYDRO COPPER GAMING, 08G-P4-3289-KR, 8GB GDDR6, RGB LED, iCX2 Technology, Metal Backplate - 08G-P4-3289-KR",
             )
         else:
-            if model == 'ftw3':
-                model_name = "FTW3 GAMING"
-                url = "https://www.evga.com/products/product.aspx?pn=10G-P5-3895-KR"
+            models = {
+                "ftw3": [ "https://www.evga.com/products/product.aspx?pn=10G-P5-3895-KR", "EVGA - Products - EVGA GeForce RTX 3080 FTW3 GAMING, 10G-P5-3895-KR, 10GB GDDR6X, iCX3 Technology, ARGB LED, Metal Backplate - 10G-P5-3895-KR" ],
+                "xc3": [ "https://www.evga.com/products/product.aspx?pn=10G-P5-3883-KR", "EVGA - Products - EVGA GeForce RTX 3080 XC3 GAMING, 10G-P5-3883-KR, 10GB GDDR6X, iCX3 Cooling, ARGB LED, Metal Backplate - 10G-P5-3883-KR" ],
+                "xc3ultra": [ "https://www.evga.com/products/product.aspx?pn=10G-P5-3885-KR", "EVGA - Products - EVGA GeForce RTX 3080 XC3 ULTRA GAMING, 10G-P5-3885-KR, 10GB GDDR6X, iCX3 Cooling, ARGB LED, Metal Backplate - 10G-P5-3885-KR" ],
+                "xc3black": [ "https://www.evga.com/products/product.aspx?pn=10G-P5-3881-KR",  "EVGA - Products - EVGA GeForce RTX 3080 XC3 BLACK GAMING, 10G-P5-3881-KR, 10GB GDDR6X, iCX3 Cooling, ARGB LED - 10G-P5-3881-KR"],
+                "ftw3ultra": [ "https://www.evga.com/products/product.aspx?pn=10G-P5-3897-KR", "EVGA - Products - EVGA GeForce RTX 3080 FTW3 ULTRA GAMING, 10G-P5-3897-KR, 10GB GDDR6X, iCX3 Technology, ARGB LED, Metal Backplate - 10G-P5-3897-KR"],
+                "any": [ "https://www.evga.com/products/productlist.aspx?type=0&family=GeForce+30+Series+Family&chipset=RTX+3080", "EVGA - Products - Graphics - GeForce 30 Series Family - RTX 3080" ]
+            }
+            if model:
                 self.driver.get(
-                    url
+                    models[model][0] + associate_code
                 )
                 selenium_utils.wait_for_page(
                     self.driver,
-                    "EVGA - Products - EVGA GeForce RTX 3080 FTW3 GAMING, 10G-P5-3895-KR, 10GB GDDR6X, iCX3 Technology, ARGB LED, Metal Backplate - 10G-P5-3895-KR",
-                )
-            elif model == 'xc3':
-                model_name = "XC3 GAMING"
-                url = "https://www.evga.com/products/product.aspx?pn=10G-P5-3883-KR"
-                self.driver.get(
-                    url
-                )
-                selenium_utils.wait_for_page(
-                    self.driver,
-                    "EVGA - Products - EVGA GeForce RTX 3080 XC3 GAMING, 10G-P5-3883-KR, 10GB GDDR6X, iCX3 Cooling, ARGB LED, Metal Backplate - 10G-P5-3883-KR",
-                )
-            elif model == 'xc3ultra':
-                model_name = "XC3 ULTRA GAMING"
-                url = "https://www.evga.com/products/product.aspx?pn=10G-P5-3885-KR"
-                self.driver.get(
-                    url
-                )
-                selenium_utils.wait_for_page(
-                    self.driver,
-                    "EVGA - Products - EVGA GeForce RTX 3080 XC3 ULTRA GAMING, 10G-P5-3885-KR, 10GB GDDR6X, iCX3 Cooling, ARGB LED, Metal Backplate - 10G-P5-3885-KR",
-                )
-            elif model == 'xc3black':
-                model_name = "XC3 BLACK GAMING"
-                url = "https://www.evga.com/products/product.aspx?pn=10G-P5-3881-KR"
-                self.driver.get(
-                    url
-                )
-                selenium_utils.wait_for_page(
-                    self.driver,
-                    "EVGA - Products - EVGA GeForce RTX 3080 XC3 GAMING, 10G-P5-3883-KR, 10GB GDDR6X, iCX3 Cooling, ARGB LED, Metal Backplate - 10G-P5-3883-KR",
-                )
-            elif model == 'ftw3ultra':
-                model_name = "FTW3 ULTRA GAMING"
-                url = "https://www.evga.com/products/product.aspx?pn=10G-P5-3897-KR"
-                self.driver.get(
-                    url
-                )
-                selenium_utils.wait_for_page(
-                    self.driver,
-                    "EVGA - Products - EVGA GeForce RTX 3080 XC3 ULTRA GAMING, 10G-P5-3885-KR, 10GB GDDR6X, iCX3 Cooling, ARGB LED, Metal Backplate - 10G-P5-3885-KR",
+                    models[model][1]
                 )
             else:
-                model_name = "ANY MODEL"
-                url = "https://www.evga.com/products/productlist.aspx?type=0&family=GeForce+30+Series+Family&chipset=RTX+3080"
                 selector = '//input[@class="btnBigAddCart"]'
                 self.driver.get(
-                    url
+                    models["any"][0] + associate_code
                 )
                 selenium_utils.wait_for_page(
                     self.driver,
-                    "EVGA - Products - Graphics - GeForce 30 Series Family - RTX 3080",
+                    models["any"][1]
                 )
 
         #  Check for stock
         log.info("On GPU Page")
-        #atc_buttons = self.driver.find_elements_by_xpath(
-        #    '//input[@class="btnBigAddCart"]'
-        #)
         atc_buttons = self.driver.find_elements_by_xpath(
             selector
         )
         while not atc_buttons:
-            if self.driver.current_url == url:
-                log.debug("Refreshing page for " + model_name)
+            if self.driver.current_url == models[model][0]:
+                log.debug("Refreshing page for " + model)
                 self.driver.refresh()
             else:
                 log.debug("Error page detected. Redirecting...")
-                self.driver.get(url)
-            #atc_buttons = self.driver.find_elements_by_xpath(
-            #    '//input[@class="btnBigAddCart"]'
-            #)
+                self.driver.get(models[model][0] + associate_code)
             atc_buttons = self.driver.find_elements_by_xpath(
                 selector
             )
