@@ -43,6 +43,15 @@ def wait_for_element_by_class(d, e_class, time=30):
     )
 
 
+def wait_for_title(d, title, path):
+    """
+    Uses webdriver(d) to navigate to get(path) until it equals title(title)
+    """
+    while d.title != title:
+        d.get(path)
+        WebDriverWait(d, 1000)
+
+
 def wait_for_page(d, title, time=30):
     """
     Uses webdriver(d) to wait for page title(title) to become visible

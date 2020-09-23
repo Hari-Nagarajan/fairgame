@@ -167,8 +167,8 @@ Make a copy of `evga_config.template_json` to `evga_config.json`:
 {
   "username": "hari@",
   "password": "password!",
-  "card_pn": "3080",
-  "card_series": "10G-P5-3895-KR",
+  "card_pn": "10G-P5-3895-KR",
+  "card_series": "3080",
   "credit_card" : {
             "name": "Hari ",
             "number": "234234",
@@ -192,6 +192,8 @@ P/N numbers can be found in URLs or on product pages such as newegg. They look l
 10G-P5-3881-KR
 10G-P5-3885-KR
 ![EVGA PN Screenshot](evga_pn.png)
+
+if it doesn't load the correct page title (since the 3090 isn't listed yet), it will refresh every second until the correct page is loaded.
 
 
 ### Notifications
