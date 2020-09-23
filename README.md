@@ -239,7 +239,7 @@ You are not running the proper version of Chrome this requires. As of this updat
 
 ## Raspberry-Pi-Setup
 
-Prereqs and Setup
+1. Prereqs and Setup
 ```
 sudo apt update
 sudo apt upgrade
@@ -250,13 +250,18 @@ pip3 install pipenv
 pipenv shell 
 pipenv install
 ```
+2. Leave this Terminal window open.
 
-Modify `/home/USERNAME/.local/share/virtualenvs/nvidia-bot-RANDOMCHARS/lib/python3.7/site-packages/selenium/webdriver/common/service.py`
-Edit line 38 from `self.path = executable` to `self.path = "chromedriver"`
+3. Open the following file in a text editor: 
+```
+/home/USERNAME/.local/share/virtualenvs/nvidia-bot-RANDOMCHARS/lib/python3.7/site-packages/selenium/webdriver/common/service.py
+```
+4. Edit line 38 from `self.path = executable` to `self.path = "chromedriver"`, then save and close the file.
 
-Back in Terminal...
+
+5. Back in Terminal...
 ```
 python app.py
 ```
 
-Follow the regular steps to configure the bot as needed.
+6. Follow [Usage](#Usage) to configure the bot as needed.
