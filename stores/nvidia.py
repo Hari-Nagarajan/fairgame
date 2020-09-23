@@ -244,6 +244,8 @@ class NvidiaBuyer:
         self.notification_handler = NotificationHandler()
 
         log.info("Opening Webdriver")
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])
         self.driver = webdriver.Chrome(
             executable_path=binary_path, options=options, chrome_options=chrome_options
         )
@@ -275,10 +277,10 @@ class NvidiaBuyer:
 
     @property
     def access_token(self):
-        if datetime.today().timestamp() >= self.token_data.get('expires_at'):
-            log.debug('Access token expired')
+        if datetime.today().timestamp() >= self.token_data.get("expires_at"):
+            log.debug("Access token expired")
             self.token_data = self.get_nvidia_access_token()
-        return self.token_data['access_token']
+        return self.token_data["access_token"]
 
     def has_valid_creds(self):
         if all(item in self.config.keys() for item in AUTOBUY_CONFIG_KEYS):
@@ -304,7 +306,7 @@ class NvidiaBuyer:
             "expand": "product",
             "fields": "product.id,product.displayName,product.pricing",
             "locale": self.locale,
-            "format": "json"
+            "format": "json",
         }
         headers = DEFAULT_HEADERS.copy()
         headers["locale"] = self.locale
@@ -477,8 +479,8 @@ class NvidiaBuyer:
                 log.debug("item not in stock")
                 return False
         except Exception as ex:
-            log.warning(str(ex))
-            log.warning("The connection has been reset.")
+            log.debug(str(ex))
+            log.debug("The connection has been reset.")
             return False
 
     def get_ext_ip(self):
@@ -591,7 +593,7 @@ class NvidiaBuyer:
         log.debug(response.status_code)
         data = response.json()
         log.debug(f"Nvidia access token: {data['access_token']}")
-        data['expires_at'] = round(now.timestamp() + data['expires_in']) - 60
+        data["expires_at"] = round(now.timestamp() + data["expires_in"]) - 60
         return data
 
     def is_signed_in(self):

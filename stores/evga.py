@@ -74,9 +74,11 @@ class Evga:
 
         self.driver.get("https://www.evga.com")
         selenium_utils.wait_for_page(
-                self.driver, "EVGA - Intelligent Innovation - Official Website", 300
-            )
-        if len(self.driver.find_elements_by_id("svg-login")) > 0:  # cookies did not provide logged in state
+            self.driver, "EVGA - Intelligent Innovation - Official Website", 300
+        )
+        if (
+            len(self.driver.find_elements_by_id("svg-login")) > 0
+        ):  # cookies did not provide logged in state
             self.driver.get(LOGIN_URL)
             selenium_utils.wait_for_page(self.driver, "EVGA - Intelligent Innovation")
 
@@ -88,7 +90,9 @@ class Evga:
             selenium_utils.wait_for_page(
                 self.driver, "EVGA - Intelligent Innovation - Official Website", 300
             )
-            pickle.dump(self.driver.get_cookies(), open ("evga-cookies.pkl", "wb"))  # save cookies
+            pickle.dump(
+                self.driver.get_cookies(), open("evga-cookies.pkl", "wb")
+            )  # save cookies
 
         log.info("Logged in!")
 

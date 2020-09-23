@@ -7,6 +7,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.expected_conditions import presence_of_element_located
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import NoSuchElementException
 
 from notifications.notifications import NotificationHandler
 from utils.logger import log
@@ -70,7 +71,10 @@ class Amazon:
                 log.warn("A polling request timed out. Retrying.")
 
         log.info("Item in stock, buy now button found!")
-        price_str = self.driver.find_element_by_id("priceblock_ourprice").text
+        try:
+            price_str = self.driver.find_element_by_id("priceblock_ourprice").text
+        except NoSuchElementException as _:
+            price_str = self.driver.find_element_by_id("priceblock_dealprice").text
         price_int = int(round(float(price_str.strip("$"))))
         if price_int < price_limit:
             log.info(f"Attempting to buy item for {price_int}")
