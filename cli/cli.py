@@ -29,8 +29,9 @@ def main():
     cls=QuestionaryOption,
 )
 @click.option("--test", is_flag=True)
-def nvidia(gpu, locale, test):
-    nv = NvidiaBuyer(gpu, locale, test)
+@click.option("--headless", is_flag=True)
+def nvidia(gpu, locale, test, headless):
+    nv = NvidiaBuyer(gpu, locale, test, headless)
     nv.run_items()
 
 
@@ -64,8 +65,9 @@ def nvidia(gpu, locale, test):
     show_default="current user",
 )
 @click.option("--no-image", is_flag=True)
+@click.option("--headless", is_flag=True)
 def amazon(
-    amazon_email, amazon_password, amazon_item_url, amazon_price_limit, no_image
+    amazon_email, amazon_password, amazon_item_url, amazon_price_limit, no_image, headless
 ):
     os.environ.setdefault("amazon_email", amazon_email)
     os.environ.setdefault("amazon_password", amazon_password)
@@ -75,7 +77,7 @@ def amazon(
     if no_image:
         selenium_utils.no_amazon_image()
 
-    amzn_obj = Amazon(username=amazon_email, password=amazon_password, debug=True)
+    amzn_obj = Amazon(username=amazon_email, password=amazon_password, headless=headless)
     amzn_obj.run_item(item_url=amazon_item_url, price_limit=amazon_price_limit)
 
     if no_image:
@@ -84,16 +86,18 @@ def amazon(
 
 @click.command()
 @click.option("--sku", type=str, required=True)
-def bestbuy(sku):
-    bb = BestBuyHandler(sku)
+@click.option("--headless", is_flag=True)
+def bestbuy(sku, headless):
+    bb = BestBuyHandler(sku, headless)
     bb.run_item()
 
 
 @click.command()
 @click.option("--test", is_flag=True)
 @click.option("--model", type=str)
-def evga(test, model):
-    ev = Evga()
+@click.option("--headless", is_flag=True)
+def evga(test, model, headless):
+    ev = Evga(headless)
     ev.buy(test=test, model=model)
 
 

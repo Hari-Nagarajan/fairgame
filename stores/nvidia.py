@@ -22,7 +22,7 @@ from notifications.notifications import NotificationHandler
 from utils import selenium_utils
 from utils.http import TimeoutHTTPAdapter
 from utils.logger import log
-from utils.selenium_utils import options, chrome_options
+from utils.selenium_utils import options, enable_headless
 
 DIGITAL_RIVER_OUT_OF_STOCK_MESSAGE = "PRODUCT_INVENTORY_OUT_OF_STOCK"
 DIGITAL_RIVER_API_KEY = "9485fa7b159e42edb08a83bde0d83dia"
@@ -198,7 +198,7 @@ class InvalidAutoBuyConfigException(Exception):
 
 
 class NvidiaBuyer:
-    def __init__(self, gpu, locale="en_us", test=False):
+    def __init__(self, gpu, locale="en_us", test=False, headless=False):
         self.product_ids = set([])
         self.cli_locale = locale.lower()
         self.locale = self.map_locales()
@@ -247,10 +247,10 @@ class NvidiaBuyer:
         self.notification_handler = NotificationHandler()
 
         log.info("Opening Webdriver")
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])
+        if headless:
+            enable_headless()
         self.driver = webdriver.Chrome(
-            executable_path=binary_path, options=options, chrome_options=chrome_options
+            executable_path=binary_path, options=options
         )
         self.sign_in()
         selenium_utils.add_cookies_to_session_from_driver(self.driver, self.session)
