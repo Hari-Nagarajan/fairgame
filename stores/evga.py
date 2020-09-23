@@ -10,7 +10,6 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
 
 import pickle
-
 from utils import selenium_utils
 from utils.logger import log
 from utils.selenium_utils import options, chrome_options
@@ -63,6 +62,12 @@ class Evga:
             "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"
         )
 
+								  
+																				  
+
+																		   
+																		 
+
         if path.isfile("evga-cookies.pkl"):  # check for cookies file
             self.driver.get("https://www.evga.com")
             selenium_utils.wait_for_page(
@@ -107,28 +112,30 @@ class Evga:
             )
         else:
             self.driver.get(
-                "https://www.evga.com/products/productlist.aspx?type=0&family=GeForce+30+Series+Family&chipset=RTX+3080"
+                "https://www.evga.com/products/product.aspx?pn=10G-P5-3897-KR&associatecode=2QME1VF65K9ZY8B"
             )
             selenium_utils.wait_for_page(
                 self.driver,
-                "EVGA - Products - Graphics - GeForce 30 Series Family - RTX 3080",
+                "EVGA - Products - EVGA GeForce RTX 3080 FTW3 ULTRA GAMING, 10G-P5-3897-KR, 10GB GDDR6X, iCX3 Technology, ARGB LED, Metal Backplate - 10G-P5-3897-KR",
             )
 
-        #  Check for stock
+        # Check for stock
         log.info("On GPU Page")
         atc_buttons = self.driver.find_elements_by_xpath(
             '//input[@class="btnBigAddCart"]'
         )
         while not atc_buttons:
-            log.debug("Refreshing page for GPU")
-            self.driver.refresh()
+            log.debug("Refreshing GPU page and checking for add to cart button")
+            self.driver.get("https://www.evga.com/products/product.aspx?pn=10G-P5-3897-KR&associatecode=2QME1VF65K9ZY8B")
             atc_buttons = self.driver.find_elements_by_xpath(
                 '//input[@class="btnBigAddCart"]'
             )
             sleep(delay)
 
         #  Add to cart
-        atc_buttons[0].click()
+        selenium_utils.button_click_using_xpath(
+            self.driver, '//*[@id="LFrame_btnAddToCart"]'
+        ) 		
 
         #  Go to checkout
         selenium_utils.wait_for_page(self.driver, "EVGA - Checkout")
@@ -174,6 +181,7 @@ class Evga:
         Select(self.driver.find_element_by_id("ctl00_LFrame_ddlYear")).select_by_value(
             self.credit_card["expiration_year"]
         )
+		
         WebDriverWait(self.driver, 10).until(
             EC.element_to_be_clickable(
                 (
@@ -196,5 +204,6 @@ class Evga:
             WebDriverWait(self.driver, 10).until(
                 EC.element_to_be_clickable((By.ID, "ctl00_LFrame_btncontinue"))
             ).click()
-
+        selenium_utils.wait_for_page(self.driver, "EVGA - Checkout - Order Successful")
         log.info("Finalized Order!")
+		
