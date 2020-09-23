@@ -479,8 +479,8 @@ class NvidiaBuyer:
                 log.debug("item not in stock")
                 return False
         except Exception as ex:
-            log.warning(str(ex))
-            log.warning("The connection has been reset.")
+            log.debug(str(ex))
+            log.debug("The connection has been reset.")
             return False
 
     def get_ext_ip(self):
