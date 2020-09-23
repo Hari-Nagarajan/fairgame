@@ -43,7 +43,7 @@ Commands:
 
 | **Website** | **Auto Checkout** | **Open Cart Link** | **Test flag** |
 |:---:|:---:|:---:|:---:|
-| nvidia.com |`✔`|`✔`| |
+| nvidia.com |`✔`|`✔`|`✔`|
 | amazon.com |`✔`| | |
 | bestbuy.com | |`✔`| |
 | evga.com |`✔` | |`✔`|
@@ -60,6 +60,11 @@ the bottom box is the settings for Nvidia.
 - Go to a product page
 - Refresh the page until the 'Buy Now' option exists
 - If the price is under the "Price Limit", it will buy the item.
+
+**Amazon flags**
+```
+--no-image : prevents images from loading on amazon webdriver
+```
 
 Example usage:
 ```
@@ -108,6 +113,11 @@ set amazon_price_limit=1000
 - Call Digitalriver API to get product number for the GPU selected (2060S, 3080, 3090)
 - Call Digitalriver API to check if the GPU is in stock until it is in stock
 - Will open a window in your default browser with the GPU in your cart when it is stock.
+
+**Nvidia flags**
+```
+--test : runs a test of the checkout process, without actually making the purchase
+```
 
 Example usage:
 ```
@@ -171,7 +181,11 @@ Test run command (Uses old gpu list and then stops before finishing the order)
 `python app.py evga --test`
 
 Autobuy command:
-`python app.py evga`
+`python app.py evga --model [indentifier]`
+
+These are the available identifiers: xc3, xc3black, xc3ultra, ftw3, ftw3ultra
+
+If model is not specified, it will select the first available card on the page.
 
 ### Notifications
 This uses a notifications handler that will support multiple notification channels. 

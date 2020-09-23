@@ -28,8 +28,9 @@ def main():
     prompt="What locale shall we use?",
     cls=QuestionaryOption,
 )
-def nvidia(gpu, locale):
-    nv = NvidiaBuyer(gpu, locale)
+@click.option("--test", is_flag=True)
+def nvidia(gpu, locale, test):
+    nv = NvidiaBuyer(gpu, locale, test)
     nv.run_items()
 
 
@@ -77,6 +78,9 @@ def amazon(
     amzn_obj = Amazon(username=amazon_email, password=amazon_password, debug=True)
     amzn_obj.run_item(item_url=amazon_item_url, price_limit=amazon_price_limit)
 
+    if no_image:
+        selenium_utils.no_amazon_image()
+
 
 @click.command()
 @click.option("--sku", type=str, required=True)
@@ -87,9 +91,10 @@ def bestbuy(sku):
 
 @click.command()
 @click.option("--test", is_flag=True)
-def evga(test):
+@click.option("--model", type=str)
+def evga(test, model):
     ev = Evga()
-    ev.buy(test=test)
+    ev.buy(test=test, model=model)
 
 
 main.add_command(nvidia)

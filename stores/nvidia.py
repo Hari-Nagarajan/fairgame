@@ -198,7 +198,7 @@ class InvalidAutoBuyConfigException(Exception):
 
 
 class NvidiaBuyer:
-    def __init__(self, gpu, locale="en_us"):
+    def __init__(self, gpu, locale="en_us", test=False):
         self.product_ids = set([])
         self.cli_locale = locale.lower()
         self.locale = self.map_locales()
@@ -208,6 +208,7 @@ class NvidiaBuyer:
         self.auto_buy_enabled = False
         self.attempt = 0
         self.started_at = datetime.now()
+        self.test = test
 
         self.gpu_long_name = GPU_DISPLAY_NAMES[gpu]
 
@@ -422,8 +423,11 @@ class NvidiaBuyer:
             self.driver, PAGE_TITLES_BY_LOCALE[self.locale]["verify_order"], 5
         )
 
-        log.info("F this captcha lmao. Submitting cart.")
-        self.submit_cart()
+        if not self.test:
+            log.info("F this captcha lmao. Submitting cart.")
+            self.submit_cart()
+        else:
+            log.info("Test complete. No actual purchase was made.")
         # log.info("Submit.")
         # log.debug("Reached order validation page.")
         # self.driver.save_screenshot("nvidia-order-validation.png")
