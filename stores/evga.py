@@ -11,6 +11,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 import pickle
 
+from notifications.notifications import NotificationHandler
 from utils import selenium_utils
 from utils.logger import log
 from utils.selenium_utils import options, chrome_options
@@ -18,9 +19,12 @@ from utils.selenium_utils import options, chrome_options
 LOGIN_URL = "https://secure.evga.com/us/login.asp"
 CONFIG_PATH = "evga_config.json"
 
+prefs = {"profile.managed_default_content_settings.images": 2}
+chrome_options.add_experimental_option("prefs", prefs)
 
 class Evga:
     def __init__(self, debug=False):
+        self.notification_handler = NotificationHandler()
         self.driver = webdriver.Chrome(
             executable_path=binary_path, options=options, chrome_options=chrome_options
         )
@@ -74,11 +78,9 @@ class Evga:
 
         self.driver.get("https://www.evga.com")
         selenium_utils.wait_for_page(
-            self.driver, "EVGA - Intelligent Innovation - Official Website", 300
-        )
-        if (
-            len(self.driver.find_elements_by_id("svg-login")) > 0
-        ):  # cookies did not provide logged in state
+                self.driver, "EVGA - Intelligent Innovation - Official Website", 300
+            )
+        if len(self.driver.find_elements_by_id("svg-login")) > 0:  # cookies did not provide logged in state
             self.driver.get(LOGIN_URL)
             selenium_utils.wait_for_page(self.driver, "EVGA - Intelligent Innovation")
 
@@ -90,42 +92,112 @@ class Evga:
             selenium_utils.wait_for_page(
                 self.driver, "EVGA - Intelligent Innovation - Official Website", 300
             )
-            pickle.dump(
-                self.driver.get_cookies(), open("evga-cookies.pkl", "wb")
-            )  # save cookies
+            pickle.dump(self.driver.get_cookies(), open ("evga-cookies.pkl", "wb"))  # save cookies
 
         log.info("Logged in!")
 
-    def buy(self, delay=5, test=False):
+    def buy(self, delay=5, test=False, model=""):
+        selector = '//a[@id="LFrame_btnAddToCart"]'
         if test:
+            model_name = "test"
+            url = "https://www.evga.com/products/product.aspx?pn=08G-P4-3289-KR"
             self.driver.get(
-                "https://www.evga.com/products/ProductList.aspx?type=0&family=GeForce+16+Series+Family&chipset=GTX+1660"
+                url
             )
             selenium_utils.wait_for_page(
                 self.driver,
-                "EVGA - Products - Graphics - GeForce 16 Series Family - GTX 1660",
+                "EVGA - Products - EVGA GeForce RTX 2080 SUPER FTW3 HYDRO COPPER GAMING, 08G-P4-3289-KR, 8GB GDDR6, RGB LED, iCX2 Technology, Metal Backplate - 08G-P4-3289-KR",
             )
         else:
-            self.driver.get(
-                "https://www.evga.com/products/productlist.aspx?type=0&family=GeForce+30+Series+Family&chipset=RTX+3080"
-            )
-            selenium_utils.wait_for_page(
-                self.driver,
-                "EVGA - Products - Graphics - GeForce 30 Series Family - RTX 3080",
-            )
+            if model == 'ftw3':
+                model_name = "FTW3 GAMING"
+                url = "https://www.evga.com/products/product.aspx?pn=10G-P5-3895-KR"
+                self.driver.get(
+                    url
+                )
+                selenium_utils.wait_for_page(
+                    self.driver,
+                    "EVGA - Products - EVGA GeForce RTX 3080 FTW3 GAMING, 10G-P5-3895-KR, 10GB GDDR6X, iCX3 Technology, ARGB LED, Metal Backplate - 10G-P5-3895-KR",
+                )
+            elif model == 'xc3':
+                model_name = "XC3 GAMING"
+                url = "https://www.evga.com/products/product.aspx?pn=10G-P5-3883-KR"
+                self.driver.get(
+                    url
+                )
+                selenium_utils.wait_for_page(
+                    self.driver,
+                    "EVGA - Products - EVGA GeForce RTX 3080 XC3 GAMING, 10G-P5-3883-KR, 10GB GDDR6X, iCX3 Cooling, ARGB LED, Metal Backplate - 10G-P5-3883-KR",
+                )
+            elif model == 'xc3ultra':
+                model_name = "XC3 ULTRA GAMING"
+                url = "https://www.evga.com/products/product.aspx?pn=10G-P5-3885-KR"
+                self.driver.get(
+                    url
+                )
+                selenium_utils.wait_for_page(
+                    self.driver,
+                    "EVGA - Products - EVGA GeForce RTX 3080 XC3 ULTRA GAMING, 10G-P5-3885-KR, 10GB GDDR6X, iCX3 Cooling, ARGB LED, Metal Backplate - 10G-P5-3885-KR",
+                )
+            elif model == 'xc3black':
+                model_name = "XC3 BLACK GAMING"
+                url = "https://www.evga.com/products/product.aspx?pn=10G-P5-3881-KR"
+                self.driver.get(
+                    url
+                )
+                selenium_utils.wait_for_page(
+                    self.driver,
+                    "EVGA - Products - EVGA GeForce RTX 3080 XC3 GAMING, 10G-P5-3883-KR, 10GB GDDR6X, iCX3 Cooling, ARGB LED, Metal Backplate - 10G-P5-3883-KR",
+                )
+            elif model == 'ftw3ultra':
+                model_name = "FTW3 ULTRA GAMING"
+                url = "https://www.evga.com/products/product.aspx?pn=10G-P5-3897-KR"
+                self.driver.get(
+                    url
+                )
+                selenium_utils.wait_for_page(
+                    self.driver,
+                    "EVGA - Products - EVGA GeForce RTX 3080 XC3 ULTRA GAMING, 10G-P5-3885-KR, 10GB GDDR6X, iCX3 Cooling, ARGB LED, Metal Backplate - 10G-P5-3885-KR",
+                )
+            else:
+                model_name = "ANY MODEL"
+                url = "https://www.evga.com/products/productlist.aspx?type=0&family=GeForce+30+Series+Family&chipset=RTX+3080"
+                selector = '//input[@class="btnBigAddCart"]'
+                self.driver.get(
+                    url
+                )
+                selenium_utils.wait_for_page(
+                    self.driver,
+                    "EVGA - Products - Graphics - GeForce 30 Series Family - RTX 3080",
+                )
 
         #  Check for stock
         log.info("On GPU Page")
+        #atc_buttons = self.driver.find_elements_by_xpath(
+        #    '//input[@class="btnBigAddCart"]'
+        #)
         atc_buttons = self.driver.find_elements_by_xpath(
-            '//input[@class="btnBigAddCart"]'
+            selector
         )
         while not atc_buttons:
-            log.debug("Refreshing page for GPU")
-            self.driver.refresh()
+            if self.driver.current_url == url:
+                log.debug("Refreshing page for " + model_name)
+                self.driver.refresh()
+            else:
+                log.debug("Error page detected. Redirecting...")
+                self.driver.get(url)
+            #atc_buttons = self.driver.find_elements_by_xpath(
+            #    '//input[@class="btnBigAddCart"]'
+            #)
             atc_buttons = self.driver.find_elements_by_xpath(
-                '//input[@class="btnBigAddCart"]'
+                selector
             )
             sleep(delay)
+
+        # send notification
+        self.notification_handler.send_notification(
+            f"EVGA BOT: " + model_name + " in stock! Attempting to place order..."
+        )
 
         #  Add to cart
         atc_buttons[0].click()

@@ -7,7 +7,6 @@ from stores.amazon import Amazon
 from stores.bestbuy import BestBuyHandler
 from stores.evga import Evga
 from stores.nvidia import NvidiaBuyer, GPU_DISPLAY_NAMES, ACCEPTED_LOCALES
-from utils import selenium_utils
 
 
 @click.group()
@@ -62,15 +61,11 @@ def nvidia(gpu, locale):
     default=lambda: int(os.environ.get("amazon_price_limit", 1000)),
     show_default="current user",
 )
-@click.option("--no-image", is_flag=True)
-def amazon(amazon_email, amazon_password, amazon_item_url, amazon_price_limit, no_image):
+def amazon(amazon_email, amazon_password, amazon_item_url, amazon_price_limit):
     os.environ.setdefault("amazon_email", amazon_email)
     os.environ.setdefault("amazon_password", amazon_password)
     os.environ.setdefault("amazon_item_url", amazon_item_url)
     os.environ.setdefault("amazon_price_limit", str(amazon_price_limit))
-	
-    if(no_image):
-	    selenium_utils.no_amazon_image()
 
     amzn_obj = Amazon(username=amazon_email, password=amazon_password, debug=True)
     amzn_obj.run_item(item_url=amazon_item_url, price_limit=amazon_price_limit)
@@ -85,9 +80,10 @@ def bestbuy(sku):
 
 @click.command()
 @click.option("--test", is_flag=True)
-def evga(test):
+@click.option("--model", type=str)
+def evga(test, model):
     ev = Evga()
-    ev.buy(test=test)
+    ev.buy(test=test, model=model)
 
 
 main.add_command(nvidia)
