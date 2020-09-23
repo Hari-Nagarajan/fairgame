@@ -14,7 +14,7 @@ import pickle
 from notifications.notifications import NotificationHandler
 from utils import selenium_utils
 from utils.logger import log
-from utils.selenium_utils import options, chrome_options
+from utils.selenium_utils import options, enable_headless
 
 LOGIN_URL = "https://secure.evga.com/us/login.asp"
 CONFIG_PATH = "evga_config.json"
@@ -24,11 +24,10 @@ CONFIG_PATH = "evga_config.json"
 
 
 class Evga:
-    def __init__(self, debug=False):
-        self.notification_handler = NotificationHandler()
-        self.driver = webdriver.Chrome(
-            executable_path=binary_path, options=options, chrome_options=chrome_options
-        )
+    def __init__(self, headless=False):
+        if headless:
+            enable_headless()
+        self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
         self.credit_card = {}
         try:
             if path.exists(CONFIG_PATH):
