@@ -71,6 +71,9 @@ def amazon(
     os.environ.setdefault("amazon_item_url", amazon_item_url)
     os.environ.setdefault("amazon_price_limit", str(amazon_price_limit))
 
+    if no_image:
+        selenium_utils.no_amazon_image()
+
     amzn_obj = Amazon(username=amazon_email, password=amazon_password, debug=True)
     amzn_obj.run_item(item_url=amazon_item_url, price_limit=amazon_price_limit)
 
