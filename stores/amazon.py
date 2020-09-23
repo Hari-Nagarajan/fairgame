@@ -70,7 +70,10 @@ class Amazon:
                 log.warn("A polling request timed out. Retrying.")
 
         log.info("Item in stock, buy now button found!")
-        price_str = self.driver.find_element_by_id("priceblock_ourprice").text
+        try:
+            price_str = self.driver.find_element_by_id("priceblock_ourprice").text
+        except:
+            price_str = self.driver.find_element_by_id("priceblock_dealprice").text
         price_int = int(round(float(price_str.strip("$"))))
         if price_int < price_limit:
             log.info(f"Attempting to buy item for {price_int}")
