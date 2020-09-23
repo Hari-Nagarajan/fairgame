@@ -222,7 +222,7 @@ class NvidiaBuyer:
                     self.nvidia_password = self.config["NVIDIA_PASSWORD"]
                     self.auto_buy_enabled = self.config["FULL_AUTOBUY"]
                     self.cvv = self.config.get("CVV")
-                    self.interval=int(self.config.get("INTERVAL", 5))
+                    self.interval = int(self.config.get("INTERVAL", 5))
                 else:
                     raise InvalidAutoBuyConfigException(self.config)
         else:
@@ -344,7 +344,9 @@ class NvidiaBuyer:
 
     def buy(self, product_id):
         try:
-            log.info(f"Checking stock for {product_id} at {self.interval} second intervals.")
+            log.info(
+                f"Checking stock for {product_id} at {self.interval} second intervals."
+            )
             while not self.add_to_cart(product_id) and self.enabled:
                 self.attempt = self.attempt + 1
                 time_delta = str(datetime.now() - self.started_at).split(".")[0]

@@ -77,6 +77,7 @@ def amazon(
     if no_image:
         selenium_utils.no_amazon_image()
 
+
 @click.command()
 @click.option("--sku", type=str, required=True)
 def bestbuy(sku):
