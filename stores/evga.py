@@ -103,7 +103,7 @@ class Evga:
 
     def buy(self, delay=5, test=False, model=""):
         selector = '//a[@id="LFrame_btnAddToCart"]'
-        associate_code = "&associatecode=2QME1VF65K9ZY8B"
+        associate_code = ""
         if test:
             model_name = "test"
             url = "https://www.evga.com/products/product.aspx?pn=08G-P4-3289-KR"
