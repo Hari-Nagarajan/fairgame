@@ -206,6 +206,18 @@ It is possible to notify multiple users at once. Just add a list as the `BOT_CHA
 }
 ```
 
+#### Pavlok
+To enable shock notifications to your [Pavlok Shockwatch](https://www.amazon.com/Pavlok-PAV2-PERIMETER-BLACK-2/dp/B01N8VJX8P?),
+store the url from the pavlok app in the ```pavlok_config.json``` file, you can copy the template from ```pavlok_config.template_json```.
+
+**WARNING:** This feature does not currently support adjusting the intensity, it will always be max (255).
+```
+{
+  "base_url": "url goes here"
+}
+```
+
+
 
 ## Troubleshooting
 
