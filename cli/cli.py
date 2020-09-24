@@ -29,9 +29,9 @@ def main():
     cls=QuestionaryOption,
 )
 @click.option("--test", is_flag=True)
-@click.option("--headless", is_flag=True)
-def nvidia(gpu, locale, test, headless):
-    nv = NvidiaBuyer(gpu, locale, test, headless)
+@click.option("--interval", type=int, default=5)
+def nvidia(gpu, locale, test, interval):
+    nv = NvidiaBuyer(gpu, locale, test, interval)
     nv.run_items()
 
 
@@ -61,7 +61,7 @@ def nvidia(gpu, locale, test, headless):
     "--amazon_price_limit",
     type=int,
     prompt="Maximum Price to Pay",
-    default=lambda: int(os.environ.get("amazon_price_limit", 1000)),
+    default=lambda: int(os.environ.get("amazon_price_limit", 10000)),
     show_default="current user",
 )
 @click.option("--no-image", is_flag=True)
