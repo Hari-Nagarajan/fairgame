@@ -110,13 +110,12 @@ set amazon_price_limit=1000
 
 
 ### Nvidia 
-- Call Digitalriver API to get product number for the GPU selected (2060S, 3080, 3090)
-- Call Digitalriver API to check if the GPU is in stock until it is in stock
-- Will open a window in your default browser with the GPU in your cart when it is stock.
+Will check stock and open an add to cart link in your browser and send notifications.
 
 **Nvidia flags**
 ```
 --test : runs a test of the checkout process, without actually making the purchase
+--interval: How many seconds between each stock check (default: 5)
 ```
 
 Example usage:
@@ -125,29 +124,15 @@ python app.py nvidia
 What GPU are you after?: 3080
 What locale shall we use? [en_us]:
 ...
-19092020 12:05:46 AM : Calling https://api.digitalriver.com/v1/shoppers/me/products/5438481700/inventory-status? : DEBUG -stores.nvidia
-19092020 12:05:46 AM : Returned 200 : DEBUG -stores.nvidia
-19092020 12:05:46 AM : Stock status is PRODUCT_INVENTORY_OUT_OF_STOCK : INFO -stores.nvidia
-
+INFO: "2020-09-23 21:43:56,152 - We have 1 product IDs for NVIDIA GEFORCE RTX 3080
+INFO: "2020-09-23 21:43:56,153 - Product IDs: ['5438481700']
+INFO: "2020-09-23 21:43:56,153 - Checking stock for 5438481700 at 5 second intervals.
 ```
 
-### Nvidia Auto-Checkout Guide
-First be sure to have a [Nvidia store](https://www.nvidia.com/en-us/shop/) account with all of your infos (billing address etc ...) already filled in). 
-Then make a copy of `autobuy_config.template_json` and name it `autobuy_config.json`. Be sure to remove all the single-line comments, which are denoted with `#`.
-If this file exists and the credentials are valid, the bot will make a purchase for you.
-
+Quick run:
 ```
-{
-  "NVIDIA_LOGIN": "fuckthesc@lpers.com",        # Your NVIDIA Store login
-  "NVIDIA_PASSWORD": "12345",                   # Your NVIDIA Store password
-  "FULL_AUTOBUY":false,                         # FALSE : Fill your infos but dont click on the last button / TRUE : Buy the card
-  "CVV":"101",             # CCV code
-  "BYPASS_ADDRESS_SUGGESTION":false             # Selects the address you entered not the one suggested
-}
+python app.py nvidia --gpu 3080 --locale en_us
 ```
-
-![Nvidia Workflow Diagram](nvidia-workflow.png)
-
 
 ## Best Buy
 This is fairly basic right now. Just login to the best buy website in your default browser and then run the command as follows:
