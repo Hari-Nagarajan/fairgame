@@ -4,6 +4,7 @@ import webbrowser
 from concurrent.futures.thread import ThreadPoolExecutor
 from datetime import datetime
 from time import sleep
+import subprocess
 
 import requests
 from furl import furl
@@ -252,6 +253,7 @@ class NvidiaBuyer:
                 ) as s:
                     sleep(self.interval)
             if self.enabled:
+                subprocess.Popen('python playmusic.py', creationflags=subprocess.CREATE_NEW_CONSOLE)
                 log.info(f"{self.gpu_long_name} is in stock. Go buy it.")
                 cart_url = self.open_cart_url(product_id)
                 self.notification_handler.send_notification(f" {self.gpu_long_name} with product ID: {product_id} in "
