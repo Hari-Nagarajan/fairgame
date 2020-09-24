@@ -1,7 +1,7 @@
-import playsound
+from playsound import playsound
 from time import sleep
 
-playsound.playsound('/nvidia-bot-master/music.mp3', True)
+playsound('music.mp3')
 sleep(360)
         
         
