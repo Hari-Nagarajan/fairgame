@@ -244,8 +244,22 @@ class NvidiaBuyer:
         pass
         try:
             log.info(
-                f"Attempting to add {product_id} to cart at {self.interval} second intervals."
+                f"Checking {self.gpu_long_name} stock at {self.interval} second intervals."
             )
+            while not self.is_in_stock(product_id) and self.enabled:
+                sleep(self.interval)
+                time_delta = str(datetime.now() - self.started_at).split(".")[0]
+                with Spinner.get(
+                        f"Checking stock (attempt {self.attempt}, have been running for {time_delta})..."
+                ) as s:
+                    sleep(self.interval)
+            log.info(
+                f"{self.gpu_long_name} is in stock!"
+            )
+            log.info(
+                f"Attempting to add {self.gpu_long_name} to cart at {self.interval} second intervals."
+            )
+            self.attempt = 0
             cart_success, cart_url = self.get_cart_url(product_id)
             while not cart_success and self.enabled:
                 self.attempt = self.attempt + 1
@@ -297,7 +311,7 @@ class NvidiaBuyer:
         headers["locale"] = self.locale
         headers["nvidia_shop_id"] = token
         headers["Content-Type"] = "application/json"
-        response = self.session.post(url=NVIDIA_ADD_TO_CART_API, headers=headers, data=json.dumps(data))
+        response = self.session.post(url=NVIDIA_ADD_TO_CART_API, headers=headers, data=json.dumps(data), timeout=30)
         response_json = response.json()
         if "location" in response_json:
             return True, response_json["location"]
