@@ -10,7 +10,7 @@ autobuy_config.json
 slack_config.json
 geckodriver.log
 .profile
-.profile-amz
+.profile-amz*
 *.log
 __pycache__/
 *.py[cod]
