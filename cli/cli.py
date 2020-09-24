@@ -31,7 +31,7 @@ def main():
 @click.option("--test", is_flag=True)
 @click.option("--interval", type=int, default=5)
 def nvidia(gpu, locale, test, interval):
-    nv = NvidiaBuyer(gpu, locale, test, headless, interval)
+    nv = NvidiaBuyer(gpu, locale, test, interval)
     nv.run_items()
 
 
