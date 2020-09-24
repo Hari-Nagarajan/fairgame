@@ -19,4 +19,4 @@ questionary = "*"
 spinlog = "*"
 slackclient = "*"
 playsound = "*"
-pyobjc = "*"
+pyobjc = {version = "*", sys_platform = "== 'darwin'"}
