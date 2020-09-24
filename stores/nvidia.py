@@ -7,11 +7,9 @@ from os import path
 from time import sleep
 
 import requests
-from chromedriver_py import binary_path  # this will get you the path variable
 from furl import furl
 from requests.exceptions import Timeout
 from requests.packages.urllib3.util.retry import Retry
-from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver import ActionChains
 from selenium.webdriver.support import expected_conditions as ec
@@ -22,37 +20,13 @@ from notifications.notifications import NotificationHandler
 from utils import selenium_utils
 from utils.http import TimeoutHTTPAdapter
 from utils.logger import log
-from utils.selenium_utils import options, enable_headless
 
-DIGITAL_RIVER_OUT_OF_STOCK_MESSAGE = "PRODUCT_INVENTORY_OUT_OF_STOCK"
-DIGITAL_RIVER_API_KEY = "9485fa7b159e42edb08a83bde0d83dia"
-DIGITAL_RIVER_PRODUCT_LIST_URL = "https://api.digitalriver.com/v1/shoppers/me/products"
-DIGITAL_RIVER_STOCK_CHECK_URL = "https://api.digitalriver.com/v1/shoppers/me/products/{product_id}/inventory-status?"
-DIGITAL_RIVER_ADD_TO_CART_URL = (
-    "https://api.digitalriver.com/v1/shoppers/me/carts/active/line-items"
-)
-DIGITAL_RIVER_CHECKOUT_URL = (
-    "https://api.digitalriver.com/v1/shoppers/me/carts/active/web-checkout"
-)
-
-DIGITAL_RIVER_ADD_TO_CART_API_URL = (
-    "https://api.digitalriver.com/v1/shoppers/me/carts/active"
-)
-DIGITAL_RIVER_APPLY_SHOPPER_DETAILS_API_URL = (
-    "https://api.digitalriver.com/v1/shoppers/me/carts/active/apply-shopper"
-)
-DIGITAL_RIVER_SUBMIT_CART_API_URL = (
-    "https://api.digitalriver.com/v1/shoppers/me/carts/active/submit-cart"
-)
-DIGITAL_RIVER_PAYMENT_METHODS_API_URL = (
-    "https://api.digitalriver.com/v1/shoppers/me/payment-options"
-)
-
-NVIDIA_CART_URL = "https://store.nvidia.com/store/nvidia/en_US/buy/productID.{product_id}/clearCart.yes/nextPage.QuickBuyCartPage"
+NVIDIA_PRODUCT_API = "https://api.nvidia.partners/edge/product/search?page=1&limit=9&locale=en-us&category=GPU"
+NVIDIA_CART_URL = "https://store.nvidia.com/store?Action=AddItemToRequisition&SiteID=nvidia&Locale=en_US&productID={product_id}&quantity=1"
 NVIDIA_TOKEN_URL = "https://store.nvidia.com/store/nvidia/SessionToken"
+NVIDIA_STOCK_API = "https://api-prod.nvidia.com/direct-sales-shop/DR/products/{locale}/USD/{product_id}"
 
 GPU_DISPLAY_NAMES = {
-    "Black_shirt": "NVIDIA Logo Graphic Tee - Black",
     "2060S": "NVIDIA GEFORCE RTX 2060 SUPER",
     "3080": "NVIDIA GEFORCE RTX 3080",
     "3090": "NVIDIA GEFORCE RTX 3090",
@@ -197,6 +171,12 @@ class InvalidAutoBuyConfigException(Exception):
         )
 
 
+PRODUCT_IDS = {
+    "2060S": ["5379432500"],
+    "3080": ["5438481700"]
+}
+
+
 class NvidiaBuyer:
     def __init__(self, gpu, locale="en_us", test=False, headless=False):
         self.product_ids = set([])
@@ -246,27 +226,27 @@ class NvidiaBuyer:
         self.session.mount("http://", adapter)
         self.notification_handler = NotificationHandler()
 
-        log.info("Opening Webdriver")
-        if headless:
-            enable_headless()
-        self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
-        self.sign_in()
-        selenium_utils.add_cookies_to_session_from_driver(self.driver, self.session)
-        log.info("Adding driver cookies to session")
-
-        log.info("Getting product IDs")
-        self.token_data = self.get_nvidia_access_token()
-        self.payment_option = self.get_payment_options()
-        if not self.payment_option.get("id") or not self.cvv:
-            log.error("No payment option on account or missing CVV. Disable Autobuy")
-            self.auto_buy_enabled = False
-        else:
-            log.debug(self.payment_option)
-            self.ext_ip = self.get_ext_ip()
-
-        if not self.auto_buy_enabled:
-            log.info("Closing webdriver")
-            self.driver.close()
+        # log.info("Opening Webdriver")
+        # if headless:
+        #     enable_headless()
+        # self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
+        # self.sign_in()
+        # selenium_utils.add_cookies_to_session_from_driver(self.driver, self.session)
+        # log.info("Adding driver cookies to session")
+        #
+        # log.info("Getting product IDs")
+        # self.token_data = self.get_nvidia_access_token()
+        # self.payment_option = self.get_payment_options()
+        # if not self.payment_option.get("id") or not self.cvv:
+        #     log.error("No payment option on account or missing CVV. Disable Autobuy")
+        #     self.auto_buy_enabled = False
+        # else:
+        #     log.debug(self.payment_option)
+        #     self.ext_ip = self.get_ext_ip()
+        #
+        # if not self.auto_buy_enabled:
+        #     log.info("Closing webdriver")
+        #     self.driver.close()
 
         self.get_product_ids()
         while len(self.product_ids) == 0:
@@ -275,6 +255,7 @@ class NvidiaBuyer:
             )
             self.get_product_ids()
             sleep(5)
+        print(self.product_ids)
 
     @property
     def access_token(self):
@@ -300,27 +281,28 @@ class NvidiaBuyer:
             return "en_gb"
         return self.cli_locale
 
-    def get_product_ids(self, url=DIGITAL_RIVER_PRODUCT_LIST_URL):
-        log.debug(f"Calling {url}")
-        payload = {
-            "apiKey": DIGITAL_RIVER_API_KEY,
-            "expand": "product",
-            "fields": "product.id,product.displayName,product.pricing",
-            "locale": self.locale,
-            "format": "json",
-        }
-        headers = DEFAULT_HEADERS.copy()
-        headers["locale"] = self.locale
-        response = self.session.get(url, headers=headers, params=payload)
-
-        log.debug(response.status_code)
-        response_json = response.json()
-        for product_obj in response_json["products"]["product"]:
-            if product_obj["displayName"] == self.gpu_long_name:
-                if self.check_if_locale_corresponds(product_obj["id"]):
-                    self.product_ids.add(product_obj["id"])
-        if response_json["products"].get("nextPage"):
-            self.get_product_ids(url=response_json["products"]["nextPage"]["uri"])
+    def get_product_ids(self):
+        self.product_ids = PRODUCT_IDS[self.gpu]
+        # log.debug(f"Calling {url}")
+        # payload = {
+        #     "apiKey": DIGITAL_RIVER_API_KEY,
+        #     "expand": "product",
+        #     "fields": "product.id,product.displayName,product.pricing",
+        #     "locale": self.locale,
+        #     "format": "json",
+        # }
+        # headers = DEFAULT_HEADERS.copy()
+        # headers["locale"] = self.locale
+        # response = self.session.get(url, headers=headers, params=payload)
+        #
+        # log.debug(response.status_code)
+        # response_json = response.json()
+        # for product_obj in response_json["products"]["product"]:
+        #     if product_obj["displayName"] == self.gpu_long_name:
+        #         if self.check_if_locale_corresponds(product_obj["id"]):
+        #             self.product_ids.add(product_obj["id"])
+        # if response_json["products"].get("nextPage"):
+        #     self.get_product_ids(url=response_json["products"]["nextPage"]["uri"])
 
     def run_items(self):
         log.info(
@@ -343,11 +325,12 @@ class NvidiaBuyer:
             self.run_items()
 
     def buy(self, product_id):
+        pass
         try:
             log.info(
                 f"Checking stock for {product_id} at {self.interval} second intervals."
             )
-            while not self.add_to_cart(product_id) and self.enabled:
+            while not self.is_in_stock(product_id) and self.enabled:
                 self.attempt = self.attempt + 1
                 time_delta = str(datetime.now() - self.started_at).split(".")[0]
                 with Spinner.get(
@@ -355,30 +338,37 @@ class NvidiaBuyer:
                 ) as s:
                     sleep(self.interval)
             if self.enabled:
-                self.apply_shopper_details()
-                self.apply_shipping()
-                if self.auto_buy_enabled:
-                    self.notification_handler.send_notification(
-                        f" {self.gpu_long_name} with product ID: {product_id} available!"
-                    )
-                    log.info("Auto buy enabled.")
-                    # self.submit_cart()
-                    self.selenium_checkout()
-                else:
-                    log.info("Auto buy disabled.")
-                    cart_url = self.open_cart_url()
-                    self.notification_handler.send_notification(
-                        f" {self.gpu_long_name} with product ID: {product_id} in stock: {cart_url}"
-                    )
+                log.info(f"{self.gpu_long_name} is in stock. Go buy it.")
+                cart_url = self.open_cart_url(product_id)
+                self.notification_handler.send_notification(f"{cart_url}")
                 self.enabled = False
         except Timeout:
             log.error("Had a timeout error.")
             self.buy(product_id)
 
-    def open_cart_url(self):
+    def is_in_stock(self, product_id):
+        response = self.session.get(
+            NVIDIA_STOCK_API.format(product_id=product_id, locale=self.locale),
+            headers=DEFAULT_HEADERS
+        )
+        log.debug(f"Stock check response code: {response.status_code}")
+        if response.status_code != 200:
+            log.debug(response.text)
+        if "PRODUCT_INVENTORY_IN_STOCK" in response.text:
+            return True
+        else:
+            return False
+
+    def open_cart_url(self, product_id):
         log.info("Opening cart.")
-        params = {"token": self.access_token}
-        url = furl(DIGITAL_RIVER_CHECKOUT_URL).set(params)
+        params = {
+            "Action": "AddItemToRequisition",
+            "SiteID": "nvidia",
+            "Locale": self.locale,
+            "productID": product_id,
+            "quantity": 1
+        }
+        url = furl(NVIDIA_CART_URL).set(params)
         webbrowser.open_new_tab(url.url)
         return url.url
 
