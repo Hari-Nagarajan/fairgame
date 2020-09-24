@@ -1,4 +1,3 @@
-import json
 from os import path
 
 from playsound import playsound
