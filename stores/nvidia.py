@@ -244,25 +244,27 @@ class NvidiaBuyer:
         pass
         try:
             log.info(
-                f"Attempting to add {product_id} to cart at {self.interval} second intervals."
+                f"Stock Check {product_id} at {self.interval} second intervals."
             )
-            cart_success, cart_url = self.get_cart_url(product_id)
-            while not cart_success and self.enabled:
+            while not self.is_in_stock(product_id):
                 self.attempt = self.attempt + 1
                 time_delta = str(datetime.now() - self.started_at).split(".")[0]
                 with Spinner.get(
-                    f"Adding to cart (attempt {self.attempt}, have been running for {time_delta})..."
+                    f"Stock Check ({self.attempt}, have been running for {time_delta})..."
                 ) as s:
                     sleep(self.interval)
-                cart_success, cart_url = self.get_cart_url(product_id)
             if self.enabled:
-                log.info(f"{self.gpu_long_name} added to cart.")
-                self.notification_handler.send_notification(
-                    f" {self.gpu_long_name} with product ID: {product_id} in "
-                    f"stock: {cart_url}"
-                )
-                self.enabled = False
-                webbrowser.open(cart_url)
+                cart_success, cart_url = self.get_cart_url(product_id)
+                if cart_success:
+                    log.info(f"{self.gpu_long_name} added to cart.")
+                    self.enabled = False
+                    webbrowser.open(cart_url)
+                    self.notification_handler.send_notification(
+                        f" {self.gpu_long_name} with product ID: {product_id} in "
+                        f"stock: {cart_url}"
+                    )
+                else:
+                    self.buy(product_id)
         except Timeout:
             log.error("Had a timeout error.")
             self.buy(product_id)
@@ -293,10 +295,12 @@ class NvidiaBuyer:
         response = self.session.post(
             url=NVIDIA_ADD_TO_CART_API, headers=headers, data=json.dumps(data)
         )
-        response_json = response.json()
-        if "location" in response_json:
-            return True, response_json["location"]
-
+        if response.status_code == 200:
+            response_json = response.json()
+            if "location" in response_json:
+                return True, response_json["location"]
+        else:
+            log.error(f"Add to cart failed with {response.status_code}. This is likely an error with nvidia's API.")
         return False, ""
 
     def get_session_token(self):
@@ -307,8 +311,11 @@ class NvidiaBuyer:
         response = self.session.get(
             NVIDIA_TOKEN_URL, headers=DEFAULT_HEADERS, params=params
         )
-        response_json = response.json()
-        if "session_token" not in response_json:
-            log.error("Error getting session token.")
-            return False, ""
-        return True, response_json["session_token"]
+        if response.status_code == 200:
+            response_json = response.json()
+            if "session_token" not in response_json:
+                log.error("Error getting session token.")
+                return False, ""
+            return True, response_json["session_token"]
+        else:
+            log.debug(f"Get Session Token: {response.status_code}")

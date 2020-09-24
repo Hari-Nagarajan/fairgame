@@ -43,7 +43,7 @@ options.add_experimental_option("excludeSwitches", ["enable-automation"])
 options.add_experimental_option("useAutomationExtension", False)
 prefs = {"profile.managed_default_content_settings.images": 2}
 options.add_experimental_option("prefs", prefs)
-options.add_argument("user-data-dir=.profile")
+options.add_argument("user-data-dir=.profile-bb")
 
 
 class BestBuyHandler:
