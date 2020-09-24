@@ -22,7 +22,6 @@ class AudioHandler:
 
     def play(self):
         try:
-            log.info(f"Playing notificaiton sound")
             playsound(NOTIFICATION_SOUND_PATH, True)
         except Exception as e:
             log.error(e)
