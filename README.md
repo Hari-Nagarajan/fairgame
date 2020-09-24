@@ -284,3 +284,7 @@ python app.py
 ```
 
 6. Follow [Usage](#Usage) to configure the bot as needed.
+
+## Attribution
+
+Notification sound from https://notificationsounds.com.
