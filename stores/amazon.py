@@ -30,14 +30,14 @@ class Amazon:
         self.password = password
         self.driver.get(BASE_URL)
         if self.is_logged_in():
-            log.info('Already logged in')
+            log.info("Already logged in")
         else:
             self.login()
         time.sleep(3)
 
     def is_logged_in(self):
         try:
-            text = wait_for_element(self.driver, 'nav-link-accountList').text
+            text = wait_for_element(self.driver, "nav-link-accountList").text
             return "Hello, Sign in" not in text
         except Exception:
             return False
