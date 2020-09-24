@@ -5,6 +5,7 @@ Pipfile.lock
 twilio_config.json
 discord_config.json
 telegram_config.json
+evga_config.json
 autobuy_config.json
 slack_config.json
 geckodriver.log
@@ -12,6 +13,5 @@ geckodriver.log
 *.log
 __pycache__/
 *.py[cod]
-/evga_config.json
 *.pkl
 .vscode/
