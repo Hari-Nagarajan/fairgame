@@ -35,7 +35,7 @@ class Amazon:
             log.info("Already logged in")
         else:
             self.login()
-        time.sleep(15)
+            time.sleep(15)
 
     def is_logged_in(self):
         try:
@@ -58,11 +58,13 @@ class Amazon:
     def run_item(self, item_url, price_limit=1000, delay=3):
         log.info(f"Loading page: {item_url}")
         self.driver.get(item_url)
+        item = ""
         try:
             product_title = self.wait.until(
                 presence_of_element_located((By.ID, "productTitle"))
             )
             log.info(f"Loaded page for {product_title.text}")
+            item = product_title.text
         except:
             log.error(self.driver.current_url)
 
@@ -75,7 +77,7 @@ class Amazon:
         while not self.driver.find_elements_by_xpath('//*[@id="buy-now-button"]'):
             try:
                 self.driver.refresh()
-                log.info("Refreshing page.")
+                log.info(f"Refreshing page for {item}")
                 availability = self.wait.until(
                     presence_of_element_located((By.ID, "availability"))
                 ).text.replace("\n", " ")
