@@ -285,19 +285,14 @@ class NvidiaBuyer:
         if not success:
             return False, ""
 
-        data = {
-            "products": [
-                {
-                    "productId": product_id,
-                    "quantity": 1
-                }
-            ]
-        }
+        data = {"products": [{"productId": product_id, "quantity": 1}]}
         headers = DEFAULT_HEADERS.copy()
         headers["locale"] = self.locale
         headers["nvidia_shop_id"] = token
         headers["Content-Type"] = "application/json"
-        response = self.session.post(url=NVIDIA_ADD_TO_CART_API, headers=headers, data=json.dumps(data))
+        response = self.session.post(
+            url=NVIDIA_ADD_TO_CART_API, headers=headers, data=json.dumps(data)
+        )
         response_json = response.json()
         if "location" in response_json:
             return True, response_json["location"]
@@ -305,14 +300,13 @@ class NvidiaBuyer:
         return False, ""
 
     def get_session_token(self):
-        params = {
-            "format": "json",
-            "locale": self.locale
-        }
+        params = {"format": "json", "locale": self.locale}
         headers = DEFAULT_HEADERS.copy()
-        headers['locale'] = self.locale
+        headers["locale"] = self.locale
 
-        response = self.session.get(NVIDIA_TOKEN_URL, headers=DEFAULT_HEADERS, params=params)
+        response = self.session.get(
+            NVIDIA_TOKEN_URL, headers=DEFAULT_HEADERS, params=params
+        )
         response_json = response.json()
         if "session_token" not in response_json:
             log.error("Error getting session token.")

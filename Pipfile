@@ -18,3 +18,5 @@ pycryptodome = "==3.9.8"
 questionary = "*"
 spinlog = "*"
 slackclient = "*"
+playsound = "*"
+pyobjc = {version = "*", sys_platform = "== 'darwin'"}
