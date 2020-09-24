@@ -19,9 +19,6 @@ from utils.selenium_utils import options, enable_headless
 LOGIN_URL = "https://secure.evga.com/us/login.asp"
 CONFIG_PATH = "evga_config.json"
 
-# prefs = {"profile.managed_default_content_settings.images": 2}
-# chrome_options.add_experimental_option("prefs", prefs)
-
 
 class Evga:
     def __init__(self, headless=False):
@@ -29,12 +26,16 @@ class Evga:
             enable_headless()
         self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
         self.credit_card = {}
+        self.card_pn = ""
+        self.card_series = ""
         try:
             if path.exists(CONFIG_PATH):
                 with open(CONFIG_PATH) as json_file:
                     config = json.load(json_file)
                     username = config["username"]
                     password = config["password"]
+                    self.card_pn = config["card_pn"]
+                    self.card_series = config["card_series"]
                     self.credit_card["name"] = config["credit_card"]["name"]
                     self.credit_card["number"] = config["credit_card"]["number"]
                     self.credit_card["cvv"] = config["credit_card"]["cvv"]
@@ -101,69 +102,52 @@ class Evga:
         log.info("Logged in!")
 
     def buy(self, delay=5, test=False, model=""):
-        selector = '//a[@id="LFrame_btnAddToCart"]'
-        associate_code = ""
         if test:
-            model_name = "test"
-            url = "https://www.evga.com/products/product.aspx?pn=08G-P4-3289-KR"
-            self.driver.get(url + associate_code)
-            selenium_utils.wait_for_page(
+            log.info("Refreshing Page Until Title Matches ...")
+            selenium_utils.wait_for_title(
                 self.driver,
-                "EVGA - Products - EVGA GeForce RTX 2080 SUPER FTW3 HYDRO COPPER GAMING, 08G-P4-3289-KR, 8GB GDDR6, RGB LED, iCX2 Technology, Metal Backplate - 08G-P4-3289-KR",
+                "EVGA - Products - Graphics - GeForce 16 Series Family - GTX 1660",
+                "https://www.evga.com/products/ProductList.aspx?type=0&family=GeForce+16+Series+Family&chipset=GTX+1660",
             )
         else:
-            models = {
-                "ftw3": [
-                    "https://www.evga.com/products/product.aspx?pn=10G-P5-3895-KR",
-                    "EVGA - Products - EVGA GeForce RTX 3080 FTW3 GAMING, 10G-P5-3895-KR, 10GB GDDR6X, iCX3 Technology, ARGB LED, Metal Backplate - 10G-P5-3895-KR",
-                ],
-                "xc3": [
-                    "https://www.evga.com/products/product.aspx?pn=10G-P5-3883-KR",
-                    "EVGA - Products - EVGA GeForce RTX 3080 XC3 GAMING, 10G-P5-3883-KR, 10GB GDDR6X, iCX3 Cooling, ARGB LED, Metal Backplate - 10G-P5-3883-KR",
-                ],
-                "xc3ultra": [
-                    "https://www.evga.com/products/product.aspx?pn=10G-P5-3885-KR",
-                    "EVGA - Products - EVGA GeForce RTX 3080 XC3 ULTRA GAMING, 10G-P5-3885-KR, 10GB GDDR6X, iCX3 Cooling, ARGB LED, Metal Backplate - 10G-P5-3885-KR",
-                ],
-                "xc3black": [
-                    "https://www.evga.com/products/product.aspx?pn=10G-P5-3881-KR",
-                    "EVGA - Products - EVGA GeForce RTX 3080 XC3 BLACK GAMING, 10G-P5-3881-KR, 10GB GDDR6X, iCX3 Cooling, ARGB LED - 10G-P5-3881-KR",
-                ],
-                "ftw3ultra": [
-                    "https://www.evga.com/products/product.aspx?pn=10G-P5-3897-KR",
-                    "EVGA - Products - EVGA GeForce RTX 3080 FTW3 ULTRA GAMING, 10G-P5-3897-KR, 10GB GDDR6X, iCX3 Technology, ARGB LED, Metal Backplate - 10G-P5-3897-KR",
-                ],
-                "any": [
-                    "https://www.evga.com/products/productlist.aspx?type=0&family=GeForce+30+Series+Family&chipset=RTX+3080",
-                    "EVGA - Products - Graphics - GeForce 30 Series Family - RTX 3080",
-                ],
-            }
-            if model:
-                self.driver.get(models[model][0] + associate_code)
-                selenium_utils.wait_for_page(self.driver, models[model][1])
-            else:
-                model = "any"
-                selector = '//input[@class="btnBigAddCart"]'
-                self.driver.get(models["any"][0] + associate_code)
-                selenium_utils.wait_for_page(self.driver, models["any"][1])
+            log.info("Refreshing Page Until Title Matches ...")
+            selenium_utils.wait_for_title(
+                self.driver,
+                "EVGA - Products - Graphics - GeForce 30 Series Family - RTX "
+                + self.card_series,
+                "https://www.evga.com/products/productlist.aspx?type=0&family=GeForce+30+Series+Family&chipset=RTX+"
+                + self.card_series,
+            )
+
+        log.info("matched chipset=RTX+" + self.card_series + "!")
+
+        # check for card
+        log.info("On GPU list Page")
+        card_btn = self.driver.find_elements_by_xpath(
+            "//a[@href='/products/product.aspx?pn=" + self.card_pn + "']"
+        )
+        while not card_btn:
+            log.debug("Refreshing page for GPU")
+            self.driver.refresh()
+            card_btn = self.driver.find_elements_by_xpath(
+                "//a[@href='/products/product.aspx?pn=" + self.card_pn + "']"
+            )
+            sleep(delay)
+
+        card_btn[0].click()
 
         #  Check for stock
         log.info("On GPU Page")
-        atc_buttons = self.driver.find_elements_by_xpath(selector)
-        while not atc_buttons:
-            if self.driver.current_url == models[model][0] + associate_code:
-                log.debug("Refreshing page for " + model)
-                self.driver.refresh()
-            else:
-                log.debug("Error page detected. Redirecting...")
-                self.driver.get(models[model][0] + associate_code)
-            atc_buttons = self.driver.find_elements_by_xpath(selector)
-            sleep(delay)
-
-        # send notification
-        self.notification_handler.send_notification(
-            f"EVGA BOT: " + model_name + " in stock! Attempting to place order..."
+        atc_buttons = self.driver.find_elements_by_xpath(
+            '//input[@class="btnBigAddCart"]'
         )
+        while not atc_buttons:
+            log.debug("Refreshing page for GPU")
+            self.driver.refresh()
+            atc_buttons = self.driver.find_elements_by_xpath(
+                '//input[@class="btnBigAddCart"]'
+            )
+            sleep(delay)
 
         #  Add to cart
         atc_buttons[0].click()

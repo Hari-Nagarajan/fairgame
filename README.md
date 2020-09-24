@@ -167,6 +167,8 @@ Make a copy of `evga_config.template_json` to `evga_config.json`:
 {
   "username": "hari@",
   "password": "password!",
+  "card_pn": "10G-P5-3895-KR",
+  "card_series": "3080",
   "credit_card" : {
             "name": "Hari ",
             "number": "234234",
@@ -183,9 +185,16 @@ Test run command (Uses old gpu list and then stops before finishing the order)
 Autobuy command:
 `python app.py evga --model [indentifier]`
 
-These are the available identifiers: xc3, xc3black, xc3ultra, ftw3, ftw3ultra
+These are the series: "3090" or "3080" (any should work, untested)
 
-If model is not specified, it will select the first available card on the page.
+P/N numbers can be found in URLs or on product pages such as newegg. They look like this:
+10G-P5-3895-KR
+10G-P5-3881-KR
+10G-P5-3885-KR
+![EVGA PN Screenshot](evga_pn.png)
+
+if it doesn't load the correct page title (since the 3090 isn't listed yet), it will refresh every second until the correct page is loaded.
+
 
 ### Notifications
 This uses a notifications handler that will support multiple notification channels. 
