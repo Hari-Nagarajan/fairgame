@@ -18,6 +18,7 @@ NVIDIA_PRODUCT_API = "https://api.nvidia.partners/edge/product/search?page=1&lim
 NVIDIA_CART_URL = "https://store.nvidia.com/store?Action=AddItemToRequisition&SiteID=nvidia&Locale=en_US&productID={product_id}&quantity=1"
 NVIDIA_TOKEN_URL = "https://store.nvidia.com/store/nvidia/SessionToken"
 NVIDIA_STOCK_API = "https://api-prod.nvidia.com/direct-sales-shop/DR/products/{locale}/USD/{product_id}"
+NVIDIA_ADD_TO_CART_API = "https://api-prod.nvidia.com/direct-sales-shop/DR/add-to-cart"
 
 GPU_DISPLAY_NAMES = {
     "2060S": "NVIDIA GEFORCE RTX 2060 SUPER",
@@ -201,7 +202,6 @@ class NvidiaBuyer:
         self.notification_handler = NotificationHandler()
 
         self.get_product_ids()
-        print(self.product_ids)
 
     def map_locales(self):
         if self.cli_locale == "de_at":
@@ -244,23 +244,25 @@ class NvidiaBuyer:
         pass
         try:
             log.info(
-                f"Checking stock for {product_id} at {self.interval} second intervals."
+                f"Attempting to add {product_id} to cart at {self.interval} second intervals."
             )
-            while not self.is_in_stock(product_id) and self.enabled:
+            cart_success, cart_url = self.get_cart_url(product_id)
+            while not cart_success and self.enabled:
                 self.attempt = self.attempt + 1
                 time_delta = str(datetime.now() - self.started_at).split(".")[0]
                 with Spinner.get(
-                    f"Still working (attempt {self.attempt}, have been running for {time_delta})..."
+                    f"Adding to cart (attempt {self.attempt}, have been running for {time_delta})..."
                 ) as s:
                     sleep(self.interval)
+                cart_success, cart_url = self.get_cart_url(product_id)
             if self.enabled:
-                log.info(f"{self.gpu_long_name} is in stock. Go buy it.")
-                cart_url = self.open_cart_url(product_id)
+                log.info(f"{self.gpu_long_name} added to cart.")
                 self.notification_handler.send_notification(
                     f" {self.gpu_long_name} with product ID: {product_id} in "
                     f"stock: {cart_url}"
                 )
                 self.enabled = False
+                webbrowser.open(cart_url)
         except Timeout:
             log.error("Had a timeout error.")
             self.buy(product_id)
@@ -278,25 +280,41 @@ class NvidiaBuyer:
         else:
             return False
 
+    def get_cart_url(self, product_id):
+        success, token = self.get_session_token()
+        if not success:
+            return False, ""
 
-
-    def open_cart_url(self, product_id):
-        STORE_URLS = {
-            "3090": "/geforce/graphics-cards/30-series/rtx-3090",
-            "3080": "/geforce/graphics-cards/30-series/rtx-3080",
-            "3070": "/geforce/graphics-cards/30-series/rtx-3070",
-            "2060S": "/geforce/graphics-cards/rtx-2060-super"
+        data = {
+            "products": [
+                {
+                    "productId": product_id,
+                    "quantity": 1
+                }
+            ]
         }
+        headers = DEFAULT_HEADERS.copy()
+        headers["locale"] = self.locale
+        headers["nvidia_shop_id"] = token
+        headers["Content-Type"] = "application/json"
+        response = self.session.post(url=NVIDIA_ADD_TO_CART_API, headers=headers, data=json.dumps(data))
+        response_json = response.json()
+        if "location" in response_json:
+            return True, response_json["location"]
 
-        log.info("Opening cart.")
-        # params = {
-        #     "Action": "AddItemToRequisition",
-        #     "SiteID": "nvidia",
-        #     "Locale": self.locale,
-        #     "productID": product_id,
-        #     "quantity": 1,
-        # }
-        # url = furl(NVIDIA_CART_URL).set(params).url
-        url = f"https://www.nvidia.com/{self.locale.replace('_', '-')}{STORE_URLS[self.gpu]}"
-        webbrowser.open_new_tab(url)
-        return url
+        return False, ""
+
+    def get_session_token(self):
+        params = {
+            "format": "json",
+            "locale": self.locale
+        }
+        headers = DEFAULT_HEADERS.copy()
+        headers['locale'] = self.locale
+
+        response = self.session.get(NVIDIA_TOKEN_URL, headers=DEFAULT_HEADERS, params=params)
+        response_json = response.json()
+        if "session_token" not in response_json:
+            log.error("Error getting session token.")
+            return False, ""
+        return True, response_json["session_token"]
