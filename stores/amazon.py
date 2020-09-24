@@ -1,4 +1,5 @@
 import time
+import hashlib
 
 from chromedriver_py import binary_path  # this will get you the path variable
 from selenium import webdriver
@@ -13,17 +14,18 @@ from notifications.notifications import NotificationHandler
 from utils.logger import log
 from utils.selenium_utils import options, enable_headless, wait_for_element
 
-options.add_argument("user-data-dir=.profile-amz")
 
 BASE_URL = "https://www.amazon.com/"
 LOGIN_URL = "https://www.amazon.com/ap/signin?openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2Fwww.amazon.com%2F%3Fref_%3Dnav_custrec_signin&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.assoc_handle=usflex&openid.mode=checkid_setup&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&"
 
 
 class Amazon:
-    def __init__(self, username, password, headless=False):
+    def __init__(self, username, password, item_url, headless=False):
         self.notification_handler = NotificationHandler()
         if headless:
             enable_headless()
+        h = hashlib.md5(item_url.encode()).hexdigest()
+        options.add_argument(f"user-data-dir=.profile-amz-{h}")
         self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
         self.wait = WebDriverWait(self.driver, 10)
         self.username = username
@@ -33,7 +35,7 @@ class Amazon:
             log.info("Already logged in")
         else:
             self.login()
-        time.sleep(30)
+        time.sleep(15)
 
     def is_logged_in(self):
         try:
