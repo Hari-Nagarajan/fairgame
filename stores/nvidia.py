@@ -253,11 +253,15 @@ class NvidiaBuyer:
                 ) as s:
                     sleep(self.interval)
             if self.enabled:
-                subprocess.Popen('python playmusic.py', creationflags=subprocess.CREATE_NEW_CONSOLE)
+                subprocess.Popen(
+                    "python playmusic.py", creationflags=subprocess.CREATE_NEW_CONSOLE
+                )
                 log.info(f"{self.gpu_long_name} is in stock. Go buy it.")
                 cart_url = self.open_cart_url(product_id)
-                self.notification_handler.send_notification(f" {self.gpu_long_name} with product ID: {product_id} in "
-                                                            f"stock: {cart_url}")
+                self.notification_handler.send_notification(
+                    f" {self.gpu_long_name} with product ID: {product_id} in "
+                    f"stock: {cart_url}"
+                )
                 self.enabled = False
         except Timeout:
             log.error("Had a timeout error.")
