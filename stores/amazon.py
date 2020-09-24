@@ -64,7 +64,7 @@ class Amazon:
                 presence_of_element_located((By.ID, "productTitle"))
             )
             log.info(f"Loaded page for {product_title.text}")
-            item = product_title.text
+            item = product_title.text[:100].strip()
         except:
             log.error(self.driver.current_url)
 
@@ -77,7 +77,7 @@ class Amazon:
         while not self.driver.find_elements_by_xpath('//*[@id="buy-now-button"]'):
             try:
                 self.driver.refresh()
-                log.info(f"Refreshing page for {item}")
+                log.info(f"Refreshing for {item}...")
                 availability = self.wait.until(
                     presence_of_element_located((By.ID, "availability"))
                 ).text.replace("\n", " ")
