@@ -278,14 +278,12 @@ class NvidiaBuyer:
         else:
             return False
 
-
-
     def open_cart_url(self, product_id):
         STORE_URLS = {
             "3090": "/geforce/graphics-cards/30-series/rtx-3090",
             "3080": "/geforce/graphics-cards/30-series/rtx-3080",
             "3070": "/geforce/graphics-cards/30-series/rtx-3070",
-            "2060S": "/geforce/graphics-cards/rtx-2060-super"
+            "2060S": "/geforce/graphics-cards/rtx-2060-super",
         }
 
         log.info("Opening cart.")

@@ -5,8 +5,9 @@ from playsound import playsound
 
 from utils.logger import log
 
-PROJECT_DIR = path.abspath(path.dirname(path.dirname(__file__)));
+PROJECT_DIR = path.abspath(path.dirname(path.dirname(__file__)))
 NOTIFICATION_SOUND_PATH = "notify.mp3"
+
 
 class AudioHandler:
     enabled = False
@@ -25,5 +26,7 @@ class AudioHandler:
             playsound(NOTIFICATION_SOUND_PATH, True)
         except Exception as e:
             log.error(e)
-            log.warn("Error playing notification sound. Disabling local audio notifications.")
+            log.warn(
+                "Error playing notification sound. Disabling local audio notifications."
+            )
             self.enabled = False
