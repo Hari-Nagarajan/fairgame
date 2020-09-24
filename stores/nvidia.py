@@ -216,7 +216,10 @@ class NvidiaBuyer:
         return self.cli_locale
 
     def get_product_ids(self):
-        self.product_ids = [PRODUCT_IDS[self.locale][self.gpu]]
+        if isinstance(PRODUCT_IDS[self.locale][self.gpu], list):
+            self.product_ids = PRODUCT_IDS[self.locale][self.gpu]
+        if isinstance(PRODUCT_IDS[self.locale][self.gpu], str):
+            self.product_ids = [PRODUCT_IDS[self.locale][self.gpu]]
 
     def run_items(self):
         log.info(
