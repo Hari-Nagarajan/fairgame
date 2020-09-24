@@ -295,11 +295,12 @@ class NvidiaBuyer:
         response = self.session.post(
             url=NVIDIA_ADD_TO_CART_API, headers=headers, data=json.dumps(data)
         )
-        if response.status_code == 200:
+        if response.status_code == 203:
             response_json = response.json()
             if "location" in response_json:
                 return True, response_json["location"]
         else:
+            log.error(response.text)
             log.error(f"Add to cart failed with {response.status_code}. This is likely an error with nvidia's API.")
         return False, ""
 
