@@ -83,7 +83,10 @@ def amazon(
         selenium_utils.no_amazon_image()
 
     amzn_obj = Amazon(
-        username=amazon_email, password=amazon_password, headless=headless
+        username=amazon_email,
+        password=amazon_password,
+        headless=headless,
+        item_url=amazon_item_url,
     )
     amzn_obj.run_item(item_url=amazon_item_url, price_limit=amazon_price_limit)
 
