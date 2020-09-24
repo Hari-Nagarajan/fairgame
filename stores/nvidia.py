@@ -164,8 +164,10 @@ class InvalidAutoBuyConfigException(Exception):
             f"Check the README and update your `autobuy_config.json` file. Your autobuy config is {json.dumps(provided_json, indent=2)}"
         )
 
+
 PRODUCT_IDS_FILE = "stores/store_data/nvidia_product_ids.json"
 PRODUCT_IDS = json.load(open(PRODUCT_IDS_FILE))
+
 
 class NvidiaBuyer:
     def __init__(self, gpu, locale="en_us", test=False, interval=5):
@@ -261,7 +263,7 @@ class NvidiaBuyer:
     def is_in_stock(self, product_id):
         response = self.session.get(
             NVIDIA_STOCK_API.format(product_id=product_id, locale=self.locale),
-            headers=DEFAULT_HEADERS
+            headers=DEFAULT_HEADERS,
         )
         log.debug(f"Stock check response code: {response.status_code}")
         if response.status_code != 200:
@@ -278,9 +280,8 @@ class NvidiaBuyer:
             "SiteID": "nvidia",
             "Locale": self.locale,
             "productID": product_id,
-            "quantity": 1
+            "quantity": 1,
         }
         url = furl(NVIDIA_CART_URL).set(params)
         webbrowser.open_new_tab(url.url)
         return url.url
-
