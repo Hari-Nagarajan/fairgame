@@ -11,8 +11,11 @@ from selenium.common.exceptions import NoSuchElementException
 
 from notifications.notifications import NotificationHandler
 from utils.logger import log
-from utils.selenium_utils import options, enable_headless
+from utils.selenium_utils import options, enable_headless, wait_for_element
 
+options.add_argument("user-data-dir=.profile-amz")
+
+BASE_URL = "https://www.amazon.com/"
 LOGIN_URL = "https://www.amazon.com/ap/signin?openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2Fwww.amazon.com%2F%3Fref_%3Dnav_custrec_signin&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.assoc_handle=usflex&openid.mode=checkid_setup&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&"
 
 
@@ -25,8 +28,19 @@ class Amazon:
         self.wait = WebDriverWait(self.driver, 10)
         self.username = username
         self.password = password
-        self.login()
+        self.driver.get(BASE_URL)
+        if self.is_logged_in():
+            log.info("Already logged in")
+        else:
+            self.login()
         time.sleep(3)
+
+    def is_logged_in(self):
+        try:
+            text = wait_for_element(self.driver, "nav-link-accountList").text
+            return "Hello, Sign in" not in text
+        except Exception:
+            return False
 
     def login(self):
         self.driver.get(LOGIN_URL)
