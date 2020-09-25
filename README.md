@@ -51,63 +51,49 @@ Commands:
 
 ## Usage
 
-Ok now we have a basic GUI. GUIs aren't my strong suit, but pretty much the top box is the settings for amazon and
-the bottom box is the settings for Nvidia. 
-
 ### Amazon 
-- Open a chrome browser
-- Log into Amazon
-- Go to a product page
-- Refresh the page until the 'Buy Now' option exists
-- If the price is under the "Price Limit", it will buy the item.
+
+***Warning***: This will buy every ASIN that is in stock the first time anything is in stock. So there is a possibility you can end up with multiple items.
+Thankfully Amazon.com has 1 click order canceling so its not a huge issue. We are working on a solution for this and price limits soon.
 
 **Amazon flags**
 ```
 --no-image : prevents images from loading on amazon webdriver
+--test : This will not finish the checkout
 ```
 
+Make a copy of `amazon_config.template_json` to `amazon_config.json`:
+```
+{
+  "username": "",
+  "password": "",
+  "asin_list": ["B07JH53M4T","B08HR7SV3M"],
+  "amazon_website": "amazon.com"
+}
+```
 Example usage:
+
 ```
-python app.py amazon
-Amazon Email []: hari@email.com
-Amazon Password []: mypassword
-Amazon Item URL []: https://www.amazon.com/dp/B08HHDP9DW
-Maximum Price to Pay [1000]: 1000
+python app.py amazon --test
 ...
-INFO: "2020-09-19 00:07:02,199 - Logged in as hari@email.com
-INFO: "2020-09-19 00:07:05,200 - Loading page: https://www.amazon.com/dp/B08HHDP9DW
-INFO: "2020-09-19 00:07:06,452 - Loaded page for ASUS TUF Gaming NVIDIA GeForce RTX 3080 Graphics Card (PCIe 4.0, 10GB GDDR6X, HDMI 2.1, DisplayPort 1.4a, Dual Ball Fan Bearings, Military-Grade Certification, GPU Tweak II)
-INFO: "2020-09-19 00:07:06,474 - Initial availability message is: Currently unavailable. We don't know when or if this item will be back in stock.
-INFO: "2020-09-19 00:07:06,494 - Refreshing page.
-INFO: "2020-09-19 00:07:07,695 - Current availability message is: Currently unavailable. We don't know when or if this item will be back in stock.
+INFO: "2020-09-25 14:40:49,987 - Initializing notification handlers
+INFO: "2020-09-25 14:40:49,988 - Enabled Handlers: ['Audio', 'Twilio', 'Pavlok']
+INFO: "2020-09-25 14:40:54,141 - Already logged in
+INFO: "2020-09-25 14:40:54,141 - Checking stock for items.
+INFO: "2020-09-25 14:40:54,614 - One or more items in stock!
+INFO: "2020-09-25 14:40:54,718 - Pavlok zaped
+INFO: "2020-09-25 14:40:54,848 - SMS Sent: SM68afc07b580f45d1b2527ec4b668f2d8
+INFO: "2020-09-25 14:40:58,771 - Clicking continue.
+INFO: "2020-09-25 14:41:03,816 - Waiting for Cart Page
+INFO: "2020-09-25 14:41:03,826 - On cart page.
+INFO: "2020-09-25 14:41:03,826 - clicking checkout.
+INFO: "2020-09-25 14:41:04,287 - Waiting for Place Your Order Page
+INFO: "2020-09-25 14:41:04,332 - Finishing checkout
+INFO: "2020-09-25 14:41:04,616 - Clicking Button: <selenium.webdriver.remote.webelement.WebElement (session="89f5bfa2d22cf963433ed241494d68c1", element="b3fb2797-383c-413d-8d79-1ddd63013394")>
+INFO: "2020-09-25 14:41:04,617 - Waiting for Order completed page.
+INFO: "2020-09-25 14:41:04,617 - This is a test, so we don't need to wait for the order completed page.
+INFO: "2020-09-25 14:41:04,617 - Order Placed.
 ```
-
-You can also save your amazon config to your environment variables. This will set them as the defaults in the CLI to save time entering them each time.
-
-**MacOS and Linux Bash Shells**
-```
-export  amazon_email=user@email.com
-export  amazon_password=supersecurepassword
-export  amazon_item_url=https://www.amazon.com/dp/B08HHDP9DW?
-export  amazon_price_limit=1000
-```
-
-**Linux csh/tcsh**
-```
-setenv  amazon_email user@email.com
-setenv  amazon_password supersecurepassword
-setenv  amazon_item_url https://www.amazon.com/dp/B08HHDP9DW?
-setenv  amazon_price_limit 1000
-```
-
-**Windows**
-```
-set amazon_email=user@email.com
-set amazon_password=supersecurepassword
-set amazon_item_url=https://www.amazon.com/dp/B08HHDP9DW?
-set amazon_price_limit=1000
-```
-
 
 ### Nvidia 
 Will check stock and open an add to cart link in your browser and send notifications.
