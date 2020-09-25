@@ -149,11 +149,19 @@ class Amazon:
             self.login()
 
     def finalize_order_button(self, test):
-        button_xpaths = ['//*[@id="bottomSubmitOrderButtonId"]/span/input', '//*[@id="placeYourOrder"]/span/input', '//*[@id="submitOrderButtonId"]/span/input', '//input[@name="placeYourOrder1"]']
+        button_xpaths = [
+            '//*[@id="bottomSubmitOrderButtonId"]/span/input',
+            '//*[@id="placeYourOrder"]/span/input',
+            '//*[@id="submitOrderButtonId"]/span/input',
+            '//input[@name="placeYourOrder1"]',
+        ]
         button = None
         for button_xpath in button_xpaths:
             try:
-                if self.driver.find_element_by_xpath(button_xpath).is_displayed() and self.driver.find_element_by_xpath(button_xpath).is_enabled():
+                if (
+                    self.driver.find_element_by_xpath(button_xpath).is_displayed()
+                    and self.driver.find_element_by_xpath(button_xpath).is_enabled()
+                ):
                     button = self.driver.find_element_by_xpath(button_xpath)
             except NoSuchElementException:
                 log.debug(f"{button_xpath}, lets try a different one.")
