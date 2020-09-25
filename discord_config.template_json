@@ -1,3 +1,4 @@
 {
-  "webhook_url": "Discord webhook url here"
+  "webhook_url": "Discord webhook url here",
+  "user_id": "Optional user id to ping here"
 }
