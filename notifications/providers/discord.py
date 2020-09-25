@@ -27,7 +27,11 @@ class DiscordHandler:
 
     def send(self, message_body):
         try:
-            message = f"<@{self.user_id}> {message_body}" if self.user_id.isdigit() else message_body
+            message = (
+                f"<@{self.user_id}> {message_body}"
+                if self.user_id.isdigit()
+                else message_body
+            )
             web_hook = DiscordWebhook(url=self.webhook_url, content=message)
             response = web_hook.execute()
             log.info(f"Discord hook status: {response.status_code}")
