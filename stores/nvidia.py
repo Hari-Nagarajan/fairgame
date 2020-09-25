@@ -182,6 +182,7 @@ class NvidiaBuyer:
         self.started_at = datetime.now()
         self.test = test
         self.interval = interval
+        self.is_finished = False
 
         self.gpu_long_name = GPU_DISPLAY_NAMES[gpu]
 
@@ -240,29 +241,41 @@ class NvidiaBuyer:
             self.get_product_ids()
             self.run_items()
 
+    def try_buy(self, product_id):
+      if not self.enabled:
+          return
+      if self.is_in_stock(product_id):
+          log.debug(f"Attempting checkout of: {product_id}")
+          self.enabled = False
+          cart_success, cart_url = self.get_cart_url(product_id)
+          if not cart_success:
+              log.warn(f"Checkout failed for: {product_id}")
+              self.enabled = True
+              return
+          self.is_finished = True
+          log.info(f"{self.gpu_long_name} added to cart.")
+          webbrowser.open(cart_url)
+          self.notification_handler.send_notification(
+              f" {self.gpu_long_name} with product ID: {product_id} in "
+              f"stock: {cart_url}"
+          )
+      else:
+        log.debug(f"{self.gpu_long_name} is currently not in stock.")
+
     def buy(self, product_id):
         pass
         try:
             log.info(f"Stock Check {product_id} at {self.interval} second intervals.")
-            while not self.is_in_stock(product_id):
-                self.attempt = self.attempt + 1
-                time_delta = str(datetime.now() - self.started_at).split(".")[0]
-                with Spinner.get(
-                    f"Stock Check ({self.attempt}, have been running for {time_delta})..."
-                ) as s:
-                    sleep(self.interval)
-            if self.enabled:
-                cart_success, cart_url = self.get_cart_url(product_id)
-                if cart_success:
-                    log.info(f"{self.gpu_long_name} added to cart.")
-                    self.enabled = False
-                    webbrowser.open(cart_url)
-                    self.notification_handler.send_notification(
-                        f" {self.gpu_long_name} with product ID: {product_id} in "
-                        f"stock: {cart_url}"
-                    )
-                else:
-                    self.buy(product_id)
+            with ThreadPoolExecutor(max_workers=5) as executor:
+                while not self.is_finished:
+                    executor.submit(self.try_buy(product_id))
+                    self.attempt = self.attempt + 1
+                    time_delta = str(datetime.now() - self.started_at).split(".")[0]
+                    with Spinner.get(
+                        f"Stock Check ({self.attempt}, has been running for {time_delta})..."
+                    ) as s:
+                        sleep(self.interval)
+                    
         except Timeout:
             log.error("Had a timeout error.")
             self.buy(product_id)
