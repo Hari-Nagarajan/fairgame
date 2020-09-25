@@ -149,7 +149,13 @@ class Amazon:
             self.login()
 
     def finalize_order_button(self, test, retry=0):
-        button_xpaths = ['//*[@id="bottomSubmitOrderButtonId"]/span/input', '//*[@id="placeYourOrder"]/span/input', '//*[@id="submitOrderButtonId"]/span/input', '//input[@name="placeYourOrder1"]']
+        button_xpaths = [
+            '//*[@id="bottomSubmitOrderButtonId"]/span/input',
+            '//*[@id="placeYourOrder"]/span/input',
+            '//*[@id="submitOrderButtonId"]/span/input',
+            '//input[@name="placeYourOrder1"]',
+        ]
+
     def finalize_order_button(self, test):
         button_xpaths = [
             '//*[@id="bottomSubmitOrderButtonId"]/span/input',
@@ -177,9 +183,11 @@ class Amazon:
             if retry < 3:
                 log.info("Couldn't find button. Lets retry in a sec.")
                 time.sleep(5)
-                self.finalize_order_button(test, retry+1)
+                self.finalize_order_button(test, retry + 1)
             else:
-                log.info("Couldn't find button after 3 retries. Open a GH issue for this.")
+                log.info(
+                    "Couldn't find button after 3 retries. Open a GH issue for this."
+                )
 
     def wait_for_order_completed(self, test):
         if not test:
