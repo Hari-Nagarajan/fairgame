@@ -242,25 +242,25 @@ class NvidiaBuyer:
             self.run_items()
 
     def try_buy(self, product_id):
-      if not self.enabled:
-          return
-      if self.is_in_stock(product_id):
-          log.debug(f"Attempting checkout of: {product_id}")
-          self.enabled = False
-          cart_success, cart_url = self.get_cart_url(product_id)
-          if not cart_success:
-              log.warn(f"Checkout failed for: {product_id}")
-              self.enabled = True
-              return
-          self.is_finished = True
-          log.info(f"{self.gpu_long_name} added to cart.")
-          webbrowser.open(cart_url)
-          self.notification_handler.send_notification(
-              f" {self.gpu_long_name} with product ID: {product_id} in "
-              f"stock: {cart_url}"
-          )
-      else:
-        log.debug(f"{self.gpu_long_name} is currently not in stock.")
+        if not self.enabled:
+            return
+        if self.is_in_stock(product_id):
+            log.debug(f"Attempting checkout of: {product_id}")
+            self.enabled = False
+            cart_success, cart_url = self.get_cart_url(product_id)
+            if not cart_success:
+                log.warn(f"Checkout failed for: {product_id}")
+                self.enabled = True
+                return
+            self.is_finished = True
+            log.info(f"{self.gpu_long_name} added to cart.")
+            webbrowser.open(cart_url)
+            self.notification_handler.send_notification(
+                f" {self.gpu_long_name} with product ID: {product_id} in "
+                f"stock: {cart_url}"
+            )
+        else:
+            log.debug(f"{self.gpu_long_name} is currently not in stock.")
 
     def buy(self, product_id):
         pass
@@ -275,7 +275,7 @@ class NvidiaBuyer:
                         f"Stock Check ({self.attempt}, has been running for {time_delta})..."
                     ) as s:
                         sleep(self.interval)
-                    
+
         except Timeout:
             log.error("Had a timeout error.")
             self.buy(product_id)
