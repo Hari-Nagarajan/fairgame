@@ -1,5 +1,6 @@
 {
   "username": "",
   "password": "",
-  "asin_list": ["B07JH53M4T","B08HR7SV3M"]
+  "asin_list": ["B07JH53M4T","B08HR7SV3M"],
+  "amazon_website": "amazon.co.uk"
 }
