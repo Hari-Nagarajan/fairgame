@@ -12,17 +12,21 @@ options.add_experimental_option("useAutomationExtension", False)
 
 
 class AnyEc:
-    """ Use with WebDriverWait to combine expected_conditions
-        in an OR.
+    """Use with WebDriverWait to combine expected_conditions
+    in an OR.
     """
+
     def __init__(self, *args):
         self.ecs = args
+
     def __call__(self, driver):
         for fn in self.ecs:
             try:
-                if fn(driver): return True
+                if fn(driver):
+                    return True
             except:
                 pass
+
 
 def no_amazon_image():
     prefs = {"profile.managed_default_content_settings.images": 2}
@@ -72,9 +76,7 @@ def wait_for_either_title(d, title1, title2, time=30):
     Uses webdriver(d) to wait for page title(title1 or title2) to become visible
     """
     try:
-        WebDriverWait(d, time).until(AnyEc(
-        ec.title_is(title1),
-        ec.title_is(title2)))
+        WebDriverWait(d, time).until(AnyEc(ec.title_is(title1), ec.title_is(title2)))
     except Exception:
         pass
 
@@ -90,12 +92,13 @@ def wait_for_any_title(d, titles, time=30):
     WebDriverWait(d, time).until(AnyEc(*my_args_list))
 
 
-
 def button_click_using_xpath(d, xpath):
     """
     Uses webdriver(d) to click a button using an XPath(xpath)
     """
-    button_menu = WebDriverWait(d, 10).until(ec.element_to_be_clickable((By.XPATH, xpath)))
+    button_menu = WebDriverWait(d, 10).until(
+        ec.element_to_be_clickable((By.XPATH, xpath))
+    )
     action = ActionChains(d)
     action.move_to_element(button_menu).pause(1).click().perform()
 

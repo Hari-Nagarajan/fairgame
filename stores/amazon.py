@@ -18,16 +18,28 @@ from utils.selenium_utils import options, enable_headless, wait_for_element
 
 AMAZON_URLS = {
     "BASE_URL": "https://www.{}/",
-    "CART_URL": "https://www.{}/gp/aws/cart/add.html"
+    "CART_URL": "https://www.{}/gp/aws/cart/add.html",
 }
 
 AUTOBUY_CONFIG_PATH = "amazon_config.json"
 
-SIGN_IN_TITLES =  ["Amazon Sign In", "Amazon Sign-In", "Amazon Anmelden"]
-SHOPING_CART_TITLES = ["Amazon.com Shopping Cart", "Amazon.co.uk Shopping Basket", "Amazon.de Basket"]
-CHECKOUT_TITLES = ["Amazon.com Checkout", "Place Your Order - Amazon.co.uk Checkout", "Place Your Order - Amazon.de Checkout"]
+SIGN_IN_TITLES = ["Amazon Sign In", "Amazon Sign-In", "Amazon Anmelden"]
+SHOPING_CART_TITLES = [
+    "Amazon.com Shopping Cart",
+    "Amazon.co.uk Shopping Basket",
+    "Amazon.de Basket",
+]
+CHECKOUT_TITLES = [
+    "Amazon.com Checkout",
+    "Place Your Order - Amazon.co.uk Checkout",
+    "Place Your Order - Amazon.de Checkout",
+]
 ORDER_COMPLETE_TITLES = ["Amazon.com Thanks You", "Thank you"]
-ADD_TO_CART_TITLES = ["Amazon.com: Please Confirm Your Action", "Amazon.de: Bitte bestätigen Sie Ihre Aktion", "Amazon.de: Please Confirm Your Action"]
+ADD_TO_CART_TITLES = [
+    "Amazon.com: Please Confirm Your Action",
+    "Amazon.de: Bitte bestätigen Sie Ihre Aktion",
+    "Amazon.de: Please Confirm Your Action",
+]
 
 
 class Amazon:
@@ -48,23 +60,29 @@ class Amazon:
                     self.amazon_website = config.get("amazon_website", "amazon.com")
                     assert isinstance(self.asin_list, list)
                 except Exception:
-                    raise InvalidAutoBuyConfigException("amazon_config.json file not formatted properly.")
+                    raise InvalidAutoBuyConfigException(
+                        "amazon_config.json file not formatted properly."
+                    )
         else:
             raise InvalidAutoBuyConfigException("Missing amazon_config.json file.")
 
         for key in AMAZON_URLS.keys():
             AMAZON_URLS[key] = AMAZON_URLS[key].format(self.amazon_website)
         print(AMAZON_URLS)
-        self.driver.get(AMAZON_URLS['BASE_URL'])
+        self.driver.get(AMAZON_URLS["BASE_URL"])
         if self.is_logged_in():
             log.info("Already logged in")
         else:
             log.info("Lets log in.")
-            selenium_utils.button_click_using_xpath(self.driver, '//*[@id="nav-link-accountList"]/div/span')
+            selenium_utils.button_click_using_xpath(
+                self.driver, '//*[@id="nav-link-accountList"]/div/span'
+            )
             selenium_utils.wait_for_any_title(self.driver, SIGN_IN_TITLES)
             self.login()
             log.info("Waiting 15 seconds.")
-            time.sleep(15)  # We can remove this once I get more info on the phone verification page.
+            time.sleep(
+                15
+            )  # We can remove this once I get more info on the phone verification page.
 
     def is_logged_in(self):
         try:
@@ -96,19 +114,19 @@ class Amazon:
         log.info("Checking stock for items.")
         while not self.something_in_stock():
             time.sleep(delay)
-        self.notification_handler.send_notification("Your items on Amazon.com were found!")
+        self.notification_handler.send_notification(
+            "Your items on Amazon.com were found!"
+        )
         self.checkout(test=test)
 
     def something_in_stock(self):
-        params = {
-            'anticache': str(secrets.token_urlsafe(32))
-        }
+        params = {"anticache": str(secrets.token_urlsafe(32))}
 
         for x in range(len(self.asin_list)):
-            params[f'ASIN.{x + 1}'] = self.asin_list[x]
-            params[f'Quantity.{x + 1}'] = 1
+            params[f"ASIN.{x + 1}"] = self.asin_list[x]
+            params[f"Quantity.{x + 1}"] = 1
 
-        f = furl(AMAZON_URLS['CART_URL'])
+        f = furl(AMAZON_URLS["CART_URL"])
         f.set(params)
         self.driver.get(f.url)
         selenium_utils.wait_for_any_title(self.driver, ADD_TO_CART_TITLES)
@@ -131,7 +149,10 @@ class Amazon:
             self.login()
 
     def finalize_order_button(self, test):
-        button_xpaths = ['//*[@id="bottomSubmitOrderButtonId"]/span/input', '//*[@id="placeYourOrder"]/span/input']
+        button_xpaths = [
+            '//*[@id="bottomSubmitOrderButtonId"]/span/input',
+            '//*[@id="placeYourOrder"]/span/input',
+        ]
         button = None
         for button_xpath in button_xpaths:
             try:
@@ -150,7 +171,9 @@ class Amazon:
         if not test:
             selenium_utils.wait_for_any_title(self.driver, ORDER_COMPLETE_TITLES)
         else:
-            log.info("This is a test, so we don't need to wait for the order completed page.")
+            log.info(
+                "This is a test, so we don't need to wait for the order completed page."
+            )
 
     def checkout(self, test):
         log.info("Clicking continue.")
@@ -160,7 +183,9 @@ class Amazon:
         self.wait_for_cart_page()
 
         log.info("clicking checkout.")
-        self.driver.find_element_by_xpath('//*[@id="sc-buy-box-ptc-button"]/span/input').click()
+        self.driver.find_element_by_xpath(
+            '//*[@id="sc-buy-box-ptc-button"]/span/input'
+        ).click()
 
         log.info("Waiting for Place Your Order Page")
         self.wait_for_pyo_page()

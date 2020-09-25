@@ -43,6 +43,7 @@ def amazon(no_image, headless, test):
     amzn_obj = Amazon(headless=headless)
     amzn_obj.run_item(test=test)
 
+
 @click.command()
 @click.option("--sku", type=str, required=True)
 @click.option("--headless", is_flag=True)

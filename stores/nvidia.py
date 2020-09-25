@@ -158,8 +158,6 @@ class ProductIDChangedException(Exception):
         super().__init__("Product IDS changed. We need to re run.")
 
 
-
-
 PRODUCT_IDS_FILE = "stores/store_data/nvidia_product_ids.json"
 PRODUCT_IDS = json.load(open(PRODUCT_IDS_FILE))
 
