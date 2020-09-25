@@ -61,7 +61,7 @@ class Amazon:
         else:
             log.info("Lets log in.")
             selenium_utils.button_click_using_xpath(self.driver, '//*[@id="nav-link-accountList"]/div/span')
-            selenium_utils.wait_for_page(self.driver, "Amazon Sign In")
+            selenium_utils.wait_for_any_title(self.driver, SIGN_IN_TITLES)
             self.login()
             log.info("Waiting 15 seconds.")
             time.sleep(15)  # We can remove this once I get more info on the phone verification page.
