@@ -1,41 +1,53 @@
+import json
+import secrets
 import time
-import hashlib
+from os import path
 
 from chromedriver_py import binary_path  # this will get you the path variable
+from furl import furl
 from selenium import webdriver
-from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.expected_conditions import presence_of_element_located
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.common.exceptions import TimeoutException
-from selenium.common.exceptions import NoSuchElementException
 
 from notifications.notifications import NotificationHandler
+from utils import selenium_utils
+from utils.json_utils import InvalidAutoBuyConfigException
 from utils.logger import log
 from utils.selenium_utils import options, enable_headless, wait_for_element
 
-
 BASE_URL = "https://www.amazon.com/"
 LOGIN_URL = "https://www.amazon.com/ap/signin?openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2Fwww.amazon.com%2F%3Fref_%3Dnav_custrec_signin&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.assoc_handle=usflex&openid.mode=checkid_setup&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&"
-
+CART_URL = "https://www.amazon.com/gp/aws/cart/add.html"
+AUTOBUY_CONFIG_PATH = "amazon_config.json"
 
 class Amazon:
-    def __init__(self, username, password, item_url, headless=False):
+    def __init__(self, headless=False):
         self.notification_handler = NotificationHandler()
         if headless:
             enable_headless()
-        h = hashlib.md5(item_url.encode()).hexdigest()
-        options.add_argument(f"user-data-dir=.profile-amz-{h}")
+        options.add_argument(f"user-data-dir=.profile-amz")
         self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
         self.wait = WebDriverWait(self.driver, 10)
-        self.username = username
-        self.password = password
+        if path.exists(AUTOBUY_CONFIG_PATH):
+            with open(AUTOBUY_CONFIG_PATH) as json_file:
+                try:
+                    config = json.load(json_file)
+                    self.username = config["username"]
+                    self.password = config["password"]
+                    self.asin_list = config["asin_list"]
+                    assert isinstance(self.asin_list, list)
+                except Exception:
+                    raise InvalidAutoBuyConfigException("amazon_config.json file not formatted properly.")
+
+        else:
+            raise InvalidAutoBuyConfigException("Missing amazon_config.json file.")
+
         self.driver.get(BASE_URL)
         if self.is_logged_in():
             log.info("Already logged in")
         else:
             self.login()
-            time.sleep(15)
+            time.sleep(15)  # We can remove this once I get more info on the phone verification page.
 
     def is_logged_in(self):
         try:
@@ -46,80 +58,62 @@ class Amazon:
 
     def login(self):
         self.driver.get(LOGIN_URL)
-        self.driver.find_element_by_xpath('//*[@id="ap_email"]').send_keys(
-            self.username + Keys.RETURN
-        )
+        if self.driver.find_element_by_xpath('//*[@id="ap_email"]'):
+            self.driver.find_element_by_xpath('//*[@id="ap_email"]').send_keys(
+                self.username + Keys.RETURN
+            )
         self.driver.find_element_by_xpath('//*[@id="ap_password"]').send_keys(
             self.password + Keys.RETURN
         )
 
         log.info(f"Logged in as {self.username}")
 
-    def run_item(self, item_url, price_limit=1000, delay=3):
-        log.info(f"Loading page: {item_url}")
-        self.driver.get(item_url)
-        item = ""
-        try:
-            product_title = self.wait.until(
-                presence_of_element_located((By.ID, "productTitle"))
-            )
-            log.info(f"Loaded page for {product_title.text}")
-            item = product_title.text[:100].strip()
-        except:
-            log.error(self.driver.current_url)
+    def run_item(self, delay=3):
+        log.info("Checking stock for items.")
+        while not self.something_in_stock():
+            time.sleep(delay)
+        self.notification_handler.send_notification("Your items on Amazon.com were found!")
+        self.checkout()
 
-        availability = self.driver.find_element_by_xpath(
-            '//*[@id="availability"]'
-        ).text.replace("\n", " ")
+    def something_in_stock(self):
+        params = {
+            'anticache': str(secrets.token_urlsafe(32))
+        }
 
-        log.info(f"Initial availability message is: {availability}")
+        for x in range(len(self.asin_list)):
+            params[f'ASIN.{x+1}'] = self.asin_list[x]
+            params[f'Quantity.{x+1}'] = 1
 
-        while not self.driver.find_elements_by_xpath('//*[@id="buy-now-button"]'):
-            try:
-                self.driver.refresh()
-                log.info(f"Refreshing for {item}...")
-                availability = self.wait.until(
-                    presence_of_element_located((By.ID, "availability"))
-                ).text.replace("\n", " ")
-                log.info(f"Current availability message is: {availability}")
-                time.sleep(delay)
-            except TimeoutException as _:
-                log.warn("A polling request timed out. Retrying.")
+        f = furl(CART_URL)
+        f.set(params)
+        self.driver.get(f.url)
+        selenium_utils.wait_for_page(self.driver, "Amazon.com: Please Confirm Your Action")
 
-        log.info("Item in stock, buy now button found!")
-        try:
-            price_str = self.driver.find_element_by_id("priceblock_ourprice").text
-        except NoSuchElementException as _:
-            price_str = self.driver.find_element_by_id("priceblock_dealprice").text
-        price_int = int(round(float(price_str.strip("$"))))
-        if price_int < price_limit:
-            log.info(f"Attempting to buy item for {price_int}")
-            self.buy_now()
+        if self.driver.find_elements_by_xpath('//td[@class="price item-row"]'):
+            log.info("One or more items in stock!")
+
+            return True
         else:
-            self.notification_handler.send_notification(
-                f"Item was found, but price is at {price_int} so we did not buy it."
-            )
-            log.info(f"Price was too high {price_int}")
+            return False
 
-    def buy_now(self):
-        self.driver.find_element_by_xpath('//*[@id="buy-now-button"]').click()
-        log.info("Clicking 'Buy Now'.")
+    def checkout(self, test=True):
+        log.info("Clicking continue.")
+        self.driver.find_element_by_xpath('//input[@value="add"]').click()
+        selenium_utils.wait_for_page(self.driver, "Amazon.com Shopping Cart")
 
-        try:
-            place_order = WebDriverWait(self.driver, 2).until(
-                presence_of_element_located((By.ID, "turbo-checkout-pyo-button"))
-            )
-        except:
-            log.debug("Went to check out page.")
-            place_order = WebDriverWait(self.driver, 2).until(
-                presence_of_element_located((By.NAME, "placeYourOrder1"))
-            )
+        log.info("clicking checkout.")
+        self.driver.find_element_by_xpath('//*[@id="sc-buy-box-ptc-button"]/span/input').click()
 
-        log.info("Clicking 'Place Your Order'.")
-        place_order.click()
-        self.notification_handler.send_notification(
-            f"Item was purchased! Check your Amazon account."
-        )
+        selenium_utils.wait_for_either_title(self.driver, "Amazon.com Checkout", "Amazon.com: Sign-In")
 
-    def force_stop(self):
-        self.driver.stop_client()
+        if self.driver.title == "Amazon.com: Sign in":
+            self.login()
+            selenium_utils.wait_for_page(self.driver, "Amazon.com Checkout")
+
+        log.info("Finishing checkout")
+        if not test:
+            self.driver.find_element_by_xpath('//*[@id="bottomSubmitOrderButtonId"]/span/input').click()
+
+        selenium_utils.wait_for_page(self.driver, "Amazon.com Thanks You")
+
+        log.info("Order Placed.")
