@@ -13,3 +13,8 @@ def find_values(json_repr, id):
 
     json.loads(json_repr, object_hook=_decode_dict)  # Return value ignored.
     return results
+
+
+class InvalidAutoBuyConfigException(Exception):
+    def __init__(self, message):
+        super().__init__(message)

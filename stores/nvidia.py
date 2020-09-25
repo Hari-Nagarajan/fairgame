@@ -17,7 +17,7 @@ from utils.logger import log
 NVIDIA_PRODUCT_API = "https://api.nvidia.partners/edge/product/search?page=1&limit=9&locale=en-us&category=GPU"
 NVIDIA_CART_URL = "https://store.nvidia.com/store?Action=AddItemToRequisition&SiteID=nvidia&Locale=en_US&productID={product_id}&quantity=1"
 NVIDIA_TOKEN_URL = "https://store.nvidia.com/store/nvidia/SessionToken"
-NVIDIA_STOCK_API = "https://api-prod.nvidia.com/direct-sales-shop/DR/products/{locale}/USD/{product_id}"
+NVIDIA_STOCK_API = "https://api-prod.nvidia.com/direct-sales-shop/DR/products/{locale}/{currency}/{product_id}"
 NVIDIA_ADD_TO_CART_API = "https://api-prod.nvidia.com/direct-sales-shop/DR/add-to-cart"
 
 GPU_DISPLAY_NAMES = {
@@ -26,20 +26,20 @@ GPU_DISPLAY_NAMES = {
     "3090": "NVIDIA GEFORCE RTX 3090",
 }
 
-ACCEPTED_LOCALES = [
-    "en_us",
-    "en_gb",
-    "de_de",
-    "fr_fr",
-    "it_it",
-    "es_es",
-    "nl_nl",
-    "sv_se",
-    "de_at",
-    "fr_be",
-    "da_dk",
-    "cs_cz",
-]
+CURRENCY_LOCALE_MAP = {
+    "en_us": "USD",
+    "en_gb": "GBP",
+    "de_de": "EUR",
+    "fr_fr": "EUR",
+    "it_it": "EUR",
+    "es_es": "EUR",
+    "nl_nl": "EUR",
+    "sv_se": "SEK",
+    "de_at": "EUR",
+    "fr_be": "EUR",
+    "da_dk": "DKK",
+    "cs_cz": "CZK",
+}
 
 PAGE_TITLES_BY_LOCALE = {
     "en_us": {  # Verified
@@ -156,13 +156,6 @@ AUTOBUY_CONFIG_KEYS = ["NVIDIA_LOGIN", "NVIDIA_PASSWORD"]
 class ProductIDChangedException(Exception):
     def __init__(self):
         super().__init__("Product IDS changed. We need to re run.")
-
-
-class InvalidAutoBuyConfigException(Exception):
-    def __init__(self, provided_json):
-        super().__init__(
-            f"Check the README and update your `autobuy_config.json` file. Your autobuy config is {json.dumps(provided_json, indent=2)}"
-        )
 
 
 PRODUCT_IDS_FILE = "stores/store_data/nvidia_product_ids.json"
@@ -282,7 +275,11 @@ class NvidiaBuyer:
 
     def is_in_stock(self, product_id):
         response = self.session.get(
-            NVIDIA_STOCK_API.format(product_id=product_id, locale=self.locale),
+            NVIDIA_STOCK_API.format(
+                product_id=product_id,
+                locale=self.locale,
+                currency=CURRENCY_LOCALE_MAP.get(self.locale, "USD"),
+            ),
             headers=DEFAULT_HEADERS,
         )
         log.debug(f"Stock check response code: {response.status_code}")
