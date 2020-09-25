@@ -68,12 +68,12 @@ class Amazon:
 
         log.info(f"Logged in as {self.username}")
 
-    def run_item(self, delay=3):
+    def run_item(self, delay=3, test=False):
         log.info("Checking stock for items.")
         while not self.something_in_stock():
             time.sleep(delay)
         self.notification_handler.send_notification("Your items on Amazon.com were found!")
-        self.checkout()
+        self.checkout(test=test)
 
     def something_in_stock(self):
         params = {
@@ -96,7 +96,7 @@ class Amazon:
         else:
             return False
 
-    def checkout(self, test=True):
+    def checkout(self, test):
         log.info("Clicking continue.")
         self.driver.find_element_by_xpath('//input[@value="add"]').click()
         selenium_utils.wait_for_page(self.driver, "Amazon.com Shopping Cart")

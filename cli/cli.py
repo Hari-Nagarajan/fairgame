@@ -36,15 +36,12 @@ def nvidia(gpu, locale, test, interval):
 @click.command()
 @click.option("--no-image", is_flag=True)
 @click.option("--headless", is_flag=True)
-def amazon(no_image, headless,):
+@click.option("--test", is_flag=True)
+def amazon(no_image, headless):
     if no_image:
         selenium_utils.no_amazon_image()
     amzn_obj = Amazon(headless=headless)
-    amzn_obj.run_item()
-
-    if no_image:
-        selenium_utils.no_amazon_image()
-
+    amzn_obj.run_item(test=test)
 
 @click.command()
 @click.option("--sku", type=str, required=True)
