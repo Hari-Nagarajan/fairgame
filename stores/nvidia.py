@@ -238,9 +238,7 @@ class NvidiaBuyer:
     def buy(self, product_id):
         pass
         try:
-            log.info(
-                f"Stock Check {product_id} at {self.interval} second intervals."
-            )
+            log.info(f"Stock Check {product_id} at {self.interval} second intervals.")
             while not self.is_in_stock(product_id):
                 self.attempt = self.attempt + 1
                 time_delta = str(datetime.now() - self.started_at).split(".")[0]
@@ -296,7 +294,9 @@ class NvidiaBuyer:
                 return True, response_json["location"]
         else:
             log.error(response.text)
-            log.error(f"Add to cart failed with {response.status_code}. This is likely an error with nvidia's API.")
+            log.error(
+                f"Add to cart failed with {response.status_code}. This is likely an error with nvidia's API."
+            )
         return False, ""
 
     def get_session_token(self):

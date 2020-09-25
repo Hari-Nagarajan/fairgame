@@ -20,13 +20,19 @@ class DiscordHandler:
                 self.config = json.load(json_file)
                 if self.config["webhook_url"]:
                     self.webhook_url = self.config["webhook_url"]
+                    self.user_id = self.config.get("user_id", "N/A")
                     self.enabled = True
         else:
             log.debug("No Discord creds found.")
 
     def send(self, message_body):
         try:
-            web_hook = DiscordWebhook(url=self.webhook_url, content=message_body)
+            message = (
+                f"<@{self.user_id}> {message_body}"
+                if self.user_id.isdigit()
+                else message_body
+            )
+            web_hook = DiscordWebhook(url=self.webhook_url, content=message)
             response = web_hook.execute()
             log.info(f"Discord hook status: {response.status_code}")
         except Exception as e:
