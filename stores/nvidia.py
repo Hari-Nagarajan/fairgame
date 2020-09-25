@@ -26,21 +26,6 @@ GPU_DISPLAY_NAMES = {
     "3090": "NVIDIA GEFORCE RTX 3090",
 }
 
-ACCEPTED_LOCALES = [
-    "en_us",
-    "en_gb",
-    "de_de",
-    "fr_fr",
-    "it_it",
-    "es_es",
-    "nl_nl",
-    "sv_se",
-    "de_at",
-    "fr_be",
-    "da_dk",
-    "cs_cz",
-]
-
 CURRENCY_LOCALE_MAP = {
     "en_us": "USD",
     "en_gb": "GBP",
