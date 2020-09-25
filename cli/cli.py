@@ -4,7 +4,7 @@ from cli.utils import QuestionaryOption
 from stores.amazon import Amazon
 from stores.bestbuy import BestBuyHandler
 from stores.evga import Evga
-from stores.nvidia import NvidiaBuyer, GPU_DISPLAY_NAMES, ACCEPTED_LOCALES
+from stores.nvidia import NvidiaBuyer, GPU_DISPLAY_NAMES, CURRENCY_LOCALE_MAP
 from utils import selenium_utils
 
 
@@ -22,7 +22,7 @@ def main():
 )
 @click.option(
     "--locale",
-    type=click.Choice(ACCEPTED_LOCALES, case_sensitive=False),
+    type=click.Choice(CURRENCY_LOCALE_MAP.keys(), case_sensitive=False),
     prompt="What locale shall we use?",
     cls=QuestionaryOption,
 )
