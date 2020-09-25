@@ -19,4 +19,6 @@ questionary = "*"
 spinlog = "*"
 slackclient = "*"
 playsound = "*"
+prompt_toolkit = "*"
+aiohttp = "*"
 pyobjc = {version = "*", sys_platform = "== 'darwin'"}
