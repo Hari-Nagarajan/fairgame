@@ -37,7 +37,9 @@ class NotificationHandler:
         return enabled_handlers
 
     def send_notification(self, message):
-        with ThreadPoolExecutor(max_workers=len(self.get_enabled_handlers())) as executor:
+        with ThreadPoolExecutor(
+            max_workers=len(self.get_enabled_handlers())
+        ) as executor:
             if self.audio_handler.enabled:
                 executor.submit(self.audio_handler.play)
             if self.twilio_handler.enabled:
