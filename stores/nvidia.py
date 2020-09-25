@@ -280,7 +280,7 @@ class NvidiaBuyer:
             NVIDIA_STOCK_API.format(
                 product_id=product_id,
                 locale=self.locale,
-                currency=CURRENCY_LOCALE_MAP.get(self.locale),
+                currency=CURRENCY_LOCALE_MAP.get(self.locale, "USD"),
             ),
             headers=DEFAULT_HEADERS,
         )
