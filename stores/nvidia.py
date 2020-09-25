@@ -17,7 +17,7 @@ from utils.logger import log
 NVIDIA_PRODUCT_API = "https://api.nvidia.partners/edge/product/search?page=1&limit=9&locale=en-us&category=GPU"
 NVIDIA_CART_URL = "https://store.nvidia.com/store?Action=AddItemToRequisition&SiteID=nvidia&Locale=en_US&productID={product_id}&quantity=1"
 NVIDIA_TOKEN_URL = "https://store.nvidia.com/store/nvidia/SessionToken"
-NVIDIA_STOCK_API = "https://api-prod.nvidia.com/direct-sales-shop/DR/products/{locale}/USD/{product_id}"
+NVIDIA_STOCK_API = "https://api-prod.nvidia.com/direct-sales-shop/DR/products/{locale}/{currency}/{product_id}"
 NVIDIA_ADD_TO_CART_API = "https://api-prod.nvidia.com/direct-sales-shop/DR/add-to-cart"
 
 GPU_DISPLAY_NAMES = {
@@ -40,6 +40,21 @@ ACCEPTED_LOCALES = [
     "da_dk",
     "cs_cz",
 ]
+
+CURRENCY_LOCALE_MAP = {
+    "en_us": "USD",
+    "en_gb": "GBP",
+    "de_de": "EUR",
+    "fr_fr": "EUR",
+    "it_it": "EUR",
+    "es_es": "EUR",
+    "nl_nl": "EUR",
+    "sv_se": "SEK",
+    "de_at": "EUR",
+    "fr_be": "EUR",
+    "da_dk": "DKK",
+    "cs_cz": "CZK"
+}
 
 PAGE_TITLES_BY_LOCALE = {
     "en_us": {  # Verified
@@ -207,6 +222,9 @@ class NvidiaBuyer:
             return "en_gb"
         return self.cli_locale
 
+    def get_currency_for_locale(self, locale):
+        return CURRENCY_LOCALE_MAP[locale]
+
     def get_product_ids(self):
         if isinstance(PRODUCT_IDS[self.locale][self.gpu], list):
             self.product_ids = PRODUCT_IDS[self.locale][self.gpu]
@@ -262,7 +280,8 @@ class NvidiaBuyer:
 
     def is_in_stock(self, product_id):
         response = self.session.get(
-            NVIDIA_STOCK_API.format(product_id=product_id, locale=self.locale),
+            NVIDIA_STOCK_API.format(product_id=product_id, locale=self.locale, 
+                currency=self.get_currency_for_locale(locale=self.locale)),
             headers=DEFAULT_HEADERS,
         )
         log.debug(f"Stock check response code: {response.status_code}")
