@@ -33,6 +33,8 @@ CHECKOUT_TITLES = [
     "Amazon.com Checkout",
     "Place Your Order - Amazon.co.uk Checkout",
     "Place Your Order - Amazon.de Checkout",
+    "Place Your Order - Amazon.com Checkout",
+    "Place Your Order - Amazon.com",
 ]
 ORDER_COMPLETE_TITLES = ["Amazon.com Thanks You", "Thank you"]
 ADD_TO_CART_TITLES = [
