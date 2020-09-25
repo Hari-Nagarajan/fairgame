@@ -104,11 +104,10 @@ def bestbuy(sku, headless):
 
 @click.command()
 @click.option("--test", is_flag=True)
-@click.option("--model", type=str)
 @click.option("--headless", is_flag=True)
-def evga(test, model, headless):
+def evga(test, headless):
     ev = Evga(headless)
-    ev.buy(test=test, model=model)
+    ev.buy(test=test)
 
 
 main.add_command(nvidia)
