@@ -158,13 +158,6 @@ class ProductIDChangedException(Exception):
         super().__init__("Product IDS changed. We need to re run.")
 
 
-class InvalidAutoBuyConfigException(Exception):
-    def __init__(self, provided_json):
-        super().__init__(
-            f"Check the README and update your `autobuy_config.json` file. Your autobuy config is {json.dumps(provided_json, indent=2)}"
-        )
-
-
 PRODUCT_IDS_FILE = "stores/store_data/nvidia_product_ids.json"
 PRODUCT_IDS = json.load(open(PRODUCT_IDS_FILE))
 

@@ -1,5 +1,3 @@
-import os
-
 import click
 
 from cli.utils import QuestionaryOption
@@ -36,62 +34,14 @@ def nvidia(gpu, locale, test, interval):
 
 
 @click.command()
-@click.option(
-    "--amazon_email",
-    type=str,
-    prompt="Amazon Email",
-    default=lambda: os.environ.get("amazon_email", ""),
-    show_default="current user",
-)
-@click.option(
-    "--amazon_password",
-    type=str,
-    prompt="Amazon Password",
-    default=lambda: os.environ.get("amazon_password", ""),
-    show_default="current user",
-)
-@click.option(
-    "--amazon_item_url",
-    type=str,
-    prompt="Amazon Item URL",
-    default=lambda: os.environ.get("amazon_item_url", ""),
-    show_default="current user",
-)
-@click.option(
-    "--amazon_price_limit",
-    type=int,
-    prompt="Maximum Price to Pay",
-    default=lambda: int(os.environ.get("amazon_price_limit", 10000)),
-    show_default="current user",
-)
 @click.option("--no-image", is_flag=True)
 @click.option("--headless", is_flag=True)
-def amazon(
-    amazon_email,
-    amazon_password,
-    amazon_item_url,
-    amazon_price_limit,
-    no_image,
-    headless,
-):
-    os.environ.setdefault("amazon_email", amazon_email)
-    os.environ.setdefault("amazon_password", amazon_password)
-    os.environ.setdefault("amazon_item_url", amazon_item_url)
-    os.environ.setdefault("amazon_price_limit", str(amazon_price_limit))
-
+@click.option("--test", is_flag=True)
+def amazon(no_image, headless, test):
     if no_image:
         selenium_utils.no_amazon_image()
-
-    amzn_obj = Amazon(
-        username=amazon_email,
-        password=amazon_password,
-        headless=headless,
-        item_url=amazon_item_url,
-    )
-    amzn_obj.run_item(item_url=amazon_item_url, price_limit=amazon_price_limit)
-
-    if no_image:
-        selenium_utils.no_amazon_image()
+    amzn_obj = Amazon(headless=headless)
+    amzn_obj.run_item(test=test)
 
 
 @click.command()
