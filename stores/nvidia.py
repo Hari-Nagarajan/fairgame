@@ -53,7 +53,7 @@ CURRENCY_LOCALE_MAP = {
     "de_at": "EUR",
     "fr_be": "EUR",
     "da_dk": "DKK",
-    "cs_cz": "CZK"
+    "cs_cz": "CZK",
 }
 
 PAGE_TITLES_BY_LOCALE = {
@@ -280,8 +280,11 @@ class NvidiaBuyer:
 
     def is_in_stock(self, product_id):
         response = self.session.get(
-            NVIDIA_STOCK_API.format(product_id=product_id, locale=self.locale, 
-                currency=self.get_currency_for_locale(locale=self.locale)),
+            NVIDIA_STOCK_API.format(
+                product_id=product_id,
+                locale=self.locale,
+                currency=self.get_currency_for_locale(locale=self.locale),
+            ),
             headers=DEFAULT_HEADERS,
         )
         log.debug(f"Stock check response code: {response.status_code}")
