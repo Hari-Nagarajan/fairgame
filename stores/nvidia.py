@@ -222,9 +222,6 @@ class NvidiaBuyer:
             return "en_gb"
         return self.cli_locale
 
-    def get_currency_for_locale(self, locale):
-        return CURRENCY_LOCALE_MAP[locale]
-
     def get_product_ids(self):
         if isinstance(PRODUCT_IDS[self.locale][self.gpu], list):
             self.product_ids = PRODUCT_IDS[self.locale][self.gpu]
@@ -283,7 +280,7 @@ class NvidiaBuyer:
             NVIDIA_STOCK_API.format(
                 product_id=product_id,
                 locale=self.locale,
-                currency=self.get_currency_for_locale(locale=self.locale),
+                currency=CURRENCY_LOCALE_MAP.get(self.locale),
             ),
             headers=DEFAULT_HEADERS,
         )
