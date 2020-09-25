@@ -1,5 +1,6 @@
 import json
 from os import path
+from urllib.parse import quote
 
 import requests
 
@@ -21,22 +22,18 @@ class TelegramHandler:
                 if self.config["BOT_TOKEN"] and self.config["BOT_CHAT_ID"]:
                     self.bot_token = self.config["BOT_TOKEN"]
                     self.bot_chat_id = self.config["BOT_CHAT_ID"]
+                    if not isinstance(self.bot_chat_id, list):
+                        self.bot_chat_id = [self.bot_chat_id]
                     self.enabled = True
         else:
             log.debug("No Telegram config found.")
 
     def send(self, message_body):
         try:
-            if type(self.bot_chat_id) is list:
-                for chat_id in self.bot_chat_id:
-                    requests.get(
-                        f"https://api.telegram.org/bot{self.bot_token}/sendMessage?"
-                        f"chat_id={chat_id}&parse_mode=Markdown&text={message_body}"
-                    )
-            else:
+            for chat_id in self.bot_chat_id:
                 requests.get(
                     f"https://api.telegram.org/bot{self.bot_token}/sendMessage?"
-                    f"chat_id={self.bot_chat_id}&parse_mode=Markdown&text={message_body}"
+                    f"chat_id={chat_id}&text={quote(message_body)}"
                 )
         except Exception as e:
             log.error(e)
