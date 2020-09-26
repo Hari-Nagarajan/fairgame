@@ -144,17 +144,21 @@ class Amazon:
             # Check against limit price
             for price_str in prices:
                 price_int = int(round(float(price_str.text.strip("$"))))
-                
+
                 if price_int <= self.price_limit:
                     # Loop through all available cards and remove ones above price limit
                     for price_str2 in prices2:
                         price_int2 = int(round(float(price_str2.text.strip("$"))))
-                        product_link = price_str2.find_element(By.XPATH, (".//preceding-sibling::td[2]//a"))
-                        asin = product_link.get_attribute('href')[-10:]
+                        product_link = price_str2.find_element(
+                            By.XPATH, (".//preceding-sibling::td[2]//a")
+                        )
+                        asin = product_link.get_attribute("href")[-10:]
                         log.info(asin)
-                        
+
                         if price_int2 > self.price_limit:
-                            log.info("Removing overpriced item(s) and continuing with purchase!")
+                            log.info(
+                                "Removing overpriced item(s) and continuing with purchase!"
+                            )
                             # Remove item from list
                             self.asin_list.remove(asin)
                             dont_refresh = False
