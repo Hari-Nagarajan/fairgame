@@ -8,12 +8,15 @@ class TimeoutHTTPAdapter(HTTPAdapter):
     def __init__(self, *args, **kwargs):
         self.timeout = kwargs.get("timeout", DEFAULT_TIMEOUT)
         super().__init__(
-            max_retries=kwargs.get("max_retries", Retry(
-                total=5, # FIXME: lowered for testing
-                backoff_factor=0,  # FIXME: Lowered to 0 for testing
-                status_forcelist=[429, 500, 502, 503, 504],
-                method_whitelist=["HEAD", "GET", "OPTIONS"],
-            ))
+            max_retries=kwargs.get(
+                "max_retries",
+                Retry(
+                    total=5,  # FIXME: lowered for testing
+                    backoff_factor=0,  # FIXME: Lowered to 0 for testing
+                    status_forcelist=[429, 500, 502, 503, 504],
+                    method_whitelist=["HEAD", "GET", "OPTIONS"],
+                ),
+            )
         )
 
     def send(self, request, **kwargs):
