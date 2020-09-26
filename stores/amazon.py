@@ -152,14 +152,13 @@ class Amazon:
                     for price_str2 in prices2:
                         price_int2 = int(
                             round(
-                                float(price_str.text.replace("$", "").replace(",", ""))
+                                float(price_str2.text.replace("$", "").replace(",", ""))
                             )
                         )
                         product_link = price_str2.find_element(
                             By.XPATH, (".//preceding-sibling::td[2]//a")
                         )
                         asin = product_link.get_attribute("href")[-10:]
-                        log.info(asin)
 
                         if price_int2 > self.price_limit:
                             log.info(
