@@ -83,7 +83,7 @@ class NvidiaBuyer:
         adapter = TimeoutHTTPAdapter(
             max_retries=Retry(
                 total=10,
-                backoff_factor=0, # FIXME: Lowered to 0 for testing
+                backoff_factor=0,  # FIXME: Lowered to 0 for testing
                 status_forcelist=[429, 500, 502, 503, 504],
                 method_whitelist=["HEAD", "GET", "OPTIONS"],
             )
@@ -167,7 +167,7 @@ class NvidiaBuyer:
                 currency=CURRENCY_LOCALE_MAP.get(self.locale, "USD"),
             ),
             headers=DEFAULT_HEADERS,
-            timeout=2.0 # FIXME: Just for testing…
+            timeout=2.0,  # FIXME: Just for testing…
         )
         log.debug(f"Stock check response code: {response.status_code}")
         if response.status_code != 200:
