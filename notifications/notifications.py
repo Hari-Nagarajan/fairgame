@@ -51,7 +51,7 @@ class NotificationHandler:
             if self.discord_handler.enabled:
                 executor.submit(self.discord_handler.send, message)
             if self.join_handler.enabled:
-                self.join_handler.send(message)
+                executor.submit(self.join_handler.send, message)
             if self.telegram_handler.enabled:
                 executor.submit(self.telegram_handler.send, message)
             if self.slack_handler.enabled:

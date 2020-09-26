@@ -1,5 +1,4 @@
 {
-  "base_url": "https://joinjoaomgcd.appspot.com/_ah/api/messaging/v1/sendPush",
-  "apikey": "get api key here: https://joinjoaomgcd.appspot.com/",
-  "deviceId": "find device id here: https://joinjoaomgcd.appspot.com/_ah/api/registration/v1/listDevices?apikey={apikey}"
+  "apikey": "paste api key here",
+  "deviceId": "paste device id here"
 }

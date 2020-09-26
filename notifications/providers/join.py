@@ -7,7 +7,7 @@ import re
 from utils.logger import log
 
 JOIN_CONFIG_PATH = "join_config.json"
-JOIN_CONFIG_KEYS = ["base_url", "deviceId", "apikey"]
+JOIN_CONFIG_KEYS = ["deviceId", "apikey"]
 
 
 class JoinHandler:
@@ -20,8 +20,7 @@ class JoinHandler:
         if path.exists(JOIN_CONFIG_PATH):
             with open(JOIN_CONFIG_PATH) as json_file:
                 self.config = json.load(json_file)
-                if self.config["base_url"]:
-                    self.base_url = self.config["base_url"]
+                if self.config["deviceId"]:
                     self.deviceId = self.config["deviceId"]
                     self.apikey = self.config["apikey"]
                     self.enabled = True
@@ -42,7 +41,7 @@ class JoinHandler:
                 message_body = self.url_re.sub("", message_body).strip()
                 payload.update({"text": message_body, "url": url.group(0)})
 
-            response = requests.get(self.base_url, params=payload)
+            response = requests.get("https://joinjoaomgcd.appspot.com/_ah/api/messaging/v1/sendPush", params=payload)
             log.info(f"Join notification status: {response.status_code}")
         except Exception as e:
             log.error(e)
