@@ -83,13 +83,9 @@ def wait_for_either_title(d, title1, title2, time=30):
 
 def wait_for_any_title(d, titles, time=30):
     """
-    Uses webdriver(d) to wait for page title(title1 or title2) to become visible
+    Uses webdriver(d) to wait for page title(any in the list of titles) to become visible
     """
-    my_args_list = []
-    for title in titles:
-        my_args_list.append(ec.title_is(title))
-
-    WebDriverWait(d, time).until(AnyEc(*my_args_list))
+    WebDriverWait(d, time).until(AnyEc(*[ec.title_is(title) for title in titles]))
 
 
 def button_click_using_xpath(d, xpath):
