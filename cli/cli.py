@@ -1,6 +1,7 @@
 import click
 
 from cli.utils import QuestionaryOption
+from notifications.notifications import NotificationHandler
 from stores.amazon import Amazon
 from stores.bestbuy import BestBuyHandler
 from stores.evga import Evga
@@ -29,8 +30,14 @@ def main():
 @click.option("--test", is_flag=True)
 @click.option("--interval", type=int, default=5)
 def nvidia(gpu, locale, test, interval):
-    nv = NvidiaBuyer(gpu, locale, test, interval)
-    nv.run_items()
+    try:
+        nv = NvidiaBuyer(gpu, locale, test, interval)
+        nv.run_items()
+    except KeyboardInterrupt:
+        raise
+    except:
+        send_crash_notification("nvidia")
+        raise
 
 
 @click.command()
@@ -38,27 +45,53 @@ def nvidia(gpu, locale, test, interval):
 @click.option("--headless", is_flag=True)
 @click.option("--test", is_flag=True)
 def amazon(no_image, headless, test):
-    if no_image:
-        selenium_utils.no_amazon_image()
-    amzn_obj = Amazon(headless=headless)
-    amzn_obj.run_item(test=test)
+    try:
+        if no_image:
+            selenium_utils.no_amazon_image()
+        amzn_obj = Amazon(headless=headless)
+        amzn_obj.run_item(test=test)
+    except KeyboardInterrupt:
+        raise
+    except:
+        send_crash_notification("amazon")
+        raise
+
 
 
 @click.command()
 @click.option("--sku", type=str, required=True)
 @click.option("--headless", is_flag=True)
 def bestbuy(sku, headless):
-    bb = BestBuyHandler(sku, headless)
-    bb.run_item()
+    try:
+        bb = BestBuyHandler(sku, headless)
+        bb.run_item()
+    except KeyboardInterrupt:
+        raise
+    except:
+        send_crash_notification("bestbuy")
+        raise
 
 
 @click.command()
 @click.option("--test", is_flag=True)
 @click.option("--headless", is_flag=True)
 def evga(test, headless):
-    ev = Evga(headless)
-    ev.buy(test=test)
+    try:
+        ev = Evga(headless)
+        ev.buy(test=test)
+    except KeyboardInterrupt:
+        raise
+    except:
+        send_crash_notification("evga")
+        raise
+    
 
+notification_handler = NotificationHandler()
+
+def send_crash_notification(store):
+    notification_handler.send_notification(
+        f"nvidia-bot for {store} has crashed."
+    )
 
 main.add_command(nvidia)
 main.add_command(amazon)
