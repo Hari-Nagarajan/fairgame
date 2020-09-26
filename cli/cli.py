@@ -57,7 +57,6 @@ def amazon(no_image, headless, test):
         raise
 
 
-
 @click.command()
 @click.option("--sku", type=str, required=True)
 @click.option("--headless", is_flag=True)
@@ -84,14 +83,14 @@ def evga(test, headless):
     except:
         send_crash_notification("evga")
         raise
-    
+
 
 notification_handler = NotificationHandler()
 
+
 def send_crash_notification(store):
-    notification_handler.send_notification(
-        f"nvidia-bot for {store} has crashed."
-    )
+    notification_handler.send_notification(f"nvidia-bot for {store} has crashed.")
+
 
 main.add_command(nvidia)
 main.add_command(amazon)
