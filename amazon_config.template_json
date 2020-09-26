@@ -2,5 +2,6 @@
   "username": "",
   "password": "",
   "asin_list": ["B07JH53M4T","B08HR7SV3M"],
-  "amazon_website": "amazon.co.uk"
+  "amazon_website": "amazon.co.uk",
+  "price_limit": 1000
 }

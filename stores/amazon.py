@@ -9,6 +9,7 @@ from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
 
 from notifications.notifications import NotificationHandler
 from utils import selenium_utils
@@ -60,6 +61,7 @@ class Amazon:
                     self.password = config["password"]
                     self.asin_list = config["asin_list"]
                     self.amazon_website = config.get("amazon_website", "amazon.com")
+                    self.price_limit = config["price_limit"]
                     assert isinstance(self.asin_list, list)
                 except Exception:
                     raise InvalidAutoBuyConfigException(
@@ -132,10 +134,32 @@ class Amazon:
         f.set(params)
         self.driver.get(f.url)
         selenium_utils.wait_for_any_title(self.driver, ADD_TO_CART_TITLES)
-        if self.driver.find_elements_by_xpath('//td[@class="price item-row"]'):
+        prices = self.driver.find_elements_by_xpath('//td[@class="price item-row"]')
+        prices2 = self.driver.find_elements_by_xpath('//td[@class="price item-row"]')
+        dont_refresh = True
+
+        if prices:
             log.info("One or more items in stock!")
 
-            return True
+            # Check against limit price
+            for price_str in prices:
+                price_int = int(round(float(price_str.text.strip("$"))))
+                
+                if price_int <= self.price_limit:
+                    # Loop through all available cards and remove ones above price limit
+                    for price_str2 in prices2:
+                        price_int2 = int(round(float(price_str2.text.strip("$"))))
+                        product_link = price_str2.find_element(By.XPATH, (".//preceding-sibling::td[2]//a"))
+                        asin = product_link.get_attribute('href')[-10:]
+                        log.info(asin)
+                        
+                        if price_int2 > self.price_limit:
+                            log.info("Removing overpriced item(s) and continuing with purchase!")
+                            # Remove item from list
+                            self.asin_list.remove(asin)
+                            dont_refresh = False
+
+                    return dont_refresh
         else:
             return False
 

@@ -53,8 +53,7 @@ Commands:
 
 ### Amazon 
 
-***Warning***: This will buy every ASIN that is in stock the first time anything is in stock. So there is a possibility you can end up with multiple items.
-Thankfully Amazon.com has 1 click order canceling so its not a huge issue. We are working on a solution for this and price limits soon.
+***Warning***: This will buy every ASIN that is in stock and under the price limit so there is a possibility you can end up with multiple items.  Thankfully Amazon.com has 1 click order canceling so its not a huge issue.
 
 **Amazon flags**
 ```
@@ -68,7 +67,8 @@ Make a copy of `amazon_config.template_json` to `amazon_config.json`:
   "username": "",
   "password": "",
   "asin_list": ["B07JH53M4T","B08HR7SV3M"],
-  "amazon_website": "amazon.com"
+  "amazon_website": "amazon.com",
+  "price_limit": 1000
 }
 ```
 Example usage:
