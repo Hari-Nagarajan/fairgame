@@ -25,10 +25,18 @@ AMAZON_URLS = {
 AUTOBUY_CONFIG_PATH = "amazon_config.json"
 
 SIGN_IN_TITLES = ["Amazon Sign In", "Amazon Sign-In", "Amazon Anmelden"]
+CAPTCHA_PAGE_TITLES = ["Robot Check"]
+HOME_PAGE_TITLES = [
+    "Amazon.com: Online Shopping for Electronics, Apparel, Computers, Books, DVDs & more",
+    "Amazon.co.uk: Low Prices in Electronics, Books, Sports Equipment & more",
+    "Amazon.de: Low Prices in Electronics, Books, Sports Equipment & more",
+    "Amazon.es: compra online de electrónica, libros, deporte, hogar, moda y mucho más.",
+]
 SHOPING_CART_TITLES = [
     "Amazon.com Shopping Cart",
     "Amazon.co.uk Shopping Basket",
     "Amazon.de Basket",
+    "Cesta de compra Amazon.es",
 ]
 CHECKOUT_TITLES = [
     "Amazon.com Checkout",
@@ -36,12 +44,14 @@ CHECKOUT_TITLES = [
     "Place Your Order - Amazon.de Checkout",
     "Place Your Order - Amazon.com Checkout",
     "Place Your Order - Amazon.com",
+    "Tramitar pedido en Amazon.es",
 ]
 ORDER_COMPLETE_TITLES = ["Amazon.com Thanks You", "Thank you"]
 ADD_TO_CART_TITLES = [
     "Amazon.com: Please Confirm Your Action",
     "Amazon.de: Bitte bestätigen Sie Ihre Aktion",
     "Amazon.de: Please Confirm Your Action",
+    "Amazon.es: confirma tu acción",
 ]
 
 
@@ -74,6 +84,9 @@ class Amazon:
             AMAZON_URLS[key] = AMAZON_URLS[key].format(self.amazon_website)
         print(AMAZON_URLS)
         self.driver.get(AMAZON_URLS["BASE_URL"])
+        log.info("Waiting for home page.")
+        self.check_if_captcha(self.wait_for_pages, HOME_PAGE_TITLES)
+
         if self.is_logged_in():
             log.info("Already logged in")
         else:
@@ -81,7 +94,8 @@ class Amazon:
             selenium_utils.button_click_using_xpath(
                 self.driver, '//*[@id="nav-link-accountList"]/div/span'
             )
-            selenium_utils.wait_for_any_title(self.driver, SIGN_IN_TITLES)
+            log.info("Wait for Sign In page")
+            self.check_if_captcha(self.wait_for_pages, SIGN_IN_TITLES)
             self.login()
             log.info("Waiting 15 seconds.")
             time.sleep(
@@ -133,7 +147,7 @@ class Amazon:
         f = furl(AMAZON_URLS["CART_URL"])
         f.set(params)
         self.driver.get(f.url)
-        selenium_utils.wait_for_any_title(self.driver, ADD_TO_CART_TITLES)
+        self.check_if_captcha(self.wait_for_pages, ADD_TO_CART_TITLES)
         dont_refresh = True
 
         if self.driver.find_elements_by_xpath('//td[@class="price item-row"]'):
@@ -178,12 +192,33 @@ class Amazon:
         else:
             return False
 
-    def wait_for_cart_page(self):
-        selenium_utils.wait_for_any_title(self.driver, SHOPING_CART_TITLES)
-        log.info("On cart page.")
+    def get_captcha_help(self):
+        log.info("Stuck on a captcha. Please help.")
+        self.notification_handler.send_notification("Amazon bot is stuck on a captcha!")
+
+    def check_if_captcha(self, func, args):
+        try:
+            func(args)
+        except Exception as e:
+            if self.driver.title in CAPTCHA_PAGE_TITLES:
+                self.get_captcha_help()
+                func(args, t=300)
+            else:
+                log.error(
+                    f"An error happened, please submit a bug report including a screenshot of the page the "
+                    f"selenium browser is on. There may be a file saved at: amazon-{func.__name__}.png"
+                )
+                self.driver.save_screenshot(f"amazon-{func.__name__}.png")
+                time.sleep(60)
+                self.driver.close()
+                raise e
+
+    def wait_for_pages(self, page_titles, t=30):
+        log.debug(f"wait_for_pages({page_titles}, {t})")
+        selenium_utils.wait_for_any_title(self.driver, page_titles, t)
 
     def wait_for_pyo_page(self):
-        selenium_utils.wait_for_any_title(self.driver, CHECKOUT_TITLES + SIGN_IN_TITLES)
+        self.check_if_captcha(self.wait_for_pages, CHECKOUT_TITLES + SIGN_IN_TITLES)
 
         if self.driver.title in SIGN_IN_TITLES:
             log.info("Need to sign in again")
@@ -224,7 +259,7 @@ class Amazon:
 
     def wait_for_order_completed(self, test):
         if not test:
-            selenium_utils.wait_for_any_title(self.driver, ORDER_COMPLETE_TITLES)
+            self.check_if_captcha(self.wait_for_pages, ORDER_COMPLETE_TITLES)
         else:
             log.info(
                 "This is a test, so we don't need to wait for the order completed page."
@@ -235,7 +270,7 @@ class Amazon:
         self.driver.find_element_by_xpath('//input[@value="add"]').click()
 
         log.info("Waiting for Cart Page")
-        self.wait_for_cart_page()
+        self.check_if_captcha(self.wait_for_pages, SHOPING_CART_TITLES)
 
         log.info("clicking checkout.")
         self.driver.find_element_by_xpath(

@@ -6,7 +6,6 @@ from datetime import datetime
 from time import sleep
 
 import requests
-from requests.exceptions import Timeout
 from requests.packages.urllib3.util.retry import Retry
 from spinlog import Spinner
 
@@ -46,9 +45,6 @@ DEFAULT_HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36",
 }
 CART_SUCCESS_CODES = {201, requests.codes.ok}
-
-AUTOBUY_CONFIG_PATH = "autobuy_config.json"
-AUTOBUY_CONFIG_KEYS = ["NVIDIA_LOGIN", "NVIDIA_PASSWORD"]
 
 
 class ProductIDChangedException(Exception):
@@ -106,10 +102,10 @@ class NvidiaBuyer:
         return self.cli_locale
 
     def get_product_ids(self):
-        if isinstance(PRODUCT_IDS[self.locale][self.gpu], list):
-            self.product_ids = PRODUCT_IDS[self.locale][self.gpu]
-        if isinstance(PRODUCT_IDS[self.locale][self.gpu], str):
-            self.product_ids = [PRODUCT_IDS[self.locale][self.gpu]]
+        if isinstance(PRODUCT_IDS[self.cli_locale][self.gpu], list):
+            self.product_ids = PRODUCT_IDS[self.cli_locale][self.gpu]
+        if isinstance(PRODUCT_IDS[self.cli_locale][self.gpu], str):
+            self.product_ids = [PRODUCT_IDS[self.cli_locale][self.gpu]]
 
     def run_items(self):
         log.info(
@@ -132,7 +128,6 @@ class NvidiaBuyer:
             self.run_items()
 
     def buy(self, product_id):
-        pass
         try:
             log.info(f"Stock Check {product_id} at {self.interval} second intervals.")
             while not self.is_in_stock(product_id):
@@ -154,64 +149,84 @@ class NvidiaBuyer:
                     )
                 else:
                     self.buy(product_id)
-        except Timeout:
-            log.error("Had a timeout error.")
+        except requests.exceptions.RequestException as e:
+            self.notification_handler.send_notification(
+                f"Got an unexpected reply from the server, API may be down, nothing we can do but try again"
+            )
             self.buy(product_id)
 
     def is_in_stock(self, product_id):
-        response = self.session.get(
-            NVIDIA_STOCK_API.format(
-                product_id=product_id,
-                locale=self.locale,
-                currency=CURRENCY_LOCALE_MAP.get(self.locale, "USD"),
-            ),
-            headers=DEFAULT_HEADERS,
-        )
-        log.debug(f"Stock check response code: {response.status_code}")
-        if response.status_code != 200:
-            log.debug(response.text)
-        if "PRODUCT_INVENTORY_IN_STOCK" in response.text:
-            return True
-        else:
+        try:
+            response = self.session.get(
+                NVIDIA_STOCK_API.format(
+                    product_id=product_id,
+                    locale=self.locale,
+                    currency=CURRENCY_LOCALE_MAP.get(self.locale, "USD"),
+                ),
+                headers=DEFAULT_HEADERS,
+            )
+            log.debug(f"Stock check response code: {response.status_code}")
+            if response.status_code != 200:
+                log.debug(response.text)
+            if "PRODUCT_INVENTORY_IN_STOCK" in response.text:
+                return True
+            else:
+                return False
+        except requests.exceptions.RequestException as e:
+            self.notification_handler.send_notification(
+                f"Got an unexpected reply from the server, API may be down, nothing we can do but try again"
+            )
             return False
 
     def get_cart_url(self, product_id):
-        success, token = self.get_session_token()
-        if not success:
-            return False, ""
+        try:
+            success, token = self.get_session_token()
+            if not success:
+                return False, ""
 
-        data = {"products": [{"productId": product_id, "quantity": 1}]}
-        headers = DEFAULT_HEADERS.copy()
-        headers["locale"] = self.locale
-        headers["nvidia_shop_id"] = token
-        headers["Content-Type"] = "application/json"
-        response = self.session.post(
-            url=NVIDIA_ADD_TO_CART_API, headers=headers, data=json.dumps(data)
-        )
-        if response.status_code == 203:
-            response_json = response.json()
-            if "location" in response_json:
-                return True, response_json["location"]
-        else:
-            log.error(response.text)
-            log.error(
-                f"Add to cart failed with {response.status_code}. This is likely an error with nvidia's API."
+            data = {"products": [{"productId": product_id, "quantity": 1}]}
+            headers = DEFAULT_HEADERS.copy()
+            headers["locale"] = self.locale
+            headers["nvidia_shop_id"] = token
+            headers["Content-Type"] = "application/json"
+            response = self.session.post(
+                url=NVIDIA_ADD_TO_CART_API, headers=headers, data=json.dumps(data)
             )
-        return False, ""
+            if response.status_code == 203:
+                response_json = response.json()
+                if "location" in response_json:
+                    return True, response_json["location"]
+            else:
+                log.error(response.text)
+                log.error(
+                    f"Add to cart failed with {response.status_code}. This is likely an error with nvidia's API."
+                )
+            return False, ""
+        except requests.exceptions.RequestException as e:
+            self.notification_handler.send_notification(
+                f"Got an unexpected reply from the server, API may be down, nothing we can do but try again"
+            )
+            return False, ""
 
     def get_session_token(self):
         params = {"format": "json", "locale": self.locale}
         headers = DEFAULT_HEADERS.copy()
         headers["locale"] = self.locale
 
-        response = self.session.get(
-            NVIDIA_TOKEN_URL, headers=DEFAULT_HEADERS, params=params
-        )
-        if response.status_code == 200:
-            response_json = response.json()
-            if "session_token" not in response_json:
-                log.error("Error getting session token.")
-                return False, ""
-            return True, response_json["session_token"]
-        else:
-            log.debug(f"Get Session Token: {response.status_code}")
+        try:
+            response = self.session.get(
+                NVIDIA_TOKEN_URL, headers=DEFAULT_HEADERS, params=params
+            )
+            if response.status_code == 200:
+                response_json = response.json()
+                if "session_token" not in response_json:
+                    log.error("Error getting session token.")
+                    return False, ""
+                return True, response_json["session_token"]
+            else:
+                log.debug(f"Get Session Token: {response.status_code}")
+        except requests.exceptions.RequestException as e:
+            self.notification_handler.send_notification(
+                f"Got an unexpected reply from the server, API may be down, nothing we can do but try again"
+            )
+            return False
