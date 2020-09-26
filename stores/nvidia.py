@@ -80,14 +80,7 @@ class NvidiaBuyer:
         if type(self.auto_buy_enabled) != bool:
             self.auto_buy_enabled = False
 
-        adapter = TimeoutHTTPAdapter(
-            max_retries=Retry(
-                total=10,
-                backoff_factor=0,  # FIXME: Lowered to 0 for testing
-                status_forcelist=[429, 500, 502, 503, 504],
-                method_whitelist=["HEAD", "GET", "OPTIONS"],
-            )
-        )
+        adapter = TimeoutHTTPAdapter()
         self.session.mount("https://", adapter)
         self.session.mount("http://", adapter)
         self.notification_handler = NotificationHandler()
@@ -155,7 +148,7 @@ class NvidiaBuyer:
                 else:
                     self.buy(product_id)
         except (ConnectionError, ConnectTimeout, Timeout) as ex:
-            log.error("Connection error while calling Nvidia API")
+            log.error("Connection error while calling Nvidia API. API may be down.")
             log.debug(f"Error {type(ex).__name__}. Arguments:\n{1!r}")
             self.buy(product_id)
 
@@ -167,7 +160,6 @@ class NvidiaBuyer:
                 currency=CURRENCY_LOCALE_MAP.get(self.locale, "USD"),
             ),
             headers=DEFAULT_HEADERS,
-            timeout=2.0,  # FIXME: Just for testing…
         )
         log.debug(f"Stock check response code: {response.status_code}")
         if response.status_code != 200:
