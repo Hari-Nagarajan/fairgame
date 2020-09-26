@@ -143,12 +143,18 @@ class Amazon:
 
             # Check against limit price
             for price_str in prices:
-                price_int = int(round(float(price_str.text.strip("$"))))
+                price_int = int(
+                    round(float(price_str.text.replace("$", "").replace(",", "")))
+                )
 
                 if price_int <= self.price_limit:
                     # Loop through all available cards and remove ones above price limit
                     for price_str2 in prices2:
-                        price_int2 = int(round(float(price_str2.text.strip("$"))))
+                        price_int2 = int(
+                            round(
+                                float(price_str.text.replace("$", "").replace(",", ""))
+                            )
+                        )
                         product_link = price_str2.find_element(
                             By.XPATH, (".//preceding-sibling::td[2]//a")
                         )
@@ -164,6 +170,10 @@ class Amazon:
                             dont_refresh = False
 
                     return dont_refresh
+                else:
+                    log.info(
+                        "Keeping in stock but overpriced items in cart. Will purchase if price falls under limit."
+                    )
         else:
             return False
 
