@@ -7,12 +7,12 @@ import re
 from utils.logger import log
 
 JOIN_CONFIG_PATH = "join_config.json"
-JOIN_CONFIG_KEYS = ["base_url","deviceId","apikey"]
+JOIN_CONFIG_KEYS = ["base_url", "deviceId", "apikey"]
 
 
 class JoinHandler:
     enabled = False
-    url_re = re.compile(r'https[^ ]+')
+    url_re = re.compile(r"https[^ ]+")
 
     def __init__(self):
         log.debug("Initializing join handler")
@@ -31,10 +31,15 @@ class JoinHandler:
     def send(self, message_body):
         try:
             url = self.url_re.search(message_body)
-            payload = { "text": message_body, "title": "Nvidia-Bot Alert", "deviceId": self.deviceId, "apikey": self.apikey}
+            payload = {
+                "text": message_body,
+                "title": "Nvidia-Bot Alert",
+                "deviceId": self.deviceId,
+                "apikey": self.apikey,
+            }
 
             if url:
-                message_body = self.url_re.sub('', message_body).strip()
+                message_body = self.url_re.sub("", message_body).strip()
                 payload.update({"text": message_body, "url": url.group(0)})
 
             response = requests.get(self.base_url, params=payload)
