@@ -41,7 +41,10 @@ class JoinHandler:
                 message_body = self.url_re.sub("", message_body).strip()
                 payload.update({"text": message_body, "url": url.group(0)})
 
-            response = requests.get("https://joinjoaomgcd.appspot.com/_ah/api/messaging/v1/sendPush", params=payload)
+            response = requests.get(
+                "https://joinjoaomgcd.appspot.com/_ah/api/messaging/v1/sendPush",
+                params=payload,
+            )
             log.info(f"Join notification status: {response.status_code}")
         except Exception as e:
             log.error(e)
