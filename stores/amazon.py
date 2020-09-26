@@ -29,13 +29,13 @@ HOME_PAGE_TITLES = [
     "Amazon.com: Online Shopping for Electronics, Apparel, Computers, Books, DVDs & more",
     "Amazon.co.uk: Low Prices in Electronics, Books, Sports Equipment & more",
     "Amazon.de: Low Prices in Electronics, Books, Sports Equipment & more",
-    "Amazon.es: compra online de electrónica, libros, deporte, hogar, moda y mucho más."
+    "Amazon.es: compra online de electrónica, libros, deporte, hogar, moda y mucho más.",
 ]
 SHOPING_CART_TITLES = [
     "Amazon.com Shopping Cart",
     "Amazon.co.uk Shopping Basket",
     "Amazon.de Basket",
-    "Cesta de compra Amazon.es"
+    "Cesta de compra Amazon.es",
 ]
 CHECKOUT_TITLES = [
     "Amazon.com Checkout",
@@ -43,14 +43,14 @@ CHECKOUT_TITLES = [
     "Place Your Order - Amazon.de Checkout",
     "Place Your Order - Amazon.com Checkout",
     "Place Your Order - Amazon.com",
-    "Tramitar pedido en Amazon.es"
+    "Tramitar pedido en Amazon.es",
 ]
 ORDER_COMPLETE_TITLES = ["Amazon.com Thanks You", "Thank you"]
 ADD_TO_CART_TITLES = [
     "Amazon.com: Please Confirm Your Action",
     "Amazon.de: Bitte bestätigen Sie Ihre Aktion",
     "Amazon.de: Please Confirm Your Action",
-    "Amazon.es: confirma tu acción"
+    "Amazon.es: confirma tu acción",
 ]
 
 
