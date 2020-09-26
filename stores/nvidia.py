@@ -6,7 +6,7 @@ from datetime import datetime
 from time import sleep
 
 import requests
-from requests.exceptions import Timeout
+from requests.exceptions import ConnectTimeout, Timeout, ConnectionError
 from requests.packages.urllib3.util.retry import Retry
 from spinlog import Spinner
 
@@ -83,7 +83,7 @@ class NvidiaBuyer:
         adapter = TimeoutHTTPAdapter(
             max_retries=Retry(
                 total=10,
-                backoff_factor=1,
+                backoff_factor=0, # FIXME: Lowered to 0 for testing
                 status_forcelist=[429, 500, 502, 503, 504],
                 method_whitelist=["HEAD", "GET", "OPTIONS"],
             )
@@ -154,8 +154,9 @@ class NvidiaBuyer:
                     )
                 else:
                     self.buy(product_id)
-        except Timeout:
-            log.error("Had a timeout error.")
+        except (ConnectionError, ConnectTimeout, Timeout) as ex:
+            log.error("Connection error while calling Nvidia API")
+            log.debug(f"Error {type(ex).__name__}. Arguments:\n{1!r}")
             self.buy(product_id)
 
     def is_in_stock(self, product_id):
@@ -166,6 +167,7 @@ class NvidiaBuyer:
                 currency=CURRENCY_LOCALE_MAP.get(self.locale, "USD"),
             ),
             headers=DEFAULT_HEADERS,
+            timeout=2.0 # FIXME: Just for testing…
         )
         log.debug(f"Stock check response code: {response.status_code}")
         if response.status_code != 200:
