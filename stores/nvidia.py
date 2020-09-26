@@ -6,7 +6,7 @@ from datetime import datetime
 from time import sleep
 
 import requests
-from requests.exceptions import ConnectTimeout, Timeout, ConnectionError
+from requests.exceptions import ConnectionError, ConnectTimeout, Timeout
 from requests.packages.urllib3.util.retry import Retry
 from spinlog import Spinner
 
