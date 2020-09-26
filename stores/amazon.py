@@ -134,22 +134,24 @@ class Amazon:
         f.set(params)
         self.driver.get(f.url)
         selenium_utils.wait_for_any_title(self.driver, ADD_TO_CART_TITLES)
-        prices = self.driver.find_elements_by_xpath('//td[@class="price item-row"]')
-        prices2 = self.driver.find_elements_by_xpath('//td[@class="price item-row"]')
         dont_refresh = True
 
-        if prices:
+        if self.driver.find_elements_by_xpath('//td[@class="price item-row"]'):
             log.info("One or more items in stock!")
 
             # Check against limit price
-            for price_str in prices:
+            for price_str in self.driver.find_elements_by_xpath(
+                '//td[@class="price item-row"]'
+            ):
                 price_int = int(
                     round(float(price_str.text.replace("$", "").replace(",", "")))
                 )
 
                 if price_int <= self.price_limit:
                     # Loop through all available cards and remove ones above price limit
-                    for price_str2 in prices2:
+                    for price_str2 in self.driver.find_elements_by_xpath(
+                        '//td[@class="price item-row"]'
+                    ):
                         price_int2 = int(
                             round(
                                 float(price_str2.text.replace("$", "").replace(",", ""))
