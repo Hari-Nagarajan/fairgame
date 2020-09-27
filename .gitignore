@@ -1,12 +1,15 @@
+# Ignore all config files
+amazon_config.json
+discord_config.json
+evga_config.json
+slack_config.json
+telegram_config.json
+twilio_config.json
+
 dist/
 .idea/
 build/
 Pipfile.lock
-twilio_config.json
-discord_config.json
-telegram_config.json
-evga_config.json
-slack_config.json
 geckodriver.log
 .profile
 .profile-amz*
