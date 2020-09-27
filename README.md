@@ -159,9 +159,10 @@ Autobuy command:
 These are the series: "3090" or "3080" (any should work, untested)
 
 P/N numbers can be found in URLs or on product pages such as newegg. They look like this:
-10G-P5-3895-KR
-10G-P5-3881-KR
-10G-P5-3885-KR 
+* 10G-P5-3895-KR
+* 10G-P5-3881-KR
+* 10G-P5-3885-KR 
+
 ![EVGA PN Screenshot](evga_pn.png)
 
 if it doesn't load the correct page title (since the 3090 isn't listed yet), it will refresh every second until the correct page is loaded.
