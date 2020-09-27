@@ -225,6 +225,18 @@ store the url from the pavlok app in the ```pavlok_config.json``` file, you can 
 }
 ```
 
+#### Join
+To enable Join notifications, make a copy of the `join_config.template_json` file and name it `join_config.json`  
+Go [here](https://joinjoaomgcd.appspot.com/) and select the device you want to notify.  
+Click the `JOIN API` tab and paste the value next to `Device Id` into your `join_config.json` `deviceId` section.  
+Next click the `SHOW` button next to `API Key` and copy that value into your `join_config.json` `apikey` section.
+```
+{
+  "apikey": "paste api key here",
+  "deviceId": "paste device id here"
+}
+```
+
 
 
 ## Troubleshooting

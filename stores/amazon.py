@@ -76,7 +76,10 @@ class Amazon:
                         "amazon_config.json file not formatted properly."
                     )
         else:
-            raise InvalidAutoBuyConfigException("Missing amazon_config.json file.")
+            log.error(
+                "No config file found, see here on how to fix this: https://github.com/Hari-Nagarajan/nvidia-bot#amazon"
+            )
+            exit(0)
 
         for key in AMAZON_URLS.keys():
             AMAZON_URLS[key] = AMAZON_URLS[key].format(self.amazon_website)

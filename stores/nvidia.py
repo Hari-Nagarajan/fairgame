@@ -76,14 +76,7 @@ class NvidiaBuyer:
         if type(self.auto_buy_enabled) != bool:
             self.auto_buy_enabled = False
 
-        adapter = TimeoutHTTPAdapter(
-            max_retries=Retry(
-                total=10,
-                backoff_factor=1,
-                status_forcelist=[429, 500, 502, 503, 504],
-                method_whitelist=["HEAD", "GET", "OPTIONS"],
-            )
-        )
+        adapter = TimeoutHTTPAdapter()
         self.session.mount("https://", adapter)
         self.session.mount("http://", adapter)
         self.notification_handler = NotificationHandler()
@@ -150,6 +143,7 @@ class NvidiaBuyer:
                 else:
                     self.buy(product_id)
         except requests.exceptions.RequestException as e:
+            log.warning("Connection error while calling Nvidia API. API may be down.")
             self.notification_handler.send_notification(
                 f"Got an unexpected reply from the server, API may be down, nothing we can do but try again"
             )
