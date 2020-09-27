@@ -10,6 +10,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
 
+from notifications.notifications import NotificationHandler
 from utils import selenium_utils
 from utils.logger import log
 from utils.selenium_utils import options, enable_headless
@@ -26,6 +27,8 @@ class Evga:
         self.credit_card = {}
         self.card_pn = ""
         self.card_series = ""
+        self.notification_handler = NotificationHandler()
+        
         try:
             if path.exists(CONFIG_PATH):
                 with open(CONFIG_PATH) as json_file:
@@ -151,6 +154,11 @@ class Evga:
         #  Add to cart
         atc_buttons[0].click()
 
+        # Send notification that product is available
+        self.notification_handler.send_notification(
+            f"📦 {self.card_pn} in stock at EVGA…"
+        )
+
         #  Go to checkout
         selenium_utils.wait_for_page(self.driver, "EVGA - Checkout")
         selenium_utils.button_click_using_xpath(
@@ -229,3 +237,13 @@ class Evga:
             ).click()
 
         log.info("Finalized Order!")
+
+        # Send extra notification alerting user that we've successfully ordered.
+        self.notification_handler.send_notification(
+            f"🎉 Order submitted at EVGA for {self.card_pn}",
+            { 
+                "audio": {
+                    "file": "purchase.mp3"
+                }
+            }
+        )
