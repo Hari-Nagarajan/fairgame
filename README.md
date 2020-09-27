@@ -293,7 +293,8 @@ Yes.
 ### 2. Does Nvidia Bot automatically bypass CAPTCHA's on the store sites?
 No. If a CAPTCHA is shown the bot will inform you and you will be given 15 seconds to complete the CAPTCHA.
 
-### 3. 
+### 3. Can I add multiple P/N numbers to the EVGA bot 
+Not currently. If you want to check for multiple card models you will need to run a separate instance of the bot for each model you want to check for.
 
 ## Attribution
 
