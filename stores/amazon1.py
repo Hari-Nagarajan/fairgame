@@ -53,7 +53,12 @@ ADD_TO_CART_TITLES = [
     "Amazon.es: confirma tu acción",
 ]
 
-
+if path.exists("amazon_config.json"):
+    log.info("Found config file!")
+else:
+    log.info("No config file found, see here on how to fix this: https://github.com/Hari-Nagarajan/nvidia-bot#amazon")
+    exit(0)
+    
 class Amazon:
     def __init__(self, headless=False):
         self.notification_handler = NotificationHandler()
