@@ -288,7 +288,7 @@ python app.py
 ## Frequently Asked Questions
 
 ### 1. Can I run multiple instances of the bot?**  
-Yes.
+Yes. For example you can run one instance to check stock on the Nvidia store and a separate instance to check stock on Amazon.
 
 ### 2. Does Nvidia Bot automatically bypass CAPTCHA's on the store sites?
 No. If a CAPTCHA is shown the bot will inform you and you will be given 15 seconds to complete the CAPTCHA.
