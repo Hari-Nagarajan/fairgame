@@ -241,7 +241,7 @@ Next click the `SHOW` button next to `API Key` and copy that value into your `jo
 
 ## Troubleshooting
 
-I suggest joining the #Support channel in [Discord](https://discord.gg/hQeUbRv) for personal assistance if these common fixes don't help.
+I suggest joining the #tech-support channel in [Discord](https://discord.gg/hQeUbRv) for personal assistance if these common fixes don't help.
 
 **Error: ```selenium.common.exceptions.WebDriverException: Message: unknown error: cannot find Chrome binary```** 
 The issue is that chrome is not installed in the expected location. See [Selenium Wiki](https://github.com/SeleniumHQ/selenium/wiki/ChromeDriver#requirements) and the section on [overriding the Chrome binary location .](https://sites.google.com/a/chromium.org/chromedriver/capabilities#TOC-Using-a-Chrome-executable-in-a-non-standard-location)
@@ -284,6 +284,16 @@ python app.py
 ```
 
 6. Follow [Usage](#Usage) to configure the bot as needed.
+
+## Frequently Asked Questions
+
+### 1. Can I run multiple instances of the bot?**  
+Yes.
+
+### 2. Does Nvidia Bot automatically bypass CAPTCHA's on the store sites?
+No. If a CAPTCHA is shown the bot will inform you and you will be given 15 seconds to complete the CAPTCHA.
+
+### 3. 
 
 ## Attribution
 
