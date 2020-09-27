@@ -28,7 +28,7 @@ class Evga:
         self.card_pn = ""
         self.card_series = ""
         self.notification_handler = NotificationHandler()
-        
+
         try:
             if path.exists(CONFIG_PATH):
                 with open(CONFIG_PATH) as json_file:
@@ -241,9 +241,5 @@ class Evga:
         # Send extra notification alerting user that we've successfully ordered.
         self.notification_handler.send_notification(
             f"🎉 Order submitted at EVGA for {self.card_pn}",
-            { 
-                "audio": {
-                    "file": "purchase.mp3"
-                }
-            }
+            {"audio": {"file": "purchase.mp3"}},
         )
