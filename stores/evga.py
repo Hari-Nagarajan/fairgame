@@ -9,6 +9,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.action_chains import ActionChains
 
 from notifications.notifications import NotificationHandler
 from utils import selenium_utils
@@ -174,7 +175,7 @@ class Evga:
         selenium_utils.wait_for_page(self.driver, "EVGA - Checkout - Billing Options")
 
         log.info("Ensure that we are paying with credit card")
-        sleep(1)  # Fix this.
+        sleep(3)
         WebDriverWait(self.driver, 10).until(
             EC.element_to_be_clickable((By.XPATH, './/input[@value="rdoCreditCard"]'))
         ).click()
