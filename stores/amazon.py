@@ -31,7 +31,7 @@ HOME_PAGE_TITLES = [
     "Amazon.co.uk: Low Prices in Electronics, Books, Sports Equipment & more",
     "Amazon.de: Low Prices in Electronics, Books, Sports Equipment & more",
     "Amazon.es: compra online de electrónica, libros, deporte, hogar, moda y mucho más.",
-    "Amazon.de: Günstige Preise für Elektronik & Foto, Filme, Musik, Bücher, Games, Spielzeug & mehr"
+    "Amazon.de: Günstige Preise für Elektronik & Foto, Filme, Musik, Bücher, Games, Spielzeug & mehr",
 ]
 SHOPING_CART_TITLES = [
     "Amazon.com Shopping Cart",
@@ -172,7 +172,9 @@ class Amazon:
         except Exception as e:
             log.debug(e)
             log.info("We were unable to solve the captcha, need help from the user.")
-            self.notification_handler.send_notification("Amazon bot is stuck on a captcha!")
+            self.notification_handler.send_notification(
+                "Amazon bot is stuck on a captcha!"
+            )
 
     def check_if_captcha(self, func, args):
         try:
