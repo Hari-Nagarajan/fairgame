@@ -3,6 +3,7 @@ import secrets
 import time
 from os import path
 
+from amazoncaptcha import AmazonCaptcha
 from chromedriver_py import binary_path  # this will get you the path variable
 from furl import furl
 from selenium import webdriver
@@ -157,8 +158,18 @@ class Amazon:
             return False
 
     def get_captcha_help(self):
-        log.info("Stuck on a captcha. Please help.")
-        self.notification_handler.send_notification("Amazon bot is stuck on a captcha!")
+        try:
+            log.info("Stuck on a captcha... Lets try to solve it.")
+            captcha = AmazonCaptcha.from_webdriver(self.driver)
+            solution = captcha.solve()
+            log.info(f"The solution is: {solution}")
+            self.driver.find_element_by_xpath('//*[@id="captchacharacters"]').send_keys(
+                solution + Keys.RETURN
+            )
+        except Exception as e:
+            log.debug(e)
+            log.info("We were unable to solve the captcha, need help from the user.")
+            self.notification_handler.send_notification("Amazon bot is stuck on a captcha!")
 
     def check_if_captcha(self, func, args):
         try:
