@@ -31,6 +31,7 @@ HOME_PAGE_TITLES = [
     "Amazon.co.uk: Low Prices in Electronics, Books, Sports Equipment & more",
     "Amazon.de: Low Prices in Electronics, Books, Sports Equipment & more",
     "Amazon.es: compra online de electrónica, libros, deporte, hogar, moda y mucho más.",
+    "Amazon.de: Günstige Preise für Elektronik & Foto, Filme, Musik, Bücher, Games, Spielzeug & mehr"
 ]
 SHOPING_CART_TITLES = [
     "Amazon.com Shopping Cart",
@@ -122,8 +123,10 @@ class Amazon:
             log.info("Email not needed.")
             pass
 
+        log.info("Remember me checkbox")
+        selenium_utils.button_click_using_xpath(self.driver, '//*[@name="rememberMe"]')
+
         log.info("Password")
-        self.driver.find_element_by_xpath('//input[@name="rememberMe"]').click()
         self.driver.find_element_by_xpath('//*[@id="ap_password"]').send_keys(
             self.password + Keys.RETURN
         )
