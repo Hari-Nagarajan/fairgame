@@ -24,7 +24,7 @@ def decrypt(ct, password):
     json_k = [ 'nonce', 'salt', 'ct', 'tag' ]
     json_v = {k:b64decode(b64Ct[k]) for k in json_k}
 
-    key = scrypt(password, json_v['salt'], key_len=32, N=2**17, r=8, p=1)
+    key = scrypt(password, json_v['salt'], key_len=32, N=2**20, r=8, p=1)
     cipher = AES.new(key, AES.MODE_GCM, nonce=json_v['nonce'])
     ptData = cipher.decrypt_and_verify(json_v['ct'], json_v['tag'])
 
