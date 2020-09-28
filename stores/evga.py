@@ -167,6 +167,7 @@ class Evga:
         selenium_utils.wait_for_page(self.driver, "EVGA - Checkout - Billing Options")
 
         log.info("Ensure that we are paying with credit card")
+        sleep(3)
         ActionChains(self.driver).move_to_element(
             self.driver.find_element_by_id("rdoCreditCard")
         ).perform()
