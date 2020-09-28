@@ -1,61 +1,40 @@
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 from Crypto.Protocol.KDF import scrypt
+from base64 import b64encode, b64decode
 import getpass
+import json
 import os
 
 def encrypt(pt, password):
-  BUFFER_SIZE = 1024 * 1024
-
-  inFile = "../amazon_config.json"
-  outFile = "../amazon_config.enc"
-
-  ptIn = open(inFile, 'rb')
-  ctOut = open(outFile, 'wb')
-
   salt = get_random_bytes(32)
   key = scrypt(password, salt, key_len=32, N=2**17, r=8, p=1)
-  ctOut.write(salt)
 
-  cipher = AES.new(key, AES.MODE_GCM)
-  ctOut.write(cipher.nonce)
+  nonce = get_random_bytes(12)
+  cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
 
-  dataIn = ptIn.read(BUFFER_SIZE)
-  while len(dataIn) != 0:
-    ct = cipher.encrypt(dataIn)
-    ctOut.write(ct)
-    dataIn = ptIn.read(BUFFER_SIZE)
+  ct, tag = cipher.encrypt_and_digest(pt)
 
-  tag = cipher.digest()
-  ctOut.write(tag)
-
-  ptIn.close()
-  ctOut.close()
+  json_k = [ 'nonce', 'salt', 'ct', 'tag' ]
+  json_v = [ b64encode(x).decode('utf-8') for x in (nonce, salt, ct, tag) ]
+  result = json.dumps(dict(zip(json_k, json_v)))
+  return result
 
 def decrypt(ct, password):
-    BUFFER_SIZE = 1024 * 1024
+  try:
+    b64Ct = json.loads(ct)
+    json_k = [ 'nonce', 'salt', 'ct', 'tag' ]
+    json_v = {k:b64decode(b64Ct[k]) for k in json_k}
 
-    inFile = "../amazon_config.enc"
+    key = scrypt(password, json_v['salt'], key_len=32, N=2**17, r=8, p=1)
 
-    ctIn = open(inFile, 'rb')
+    cipher = AES.new(key, AES.MODE_GCM, nonce=json_v['nonce'])
 
-    salt = ctIn.read(32)
-    key = scrypt(password, salt, key_len=32, N=2**17, r=8, p=1)
-
-    nonce = ctIn.read(16)
-    cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
-
-    size = os.path.getsize("../amazon_config.enc")
-    ctSize = size - 32 - 16 - 16
-
-    for _ in range(int(ctSize / BUFFER_SIZE)):
-      ctData = ctIn.read(BUFFER_SIZE)
-      ptData = cipher.decrypt(ctData)
-
-    ctData = ctIn.read(int(ctSize % BUFFER_SIZE))
-    ptData = cipher.decrypt(ctData)
+    ptData = cipher.decrypt_and_verify(json_v['ct'], json_v['tag'])
     return ptData
-
+  except (KeyError, ValueError):
+    print("Incorrect Password.")
+    exit(0)
 
 def main():
 
@@ -65,9 +44,12 @@ def main():
     ptFile = open('../amazon_config.json', 'rb')
     data = ptFile.read()
     ct = encrypt(data, password)
-    print(ct)
 
-  ctFile = open('../amazon_config.enc', 'rb')
+    ctFile = open('../amazon_config.enc', 'w')
+    ctFile.write(ct)
+    ctFile.close()
+
+  ctFile = open('../amazon_config.enc', 'r')
   data = ctFile.read()
   pt = decrypt(data, password)
   print(pt)
