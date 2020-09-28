@@ -63,7 +63,7 @@ Thankfully Amazon.com has 1 click order canceling so its not a huge issue. We ar
 ```
 
 Make a copy of `amazon_config.template_json` to `amazon_config.json`:
-```
+```json
 {
   "username": "",
   "password": "",
@@ -105,7 +105,7 @@ Will check stock and open an add to cart link in your browser and send notificat
 ```
 
 Example usage:
-```
+```python
 python app.py nvidia
 What GPU are you after?: 3080
 What locale shall we use? [en_us]:
@@ -116,7 +116,7 @@ INFO: "2020-09-23 21:43:56,153 - Checking stock for 5438481700 at 5 second inter
 ```
 
 Quick run:
-```
+```python
 python app.py nvidia --gpu 3080 --locale en_us
 ```
 
@@ -128,13 +128,13 @@ python app.py bestbuy --sku [SKU]
 ```
 
 Example:
-```
+```python
 python app.py bestbuy --sku 6429440
 ```
 
 ## EVGA
 Make a copy of `evga_config.template_json` to `evga_config.json`:
-```
+```json
 {
   "username": "hari@",
   "password": "password!",
@@ -159,9 +159,10 @@ Autobuy command:
 These are the series: "3090" or "3080" (any should work, untested)
 
 P/N numbers can be found in URLs or on product pages such as newegg. They look like this:
-10G-P5-3895-KR
-10G-P5-3881-KR
-10G-P5-3885-KR
+* 10G-P5-3895-KR
+* 10G-P5-3881-KR
+* 10G-P5-3885-KR 
+
 ![EVGA PN Screenshot](evga_pn.png)
 
 if it doesn't load the correct page title (since the 3090 isn't listed yet), it will refresh every second until the correct page is loaded.
@@ -174,7 +175,7 @@ This uses a notifications handler that will support multiple notification channe
 To enable Twilio notifications, first go to https://www.twilio.com/ and create a free account and get a Twilio number.
 Then make a copy of `twilio_config.template_json` and name it `twilio_config.json`. If this file exists and the credentials are
 valid, the notification handler will send you an sms when it carts or purchases an item.
-```
+```json
 {
   "account_sid": "ACCOUNT_SID",
   "auth_token": "AUTH_TOKEN",
@@ -187,7 +188,7 @@ valid, the notification handler will send you an sms when it carts or purchases 
 To enable Discord notifications, first get your wehbook url. Use the directions [here](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) to get the webhook url.
 Make a copy of the `discord_config.template_json` file and name it `discord_config.json` and place the webhook url here. 
 Optionally a [user id](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-) can be added to ping someone (like yourself).
-```
+```json
 {
   "webhook_url": "Discord webhook url here",
   "user_id": "Optional user id to ping here"
@@ -198,7 +199,7 @@ Optionally a [user id](https://support.discord.com/hc/en-us/articles/206346498-W
 To enable Telegram notifications, you have to create a new bot and get your chat id. Use the directions [here](https://medium.com/@ManHay_Hong/how-to-create-a-telegram-bot-and-send-messages-with-python-4cf314d9fa3e) (Creating your bot and Getting your Chat id sections).
 
 Make a copy of the `telegram_config.template_json` file and name it `telegram_config.json` and place your `BOT_TOKEN` and `BOT_CHAT_ID` values here. 
-```
+```json
 {
     "BOT_TOKEN" : "1234567890:abcdefghijklmnopqrstuvwxyz",
     "BOT_CHAT_ID" : "111222333"
@@ -207,7 +208,7 @@ Make a copy of the `telegram_config.template_json` file and name it `telegram_co
 
 It is possible to notify multiple users at once. Just add a list as the `BOT_CHAT_ID` value:
 
-```
+```json
 {
     "BOT_TOKEN" : "1234567890:abcdefghijklmnopqrstuvwxyz",
     "BOT_CHAT_ID" : ["111222333", "444555666"]
@@ -219,7 +220,7 @@ To enable shock notifications to your [Pavlok Shockwatch](https://www.amazon.com
 store the url from the pavlok app in the ```pavlok_config.json``` file, you can copy the template from ```pavlok_config.template_json```.
 
 **WARNING:** This feature does not currently support adjusting the intensity, it will always be max (255).
-```
+```json
 {
   "base_url": "url goes here"
 }
@@ -230,7 +231,7 @@ To enable Join notifications, make a copy of the `join_config.template_json` fil
 Go [here](https://joinjoaomgcd.appspot.com/) and select the device you want to notify.  
 Click the `JOIN API` tab and paste the value next to `Device Id` into your `join_config.json` `deviceId` section.  
 Next click the `SHOW` button next to `API Key` and copy that value into your `join_config.json` `apikey` section.
-```
+```json
 {
   "apikey": "paste api key here",
   "deviceId": "paste device id here"
@@ -241,13 +242,13 @@ Next click the `SHOW` button next to `API Key` and copy that value into your `jo
 
 ## Troubleshooting
 
-I suggest joining the #Support channel in [Discord](https://discord.gg/hQeUbRv) for personal assistance if these common fixes don't help.
+I suggest joining the #tech-support channel in [Discord](https://discord.gg/hQeUbRv) for personal assistance if these common fixes don't help.
 
 **Error: ```selenium.common.exceptions.WebDriverException: Message: unknown error: cannot find Chrome binary```** 
 The issue is that chrome is not installed in the expected location. See [Selenium Wiki](https://github.com/SeleniumHQ/selenium/wiki/ChromeDriver#requirements) and the section on [overriding the Chrome binary location .](https://sites.google.com/a/chromium.org/chromedriver/capabilities#TOC-Using-a-Chrome-executable-in-a-non-standard-location)
 
 The easy fix for this is to add an option where selenium is used (amazon.py)
-```
+```python
 chrome_options.binary_location="C:\Users\%USERNAME%\AppData\Local\Google\Chrome\Application\chrome.exe"
 ```
 
@@ -258,7 +259,7 @@ You are not running the proper version of Chrome this requires. As of this updat
 ## Raspberry-Pi-Setup
 
 1. Prereqs and Setup
-```
+```shell
 sudo apt update
 sudo apt upgrade
 sudo apt install chromium-chromedriver
@@ -279,11 +280,22 @@ pipenv install
 
 
 5. Back in Terminal...
-```
+```shell
 python app.py
 ```
 
 6. Follow [Usage](#Usage) to configure the bot as needed.
+
+## Frequently Asked Questions
+
+### 1. Can I run multiple instances of the bot?**  
+Yes. For example you can run one instance to check stock on the Nvidia store and a separate instance to check stock on Amazon.
+
+### 2. Does Nvidia Bot automatically bypass CAPTCHA's on the store sites?
+No. If a CAPTCHA is shown the bot will inform you and you will be given 15 seconds to complete the CAPTCHA.
+
+### 3. Can I add multiple P/N numbers to the EVGA bot 
+Not currently. If you want to check for multiple card models you will need to run a separate instance of the bot for each model you want to check for.
 
 ## Attribution
 

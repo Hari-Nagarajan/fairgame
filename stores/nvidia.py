@@ -144,7 +144,7 @@ class NvidiaBuyer:
                     self.buy(product_id)
         except requests.exceptions.RequestException as e:
             log.warning("Connection error while calling Nvidia API. API may be down.")
-            self.notification_handler.send_notification(
+            log.info(
                 f"Got an unexpected reply from the server, API may be down, nothing we can do but try again"
             )
             self.buy(product_id)
