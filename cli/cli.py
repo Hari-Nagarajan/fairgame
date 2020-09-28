@@ -1,11 +1,29 @@
 import click
 
 from cli.utils import QuestionaryOption
+from functools import wraps
+from notifications.notifications import NotificationHandler
 from stores.amazon import Amazon
 from stores.bestbuy import BestBuyHandler
 from stores.evga import Evga
 from stores.nvidia import NvidiaBuyer, GPU_DISPLAY_NAMES, CURRENCY_LOCALE_MAP
 from utils import selenium_utils
+
+notification_handler = NotificationHandler()
+
+
+def notify_on_crash(func):
+    @wraps(func)
+    def decorator(*args, **kwargs):
+        try:
+            func(*args, **kwargs)
+        except KeyboardInterrupt:
+            pass
+        except:
+            notification_handler.send_notification(f"nvidia-bot has crashed.")
+            raise
+
+    return decorator
 
 
 @click.group()
@@ -28,6 +46,7 @@ def main():
 )
 @click.option("--test", is_flag=True)
 @click.option("--interval", type=int, default=5)
+@notify_on_crash
 def nvidia(gpu, locale, test, interval):
     nv = NvidiaBuyer(gpu, locale, test, interval)
     nv.run_items()
@@ -37,9 +56,13 @@ def nvidia(gpu, locale, test, interval):
 @click.option("--no-image", is_flag=True)
 @click.option("--headless", is_flag=True)
 @click.option("--test", is_flag=True)
+@notify_on_crash
 def amazon(no_image, headless, test):
     if no_image:
         selenium_utils.no_amazon_image()
+    else:
+        selenium_utils.yes_amazon_image()
+
     amzn_obj = Amazon(headless=headless)
     amzn_obj.run_item(test=test)
 
@@ -47,6 +70,7 @@ def amazon(no_image, headless, test):
 @click.command()
 @click.option("--sku", type=str, required=True)
 @click.option("--headless", is_flag=True)
+@notify_on_crash
 def bestbuy(sku, headless):
     bb = BestBuyHandler(sku, headless)
     bb.run_item()
@@ -55,6 +79,7 @@ def bestbuy(sku, headless):
 @click.command()
 @click.option("--test", is_flag=True)
 @click.option("--headless", is_flag=True)
+@notify_on_crash
 def evga(test, headless):
     ev = Evga(headless)
     ev.buy(test=test)

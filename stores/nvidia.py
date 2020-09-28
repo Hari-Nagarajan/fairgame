@@ -76,14 +76,7 @@ class NvidiaBuyer:
         if type(self.auto_buy_enabled) != bool:
             self.auto_buy_enabled = False
 
-        adapter = TimeoutHTTPAdapter(
-            max_retries=Retry(
-                total=10,
-                backoff_factor=1,
-                status_forcelist=[429, 500, 502, 503, 504],
-                method_whitelist=["HEAD", "GET", "OPTIONS"],
-            )
-        )
+        adapter = TimeoutHTTPAdapter()
         self.session.mount("https://", adapter)
         self.session.mount("http://", adapter)
         self.notification_handler = NotificationHandler()
@@ -148,9 +141,13 @@ class NvidiaBuyer:
                         f"stock: {cart_url}"
                     )
                 else:
+                    self.notification_handler.send_notification(
+                        f" ERROR: Attempted to add {self.gpu_long_name} to cart but couldn't, check manually!"
+                    )
                     self.buy(product_id)
         except requests.exceptions.RequestException as e:
-            self.notification_handler.send_notification(
+            log.warning("Connection error while calling Nvidia API. API may be down.")
+            log.info(
                 f"Got an unexpected reply from the server, API may be down, nothing we can do but try again"
             )
             self.buy(product_id)
@@ -173,7 +170,7 @@ class NvidiaBuyer:
             else:
                 return False
         except requests.exceptions.RequestException as e:
-            self.notification_handler.send_notification(
+            log.info(
                 f"Got an unexpected reply from the server, API may be down, nothing we can do but try again"
             )
             return False
@@ -203,7 +200,7 @@ class NvidiaBuyer:
                 )
             return False, ""
         except requests.exceptions.RequestException as e:
-            self.notification_handler.send_notification(
+            log.info(
                 f"Got an unexpected reply from the server, API may be down, nothing we can do but try again"
             )
             return False, ""
@@ -226,7 +223,7 @@ class NvidiaBuyer:
             else:
                 log.debug(f"Get Session Token: {response.status_code}")
         except requests.exceptions.RequestException as e:
-            self.notification_handler.send_notification(
+            log.info(
                 f"Got an unexpected reply from the server, API may be down, nothing we can do but try again"
             )
             return False
