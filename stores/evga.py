@@ -168,9 +168,6 @@ class Evga:
 
         log.info("Ensure that we are paying with credit card")
         sleep(3)
-        ActionChains(self.driver).move_to_element(
-            self.driver.find_element_by_id("rdoCreditCard")
-        ).perform()
         WebDriverWait(self.driver, 10).until(
             EC.element_to_be_clickable((By.XPATH, './/input[@value="rdoCreditCard"]'))
         ).click()
