@@ -1,10 +1,10 @@
-from Crypto.Cipher import AES
-from Crypto.Random import get_random_bytes
-from Crypto.Protocol.KDF import scrypt
-from base64 import b64encode, b64decode
 import getpass
 import json
 import os
+from base64 import b64encode, b64decode
+from Crypto.Cipher import AES
+from Crypto.Random import get_random_bytes
+from Crypto.Protocol.KDF import scrypt
 
 def encrypt(pt, password):
   salt = get_random_bytes(32)
