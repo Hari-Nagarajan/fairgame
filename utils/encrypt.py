@@ -5,14 +5,14 @@ import getpass
 import os
 
 def encrypt(pt, password):
-  BUFFER_SIZE = 1024  *1024
+  BUFFER_SIZE = 1024 * 1024
 
   inFile = "../amazon_config.json"
   outFile = "../amazon_config.enc"
 
   ptIn = open(inFile, 'rb')
   ctOut = open(outFile, 'wb')
-    
+
   salt = get_random_bytes(32)
   key = scrypt(password, salt, key_len=32, N=2**17, r=8, p=1)
   ctOut.write(salt)
@@ -25,7 +25,7 @@ def encrypt(pt, password):
     ct = cipher.encrypt(dataIn)
     ctOut.write(ct)
     dataIn = ptIn.read(BUFFER_SIZE)
-  
+
   tag = cipher.digest()
   ctOut.write(tag)
 
@@ -36,7 +36,7 @@ def decrypt(ct, password):
     BUFFER_SIZE = 1024 * 1024
 
     inFile = "../amazon_config.enc"
-    
+
     ctIn = open(inFile, 'rb')
 
     salt = ctIn.read(32)
@@ -58,7 +58,7 @@ def decrypt(ct, password):
 
 
 def main():
-  
+
   password = getpass.getpass(prompt='Password: ')
 
   if not os.path.isfile('../amazon_config.enc'):
