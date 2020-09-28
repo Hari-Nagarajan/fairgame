@@ -19,10 +19,12 @@ class AudioHandler:
         else:
             log.debug("No notificaiton sound file found.")
 
-    def play(self, options={}):
-        options = options if options is not None else {}
+    def play(self, audio_file=None, **kwargs):
         try:
-            playsound(options.get("file", NOTIFICATION_SOUND_PATH), True)
+            playsound(
+                audio_file if audio_file else NOTIFICATION_SOUND_PATH,
+                True
+            )
         except Exception as e:
             log.error(e)
             log.warn(

@@ -241,5 +241,5 @@ class Evga:
         # Send extra notification alerting user that we've successfully ordered.
         self.notification_handler.send_notification(
             f"🎉 Order submitted at EVGA for {self.card_pn}",
-            {"audio": {"file": "purchase.mp3"}},
+            audio_file="purchase.mp3",
         )
