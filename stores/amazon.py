@@ -169,7 +169,9 @@ class Amazon:
         except Exception as e:
             log.debug(e)
             log.info("We were unable to solve the captcha, need help from the user.")
-            self.notification_handler.send_notification("Amazon bot is stuck on a captcha!")
+            self.notification_handler.send_notification(
+                "Amazon bot is stuck on a captcha!"
+            )
 
     def check_if_captcha(self, func, args):
         try:
