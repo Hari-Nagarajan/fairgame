@@ -156,7 +156,7 @@ class Evga:
 
         # Send notification that product is available
         self.notification_handler.send_notification(
-            f"📦 {self.card_pn} in stock at EVGA…"
+            f"📦 Card found in stock at EVGA (P/N {self.card_pn})…"
         )
 
         #  Go to checkout
