@@ -62,7 +62,7 @@ def amazon(no_image, headless, test):
         selenium_utils.no_amazon_image()
     else:
         selenium_utils.yes_amazon_image()
-        
+
     amzn_obj = Amazon(headless=headless)
     amzn_obj.run_item(test=test)
 
