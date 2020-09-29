@@ -154,7 +154,7 @@ Test run command (Uses old gpu list and then stops before finishing the order)
 `python app.py evga --test`
 
 Autobuy command:
-`python app.py evga --model [indentifier]`
+`python app.py evga`
 
 These are the series: "3090" or "3080" (any should work, untested)
 
