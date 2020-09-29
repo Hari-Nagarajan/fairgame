@@ -166,14 +166,14 @@ class Amazon:
             captcha = AmazonCaptcha.from_webdriver(self.driver)
             solution = captcha.solve()
             log.info(f"The solution is: {solution}")
-            if solution is not "Not solved":
-                self.driver.find_element_by_xpath(
-                    '//*[@id="captchacharacters"]'
-                ).send_keys(solution + Keys.RETURN)
-            else:
+            if solution is "Not solved":
                 self.driver.execute_script("window.location.reload()")
                 time.sleep(5)
                 self.get_captcha_help()
+            else:
+                self.driver.find_element_by_xpath(
+                    '//*[@id="captchacharacters"]'
+                ).send_keys(solution + Keys.RETURN)
         except Exception as e:
             log.debug(e)
             log.info("We were unable to solve the captcha, need help from the user.")
