@@ -8,6 +8,7 @@ from stores.bestbuy import BestBuyHandler
 from stores.evga import Evga
 from stores.nvidia import NvidiaBuyer, GPU_DISPLAY_NAMES, CURRENCY_LOCALE_MAP
 from utils import selenium_utils
+from utils.logger import log
 
 notification_handler = NotificationHandler()
 
@@ -85,7 +86,17 @@ def evga(test, headless):
     ev.buy(test=test)
 
 
+@click.command()
+def test_notifications():
+    enabled_handlers = ", ".join(notification_handler.get_enabled_handlers())
+    notification_handler.send_notification(
+        f"🤖 Beep boop. This is a test notification from Nvidia bot."
+    )
+    log.info(f"A notification was sent to the following handlers: {enabled_handlers}")
+
+
 main.add_command(nvidia)
 main.add_command(amazon)
 main.add_command(bestbuy)
 main.add_command(evga)
+main.add_command(test_notifications)

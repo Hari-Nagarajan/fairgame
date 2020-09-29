@@ -171,6 +171,8 @@ if it doesn't load the correct page title (since the 3090 isn't listed yet), it 
 ### Notifications
 This uses a notifications handler that will support multiple notification channels. 
 
+Once you've set up the notification handlers you want to use, be sure to test them using the [test-notifications command].(#testing-notifications).
+
 #### Twilio
 To enable Twilio notifications, first go to https://www.twilio.com/ and create a free account and get a Twilio number.
 Then make a copy of `twilio_config.template_json` and name it `twilio_config.json`. If this file exists and the credentials are
@@ -238,7 +240,9 @@ Next click the `SHOW` button next to `API Key` and copy that value into your `jo
 }
 ```
 
+#### Testing notifications
 
+Once you have setup your desired notification handlers you can test them by running `python app.py test-notifications` from within your pipenv shell. This will send a test notification to all configured notificaiton handlers.
 
 ## Troubleshooting
 
