@@ -30,6 +30,7 @@ HOME_PAGE_TITLES = [
     "Amazon.com: Online Shopping for Electronics, Apparel, Computers, Books, DVDs & more",
     "Amazon.co.uk: Low Prices in Electronics, Books, Sports Equipment & more",
     "Amazon.de: Low Prices in Electronics, Books, Sports Equipment & more",
+    "Amazon.de: Günstige Preise für Elektronik & Foto, Filme, Musik, Bücher, Games, Spielzeug & mehr",
     "Amazon.es: compra online de electrónica, libros, deporte, hogar, moda y mucho más.",
     "Amazon.de: Günstige Preise für Elektronik & Foto, Filme, Musik, Bücher, Games, Spielzeug & mehr",
 ]
@@ -37,6 +38,7 @@ SHOPING_CART_TITLES = [
     "Amazon.com Shopping Cart",
     "Amazon.co.uk Shopping Basket",
     "Amazon.de Basket",
+    "Amazon.de Einkaufswagen",
     "Cesta de compra Amazon.es",
 ]
 CHECKOUT_TITLES = [
@@ -44,6 +46,7 @@ CHECKOUT_TITLES = [
     "Place Your Order - Amazon.co.uk Checkout",
     "Amazon.de Checkout",
     "Place Your Order - Amazon.de Checkout",
+    "Amazon.de - Bezahlvorgang",
     "Place Your Order - Amazon.com Checkout",
     "Place Your Order - Amazon.com",
     "Tramitar pedido en Amazon.es",

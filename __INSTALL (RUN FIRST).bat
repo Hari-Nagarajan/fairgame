@@ -1,4 +1,4 @@
-@ehcho on
+@echo on
 pip install pipenv
 pause
 pipenv install
