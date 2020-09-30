@@ -3,6 +3,7 @@ import secrets
 import time
 from os import path
 
+from amazoncaptcha import AmazonCaptcha
 from chromedriver_py import binary_path  # this will get you the path variable
 from furl import furl
 from selenium import webdriver
@@ -31,6 +32,7 @@ HOME_PAGE_TITLES = [
     "Amazon.de: Low Prices in Electronics, Books, Sports Equipment & more",
     "Amazon.de: Günstige Preise für Elektronik & Foto, Filme, Musik, Bücher, Games, Spielzeug & mehr",
     "Amazon.es: compra online de electrónica, libros, deporte, hogar, moda y mucho más.",
+    "Amazon.de: Günstige Preise für Elektronik & Foto, Filme, Musik, Bücher, Games, Spielzeug & mehr",
 ]
 SHOPING_CART_TITLES = [
     "Amazon.com Shopping Cart",
@@ -42,6 +44,7 @@ SHOPING_CART_TITLES = [
 CHECKOUT_TITLES = [
     "Amazon.com Checkout",
     "Place Your Order - Amazon.co.uk Checkout",
+    "Amazon.de Checkout",
     "Place Your Order - Amazon.de Checkout",
     "Amazon.de - Bezahlvorgang",
     "Place Your Order - Amazon.com Checkout",
@@ -124,8 +127,10 @@ class Amazon:
             log.info("Email not needed.")
             pass
 
+        log.info("Remember me checkbox")
+        selenium_utils.button_click_using_xpath(self.driver, '//*[@name="rememberMe"]')
+
         log.info("Password")
-        self.driver.find_element_by_xpath('//input[@name="rememberMe"]').click()
         self.driver.find_element_by_xpath('//*[@id="ap_password"]').send_keys(
             self.password + Keys.RETURN
         )
@@ -160,8 +165,25 @@ class Amazon:
             return False
 
     def get_captcha_help(self):
-        log.info("Stuck on a captcha. Please help.")
-        self.notification_handler.send_notification("Amazon bot is stuck on a captcha!")
+        try:
+            log.info("Stuck on a captcha... Lets try to solve it.")
+            captcha = AmazonCaptcha.from_webdriver(self.driver)
+            solution = captcha.solve()
+            log.info(f"The solution is: {solution}")
+            if solution == "Not solved":
+                self.driver.execute_script("window.location.reload()")
+                time.sleep(5)
+                self.get_captcha_help()
+            else:
+                self.driver.find_element_by_xpath(
+                    '//*[@id="captchacharacters"]'
+                ).send_keys(solution + Keys.RETURN)
+        except Exception as e:
+            log.debug(e)
+            log.info("We were unable to solve the captcha, need help from the user.")
+            self.notification_handler.send_notification(
+                "Amazon bot is stuck on a captcha!"
+            )
 
     def check_if_captcha(self, func, args):
         try:
