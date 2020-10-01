@@ -225,7 +225,9 @@ class NvidiaBuyer:
         params = {"format": "json", "locale": self.locale}
         headers = DEFAULT_HEADERS.copy()
         headers["locale"] = self.locale
-        headers["cookie"] = "; ".join([f"{cookie.name}={cookie.value}" for cookie in self.session.cookies])
+        headers["cookie"] = "; ".join(
+            [f"{cookie.name}={cookie.value}" for cookie in self.session.cookies]
+        )
 
         try:
             response = self.session.get(
