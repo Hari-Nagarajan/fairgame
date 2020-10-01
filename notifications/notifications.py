@@ -1,4 +1,10 @@
+import json
+import queue
+import threading
 from concurrent.futures import ThreadPoolExecutor
+from os import path
+
+import apprise
 
 from notifications.providers.audio import AudioHandler
 from notifications.providers.discord import DiscordHandler
@@ -42,7 +48,7 @@ class NotificationHandler:
 
     def send_notification(self, message, **kwargs):
         with ThreadPoolExecutor(
-            max_workers=len(self.get_enabled_handlers())
+                max_workers=len(self.get_enabled_handlers())
         ) as executor:
             if self.audio_handler.enabled:
                 executor.submit(self.audio_handler.play, **kwargs)
@@ -58,3 +64,37 @@ class NotificationHandler:
                 executor.submit(self.slack_handler.send, message)
             if self.pavlok_handler.enabled:
                 executor.submit(self.pavlok_handler.zap)
+
+
+APPRISE_CONFIG_PATH = "config/apprise_config.json"
+
+
+class AppriseHandler:
+    def __init__(self):
+        log.debug("Initializing Apprise handler")
+        self.apb = apprise.Apprise()
+
+        if path.exists(APPRISE_CONFIG_PATH):
+            with open(APPRISE_CONFIG_PATH) as json_file:
+                configs = json.load(json_file)
+                for config in configs:
+                    self.apb.add(config['url'])
+            self.queue = queue.Queue()
+            self.start_worker()
+            self.enabled = True
+        else:
+            self.enabled = False
+            log.debug("No Apprise config found.")
+
+    def send(self, message_body):
+        if self.enabled:
+            self.queue.put(message_body)
+
+    def message_sender(self):
+        while True:
+            message = self.queue.get()
+            self.apb.notify(body=message, attach="screenshot.png")
+            self.queue.task_done()
+
+    def start_worker(self):
+        threading.Thread(target=self.message_sender, daemon=True).start()

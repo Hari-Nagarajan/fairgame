@@ -11,3 +11,5 @@ __pycache__/
 *.py[cod]
 *.pkl
 .vscode/
+/config/apprise_config.json
+/config/apprise_config.json

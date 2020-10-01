@@ -9,9 +9,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.action_chains import ActionChains
 
-from notifications.notifications import NotificationHandler
 from utils import selenium_utils
 from utils.logger import log
 from utils.selenium_utils import options, enable_headless
@@ -21,14 +19,14 @@ CONFIG_PATH = "evga_config.json"
 
 
 class Evga:
-    def __init__(self, headless=False):
+    def __init__(self, notification_handler,  headless=False):
         if headless:
             enable_headless()
         self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
         self.credit_card = {}
         self.card_pn = ""
         self.card_series = ""
-        self.notification_handler = NotificationHandler()
+        self.notification_handler = notification_handler
 
         try:
             if path.exists(CONFIG_PATH):

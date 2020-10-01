@@ -11,16 +11,17 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 
-from notifications.notifications import NotificationHandler
+from notifications.notifications import AppriseHandler
 from utils import selenium_utils
 from utils.json_utils import InvalidAutoBuyConfigException
 from utils.logger import log
 from utils.selenium_utils import options, enable_headless, wait_for_element
 
 AMAZON_URLS = {
-    "BASE_URL": "https://www.{}/",
-    "CART_URL": "https://www.{}/gp/aws/cart/add.html",
+    "BASE_URL": "https://www.{domain}/",
+    "CART_URL": "https://www.{domain}/gp/aws/cart/add.html",
 }
+CHECKOUT_URL = "https://www.{domain}/gp/cart/desktop/go-to-checkout.html/ref=ox_sc_proceed?partialCheckoutCart=1&isToBeGiftWrappedBefore=0&proceedToRetailCheckout=Proceed+to+checkout&proceedToCheckout=1&cartInitiateId={cart_id}"
 
 AUTOBUY_CONFIG_PATH = "amazon_config.json"
 
@@ -61,8 +62,9 @@ ADD_TO_CART_TITLES = [
 
 
 class Amazon:
-    def __init__(self, headless=False):
-        self.notification_handler = NotificationHandler()
+    def __init__(self, notification_handler, headless=False):
+        self.notification_handler = notification_handler
+        self.apprise_handler = AppriseHandler()
         if headless:
             enable_headless()
         options.add_argument(f"user-data-dir=.profile-amz")
@@ -88,7 +90,7 @@ class Amazon:
             exit(0)
 
         for key in AMAZON_URLS.keys():
-            AMAZON_URLS[key] = AMAZON_URLS[key].format(self.amazon_website)
+            AMAZON_URLS[key] = AMAZON_URLS[key].format(domain=self.amazon_website)
         print(AMAZON_URLS)
         self.driver.get(AMAZON_URLS["BASE_URL"])
         log.info("Waiting for home page.")
@@ -179,6 +181,8 @@ class Amazon:
                 time.sleep(5)
                 self.get_captcha_help()
             else:
+                self.driver.save_screenshot('screenshot.png')
+                self.apprise_handler.send(f"Solving Captcha: {solution}")
                 self.driver.find_element_by_xpath(
                     '//*[@id="captchacharacters"]'
                 ).send_keys(solution + Keys.RETURN)
@@ -193,7 +197,7 @@ class Amazon:
             if self.driver.title in CAPTCHA_PAGE_TITLES:
                 return True
             if self.driver.find_element_by_xpath(
-                '//form[@action="/errors/validateCaptcha"]'
+                    '//form[@action="/errors/validateCaptcha"]'
             ):
                 return True
         except Exception:
@@ -215,6 +219,8 @@ class Amazon:
                     f"selenium browser is on. There may be a file saved at: amazon-{func.__name__}.png"
                 )
                 self.driver.save_screenshot(f"amazon-{func.__name__}.png")
+                self.driver.save_screenshot('screenshot.png')
+                self.apprise_handler.send(f"Error on {self.driver.title}")
                 time.sleep(60)
                 self.driver.close()
                 raise e
@@ -241,15 +247,15 @@ class Amazon:
         for button_xpath in button_xpaths:
             try:
                 if (
-                    self.driver.find_element_by_xpath(button_xpath).is_displayed()
-                    and self.driver.find_element_by_xpath(button_xpath).is_enabled()
+                        self.driver.find_element_by_xpath(button_xpath).is_displayed()
+                        and self.driver.find_element_by_xpath(button_xpath).is_enabled()
                 ):
                     button = self.driver.find_element_by_xpath(button_xpath)
             except NoSuchElementException:
                 log.debug(f"{button_xpath}, lets try a different one.")
 
         if button:
-            log.info(f"Clicking Button: {button}")
+            log.info(f"Clicking Button: {button.text}")
             if not test:
                 button.click()
             return
@@ -273,28 +279,46 @@ class Amazon:
 
     def checkout(self, test):
         log.info("Clicking continue.")
+        self.driver.save_screenshot('screenshot.png')
+        self.apprise_handler.send("Starting Checkout")
         self.driver.find_element_by_xpath('//input[@value="add"]').click()
 
         log.info("Waiting for Cart Page")
         self.check_if_captcha(self.wait_for_pages, SHOPING_CART_TITLES)
+        self.driver.save_screenshot('screenshot.png')
+        self.apprise_handler.send("Cart Page")
 
-        log.info("clicking checkout.")
-        try:
-            self.driver.find_element_by_xpath(
-                '//*[@id="sc-buy-box-ptc-button"]/span/input'
-            ).click()
-        except Exception as e:
-            log.debug(e)
-            log.info("Failed to checkout. Returning to stock check.")
-            self.run_item(test=test)
+        try:  # This is fast.
+            log.info("Quick redirect to checkout page")
+            cart_initiate_id = self.driver.find_element_by_name("cartInitiateId")
+            cart_initiate_id = cart_initiate_id.get_attribute("value")
+            self.driver.get(CHECKOUT_URL.format(domain=self.amazon_website, cart_id=cart_initiate_id))
+        except:
+            log.info("clicking checkout.")
+            try:
+                self.driver.find_element_by_xpath(
+                    '//*[@id="sc-buy-box-ptc-button"]/span/input'
+                ).click()
+            finally:
+                self.driver.save_screenshot('screenshot.png')
+                self.apprise_handler.send("Failed to checkout. Returning to stock check.")
+                log.info("Failed to checkout. Returning to stock check.")
+                self.run_item(test=test)
 
         log.info("Waiting for Place Your Order Page")
         self.wait_for_pyo_page()
 
         log.info("Finishing checkout")
+        self.driver.save_screenshot('screenshot.png')
+        self.apprise_handler.send("Finishing checkout")
+
         self.finalize_order_button(test)
 
         log.info("Waiting for Order completed page.")
         self.wait_for_order_completed(test)
 
         log.info("Order Placed.")
+        self.driver.save_screenshot('screenshot.png')
+        self.apprise_handler.send("Order Placed")
+
+        time.sleep(20)
