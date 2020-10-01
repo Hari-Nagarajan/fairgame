@@ -282,4 +282,3 @@ class Amazon:
         self.wait_for_order_completed(test)
 
         log.info("Order Placed.")
-
