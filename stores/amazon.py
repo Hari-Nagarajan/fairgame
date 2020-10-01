@@ -1,6 +1,7 @@
 import json
 import secrets
 import time
+import getpass
 from os import path
 
 from amazoncaptcha import AmazonCaptcha
@@ -16,6 +17,7 @@ from utils import selenium_utils
 from utils.json_utils import InvalidAutoBuyConfigException
 from utils.logger import log
 from utils.selenium_utils import options, enable_headless, wait_for_element
+from utils import encryption as encrypt
 
 AMAZON_URLS = {
     "BASE_URL": "https://www.{}/",
@@ -65,27 +67,53 @@ class Amazon:
         self.notification_handler = NotificationHandler()
         if headless:
             enable_headless()
-        options.add_argument(f"user-data-dir=.profile-amz")
-        self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
-        self.wait = WebDriverWait(self.driver, 10)
         if path.exists(AUTOBUY_CONFIG_PATH):
-            with open(AUTOBUY_CONFIG_PATH) as json_file:
+            with open(AUTOBUY_CONFIG_PATH, "r") as json_file:
                 try:
-                    config = json.load(json_file)
+                    data = json_file.read()
+                    password = getpass.getpass(prompt="Password: ")
+                    decrypted = encrypt.decrypt(data, password)
+                    config = json.loads(decrypted)
                     self.username = config["username"]
                     self.password = config["password"]
                     self.asin_list = config["asin_list"]
                     self.amazon_website = config.get("amazon_website", "amazon.com")
                     assert isinstance(self.asin_list, list)
+
                 except Exception:
                     raise InvalidAutoBuyConfigException(
                         "amazon_config.json file not formatted properly."
                     )
         else:
-            log.error(
-                "No config file found, see here on how to fix this: https://github.com/Hari-Nagarajan/nvidia-bot#amazon"
-            )
-            exit(0)
+            log.fatal("No config file found, creating")
+            uname = input("Amazon login ID: ")
+            upass = getpass.getpass(prompt="Amazon Password: ")
+            uasin = input("Comma seperated list of ASIN's to search for: ")
+            usite = input("Amazon page for your locale: ")
+            create_config = {
+                "username": uname,
+                "password": upass,
+                "asin_list": [uasin],
+                "amazon_website": usite
+            }
+            config = bytes(json.dumps(create_config), 'utf-8')
+            log.info("Create a password for the credential file")
+            cpass = getpass.getpass(prompt="Credential file password: ")
+            vpass = getpass.getpass(prompt="Verify credential file password: ")
+            if cpass == vpass:
+                result = encrypt.encrypt(config, cpass)
+                final_config = open(AUTOBUY_CONFIG_PATH, 'w')
+                final_config.write(result)
+                final_config.close()
+                log.info("Credentials safely stored, run me again to start monitoring.")
+                exit(0)
+            else:
+                print("Password and verify password do not match.")
+                exit(0)
+
+        options.add_argument(f"user-data-dir=.profile-amz")
+        self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
+        self.wait = WebDriverWait(self.driver, 10)
 
         for key in AMAZON_URLS.keys():
             AMAZON_URLS[key] = AMAZON_URLS[key].format(self.amazon_website)

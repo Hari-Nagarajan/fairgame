@@ -36,29 +36,29 @@ def decrypt(ct, password):
         exit(0)
 
 
-def main():
-
-    password = getpass.getpass(prompt="Password: ")
-
-    if not os.path.isfile("../amazon_config.enc"):
-        verify = getpass.getpass(prompt="Verify Password: ")
-
-        if verify == password:
-            ptFile = open("../amazon_config.json", "rb")
-            data = ptFile.read()
-            ct = encrypt(data, password)
-
-            ctFile = open("../amazon_config.enc", "w")
-            ctFile.write(ct)
-            ctFile.close()
-        else:
-            print("Passwords do no match")
-            exit(0)
-
-    ctFile = open("../amazon_config.enc", "r")
-    data = ctFile.read()
-    pt = decrypt(data, password)
-    print(pt)
-
-
-main()
+#def main():
+#
+#    password = getpass.getpass(prompt="Password: ")
+#
+#    if not os.path.isfile("../amazon_config.enc"):
+#        verify = getpass.getpass(prompt="Verify Password: ")
+#
+#        if verify == password:
+#            ptFile = open("../amazon_config.json", "rb")
+#            data = ptFile.read()
+#            ct = encrypt(data, password)
+#
+#            ctFile = open("../amazon_config.enc", "w")
+#            ctFile.write(ct)
+#            ctFile.close()
+#        else:
+#            print("Passwords do no match")
+#            exit(0)
+#
+#    ctFile = open("../amazon_config.enc", "r")
+#    data = ctFile.read()
+#    pt = decrypt(data, password)
+#    print(pt)
+#
+#
+#main()
