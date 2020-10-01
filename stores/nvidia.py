@@ -5,16 +5,17 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from datetime import datetime
 from time import sleep
 
+import browser_cookie3
 import requests
-from requests.packages.urllib3.util.retry import Retry
 from spinlog import Spinner
 
 from notifications.notifications import NotificationHandler
 from utils.http import TimeoutHTTPAdapter
 from utils.logger import log
 
-NVIDIA_PRODUCT_API = "https://api.nvidia.partners/edge/product/search?page=1&limit=9&locale=en-us&category=GPU"
-NVIDIA_CART_URL = "https://store.nvidia.com/store?Action=AddItemToRequisition&SiteID=nvidia&Locale=en_US&productID={product_id}&quantity=1"
+NVIDIA_CART_URL = (
+    "https://store.nvidia.com/store?Action=DisplayHGOP2LandingPage&SiteID=nvidia"
+)
 NVIDIA_TOKEN_URL = "https://store.nvidia.com/store/nvidia/SessionToken"
 NVIDIA_STOCK_API = "https://api-prod.nvidia.com/direct-sales-shop/DR/products/{locale}/{currency}/{product_id}"
 NVIDIA_ADD_TO_CART_API = "https://api-prod.nvidia.com/direct-sales-shop/DR/add-to-cart"
@@ -71,6 +72,9 @@ class NvidiaBuyer:
         self.interval = interval
 
         self.gpu_long_name = GPU_DISPLAY_NAMES[gpu]
+
+        self.cj = browser_cookie3.load(".nvidia.com")
+        self.session.cookies = self.cj
 
         # Disable auto_buy_enabled if the user does not provide a bool.
         if type(self.auto_buy_enabled) != bool:
@@ -131,14 +135,14 @@ class NvidiaBuyer:
                 ) as s:
                     sleep(self.interval)
             if self.enabled:
-                cart_success, cart_url = self.get_cart_url(product_id)
+                cart_success = self.add_to_cart(product_id)
                 if cart_success:
                     log.info(f"{self.gpu_long_name} added to cart.")
                     self.enabled = False
-                    webbrowser.open(cart_url)
+                    webbrowser.open(NVIDIA_CART_URL)
                     self.notification_handler.send_notification(
                         f" {self.gpu_long_name} with product ID: {product_id} in "
-                        f"stock: {cart_url}"
+                        f"stock: {NVIDIA_CART_URL}"
                     )
                 else:
                     self.notification_handler.send_notification(
@@ -159,6 +163,7 @@ class NvidiaBuyer:
                     product_id=product_id,
                     locale=self.locale,
                     currency=CURRENCY_LOCALE_MAP.get(self.locale, "USD"),
+                    cookies=self.cj,
                 ),
                 headers=DEFAULT_HEADERS,
             )
@@ -175,11 +180,12 @@ class NvidiaBuyer:
             )
             return False
 
-    def get_cart_url(self, product_id):
+    def add_to_cart(self, product_id):
         try:
             success, token = self.get_session_token()
             if not success:
-                return False, ""
+                return False
+            log.info(f"Session token: {token}")
 
             data = {"products": [{"productId": product_id, "quantity": 1}]}
             headers = DEFAULT_HEADERS.copy()
@@ -187,32 +193,48 @@ class NvidiaBuyer:
             headers["nvidia_shop_id"] = token
             headers["Content-Type"] = "application/json"
             response = self.session.post(
-                url=NVIDIA_ADD_TO_CART_API, headers=headers, data=json.dumps(data)
+                url=NVIDIA_ADD_TO_CART_API,
+                headers=headers,
+                data=json.dumps(data),
+                cookies=self.cj,
             )
-            if response.status_code == 203:
+            if response.status_code == 200:
                 response_json = response.json()
-                if "location" in response_json:
-                    return True, response_json["location"]
+                print(response_json)
+                if "successfully" in response_json["message"]:
+                    return True
             else:
                 log.error(response.text)
                 log.error(
                     f"Add to cart failed with {response.status_code}. This is likely an error with nvidia's API."
                 )
-            return False, ""
+            return False
         except requests.exceptions.RequestException as e:
+            log.info(e)
             log.info(
                 f"Got an unexpected reply from the server, API may be down, nothing we can do but try again"
             )
-            return False, ""
+            return False
 
     def get_session_token(self):
+        """
+        Ok now this works, but I dont know when the cookies expire so might be unstable.
+        :return:
+        """
+
         params = {"format": "json", "locale": self.locale}
         headers = DEFAULT_HEADERS.copy()
         headers["locale"] = self.locale
+        headers["cookie"] = "; ".join(
+            [f"{cookie.name}={cookie.value}" for cookie in self.session.cookies]
+        )
 
         try:
             response = self.session.get(
-                NVIDIA_TOKEN_URL, headers=DEFAULT_HEADERS, params=params
+                NVIDIA_TOKEN_URL,
+                headers=headers,
+                params=params,
+                cookies=self.cj,
             )
             if response.status_code == 200:
                 response_json = response.json()
