@@ -165,6 +165,9 @@ class Amazon:
             return False
 
     def get_captcha_help(self):
+        if not self.on_captcha_page():
+            log.info("Not on captcha page.")
+            return
         try:
             log.info("Stuck on a captcha... Lets try to solve it.")
             captcha = AmazonCaptcha.from_webdriver(self.driver)
@@ -172,7 +175,7 @@ class Amazon:
             log.info(f"The solution is: {solution}")
             if solution == "Not solved":
                 log.info(f"Failed to solve, lets reload and get a new captcha.")
-                self.driver.execute_script("window.location.reload()")
+                self.driver.refresh()
                 time.sleep(5)
                 self.get_captcha_help()
             else:
@@ -181,19 +184,32 @@ class Amazon:
                 ).send_keys(solution + Keys.RETURN)
         except Exception as e:
             log.debug(e)
-            log.info("We were unable to solve the captcha, need help from the user.")
-            self.notification_handler.send_notification(
-                "Amazon bot is stuck on a captcha!"
-            )
+            log.info("Error trying to solve captcha. Refresh and retry.")
+            self.driver.refresh()
+            time.sleep(5)
+
+    def on_captcha_page(self):
+        try:
+            if self.driver.title in CAPTCHA_PAGE_TITLES:
+                return True
+            if self.driver.find_element_by_xpath(
+                '//form[@action="/errors/validateCaptcha"]'
+            ):
+                return True
+        except Exception:
+            pass
+        return False
 
     def check_if_captcha(self, func, args):
         try:
             func(args)
         except Exception as e:
-            if self.driver.title in CAPTCHA_PAGE_TITLES:
+            log.debug(str(e))
+            if self.on_captcha_page():
                 self.get_captcha_help()
                 func(args, t=300)
             else:
+                log.debug(self.driver.title)
                 log.error(
                     f"An error happened, please submit a bug report including a screenshot of the page the "
                     f"selenium browser is on. There may be a file saved at: amazon-{func.__name__}.png"
