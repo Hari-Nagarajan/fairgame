@@ -14,7 +14,8 @@ from utils.http import TimeoutHTTPAdapter
 from utils.logger import log
 
 NVIDIA_PRODUCT_API = "https://api.nvidia.partners/edge/product/search?page=1&limit=9&locale=en-us&category=GPU"
-NVIDIA_CART_URL = "https://store.nvidia.com/store?Action=AddItemToRequisition&SiteID=nvidia&Locale=en_US&productID={product_id}&quantity=1"
+#NVIDIA_CART_URL = "https://store.nvidia.com/store?Action=AddItemToRequisition&SiteID=nvidia&Locale=en_US&productID={product_id}&quantity=1"
+NVIDIA_CART_URL = "https://store.nvidia.com/store?Action=DisplayHGOP2LandingPage&SiteID=nvidia"
 NVIDIA_TOKEN_URL = "https://store.nvidia.com/store/nvidia/SessionToken"
 NVIDIA_STOCK_API = "https://api-prod.nvidia.com/direct-sales-shop/DR/products/{locale}/{currency}/{product_id}"
 NVIDIA_ADD_TO_CART_API = "https://api-prod.nvidia.com/direct-sales-shop/DR/add-to-cart"
@@ -131,20 +132,21 @@ class NvidiaBuyer:
                 ) as s:
                     sleep(self.interval)
             if self.enabled:
-                cart_success, cart_url = self.get_cart_url(product_id)
-                if cart_success:
-                    log.info(f"{self.gpu_long_name} added to cart.")
-                    self.enabled = False
-                    webbrowser.open(cart_url)
-                    self.notification_handler.send_notification(
-                        f" {self.gpu_long_name} with product ID: {product_id} in "
-                        f"stock: {cart_url}"
-                    )
-                else:
-                    self.notification_handler.send_notification(
-                        f" ERROR: Attempted to add {self.gpu_long_name} to cart but couldn't, check manually!"
-                    )
-                    self.buy(product_id)
+                #cart_success, cart_url = self.get_cart_url(product_id)
+                #if cart_success:
+                cart_url = NVIDIA_CART_URL
+                log.info(f"{self.gpu_long_name} added to cart.")
+                self.enabled = False
+                webbrowser.open(cart_url)
+                self.notification_handler.send_notification(
+                    f" {self.gpu_long_name} with product ID: {product_id} in "
+                    f"stock: {cart_url}"
+                )
+                #else:
+                #    self.notification_handler.send_notification(
+                #        f" ERROR: Attempted to add {self.gpu_long_name} to cart but couldn't, check manually!"
+                #    )
+                #    self.buy(product_id)
         except requests.exceptions.RequestException as e:
             log.warning("Connection error while calling Nvidia API. API may be down.")
             log.info(
@@ -189,10 +191,11 @@ class NvidiaBuyer:
             response = self.session.post(
                 url=NVIDIA_ADD_TO_CART_API, headers=headers, data=json.dumps(data)
             )
-            if response.status_code == 203:
+            if response.status_code == 200:
                 response_json = response.json()
-                if "location" in response_json:
-                    return True, response_json["location"]
+                print(response_json)
+                if "successfully" in response_json:
+                    return True #, response_json["location"]
             else:
                 log.error(response.text)
                 log.error(
@@ -216,6 +219,7 @@ class NvidiaBuyer:
             )
             if response.status_code == 200:
                 response_json = response.json()
+                print(response_json)
                 if "session_token" not in response_json:
                     log.error("Error getting session token.")
                     return False, ""
