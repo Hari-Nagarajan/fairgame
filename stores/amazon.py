@@ -171,6 +171,7 @@ class Amazon:
             solution = captcha.solve()
             log.info(f"The solution is: {solution}")
             if solution == "Not solved":
+                log.info(f"Failed to solve, lets reload and get a new captcha.")
                 self.driver.execute_script("window.location.reload()")
                 time.sleep(5)
                 self.get_captcha_help()
@@ -262,9 +263,14 @@ class Amazon:
         self.check_if_captcha(self.wait_for_pages, SHOPING_CART_TITLES)
 
         log.info("clicking checkout.")
-        self.driver.find_element_by_xpath(
-            '//*[@id="sc-buy-box-ptc-button"]/span/input'
-        ).click()
+        try:
+            self.driver.find_element_by_xpath(
+                '//*[@id="sc-buy-box-ptc-button"]/span/input'
+            ).click()
+        except Exception as e:
+            log.debug(e)
+            log.info("Failed to checkout. Returning to stock check.")
+            self.run_item(test=test)
 
         log.info("Waiting for Place Your Order Page")
         self.wait_for_pyo_page()
@@ -276,3 +282,4 @@ class Amazon:
         self.wait_for_order_completed(test)
 
         log.info("Order Placed.")
+
