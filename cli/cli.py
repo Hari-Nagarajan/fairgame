@@ -1,7 +1,8 @@
+from functools import wraps
+
 import click
 
 from cli.utils import QuestionaryOption
-from functools import wraps
 from notifications.notifications import NotificationHandler
 from stores.amazon import Amazon
 from stores.bestbuy import BestBuyHandler
@@ -49,7 +50,7 @@ def main():
 @click.option("--interval", type=int, default=5)
 @notify_on_crash
 def nvidia(gpu, locale, test, interval):
-    nv = NvidiaBuyer(gpu, locale, test, interval)
+    nv = NvidiaBuyer(gpu, locale, test, interval, notification_handler=notification_handler)
     nv.run_items()
 
 
@@ -64,7 +65,7 @@ def amazon(no_image, headless, test):
     else:
         selenium_utils.yes_amazon_image()
 
-    amzn_obj = Amazon(headless=headless)
+    amzn_obj = Amazon(headless=headless, notification_handler=notification_handler)
     amzn_obj.run_item(test=test)
 
 
@@ -73,7 +74,7 @@ def amazon(no_image, headless, test):
 @click.option("--headless", is_flag=True)
 @notify_on_crash
 def bestbuy(sku, headless):
-    bb = BestBuyHandler(sku, headless)
+    bb = BestBuyHandler(sku, headless, notification_handler=notification_handler)
     bb.run_item()
 
 
@@ -82,7 +83,7 @@ def bestbuy(sku, headless):
 @click.option("--headless", is_flag=True)
 @notify_on_crash
 def evga(test, headless):
-    ev = Evga(headless)
+    ev = Evga(headless, notification_handler=notification_handler)
     ev.buy(test=test)
 
 
