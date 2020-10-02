@@ -27,20 +27,14 @@ class Evga:
         if headless:
             enable_headless()
         self.notification_handler = NotificationHandler()
-        # self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
-        # self.card_pn = ""
-        # self.card_series = ""
         if path.exists(CONFIG_PATH):
             self.load_encrypted_credentials(CONFIG_PATH)
+            self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
+            self.login(self.username, self.password)
         else:
             log.fatal("No config file found, creating")
             config_dict = self.await_credential_input()
             self.create_encrypted_credentials(config_dict, CONFIG_PATH)
-        # except Exception as e:
-        # log.error(f"This is most likely an error with your {CONFIG_PATH} file.")
-        # raise e
-        exit(0)
-        # self.login(username, password)
 
     @staticmethod
     def await_credential_input():
@@ -94,7 +88,6 @@ class Evga:
                 password = getpass.getpass(prompt="Password: ")
                 decrypted = encrypt.decrypt(data, password)
                 config = json.loads(decrypted)
-                print(config)
                 self.username = config["username"]
                 self.password = config["password"]
                 self.card_pn = config["card_pn"]
