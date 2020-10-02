@@ -27,14 +27,14 @@ class Evga:
         if headless:
             enable_headless()
         self.notification_handler = NotificationHandler()
-        #self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
+        # self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
         self.ucredit_card = {}
-        #self.card_pn = ""
-        #self.card_series = ""
+        # self.card_pn = ""
+        # self.card_series = ""
         if path.exists(CONFIG_PATH):
             with open(CONFIG_PATH, "r") as json_file:
                 try:
-                    #config = json.load(json_file)
+                    # config = json.load(json_file)
                     data = json_file.read()
                     password = getpass.getpass(prompt="Password: ")
                     decrypted = encrypt.decrypt(data, password)
@@ -64,9 +64,15 @@ class Evga:
             self.ucard_series = input("Card series (3070, 3080, 3090): ")
             self.ucredit_card["name"] = input("Name on your CC: ")
             self.ucredit_card["number"] = input("Credit card number: ")
-            self.ucredit_card["cvv"] = input("3 digit number on the back (4 for AMEX): ")
-            self.ucredit_card["expiration_month"] = input("Expiration month (2 digit format): ")
-            self.ucredit_card["expiration_year"] = input("Expiration year (4 digit format): ")
+            self.ucredit_card["cvv"] = input(
+                "3 digit number on the back (4 for AMEX): "
+            )
+            self.ucredit_card["expiration_month"] = input(
+                "Expiration month (2 digit format): "
+            )
+            self.ucredit_card["expiration_year"] = input(
+                "Expiration year (4 digit format): "
+            )
             create_config = {
                 "username": self.uname,
                 "password": self.upass,
@@ -78,7 +84,7 @@ class Evga:
                     "cvv": self.ucredit_card["cvv"],
                     "expiration_month": self.ucredit_card["expiration_month"],
                     "expiration_year": self.ucredit_card["expiration_year"],
-                }
+                },
             }
             config = bytes(json.dumps(create_config), "utf-8")
             print(config)
@@ -95,11 +101,11 @@ class Evga:
             else:
                 print("Password and verify password do not match.")
                 exit(0)
-        #except Exception as e:
-            #log.error(f"This is most likely an error with your {CONFIG_PATH} file.")
-            #raise e
+        # except Exception as e:
+        # log.error(f"This is most likely an error with your {CONFIG_PATH} file.")
+        # raise e
         exit(0)
-        #self.login(username, password)
+        # self.login(username, password)
 
     def login(self, username, password):
         """
