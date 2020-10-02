@@ -36,7 +36,7 @@ def decrypt(ct, password):
         exit(0)
 
 
-#def main():
+# def main():
 #
 #    password = getpass.getpass(prompt="Password: ")
 #
@@ -61,4 +61,4 @@ def decrypt(ct, password):
 #    print(pt)
 #
 #
-#main()
+# main()

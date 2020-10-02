@@ -94,15 +94,15 @@ class Amazon:
                 "username": uname,
                 "password": upass,
                 "asin_list": [uasin],
-                "amazon_website": usite
+                "amazon_website": usite,
             }
-            config = bytes(json.dumps(create_config), 'utf-8')
+            config = bytes(json.dumps(create_config), "utf-8")
             log.info("Create a password for the credential file")
             cpass = getpass.getpass(prompt="Credential file password: ")
             vpass = getpass.getpass(prompt="Verify credential file password: ")
             if cpass == vpass:
                 result = encrypt.encrypt(config, cpass)
-                final_config = open(AUTOBUY_CONFIG_PATH, 'w')
+                final_config = open(AUTOBUY_CONFIG_PATH, "w")
                 final_config.write(result)
                 final_config.close()
                 log.info("Credentials safely stored, run me again to start monitoring.")
