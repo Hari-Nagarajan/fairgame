@@ -3,7 +3,7 @@ from functools import wraps
 import click
 
 from cli.utils import QuestionaryOption
-from notifications.notifications import NotificationHandler
+from notifications.notifications import AppriseHandler, NotificationHandler
 from stores.amazon import Amazon
 from stores.bestbuy import BestBuyHandler
 from stores.evga import Evga
@@ -89,10 +89,17 @@ def evga(test, headless):
 
 @click.command()
 def test_notifications():
-    enabled_handlers = ", ".join(notification_handler.get_enabled_handlers())
-    notification_handler.send_notification(
-        f"🤖 Beep boop. This is a test notification from Nvidia bot."
-    )
+    message = f"🤖 Beep boop. This is a test notification from Nvidia bot."
+
+    apprise_handler = AppriseHandler()
+    apprise_handler.send(message)
+
+    handlers = notification_handler.get_enabled_handlers()
+    if apprise_handler.enabled:
+        handlers.insert(0, 'Apprise')
+
+    enabled_handlers = ", ".join(handlers)
+    notification_handler.send_notification(message)
     log.info(f"A notification was sent to the following handlers: {enabled_handlers}")
 
 
