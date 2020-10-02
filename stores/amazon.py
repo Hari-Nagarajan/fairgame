@@ -33,6 +33,7 @@ HOME_PAGE_TITLES = [
     "Amazon.de: Günstige Preise für Elektronik & Foto, Filme, Musik, Bücher, Games, Spielzeug & mehr",
     "Amazon.es: compra online de electrónica, libros, deporte, hogar, moda y mucho más.",
     "Amazon.de: Günstige Preise für Elektronik & Foto, Filme, Musik, Bücher, Games, Spielzeug & mehr",
+    "Amazon.fr : livres, DVD, jeux vidéo, musique, high-tech, informatique, jouets, vêtements, chaussures, sport, bricolage, maison, beauté, puériculture, épicerie et plus encore !"
 ]
 SHOPING_CART_TITLES = [
     "Amazon.com Shopping Cart",
@@ -40,6 +41,7 @@ SHOPING_CART_TITLES = [
     "Amazon.de Basket",
     "Amazon.de Einkaufswagen",
     "Cesta de compra Amazon.es",
+    "Amazon.fr Panier"
 ]
 CHECKOUT_TITLES = [
     "Amazon.com Checkout",
@@ -50,13 +52,15 @@ CHECKOUT_TITLES = [
     "Place Your Order - Amazon.com Checkout",
     "Place Your Order - Amazon.com",
     "Tramitar pedido en Amazon.es",
+    "Processus de paiement Amazon.com"
 ]
-ORDER_COMPLETE_TITLES = ["Amazon.com Thanks You", "Thank you"]
+ORDER_COMPLETE_TITLES = ["Amazon.com Thanks You", "Thank you", "Amazon.fr Merci", "Merci"]
 ADD_TO_CART_TITLES = [
     "Amazon.com: Please Confirm Your Action",
     "Amazon.de: Bitte bestätigen Sie Ihre Aktion",
     "Amazon.de: Please Confirm Your Action",
     "Amazon.es: confirma tu acción",
+    "Amazon.com : Veuillez confirmer votre action"  # Careful, required non-breaking space after .com (&nbsp)
 ]
 
 
