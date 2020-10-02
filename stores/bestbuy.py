@@ -1,6 +1,9 @@
+import getpass
 import json
 import webbrowser
+from os import path
 from time import sleep
+from utils import encryption as encrypt
 
 from chromedriver_py import binary_path  # this will get you the path variable
 from selenium import webdriver
@@ -29,6 +32,8 @@ BEST_BUY_CART_URL = "https://api.bestbuy.com/click/5592e2b895800000/{sku}/cart"
 BEST_BUY_ADD_TO_CART_API_URL = "https://www.bestbuy.com/cart/api/v1/addToCart"
 BEST_BUY_CHECKOUT_URL = "https://www.bestbuy.com/checkout/c/orders/{order_id}/"
 
+AUTOBUY_CONFIG_PATH = "bestbuy_config.json"
+
 DEFAULT_HEADERS = {
     "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
     "accept-encoding": "gzip, deflate, br",
@@ -49,10 +54,44 @@ options.add_argument("user-data-dir=.profile-bb")
 class BestBuyHandler:
     def __init__(self, sku_id, headless=False):
         self.notification_handler = NotificationHandler()
+        if path.exists(AUTOBUY_CONFIG_PATH):
+            with open(AUTOBUY_CONFIG_PATH, "r") as json_file:
+                try:
+                    data = json_file.read()
+                    password = getpass.getpass(prompt="Password: ")
+                    decrypted = encrypt.decrypt(data, password)
+                    config = json.loads(decrypted)
+                    self.username = config["username"]
+                    self.password = config["password"]
+                except:
+                    log.error("An error occured decrypting the credential file.")
+        else:
+            log.fatal("No config file found, creating")
+            uname = input("BestBuy login ID: ")
+            upass = getpass.getpass(prompt="BestBuy Password: ")
+            create_config = {
+                "username": uname,
+                "password": upass,
+            }
+            config = bytes(json.dumps(create_config), 'utf-8')
+            log.info("Create a password for the credential file")
+            cpass = getpass.getpass(prompt="Credential file password: ")
+            vpass = getpass.getpass(prompt="Verify credential file password: ")
+            if cpass == vpass:
+                result = encrypt.encrypt(config, cpass)
+                final_config = open(AUTOBUY_CONFIG_PATH, 'w')
+                final_config.write(result)
+                final_config.close()
+                log.info("Credentials safely stored, run me again to start monitoring.")
+                exit(0)
+            else:
+                print("Password and verify password do not match.")
+                exit(0)
+
         self.sku_id = sku_id
         self.session = requests.Session()
         self.auto_buy = False
-        self.account = {"username": "", "password": ""}
+        #self.account = {"username": "", "password": ""}
 
         adapter = HTTPAdapter(
             max_retries=Retry(
