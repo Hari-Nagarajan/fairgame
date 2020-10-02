@@ -51,21 +51,15 @@ class Evga:
         credit_card = {}
         credit_card["name"] = input("Name on your CC: ")
         credit_card["number"] = input("Credit card number: ")
-        credit_card["cvv"] = input(
-            "3 digit number on the back (4 for AMEX): "
-        )
-        credit_card["expiration_month"] = input(
-            "Expiration month (2 digit format): "
-        )
-        credit_card["expiration_year"] = input(
-            "Expiration year (4 digit format): "
-        )
+        credit_card["cvv"] = input("3 digit number on the back (4 for AMEX): ")
+        credit_card["expiration_month"] = input("Expiration month (2 digit format): ")
+        credit_card["expiration_year"] = input("Expiration year (4 digit format): ")
         return {
             "username": username,
             "password": password,
             "card_pn": card_pn,
             "card_series": card_series,
-            "credit_card": credit_card
+            "credit_card": credit_card,
         }
 
     @staticmethod
