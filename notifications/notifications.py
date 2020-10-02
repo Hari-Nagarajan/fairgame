@@ -47,23 +47,24 @@ class NotificationHandler:
         return enabled_handlers
 
     def send_notification(self, message, **kwargs):
-        with ThreadPoolExecutor(
-                max_workers=len(self.get_enabled_handlers())
-        ) as executor:
-            if self.audio_handler.enabled:
-                executor.submit(self.audio_handler.play, **kwargs)
-            if self.twilio_handler.enabled:
-                executor.submit(self.twilio_handler.send, message)
-            if self.discord_handler.enabled:
-                executor.submit(self.discord_handler.send, message)
-            if self.join_handler.enabled:
-                executor.submit(self.join_handler.send, message)
-            if self.telegram_handler.enabled:
-                executor.submit(self.telegram_handler.send, message)
-            if self.slack_handler.enabled:
-                executor.submit(self.slack_handler.send, message)
-            if self.pavlok_handler.enabled:
-                executor.submit(self.pavlok_handler.zap)
+        if len(self.get_enabled_handlers()) > 0:
+            with ThreadPoolExecutor(
+                    max_workers=len(self.get_enabled_handlers())
+            ) as executor:
+                if self.audio_handler.enabled:
+                    executor.submit(self.audio_handler.play, **kwargs)
+                if self.twilio_handler.enabled:
+                    executor.submit(self.twilio_handler.send, message)
+                if self.discord_handler.enabled:
+                    executor.submit(self.discord_handler.send, message)
+                if self.join_handler.enabled:
+                    executor.submit(self.join_handler.send, message)
+                if self.telegram_handler.enabled:
+                    executor.submit(self.telegram_handler.send, message)
+                if self.slack_handler.enabled:
+                    executor.submit(self.slack_handler.send, message)
+                if self.pavlok_handler.enabled:
+                    executor.submit(self.pavlok_handler.zap)
 
 
 APPRISE_CONFIG_PATH = "config/apprise_config.json"
