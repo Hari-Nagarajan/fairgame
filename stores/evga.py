@@ -28,84 +28,81 @@ class Evga:
             enable_headless()
         self.notification_handler = NotificationHandler()
         # self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
-        self.ucredit_card = {}
         # self.card_pn = ""
         # self.card_series = ""
         if path.exists(CONFIG_PATH):
-            with open(CONFIG_PATH, "r") as json_file:
-                try:
-                    # config = json.load(json_file)
-                    data = json_file.read()
-                    password = getpass.getpass(prompt="Password: ")
-                    decrypted = encrypt.decrypt(data, password)
-                    config = json.loads(decrypted)
-                    print(config)
-                    self.username = config["username"]
-                    self.password = config["password"]
-                    self.card_pn = config["card_pn"]
-                    self.card_series = config["card_series"]
-                    self.credit_card["name"] = config["credit_card"]["name"]
-                    self.credit_card["number"] = config["credit_card"]["number"]
-                    self.credit_card["cvv"] = config["credit_card"]["cvv"]
-                    self.credit_card["expiration_month"] = config["credit_card"][
-                        "expiration_month"
-                    ]
-                    self.credit_card["expiration_year"] = config["credit_card"][
-                        "expiration_year"
-                    ]
-                except Exception as e:
-                    log.error(e)
-                    log.error("Failed to decrypt the credential file.")
+            self.load_encrypted_credentials(CONFIG_PATH)
         else:
             log.fatal("No config file found, creating")
-            self.uname = input("EVGA login ID: ")
-            self.upass = getpass.getpass(prompt="EVGA Password: ")
-            self.ucard_pn = input("Part number to purchase: ")
-            self.ucard_series = input("Card series (3070, 3080, 3090): ")
-            self.ucredit_card["name"] = input("Name on your CC: ")
-            self.ucredit_card["number"] = input("Credit card number: ")
-            self.ucredit_card["cvv"] = input(
-                "3 digit number on the back (4 for AMEX): "
-            )
-            self.ucredit_card["expiration_month"] = input(
-                "Expiration month (2 digit format): "
-            )
-            self.ucredit_card["expiration_year"] = input(
-                "Expiration year (4 digit format): "
-            )
-            create_config = {
-                "username": self.uname,
-                "password": self.upass,
-                "card_pn": self.ucard_pn,
-                "card_series": self.ucard_series,
-                "credit_card": {
-                    "name": self.ucredit_card["name"],
-                    "number": self.ucredit_card["number"],
-                    "cvv": self.ucredit_card["cvv"],
-                    "expiration_month": self.ucredit_card["expiration_month"],
-                    "expiration_year": self.ucredit_card["expiration_year"],
-                },
-            }
-            config = bytes(json.dumps(create_config), "utf-8")
-            print(config)
-            log.info("Create a password for the credential file")
-            cpass = getpass.getpass(prompt="Credential file password: ")
-            vpass = getpass.getpass(prompt="Verify credential file password: ")
-            if cpass == vpass:
-                result = encrypt.encrypt(config, cpass)
-                final_config = open(CONFIG_PATH, "w")
-                final_config.write(result)
-                final_config.close()
-                log.info("Credentials safely stored, run me again to start monitoring.")
-                exit(0)
-            else:
-                print("Password and verify password do not match.")
-                exit(0)
+            config_dict = self.await_credential_input()
+            self.create_encrypted_credentials(config_dict, CONFIG_PATH)
         # except Exception as e:
         # log.error(f"This is most likely an error with your {CONFIG_PATH} file.")
         # raise e
         exit(0)
         # self.login(username, password)
+
+    @staticmethod
+    def await_credential_input():
+        username = input("EVGA login ID: ")
+        password = getpass.getpass(prompt="EVGA Password: ")
+        card_pn = input("Part number to purchase: ")
+        card_series = input("Card series (3070, 3080, 3090): ")
+        credit_card = {}
+        credit_card["name"] = input("Name on your CC: ")
+        credit_card["number"] = input("Credit card number: ")
+        credit_card["cvv"] = input(
+            "3 digit number on the back (4 for AMEX): "
+        )
+        credit_card["expiration_month"] = input(
+            "Expiration month (2 digit format): "
+        )
+        credit_card["expiration_year"] = input(
+            "Expiration year (4 digit format): "
+        )
+        return {
+            "username": username,
+            "password": password,
+            "card_pn": card_pn,
+            "card_series": card_series,
+            "credit_card": credit_card
+        }
+
+    @staticmethod
+    def create_encrypted_credentials(config_dict, config_path):
+        config = bytes(json.dumps(config_dict), "utf-8")
+        print(config)
+        log.info("Create a password for the credential file")
+        cpass = getpass.getpass(prompt="Credential file password: ")
+        vpass = getpass.getpass(prompt="Verify credential file password: ")
+        if cpass == vpass:
+            result = encrypt.encrypt(config, cpass)
+            final_config = open(config_path, "w")
+            final_config.write(result)
+            final_config.close()
+            log.info("Credentials safely stored, run me again to start monitoring.")
+            exit(0)
+        else:
+            print("Password and verify password do not match.")
+            exit(0)
+
+    def load_encrypted_credentials(self, config_path):
+        with open(config_path, "r") as json_file:
+            try:
+                # config = json.load(json_file)
+                data = json_file.read()
+                password = getpass.getpass(prompt="Password: ")
+                decrypted = encrypt.decrypt(data, password)
+                config = json.loads(decrypted)
+                print(config)
+                self.username = config["username"]
+                self.password = config["password"]
+                self.card_pn = config["card_pn"]
+                self.card_series = config["card_series"]
+                self.credit_card = config["credit_card"]
+            except Exception as e:
+                log.error(e)
+                log.error("Failed to decrypt the credential file.")
 
     def login(self, username, password):
         """
