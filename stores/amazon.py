@@ -92,7 +92,6 @@ class Amazon:
                             final_config.write(result)
                             final_config.close()
                             log.info("Credentials safely stored, run me again to start monitoring.")
-                            exit(0)
                         else:
                             print("Password and verify password do not match.")
                             exit(0)
@@ -122,7 +121,6 @@ class Amazon:
                 final_config.write(result)
                 final_config.close()
                 log.info("Credentials safely stored, run me again to start monitoring.")
-                exit(0)
             else:
                 print("Password and verify password do not match.")
                 exit(0)
