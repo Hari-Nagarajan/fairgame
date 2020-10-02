@@ -1,7 +1,9 @@
+import getpass
 import json
 import pickle
 from os import path
 from time import sleep
+from utils import encryption as encrypt
 
 from chromedriver_py import binary_path  # this will get you the path variable
 from selenium import webdriver
@@ -24,19 +26,23 @@ class Evga:
     def __init__(self, headless=False):
         if headless:
             enable_headless()
-        self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
-        self.credit_card = {}
-        self.card_pn = ""
-        self.card_series = ""
         self.notification_handler = NotificationHandler()
-
-        try:
-            if path.exists(CONFIG_PATH):
-                with open(CONFIG_PATH) as json_file:
-                    config = json.load(json_file)
-                    username = config["username"]
-                    password = config["password"]
-                    self.card_pn = config.get("card_pn")
+        #self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
+        self.ucredit_card = {}
+        #self.card_pn = ""
+        #self.card_series = ""
+        if path.exists(CONFIG_PATH):
+            with open(CONFIG_PATH, "r") as json_file:
+                try:
+                    #config = json.load(json_file)
+                    data = json_file.read()
+                    password = getpass.getpass(prompt="Password: ")
+                    decrypted = encrypt.decrypt(data, password)
+                    config = json.loads(decrypted)
+                    print(config)
+                    self.username = config["username"]
+                    self.password = config["password"]
+                    self.card_pn = config["card_pn"]
                     self.card_series = config["card_series"]
                     self.credit_card["name"] = config["credit_card"]["name"]
                     self.credit_card["number"] = config["credit_card"]["number"]
@@ -47,11 +53,53 @@ class Evga:
                     self.credit_card["expiration_year"] = config["credit_card"][
                         "expiration_year"
                     ]
-        except Exception as e:
-            log.error(f"This is most likely an error with your {CONFIG_PATH} file.")
-            raise e
-
-        self.login(username, password)
+                except Exception as e:
+                    log.error(e)
+                    log.error("Failed to decrypt the credential file.")
+        else:
+            log.fatal("No config file found, creating")
+            self.uname = input("EVGA login ID: ")
+            self.upass = getpass.getpass(prompt="EVGA Password: ")
+            self.ucard_pn = input("Part number to purchase: ")
+            self.ucard_series = input("Card series (3070, 3080, 3090): ")
+            self.ucredit_card["name"] = input("Name on your CC: ")
+            self.ucredit_card["number"] = input("Credit card number: ")
+            self.ucredit_card["cvv"] = input("3 digit number on the back (4 for AMEX): ")
+            self.ucredit_card["expiration_month"] = input("Expiration month (2 digit format): ")
+            self.ucredit_card["expiration_year"] = input("Expiration year (4 digit format): ")
+            create_config = {
+                "username": self.uname,
+                "password": self.upass,
+                "card_pn": self.ucard_pn,
+                "card_series": self.ucard_series,
+                "credit_card": {
+                    "name": self.ucredit_card["name"],
+                    "number": self.ucredit_card["number"],
+                    "cvv": self.ucredit_card["cvv"],
+                    "expiration_month": self.ucredit_card["expiration_month"],
+                    "expiration_year": self.ucredit_card["expiration_year"],
+                }
+            }
+            config = bytes(json.dumps(create_config), "utf-8")
+            print(config)
+            log.info("Create a password for the credential file")
+            cpass = getpass.getpass(prompt="Credential file password: ")
+            vpass = getpass.getpass(prompt="Verify credential file password: ")
+            if cpass == vpass:
+                result = encrypt.encrypt(config, cpass)
+                final_config = open(CONFIG_PATH, "w")
+                final_config.write(result)
+                final_config.close()
+                log.info("Credentials safely stored, run me again to start monitoring.")
+                exit(0)
+            else:
+                print("Password and verify password do not match.")
+                exit(0)
+        #except Exception as e:
+            #log.error(f"This is most likely an error with your {CONFIG_PATH} file.")
+            #raise e
+        exit(0)
+        #self.login(username, password)
 
     def login(self, username, password):
         """
