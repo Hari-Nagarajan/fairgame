@@ -14,7 +14,11 @@ that scalpers can buy goes down and normal consumers can buy items for MSRP. If 
 
 For Raspberry Pi installation and setup, go [here](#Raspberry-Pi-Setup).
 
-This project uses [Pipenv](https://pypi.org/project/pipenv/) to manage dependencies. Hop in my [Discord](https://discord.gg/hQeUbRv) if you have ideas, need help or just want to tell me about how you got your new 3080. [TerryFrench](https://github.com/TerryFrench) has also created a youtube video detailing how to get this project running on Windows 10 as well. Huge thanks to him. 
+This project uses [Pipenv](https://pypi.org/project/pipenv/) to manage dependencies. Hop in my [Discord](https://discord.gg/hQeUbRv) if you have ideas, need help or just want to tell me about how you got your new 3080. 
+
+To get started you'll first need to clone this repository. If you are unfamiliar with Git, follow the [guide on how to do that on our Wiki](https://github.com/Hari-Nagarajan/nvidia-bot/wiki/How-to-use-GitHub-Desktop-App). You *can* use the "Download Zip" button on the GitHub repository's homepage but this makes receieve updates more difficult. If you can get setup with the GitHub Desktop app, updating to the latest version of the bot takes 1 click.
+
+[TerryFrench](https://github.com/TerryFrench) has also created a youtube video detailing how to get this project running on Windows 10 as well. Huge thanks to him. 
 
 [![Alt text](https://img.youtube.com/vi/TvOQubunx6o/0.jpg)](https://www.youtube.com/watch?v=TvOQubunx6o)
 
@@ -292,14 +296,16 @@ python app.py
 
 ## Frequently Asked Questions
 
-### 1. Can I run multiple instances of the bot?**  
-Yes. For example you can run one instance to check stock on the Nvidia store and a separate instance to check stock on Amazon.
+### 1. Can I run multiple instances of the bot? 
+Yes. For example you can run one instance to check stock on the Nvidia store and a separate instance to check stock on Amazon. Bear in mind that if you do this you may end up with multiple purchases going through at the same time.
 
 ### 2. Does Nvidia Bot automatically bypass CAPTCHA's on the store sites?
-No. If a CAPTCHA is shown the bot will inform you and you will be given 15 seconds to complete the CAPTCHA.
+* For the Nvidia store, no. The Nvidia bot just notifys you when the desired card is in stock, and tries to add it to your cart. The rest of the checkout process is up to you.
+* For EVGA, no. You will need to enter the CAPTCHA.
+* For Amazon, yes. The bot will try and auto-solve CAPTCHA's during the checkout process.
 
 ### 3. Can I add multiple P/N numbers to the EVGA bot 
-Not currently. If you want to check for multiple card models you will need to run a separate instance of the bot for each model you want to check for.
+Not currently. If you want to check for multiple card models you will need to run a separate instance of the bot (each with different P/Ns in `evga_config.json`) for each model you want to check for.
 
 ## Attribution
 
