@@ -58,11 +58,26 @@ class BestBuyHandler:
             with open(AUTOBUY_CONFIG_PATH, "r") as json_file:
                 try:
                     data = json_file.read()
-                    password = getpass.getpass(prompt="Password: ")
-                    decrypted = encrypt.decrypt(data, password)
-                    config = json.loads(decrypted)
-                    self.username = config["username"]
-                    self.password = config["password"]
+                    if "nonce" in data:
+                        password = getpass.getpass(prompt="Password: ")
+                        decrypted = encrypt.decrypt(data, password)
+                        config = json.loads(decrypted)
+                        self.username = config["username"]
+                        self.password = config["password"]
+                    else:
+                        config = bytes(json.dumps(data), "utf-8")
+                        log.info("Your configuration file is unencrypted, it will now be encrypted.")
+                        cpass = getpass.getpass(prompt="Credential file password: ")
+                        vpass = getpass.getpass(prompt="Verify credential file password: ")
+                        if cpass == vpass:
+                            result = encrypt.encrypt(config, cpass)
+                            final_config = open(AUTOBUY_CONFIG_PATH, "w")
+                            final_config.write(result)
+                            final_config.close()
+                            log.info("Credentials safely stored.")
+                        else:
+                            print("Password and verify password do not match.")
+                            exit(0)
                 except:
                     log.error("An error occured decrypting the credential file.")
         else:
@@ -83,7 +98,6 @@ class BestBuyHandler:
                 final_config.write(result)
                 final_config.close()
                 log.info("Credentials safely stored, run me again to start monitoring.")
-                exit(0)
             else:
                 print("Password and verify password do not match.")
                 exit(0)
