@@ -75,13 +75,9 @@ class Amazon:
             create_encrypted_config(config, AUTOBUY_CONFIG_PATH)
 
         self.username = config["username"]
-        print(self.username)
         self.password = config["password"]
-        print(self.password)
         self.asin_list = config["asin_list"]
-        print(self.asin_list)
         self.amazon_website = config["amazon_website"]
-        print(self.amazon_website)
 
         options.add_argument(f"user-data-dir=.profile-amz")
         self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
