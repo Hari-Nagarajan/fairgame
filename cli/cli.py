@@ -50,7 +50,9 @@ def main():
 @click.option("--interval", type=int, default=5)
 @notify_on_crash
 def nvidia(gpu, locale, test, interval):
-    nv = NvidiaBuyer(gpu, locale, test, interval, notification_handler=notification_handler)
+    nv = NvidiaBuyer(
+        gpu, locale, test, interval, notification_handler=notification_handler
+    )
     nv.run_items()
 
 
@@ -96,7 +98,7 @@ def test_notifications():
 
     handlers = notification_handler.get_enabled_handlers()
     if apprise_handler.enabled:
-        handlers.insert(0, 'Apprise')
+        handlers.insert(0, "Apprise")
 
     enabled_handlers = ", ".join(handlers)
     notification_handler.send_notification(message)

@@ -19,7 +19,7 @@ CONFIG_PATH = "evga_config.json"
 
 
 class Evga:
-    def __init__(self, notification_handler,  headless=False):
+    def __init__(self, notification_handler, headless=False):
         if headless:
             enable_headless()
         self.driver = webdriver.Chrome(executable_path=binary_path, options=options)

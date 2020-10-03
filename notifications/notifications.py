@@ -49,7 +49,7 @@ class NotificationHandler:
     def send_notification(self, message, **kwargs):
         if len(self.get_enabled_handlers()) > 0:
             with ThreadPoolExecutor(
-                    max_workers=len(self.get_enabled_handlers())
+                max_workers=len(self.get_enabled_handlers())
             ) as executor:
                 if self.audio_handler.enabled:
                     executor.submit(self.audio_handler.play, **kwargs)
@@ -79,7 +79,7 @@ class AppriseHandler:
             with open(APPRISE_CONFIG_PATH) as json_file:
                 configs = json.load(json_file)
                 for config in configs:
-                    self.apb.add(config['url'])
+                    self.apb.add(config["url"])
             self.enabled = True
         else:
             self.enabled = False
