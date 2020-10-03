@@ -28,23 +28,20 @@ class Evga:
             enable_headless()
         self.notification_handler = NotificationHandler()
         if path.exists(CONFIG_PATH):
-            config_dict = load_encrypted_config(CONFIG_PATH)
-            self.set_config(config_dict)
+            config = load_encrypted_config(CONFIG_PATH)
         else:
             log.fatal("No config file found, creating")
-            config_dict = self.await_credential_input()
-            self.set_config(config_dict)
-            create_encrypted_config(config_dict, CONFIG_PATH)
+            config = self.await_credential_input()
+            create_encrypted_config(config, CONFIG_PATH)
 
-        self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
-        self.login(self.username, self.password)
-
-    def set_config(self, config):
         self.username = config["username"]
         self.password = config["password"]
         self.card_pn = config["card_pn"]
         self.card_series = config["card_series"]
         self.credit_card = config["credit_card"]
+
+        self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
+        self.login(self.username, self.password)
 
     @staticmethod
     def await_credential_input():
