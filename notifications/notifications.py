@@ -80,22 +80,11 @@ class AppriseHandler:
                 configs = json.load(json_file)
                 for config in configs:
                     self.apb.add(config['url'])
-            self.queue = queue.Queue()
-            self.start_worker()
             self.enabled = True
         else:
             self.enabled = False
             log.debug("No Apprise config found.")
 
-    def send(self, message_body):
+    def send(self, message_body, attatchment=None):
         if self.enabled:
-            self.queue.put(message_body)
-
-    def message_sender(self):
-        while True:
-            message = self.queue.get()
-            self.apb.notify(body=message, attach="screenshot.png")
-            self.queue.task_done()
-
-    def start_worker(self):
-        threading.Thread(target=self.message_sender, daemon=True).start()
+            self.apb.notify(body=message_body, attach=attatchment)
