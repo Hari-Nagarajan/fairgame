@@ -6,6 +6,8 @@ from Crypto.Cipher import ChaCha20_Poly1305
 from Crypto.Random import get_random_bytes
 from Crypto.Protocol.KDF import scrypt
 
+from utils.logger import log
+
 
 def encrypt(pt, password):
     salt = get_random_bytes(32)
@@ -35,6 +37,40 @@ def decrypt(ct, password):
         print("Incorrect Password.")
         exit(0)
 
+
+def create_encrypted_config(data, file_path):
+    if isinstance(data, dict):
+        data = json.dumps(data)
+    payload = bytes(data, "utf-8")
+    log.info("Create a password for the credential file")
+    cpass = getpass.getpass(prompt="Credential file password: ")
+    vpass = getpass.getpass(prompt="Verify credential file password: ")
+    if cpass == vpass:
+        result = encrypt(payload, cpass)
+        with open(file_path, "w") as f:
+            f.write(result)
+        log.info("Credentials safely stored.")
+    else:
+        print("Password and verify password do not match.")
+        exit(0)
+
+
+def load_encrypted_config(config_path):
+    log.info("Reading credentials from: " + config_path)
+    with open(config_path, "r") as json_file:
+        data = json_file.read()
+    try:
+        if "nonce" in data:
+            password = getpass.getpass(prompt="Password: ")
+            decrypted = decrypt(data, password)
+            return json.loads(decrypted)
+        else:
+            log.info("Your configuration file is unencrypted, it will now be encrypted.")
+            create_encrypted_config(data, config_path)
+            return json.loads(data)
+    except Exception as e:
+        log.error(e)
+        log.error("Failed to decrypt the credential file.")
 
 # def main():
 #

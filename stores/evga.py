@@ -3,7 +3,6 @@ import json
 import pickle
 from os import path
 from time import sleep
-from utils import encryption as encrypt
 
 from chromedriver_py import binary_path  # this will get you the path variable
 from selenium import webdriver
@@ -17,6 +16,7 @@ from notifications.notifications import NotificationHandler
 from utils import selenium_utils
 from utils.logger import log
 from utils.selenium_utils import options, enable_headless
+from utils.encryption import create_encrypted_config, load_encrypted_config
 
 LOGIN_URL = "https://secure.evga.com/us/login.asp"
 CONFIG_PATH = "evga_config.json"
@@ -28,15 +28,23 @@ class Evga:
             enable_headless()
         self.notification_handler = NotificationHandler()
         if path.exists(CONFIG_PATH):
-            self.load_encrypted_credentials(CONFIG_PATH)
+            config_dict = load_encrypted_config(CONFIG_PATH)
+            self.set_config(config_dict)
         else:
             log.fatal("No config file found, creating")
             config_dict = self.await_credential_input()
-            self.create_encrypted_credentials(config_dict, CONFIG_PATH)
-            self.load_encrypted_credentials(CONFIG_PATH)
-                    
+            self.set_config(config_dict)
+            create_encrypted_config(config_dict, CONFIG_PATH)
+
         self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
         self.login(self.username, self.password)
+
+    def set_config(self, config):
+        self.username = config["username"]
+        self.password = config["password"]
+        self.card_pn = config["card_pn"]
+        self.card_series = config["card_series"]
+        self.credit_card = config["credit_card"]
 
     @staticmethod
     def await_credential_input():
@@ -57,53 +65,6 @@ class Evga:
             "card_series": card_series,
             "credit_card": credit_card,
         }
-
-    @staticmethod
-    def create_encrypted_credentials(config_dict, config_path):
-        config = bytes(json.dumps(config_dict), "utf-8")
-        log.info("Create a password for the credential file")
-        cpass = getpass.getpass(prompt="Credential file password: ")
-        vpass = getpass.getpass(prompt="Verify credential file password: ")
-        if cpass == vpass:
-            result = encrypt.encrypt(config, cpass)
-            final_config = open(config_path, "w")
-            final_config.write(result)
-            final_config.close()
-            log.info("Credentials safely stored.")
-        else:
-            print("Password and verify password do not match.")
-            exit(0)
-
-    def load_encrypted_credentials(self, config_path):
-        with open(config_path, "r") as json_file:
-            try:
-                data = json_file.read()
-                if "nonce" in data:
-                    password = getpass.getpass(prompt="Password: ")
-                    decrypted = encrypt.decrypt(data, password)
-                    config = json.loads(decrypted)
-                    self.username = config["username"]
-                    self.password = config["password"]
-                    self.card_pn = config["card_pn"]
-                    self.card_series = config["card_series"]
-                    self.credit_card = config["credit_card"]
-                else:
-                    config = bytes(json.dumps(data), "utf-8")
-                    log.info("Your configuration file is unencrypted, it will now be encrypted.")
-                    cpass = getpass.getpass(prompt="Credential file password: ")
-                    vpass = getpass.getpass(prompt="Verify credential file password: ")
-                    if cpass == vpass:
-                        result = encrypt.encrypt(config, cpass)
-                        final_config = open(AUTOBUY_CONFIG_PATH, "w")
-                        final_config.write(result)
-                        final_config.close()
-                        log.info("Credentials safely stored.")
-                    else:
-                        print("Password and verify password do not match.")
-                        exit(0)
-            except Exception as e:
-                log.error(e)
-                log.error("Failed to decrypt the credential file.")
 
     def login(self, username, password):
         """
