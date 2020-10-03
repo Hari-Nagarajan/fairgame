@@ -9,10 +9,8 @@ def get_remote_version():
     local_repo = git.Repo(".")
     local_commit = local_repo.commit()
     fetch = local_repo.remotes.origin.fetch()[0]
-    info = fetch.commit
-    print(local_commit)
-    print(info)
-    #if info != 4:
-    #    log.warning(
-    #      "Version out of date, please pull the latest."
-    #    )
+    remote_commit = fetch.commit
+    if local_commit != remote_commit:
+        log.warning(
+          "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n! Version out of date, please pull the latest. !\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        )
