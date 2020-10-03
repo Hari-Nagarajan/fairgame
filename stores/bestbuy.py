@@ -3,7 +3,7 @@ import json
 import webbrowser
 from os import path
 from time import sleep
-from utils import encryption as encrypt
+from utils.encryption import create_encrypted_config, load_encrypted_config
 
 from chromedriver_py import binary_path  # this will get you the path variable
 from selenium import webdriver
@@ -53,54 +53,18 @@ options.add_argument("user-data-dir=.profile-bb")
 
 class BestBuyHandler:
     def __init__(self, sku_id, headless=False):
+        if headless:
+            enable_headless()
         self.notification_handler = NotificationHandler()
         if path.exists(AUTOBUY_CONFIG_PATH):
-            with open(AUTOBUY_CONFIG_PATH, "r") as json_file:
-                try:
-                    data = json_file.read()
-                    if "nonce" in data:
-                        password = getpass.getpass(prompt="Password: ")
-                        decrypted = encrypt.decrypt(data, password)
-                        config = json.loads(decrypted)
-                        self.username = config["username"]
-                        self.password = config["password"]
-                    else:
-                        config = bytes(json.dumps(data), "utf-8")
-                        log.info("Your configuration file is unencrypted, it will now be encrypted.")
-                        cpass = getpass.getpass(prompt="Credential file password: ")
-                        vpass = getpass.getpass(prompt="Verify credential file password: ")
-                        if cpass == vpass:
-                            result = encrypt.encrypt(config, cpass)
-                            final_config = open(AUTOBUY_CONFIG_PATH, "w")
-                            final_config.write(result)
-                            final_config.close()
-                            log.info("Credentials safely stored.")
-                        else:
-                            print("Password and verify password do not match.")
-                            exit(0)
-                except:
-                    log.error("An error occured decrypting the credential file.")
+            config = load_encrypted_config(AUTOBUY_CONFIG_PATH)
         else:
             log.fatal("No config file found, creating")
-            uname = input("BestBuy login ID: ")
-            upass = getpass.getpass(prompt="BestBuy Password: ")
-            create_config = {
-                "username": uname,
-                "password": upass,
-            }
-            config = bytes(json.dumps(create_config), "utf-8")
-            log.info("Create a password for the credential file")
-            cpass = getpass.getpass(prompt="Credential file password: ")
-            vpass = getpass.getpass(prompt="Verify credential file password: ")
-            if cpass == vpass:
-                result = encrypt.encrypt(config, cpass)
-                final_config = open(AUTOBUY_CONFIG_PATH, "w")
-                final_config.write(result)
-                final_config.close()
-                log.info("Credentials safely stored.")
-            else:
-                print("Password and verify password do not match.")
-                exit(0)
+            config = self.await_credential_input()
+            create_encrypted_config(config, AUTOBUY_CONFIG_PATH)
+
+        self.username = config["username"]
+        self.password = config["password"]
 
         self.sku_id = sku_id
         self.session = requests.Session()
@@ -178,6 +142,15 @@ class BestBuyHandler:
                     },
                 ).status_code
             )
+
+    @staticmethod
+    def await_credential_input():
+        username = input("BestBuy login ID: ")
+        password = getpass.getpass(prompt="BestBuy Password: ")
+        return {
+            "username": username,
+            "password": password,
+        }
 
     def login(self):
         self.driver.get("https://www.bestbuy.com/identity/global/signin")

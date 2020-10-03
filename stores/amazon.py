@@ -1,7 +1,7 @@
+import getpass
 import json
 import secrets
 import time
-import getpass
 from os import path
 
 from amazoncaptcha import AmazonCaptcha
@@ -17,7 +17,7 @@ from utils import selenium_utils
 from utils.json_utils import InvalidAutoBuyConfigException
 from utils.logger import log
 from utils.selenium_utils import options, enable_headless, wait_for_element
-from utils import encryption as encrypt
+from utils.encryption import create_encrypted_config, load_encrypted_config
 
 AMAZON_URLS = {
     "BASE_URL": "https://www.{}/",
@@ -68,12 +68,20 @@ class Amazon:
             enable_headless()
         self.notification_handler = NotificationHandler()
         if path.exists(AUTOBUY_CONFIG_PATH):
-            self.load_encrypted_credentials(AUTOBUY_CONFIG_PATH)
+            config = load_encrypted_config(AUTOBUY_CONFIG_PATH)
         else:
             log.fatal("No config file found, creating")
-            config_dict = self.await_credential_input()
-            self.create_encrypted_credentials(config_dict, AUTOBUY_CONFIG_PATH)
-            self.load_encrypted_credentials(AUTOBUY_CONFIG_PATH)
+            config = self.await_credential_input()
+            create_encrypted_config(config, AUTOBUY_CONFIG_PATH)
+
+        self.username = config["username"]
+        print(self.username)
+        self.password = config["password"]
+        print(self.password)
+        self.asin_list = config["asin_list"]
+        print(self.asin_list)
+        self.amazon_website = config["amazon_website"]
+        print(self.amazon_website)
 
         options.add_argument(f"user-data-dir=.profile-amz")
         self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
@@ -113,54 +121,6 @@ class Amazon:
             "asin_list": [asin_list],
             "amazon_website": amazon_website,
         }
-
-    @staticmethod
-    def create_encrypted_credentials(config_dict, config_path):
-        config = bytes(json.dumps(config_dict), "utf-8")
-        log.info("Create a password for the credential file")
-        cpass = getpass.getpass(prompt="Credential file password: ")
-        vpass = getpass.getpass(prompt="Verify credential file password: ")
-        if cpass == vpass:
-            result = encrypt.encrypt(config, cpass)
-            final_config = open(config_path, "w")
-            final_config.write(result)
-            final_config.close()
-            log.info("Credentials safely stored.")
-        else:
-            print("Password and verify password do not match.")
-            exit(0)
-
-    def load_encrypted_credentials(self, config_path):
-        with open(config_path, "r") as json_file:
-            try:
-                data = json_file.read()
-                if "nonce" in data:
-                    password = getpass.getpass(prompt="Password: ")
-                    decrypted = encrypt.decrypt(data, password)
-                    config = json.loads(decrypted)
-                    self.username = config["username"]
-                    self.password = config["password"]
-                    self.asin_list = config["asin_list"]
-                    self.amazon_website = config.get("amazon_website", "amazon.com")
-                    assert isinstance(self.asin_list, list)
-                else:
-                    config = bytes(json.dumps(data), "utf-8")
-                    log.info("Your configuration file is unencrypted, it will now be encrypted.")
-                    cpass = getpass.getpass(prompt="Credential file password: ")
-                    vpass = getpass.getpass(prompt="Verify credential file password: ")
-                    if cpass == vpass:
-                        result = encrypt.encrypt(config, cpass)
-                        final_config = open(AUTOBUY_CONFIG_PATH, "w")
-                        final_config.write(result)
-                        final_config.close()
-                        log.info("Credentials safely stored.")
-                    else:
-                        print("Password and verify password do not match.")
-                        exit(0)
-            except Exception:
-                raise InvalidAutoBuyConfigException(
-                    "amazon_config.json file not formatted properly."
-                )
 
     def is_logged_in(self):
         try:
