@@ -64,74 +64,22 @@ ADD_TO_CART_TITLES = [
 
 class Amazon:
     def __init__(self, headless=False):
-        self.notification_handler = NotificationHandler()
         if headless:
             enable_headless()
+        self.notification_handler = NotificationHandler()
         if path.exists(AUTOBUY_CONFIG_PATH):
-            with open(AUTOBUY_CONFIG_PATH, "r") as json_file:
-                try:
-                    data = json_file.read()
-                    if "nonce" in data:
-                        password = getpass.getpass(prompt="Password: ")
-                        decrypted = encrypt.decrypt(data, password)
-                        config = json.loads(decrypted)
-                        self.username = config["username"]
-                        self.password = config["password"]
-                        self.asin_list = config["asin_list"]
-                        self.amazon_website = config.get("amazon_website", "amazon.com")
-                        assert isinstance(self.asin_list, list)
-
-                    else:
-                        config = bytes(json.dumps(data), "utf-8")
-                        log.info("Your configuration file is unencrypted, it will now be encrypted.")
-                        cpass = getpass.getpass(prompt="Credential file password: ")
-                        vpass = getpass.getpass(prompt="Verify credential file password: ")
-                        if cpass == vpass:
-                            result = encrypt.encrypt(config, cpass)
-                            final_config = open(AUTOBUY_CONFIG_PATH, "w")
-                            final_config.write(result)
-                            final_config.close()
-                            log.info("Credentials safely stored, run me again to start monitoring.")
-                        else:
-                            print("Password and verify password do not match.")
-                            exit(0)
-                except Exception:
-                    raise InvalidAutoBuyConfigException(
-                        "amazon_config.json file not formatted properly."
-                    )
+            self.load_encrypted_credentials(AUTOBUY_CONFIG_PATH)
         else:
             log.fatal("No config file found, creating")
-            uname = input("Amazon login ID: ")
-            upass = getpass.getpass(prompt="Amazon Password: ")
-            uasin = input("Comma seperated list of ASIN's to search for: ")
-            usite = input("Amazon page for your locale: ")
-            create_config = {
-                "username": uname,
-                "password": upass,
-                "asin_list": [uasin],
-                "amazon_website": usite,
-            }
-            config = bytes(json.dumps(create_config), "utf-8")
-            log.info("Create a password for the credential file")
-            cpass = getpass.getpass(prompt="Credential file password: ")
-            vpass = getpass.getpass(prompt="Verify credential file password: ")
-            if cpass == vpass:
-                result = encrypt.encrypt(config, cpass)
-                final_config = open(AUTOBUY_CONFIG_PATH, "w")
-                final_config.write(result)
-                final_config.close()
-                log.info("Credentials safely stored, run me again to start monitoring.")
-            else:
-                print("Password and verify password do not match.")
-                exit(0)
-
+            config_dict = self.await_credential_input()
+            self.create_encrypted_credentials(config_dict, AUTOBUY_CONFIG_PATH)
+        
         options.add_argument(f"user-data-dir=.profile-amz")
         self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
         self.wait = WebDriverWait(self.driver, 10)
 
         for key in AMAZON_URLS.keys():
             AMAZON_URLS[key] = AMAZON_URLS[key].format(self.amazon_website)
-        print(AMAZON_URLS)
         self.driver.get(AMAZON_URLS["BASE_URL"])
         log.info("Waiting for home page.")
         self.check_if_captcha(self.wait_for_pages, HOME_PAGE_TITLES)
@@ -150,6 +98,67 @@ class Amazon:
             time.sleep(
                 15
             )  # We can remove this once I get more info on the phone verification page.
+
+    @staticmethod
+    def await_credential_input():
+        username = input("Amazon login ID: ")
+        password = getpass.getpass(prompt="Amazon Password: ")
+        asin_list = input("Comma seperated list of ASIN's to search for: ")
+        amazon_website = input("Amazon page for your locale: ")
+        return {
+            "username": username,
+            "password": password,
+            "asin_list": [asin_list],
+            "amazon_website": amazon_website,
+        }
+
+    @staticmethod
+    def create_encrypted_credentials(config_dict, config_path):
+        config = bytes(json.dumps(config_dict), "utf-8")
+        log.info("Create a password for the credential file")
+        cpass = getpass.getpass(prompt="Credential file password: ")
+        vpass = getpass.getpass(prompt="Verify credential file password: ")
+        if cpass == vpass:
+            result = encrypt.encrypt(config, cpass)
+            final_config = open(config_path, "w")
+            final_config.write(result)
+            final_config.close()
+            log.info("Credentials safely stored.")
+        else:
+            print("Password and verify password do not match.")
+            exit(0)
+
+    def load_encrypted_credentials(self, config_path):
+        with open(config_path, "r") as json_file:
+            try:
+                data = json_file.read()
+                if "nonce" in data:
+                    password = getpass.getpass(prompt="Password: ")
+                    decrypted = encrypt.decrypt(data, password)
+                    config = json.loads(decrypted)
+                    self.username = config["username"]
+                    self.password = config["password"]
+                    self.asin_list = config["asin_list"]
+                    self.amazon_website = config.get("amazon_website", "amazon.com")
+                    assert isinstance(self.asin_list, list)
+                else:
+                    config = bytes(json.dumps(data), "utf-8")
+                    log.info("Your configuration file is unencrypted, it will now be encrypted.")
+                    cpass = getpass.getpass(prompt="Credential file password: ")
+                    vpass = getpass.getpass(prompt="Verify credential file password: ")
+                    if cpass == vpass:
+                        result = encrypt.encrypt(config, cpass)
+                        final_config = open(AUTOBUY_CONFIG_PATH, "w")
+                        final_config.write(result)
+                        final_config.close()
+                        log.info("Credentials safely stored.")
+                    else:
+                        print("Password and verify password do not match.")
+                        exit(0)
+            except Exception:
+                raise InvalidAutoBuyConfigException(
+                    "amazon_config.json file not formatted properly."
+                )
 
     def is_logged_in(self):
         try:
