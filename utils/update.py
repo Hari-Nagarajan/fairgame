@@ -2,8 +2,6 @@ import git
 import threading
 from utils.logger import log
 
-proj_url = "https://github.com/Hari-Nagarajan/nvidia-bot.git"
-
 def get_remote_version():
     threading.Timer(600, get_remote_version).start()
     local_repo = git.Repo(".")
