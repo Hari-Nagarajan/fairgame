@@ -97,7 +97,7 @@ class BestBuyHandler:
                 final_config = open(AUTOBUY_CONFIG_PATH, "w")
                 final_config.write(result)
                 final_config.close()
-                log.info("Credentials safely stored, run me again to start monitoring.")
+                log.info("Credentials safely stored.")
             else:
                 print("Password and verify password do not match.")
                 exit(0)
