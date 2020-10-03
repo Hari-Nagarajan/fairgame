@@ -73,13 +73,15 @@ class Amazon:
             log.fatal("No config file found, creating")
             config_dict = self.await_credential_input()
             self.create_encrypted_credentials(config_dict, AUTOBUY_CONFIG_PATH)
-        
+            self.load_encrypted_credentials(AUTOBUY_CONFIG_PATH)
+
         options.add_argument(f"user-data-dir=.profile-amz")
         self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
         self.wait = WebDriverWait(self.driver, 10)
 
         for key in AMAZON_URLS.keys():
             AMAZON_URLS[key] = AMAZON_URLS[key].format(self.amazon_website)
+
         self.driver.get(AMAZON_URLS["BASE_URL"])
         log.info("Waiting for home page.")
         self.check_if_captcha(self.wait_for_pages, HOME_PAGE_TITLES)
