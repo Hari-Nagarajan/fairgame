@@ -218,9 +218,9 @@ class Amazon:
                     f"An error happened, please submit a bug report including a screenshot of the page the "
                     f"selenium browser is on. There may be a file saved at: amazon-{func.__name__}.png"
                 )
-                self.driver.save_screenshot(f"amazon-{func.__name__}.png")
-                self.driver.save_screenshot('screenshot.png')
-                self.apprise_handler.send(f"Error on {self.driver.title}")
+                screenshot_name = f"amazon-{func.__name__}.png"
+                self.driver.save_screenshot(screenshot_name)
+                self.apprise_handler.send(f"Error on {self.driver.title}", screenshot_name)
                 time.sleep(60)
                 self.driver.close()
                 raise e
@@ -280,13 +280,13 @@ class Amazon:
     def checkout(self, test):
         log.info("Clicking continue.")
         self.driver.save_screenshot('screenshot.png')
-        self.apprise_handler.send("Starting Checkout")
+        self.apprise_handler.send("Starting Checkout", 'screenshot.png')
         self.driver.find_element_by_xpath('//input[@value="add"]').click()
 
         log.info("Waiting for Cart Page")
         self.check_if_captcha(self.wait_for_pages, SHOPING_CART_TITLES)
         self.driver.save_screenshot('screenshot.png')
-        self.apprise_handler.send("Cart Page")
+        self.apprise_handler.send("Cart Page", 'screenshot.png')
 
         try:  # This is fast.
             log.info("Quick redirect to checkout page")
@@ -301,7 +301,7 @@ class Amazon:
                 ).click()
             finally:
                 self.driver.save_screenshot('screenshot.png')
-                self.apprise_handler.send("Failed to checkout. Returning to stock check.")
+                self.apprise_handler.send("Failed to checkout. Returning to stock check.", 'screenshot.png')
                 log.info("Failed to checkout. Returning to stock check.")
                 self.run_item(test=test)
 
@@ -310,7 +310,7 @@ class Amazon:
 
         log.info("Finishing checkout")
         self.driver.save_screenshot('screenshot.png')
-        self.apprise_handler.send("Finishing checkout")
+        self.apprise_handler.send("Finishing checkout", 'screenshot.png')
 
         self.finalize_order_button(test)
 
@@ -319,6 +319,6 @@ class Amazon:
 
         log.info("Order Placed.")
         self.driver.save_screenshot('screenshot.png')
-        self.apprise_handler.send("Order Placed")
+        self.apprise_handler.send("Order Placed", 'screenshot.png')
 
         time.sleep(20)
