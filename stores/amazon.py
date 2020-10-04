@@ -28,6 +28,7 @@ SIGN_IN_TITLES = ["Amazon Sign In", "Amazon Sign-In", "Amazon Anmelden"]
 CAPTCHA_PAGE_TITLES = ["Robot Check"]
 HOME_PAGE_TITLES = [
     "Amazon.com: Online Shopping for Electronics, Apparel, Computers, Books, DVDs & more",
+    "Amazon.ca: Low Prices - Fast Shipping - Millions of Items",
     "Amazon.co.uk: Low Prices in Electronics, Books, Sports Equipment & more",
     "Amazon.de: Low Prices in Electronics, Books, Sports Equipment & more",
     "Amazon.de: Günstige Preise für Elektronik & Foto, Filme, Musik, Bücher, Games, Spielzeug & mehr",
@@ -37,6 +38,7 @@ HOME_PAGE_TITLES = [
 ]
 SHOPING_CART_TITLES = [
     "Amazon.com Shopping Cart",
+    "Amazon.ca Shopping Cart",
     "Amazon.co.uk Shopping Basket",
     "Amazon.de Basket",
     "Amazon.de Einkaufswagen",
@@ -45,6 +47,7 @@ SHOPING_CART_TITLES = [
 ]
 CHECKOUT_TITLES = [
     "Amazon.com Checkout",
+    "Place Your Order - Amazon.ca Checkout",
     "Place Your Order - Amazon.co.uk Checkout",
     "Amazon.de Checkout",
     "Place Your Order - Amazon.de Checkout",
@@ -56,6 +59,7 @@ CHECKOUT_TITLES = [
 ]
 ORDER_COMPLETE_TITLES = [
     "Amazon.com Thanks You",
+    "Amazon.ca Thanks You",
     "Thank you",
     "Amazon.fr Merci",
     "Merci",
