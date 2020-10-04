@@ -95,6 +95,7 @@ def test_notifications():
     )
     log.info(f"A notification was sent to the following handlers: {enabled_handlers}")
 
+
 get_remote_version()
 main.add_command(nvidia)
 main.add_command(amazon)
