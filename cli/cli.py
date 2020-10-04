@@ -13,6 +13,7 @@ from utils.logger import log
 
 notification_handler = NotificationHandler()
 
+
 def handler(signal, frame):
     log.info("Caught the stop, exiting.")
     exit(0)
