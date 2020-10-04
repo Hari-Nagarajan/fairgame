@@ -28,23 +28,26 @@ SIGN_IN_TITLES = ["Amazon Sign In", "Amazon Sign-In", "Amazon Anmelden"]
 CAPTCHA_PAGE_TITLES = ["Robot Check"]
 HOME_PAGE_TITLES = [
     "Amazon.com: Online Shopping for Electronics, Apparel, Computers, Books, DVDs & more",
+    "Amazon.ca: Low Prices - Fast Shipping - Millions of Items",
     "Amazon.co.uk: Low Prices in Electronics, Books, Sports Equipment & more",
     "Amazon.de: Low Prices in Electronics, Books, Sports Equipment & more",
     "Amazon.de: Günstige Preise für Elektronik & Foto, Filme, Musik, Bücher, Games, Spielzeug & mehr",
     "Amazon.es: compra online de electrónica, libros, deporte, hogar, moda y mucho más.",
     "Amazon.de: Günstige Preise für Elektronik & Foto, Filme, Musik, Bücher, Games, Spielzeug & mehr",
-    "Amazon.fr : livres, DVD, jeux vidéo, musique, high-tech, informatique, jouets, vêtements, chaussures, sport, bricolage, maison, beauté, puériculture, épicerie et plus encore !"
+    "Amazon.fr : livres, DVD, jeux vidéo, musique, high-tech, informatique, jouets, vêtements, chaussures, sport, bricolage, maison, beauté, puériculture, épicerie et plus encore !",
 ]
 SHOPING_CART_TITLES = [
     "Amazon.com Shopping Cart",
+    "Amazon.ca Shopping Cart",
     "Amazon.co.uk Shopping Basket",
     "Amazon.de Basket",
     "Amazon.de Einkaufswagen",
     "Cesta de compra Amazon.es",
-    "Amazon.fr Panier"
+    "Amazon.fr Panier",
 ]
 CHECKOUT_TITLES = [
     "Amazon.com Checkout",
+    "Place Your Order - Amazon.ca Checkout",
     "Place Your Order - Amazon.co.uk Checkout",
     "Amazon.de Checkout",
     "Place Your Order - Amazon.de Checkout",
@@ -52,15 +55,21 @@ CHECKOUT_TITLES = [
     "Place Your Order - Amazon.com Checkout",
     "Place Your Order - Amazon.com",
     "Tramitar pedido en Amazon.es",
-    "Processus de paiement Amazon.com"
+    "Processus de paiement Amazon.com",
 ]
-ORDER_COMPLETE_TITLES = ["Amazon.com Thanks You", "Thank you", "Amazon.fr Merci", "Merci"]
+ORDER_COMPLETE_TITLES = [
+    "Amazon.com Thanks You",
+    "Amazon.ca Thanks You",
+    "Thank you",
+    "Amazon.fr Merci",
+    "Merci",
+]
 ADD_TO_CART_TITLES = [
     "Amazon.com: Please Confirm Your Action",
     "Amazon.de: Bitte bestätigen Sie Ihre Aktion",
     "Amazon.de: Please Confirm Your Action",
     "Amazon.es: confirma tu acción",
-    "Amazon.com : Veuillez confirmer votre action"  # Careful, required non-breaking space after .com (&nbsp)
+    "Amazon.com : Veuillez confirmer votre action",  # Careful, required non-breaking space after .com (&nbsp)
 ]
 
 
