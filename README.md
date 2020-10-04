@@ -10,6 +10,10 @@ for $1700 on eBay, and these scalpers are buying 40 carts while normal consumers
 being resold for nearly $1000. My take on this is that if I release a bot that anyone can use, for free, then the number of items 
 that scalpers can buy goes down and normal consumers can buy items for MSRP. If everyone is botting, then no one is botting. 
 
+## Got a question?
+
+See the [FAQs](#frequently-asked-questions) first.
+
 ## Installation
 
 For Raspberry Pi installation and setup, go [here](#Raspberry-Pi-Setup).
