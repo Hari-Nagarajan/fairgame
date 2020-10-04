@@ -9,6 +9,7 @@ from stores.evga import Evga
 from stores.nvidia import NvidiaBuyer, GPU_DISPLAY_NAMES, CURRENCY_LOCALE_MAP
 from utils import selenium_utils
 from utils.logger import log
+from utils.update import get_remote_version
 
 notification_handler = NotificationHandler()
 
@@ -94,7 +95,7 @@ def test_notifications():
     )
     log.info(f"A notification was sent to the following handlers: {enabled_handlers}")
 
-
+get_remote_version()
 main.add_command(nvidia)
 main.add_command(amazon)
 main.add_command(bestbuy)
