@@ -47,6 +47,7 @@ SHOPING_CART_TITLES = [
 ]
 CHECKOUT_TITLES = [
     "Amazon.com Checkout",
+    "Amazon.co.uk Checkout",
     "Place Your Order - Amazon.ca Checkout",
     "Place Your Order - Amazon.co.uk Checkout",
     "Amazon.de Checkout",
