@@ -1,8 +1,9 @@
 import click
 
+from datetime import datetime
 from cli.utils import QuestionaryOption
 from functools import wraps
-from notifications.notifications import NotificationHandler
+from notifications.notifications import NotificationHandler, TIME_FORMAT
 from signal import signal, SIGINT
 from stores.amazon import Amazon
 from stores.bestbuy import BestBuyHandler
@@ -95,8 +96,9 @@ def evga(test, headless):
 @click.command()
 def test_notifications():
     enabled_handlers = ", ".join(notification_handler.get_enabled_handlers())
+    time = datetime.now().strftime(TIME_FORMAT)
     notification_handler.send_notification(
-        f"🤖 Beep boop. This is a test notification from Nvidia bot."
+        f"🤖 Beep boop. This is a test notification from Nvidia bot. Sent {time}."
     )
     log.info(f"A notification was sent to the following handlers: {enabled_handlers}")
 
