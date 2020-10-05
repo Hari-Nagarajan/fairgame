@@ -9,6 +9,8 @@ from notifications.providers.telegram import TelegramHandler
 from notifications.providers.twilio import TwilioHandler
 from utils.logger import log
 
+TIME_FORMAT = "%Y-%m-%d @ %H:%M:%S"
+
 
 class NotificationHandler:
     def __init__(self):
