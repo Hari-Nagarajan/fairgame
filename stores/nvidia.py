@@ -3,6 +3,7 @@ import json
 import webbrowser
 from concurrent.futures.thread import ThreadPoolExecutor
 from datetime import datetime
+from enum import Enum
 from time import sleep
 
 import browser_cookie3
@@ -57,6 +58,11 @@ PRODUCT_IDS_FILE = "stores/store_data/nvidia_product_ids.json"
 PRODUCT_IDS = json.load(open(PRODUCT_IDS_FILE))
 
 
+class API_STATUS(Enum):
+    ONLINE = 'online'
+    OFFLINE = 'offline'
+
+
 class NvidiaBuyer:
     def __init__(self, gpu, locale="en_us", test=False, interval=5):
         self.product_ids = set([])
@@ -70,6 +76,7 @@ class NvidiaBuyer:
         self.started_at = datetime.now()
         self.test = test
         self.interval = interval
+        self.api_status = API_STATUS.ONLINE
 
         self.gpu_long_name = GPU_DISPLAY_NAMES[gpu]
 
@@ -124,16 +131,29 @@ class NvidiaBuyer:
             self.get_product_ids()
             self.run_items()
 
+    def updateApiStatus(self, api_status):
+        if self.api_status == API_STATUS.OFFLINE and api_status == API_STATUS.ONLINE:
+            log.info(f"API appears to be back up! Sending notification.")
+            self.notification_handler.send_notification(
+                f"🔌 Nvidia API appears to be back online…"
+            )
+        self.api_online = api_status
+
     def buy(self, product_id):
         try:
             log.info(f"Stock Check {product_id} at {self.interval} second intervals.")
+            log.info(f"Buy start. API Status: {self.api_status}")
             while not self.is_in_stock(product_id):
+                self.updateApiStatus(API_STATUS.ONLINE)
                 self.attempt = self.attempt + 1
                 time_delta = str(datetime.now() - self.started_at).split(".")[0]
                 with Spinner.get(
                     f"Stock Check ({self.attempt}, have been running for {time_delta})..."
                 ) as s:
                     sleep(self.interval)
+
+            self.updateApiStatus(API_STATUS.ONLINE)
+
             if self.enabled:
                 cart_success = self.add_to_cart(product_id)
                 if cart_success:
@@ -154,6 +174,7 @@ class NvidiaBuyer:
             log.info(
                 f"Got an unexpected reply from the server, API may be down, nothing we can do but try again"
             )
+            self.updateApiStatus(API_STATUS.OFFLINE)
             self.buy(product_id)
 
     def is_in_stock(self, product_id):
