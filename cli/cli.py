@@ -14,9 +14,13 @@ from utils.logger import log
 
 notification_handler = NotificationHandler()
 
+onClose = []
+
 
 def handler(signal, frame):
     log.info("Caught the stop, exiting.")
+    for close in onClose:
+        close()
     exit(0)
 
 
@@ -57,6 +61,7 @@ def main():
 @notify_on_crash
 def nvidia(gpu, locale, test, interval):
     nv = NvidiaBuyer(gpu, locale, test, interval)
+    onClose.append(nv.close)
     nv.run_items()
 
 
