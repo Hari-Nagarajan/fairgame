@@ -26,7 +26,7 @@ To get started you'll first need to clone this repository. If you are unfamiliar
 
 [![Alt text](https://img.youtube.com/vi/TvOQubunx6o/0.jpg)](https://www.youtube.com/watch?v=TvOQubunx6o)
 
-
+!!! YOU WILL NEED TO USE THE 3.8 BRANCH OF PYTHON, 3.9.0 BREAKS DEPENDENCIES !!!
 ```
 pip install pipenv
 pipenv shell 
