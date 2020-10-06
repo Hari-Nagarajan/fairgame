@@ -53,6 +53,16 @@ class ProductIDChangedException(Exception):
         super().__init__("Product IDS changed. We need to re run.")
 
 
+class CancellationToken:
+    def __init__(self):
+        self.is_cancelled = False
+
+    def cancel(self):
+        self.is_cancelled = True
+
+
+cancellationToken = CancellationToken()
+
 PRODUCT_IDS_FILE = "stores/store_data/nvidia_product_ids.json"
 PRODUCT_IDS = json.load(open(PRODUCT_IDS_FILE))
 
@@ -80,12 +90,17 @@ class NvidiaBuyer:
         if type(self.auto_buy_enabled) != bool:
             self.auto_buy_enabled = False
 
-        adapter = TimeoutHTTPAdapter()
-        self.session.mount("https://", adapter)
-        self.session.mount("http://", adapter)
+        self.adapter = TimeoutHTTPAdapter()
+        self.session.mount("https://", self.adapter)
+        self.session.mount("http://", self.adapter)
         self.notification_handler = NotificationHandler()
 
         self.get_product_ids()
+
+    def close(self):
+        log.error("KILLING NVIDIA")
+        self.adapter.close()
+        cancellationToken.cancel()
 
     def map_locales(self):
         if self.cli_locale == "de_at":
@@ -127,13 +142,18 @@ class NvidiaBuyer:
     def buy(self, product_id):
         try:
             log.info(f"Stock Check {product_id} at {self.interval} second intervals.")
+            if cancellationToken.is_cancelled:
+                return
             while not self.is_in_stock(product_id):
                 self.attempt = self.attempt + 1
                 time_delta = str(datetime.now() - self.started_at).split(".")[0]
                 with Spinner.get(
                     f"Stock Check ({self.attempt}, have been running for {time_delta})..."
                 ) as s:
-                    sleep(self.interval)
+                    for i in range(self.interval * 2):
+                        if cancellationToken.is_cancelled:
+                            return
+                        sleep(0.5)
             if self.enabled:
                 cart_success = self.add_to_cart(product_id)
                 if cart_success:
