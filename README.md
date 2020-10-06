@@ -33,6 +33,14 @@ pipenv shell
 pipenv install
 ```
 
+```
+NOTE:
+If you are using Windows 10 and you have a fresh Python install, you need to set your environment paths.
+To do this, open Powershell and type $env:PATH += ";yourpath" 
+This command appends a semicolon + your path to the system path file.
+You can verify this worked by typing $env:PATH
+```
+
 Run it
 ```
 python app.py
