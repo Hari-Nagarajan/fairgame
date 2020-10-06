@@ -59,8 +59,8 @@ PRODUCT_IDS = json.load(open(PRODUCT_IDS_FILE))
 
 
 class API_STATUS(Enum):
-    ONLINE = 'online'
-    OFFLINE = 'offline'
+    ONLINE = "online"
+    OFFLINE = "offline"
 
 
 class NvidiaBuyer:
