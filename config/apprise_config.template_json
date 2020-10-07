@@ -1,5 +1,11 @@
 [
   {
   "url": "tgram://{bot_token}/{chat_id}"
+  },
+  {
+  "url": "twilio://{AccountSID}:{AuthToken}@{FromPhoneNo}/{PhoneNo}"
+  },
+  {
+  "url": "slack://{OAuthToken}/#{channel}"
   }
 ]

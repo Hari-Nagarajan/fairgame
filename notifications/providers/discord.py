@@ -25,6 +25,10 @@ class DiscordHandler:
         else:
             log.debug("No Discord creds found.")
 
+    def generate_apprise_url(self):
+        self.enabled = False
+        return self.webhook_url
+
     def send(self, message_body):
         try:
             message = (

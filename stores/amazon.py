@@ -11,7 +11,6 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 
-from notifications.notifications import AppriseHandler
 from utils import selenium_utils
 from utils.json_utils import InvalidAutoBuyConfigException
 from utils.logger import log
@@ -78,7 +77,6 @@ ADD_TO_CART_TITLES = [
 class Amazon:
     def __init__(self, notification_handler, headless=False):
         self.notification_handler = notification_handler
-        self.apprise_handler = AppriseHandler()
         if headless:
             enable_headless()
         options.add_argument(f"user-data-dir=.profile-amz")
@@ -158,7 +156,7 @@ class Amazon:
         while not self.something_in_stock():
             time.sleep(delay)
         self.notification_handler.send_notification(
-            "Your items on Amazon.com were found!"
+            "Your items on Amazon.com were found!", True
         )
         self.checkout(test=test)
 
@@ -195,8 +193,10 @@ class Amazon:
                 time.sleep(5)
                 self.get_captcha_help()
             else:
-                self.driver.save_screenshot('screenshot.png')
-                self.apprise_handler.send(f"Solving Captcha: {solution}")
+                self.driver.save_screenshot("screenshot.png")
+                self.notification_handler.send_notification(
+                    f"Solving Captcha: {solution}"
+                )
                 self.driver.find_element_by_xpath(
                     '//*[@id="captchacharacters"]'
                 ).send_keys(solution + Keys.RETURN)
@@ -211,7 +211,7 @@ class Amazon:
             if self.driver.title in CAPTCHA_PAGE_TITLES:
                 return True
             if self.driver.find_element_by_xpath(
-                    '//form[@action="/errors/validateCaptcha"]'
+                '//form[@action="/errors/validateCaptcha"]'
             ):
                 return True
         except Exception:
@@ -233,8 +233,10 @@ class Amazon:
                     f"selenium browser is on. There may be a file saved at: amazon-{func.__name__}.png"
                 )
                 self.driver.save_screenshot(f"amazon-{func.__name__}.png")
-                self.driver.save_screenshot('screenshot.png')
-                self.apprise_handler.send(f"Error on {self.driver.title}")
+                self.driver.save_screenshot("screenshot.png")
+                self.notification_handler.send_notification(
+                    f"Error on {self.driver.title}"
+                )
                 time.sleep(60)
                 self.driver.close()
                 raise e
@@ -261,8 +263,8 @@ class Amazon:
         for button_xpath in button_xpaths:
             try:
                 if (
-                        self.driver.find_element_by_xpath(button_xpath).is_displayed()
-                        and self.driver.find_element_by_xpath(button_xpath).is_enabled()
+                    self.driver.find_element_by_xpath(button_xpath).is_displayed()
+                    and self.driver.find_element_by_xpath(button_xpath).is_enabled()
                 ):
                     button = self.driver.find_element_by_xpath(button_xpath)
             except NoSuchElementException:
@@ -293,20 +295,24 @@ class Amazon:
 
     def checkout(self, test):
         log.info("Clicking continue.")
-        self.driver.save_screenshot('screenshot.png')
-        self.apprise_handler.send("Starting Checkout")
+        self.driver.save_screenshot("screenshot.png")
+        self.notification_handler.send_notification("Starting Checkout")
         self.driver.find_element_by_xpath('//input[@value="add"]').click()
 
         log.info("Waiting for Cart Page")
         self.check_if_captcha(self.wait_for_pages, SHOPING_CART_TITLES)
-        self.driver.save_screenshot('screenshot.png')
-        self.apprise_handler.send("Cart Page")
+        self.driver.save_screenshot("screenshot.png")
+        self.notification_handler.send_notification("Cart Page")
 
         try:  # This is fast.
             log.info("Quick redirect to checkout page")
             cart_initiate_id = self.driver.find_element_by_name("cartInitiateId")
             cart_initiate_id = cart_initiate_id.get_attribute("value")
-            self.driver.get(CHECKOUT_URL.format(domain=self.amazon_website, cart_id=cart_initiate_id))
+            self.driver.get(
+                CHECKOUT_URL.format(
+                    domain=self.amazon_website, cart_id=cart_initiate_id
+                )
+            )
         except:
             log.info("clicking checkout.")
             try:
@@ -314,8 +320,10 @@ class Amazon:
                     '//*[@id="sc-buy-box-ptc-button"]/span/input'
                 ).click()
             finally:
-                self.driver.save_screenshot('screenshot.png')
-                self.apprise_handler.send("Failed to checkout. Returning to stock check.")
+                self.driver.save_screenshot("screenshot.png")
+                self.notification_handler.send_notification(
+                    "Failed to checkout. Returning to stock check."
+                )
                 log.info("Failed to checkout. Returning to stock check.")
                 self.run_item(test=test)
 
@@ -323,8 +331,8 @@ class Amazon:
         self.wait_for_pyo_page()
 
         log.info("Finishing checkout")
-        self.driver.save_screenshot('screenshot.png')
-        self.apprise_handler.send("Finishing checkout")
+        self.driver.save_screenshot("screenshot.png")
+        self.notification_handler.send_notification("Finishing checkout")
 
         self.finalize_order_button(test)
 
@@ -332,7 +340,7 @@ class Amazon:
         self.wait_for_order_completed(test)
 
         log.info("Order Placed.")
-        self.driver.save_screenshot('screenshot.png')
-        self.apprise_handler.send("Order Placed")
+        self.driver.save_screenshot("screenshot.png")
+        self.notification_handler.send_notification("Order Placed")
 
         time.sleep(20)
