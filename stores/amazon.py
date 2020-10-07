@@ -189,7 +189,7 @@ class Amazon:
             log.info(f"The solution is: {solution}")
             if solution == "Not solved":
                 log.info(f"Failed to solve, lets reload and get a new captcha.")
-                self.driver.refresh()
+                self.driver.find_element_by_xpath("//div[contains(@class,'a-column a-span6')]//a[1]").click()
                 time.sleep(5)
                 self.get_captcha_help()
             else:
@@ -199,7 +199,7 @@ class Amazon:
         except Exception as e:
             log.debug(e)
             log.info("Error trying to solve captcha. Refresh and retry.")
-            self.driver.refresh()
+            self.driver.find_element_by_xpath("//div[contains(@class,'a-column a-span6')]//a[1]").click()
             time.sleep(5)
 
     def on_captcha_page(self):
