@@ -1,8 +1,10 @@
-from functools import wraps
-
 import click
 
+from datetime import datetime
 from cli.utils import QuestionaryOption
+from functools import wraps
+from notifications.notifications import NotificationHandler, TIME_FORMAT
+from signal import signal, SIGINT
 from notifications.notifications import AppriseHandler, NotificationHandler
 from stores.amazon import Amazon
 from stores.bestbuy import BestBuyHandler
@@ -12,6 +14,11 @@ from utils import selenium_utils
 from utils.logger import log
 
 notification_handler = NotificationHandler()
+
+
+def handler(signal, frame):
+    log.info("Caught the stop, exiting.")
+    exit(0)
 
 
 def notify_on_crash(func):
@@ -89,19 +96,15 @@ def evga(test, headless):
 
 @click.command()
 def test_notifications():
-    message = f"🤖 Beep boop. This is a test notification from Nvidia bot."
-
-    apprise_handler = AppriseHandler()
-    apprise_handler.send(message)
-
-    handlers = notification_handler.get_enabled_handlers()
-    if apprise_handler.enabled:
-        handlers.insert(0, 'Apprise')
-
-    enabled_handlers = ", ".join(handlers)
-    notification_handler.send_notification(message)
+    enabled_handlers = ", ".join(notification_handler.get_enabled_handlers())
+    time = datetime.now().strftime(TIME_FORMAT)
+    notification_handler.send_notification(
+        f"🤖 Beep boop. This is a test notification from Nvidia bot. Sent {time}."
+    )
     log.info(f"A notification was sent to the following handlers: {enabled_handlers}")
 
+
+signal(SIGINT, handler)
 
 main.add_command(nvidia)
 main.add_command(amazon)
