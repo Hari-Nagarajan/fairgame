@@ -1,8 +1,8 @@
 import json
+import re
 from os import path
 
 import requests
-import re
 
 from utils.logger import log
 
@@ -26,6 +26,10 @@ class JoinHandler:
                     self.enabled = True
         else:
             log.debug("No join config found.")
+
+    def generate_apprise_url(self):
+        self.enabled = False
+        return f"join://{self.apikey}/{self.deviceId}"
 
     def send(self, message_body):
         try:

@@ -26,7 +26,7 @@ To get started you'll first need to clone this repository. If you are unfamiliar
 
 [![Alt text](https://img.youtube.com/vi/TvOQubunx6o/0.jpg)](https://www.youtube.com/watch?v=TvOQubunx6o)
 
-
+!!! YOU WILL NEED TO USE THE 3.8 BRANCH OF PYTHON, 3.9.0 BREAKS DEPENDENCIES !!!
 ```
 pip install pipenv
 pipenv shell 
@@ -54,7 +54,6 @@ Commands:
 | nvidia.com | |`✔`| |
 | amazon.com |`✔`| | |
 | bestbuy.com | |`✔`| |
-| evga.com |`✔` | |`✔`|
 
 
 ## Usage
@@ -140,89 +139,27 @@ Example:
 python app.py bestbuy --sku 6429440
 ```
 
-## EVGA
-Make a copy of `evga_config.template_json` to `evga_config.json`:
-```json
-{
-  "username": "hari@",
-  "password": "password!",
-  "card_pn": "10G-P5-3895-KR",
-  "card_series": "3080",
-  "credit_card" : {
-            "name": "Hari ",
-            "number": "234234",
-            "cvv": "123",
-            "expiration_month": "12",
-            "expiration_year": "2023"
-        }
-}
-```
-
-Test run command (Uses old gpu list and then stops before finishing the order)
-`python app.py evga --test`
-
-Autobuy command:
-`python app.py evga`
-
-These are the series: "3090" or "3080" (any should work, untested)
-
-P/N numbers can be found in URLs or on product pages such as newegg. They look like this:
-* 10G-P5-3895-KR
-* 10G-P5-3881-KR
-* 10G-P5-3885-KR 
-
-![EVGA PN Screenshot](evga_pn.png)
-
-if it doesn't load the correct page title (since the 3090 isn't listed yet), it will refresh every second until the correct page is loaded.
-
 
 ### Notifications
-This uses a notifications handler that will support multiple notification channels. 
+Notifications are now handled by apprise. Apprise lets you send notifications to a large number of supported notification services.
+Check https://github.com/caronc/apprise/wiki for a detailed list. 
 
-Once you've set up the notification handlers you want to use, be sure to test them using the [test-notifications command].(#testing-notifications).
+To enable Apprise notifications, make a copy of `apprise_config.template_json` in the `config` directory and name it `apprise_config.json`.
+Then add apprise formatted urls for your desired notification services as json blobs. 
 
-#### Twilio
-To enable Twilio notifications, first go to https://www.twilio.com/ and create a free account and get a Twilio number.
-Then make a copy of `twilio_config.template_json` and name it `twilio_config.json`. If this file exists and the credentials are
-valid, the notification handler will send you an sms when it carts or purchases an item.
+Apprise Example blobs:
 ```json
-{
-  "account_sid": "ACCOUNT_SID",
-  "auth_token": "AUTH_TOKEN",
-  "from": "YOUR TWILIO NUMBER",
-  "to": "THE NUMBER YOU WANT TO SEND SMS TO"
-}
-```
-
-#### Discord
-To enable Discord notifications, first get your wehbook url. Use the directions [here](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) to get the webhook url.
-Make a copy of the `discord_config.template_json` file and name it `discord_config.json` and place the webhook url here. 
-Optionally a [user id](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-) can be added to ping someone (like yourself).
-```json
-{
-  "webhook_url": "Discord webhook url here",
-  "user_id": "Optional user id to ping here"
-}
-```
-
-#### Telegram
-To enable Telegram notifications, you have to create a new bot and get your chat id. Use the directions [here](https://medium.com/@ManHay_Hong/how-to-create-a-telegram-bot-and-send-messages-with-python-4cf314d9fa3e) (Creating your bot and Getting your Chat id sections).
-
-Make a copy of the `telegram_config.template_json` file and name it `telegram_config.json` and place your `BOT_TOKEN` and `BOT_CHAT_ID` values here. 
-```json
-{
-    "BOT_TOKEN" : "1234567890:abcdefghijklmnopqrstuvwxyz",
-    "BOT_CHAT_ID" : "111222333"
-}
-```
-
-It is possible to notify multiple users at once. Just add a list as the `BOT_CHAT_ID` value:
-
-```json
-{
-    "BOT_TOKEN" : "1234567890:abcdefghijklmnopqrstuvwxyz",
-    "BOT_CHAT_ID" : ["111222333", "444555666"]
-}
+[
+  {
+  "url": "tgram://{bot_token}/{chat_id}"
+  },
+  {
+  "url": "twilio://{AccountSID}:{AuthToken}@{FromPhoneNo}/{PhoneNo}"
+  },
+  {
+  "url": "slack://{OAuthToken}/#{channel}"
+  }
+]
 ```
 
 #### Pavlok
@@ -236,21 +173,10 @@ store the url from the pavlok app in the ```pavlok_config.json``` file, you can 
 }
 ```
 
-#### Join
-To enable Join notifications, make a copy of the `join_config.template_json` file and name it `join_config.json`  
-Go [here](https://joinjoaomgcd.appspot.com/) and select the device you want to notify.  
-Click the `JOIN API` tab and paste the value next to `Device Id` into your `join_config.json` `deviceId` section.  
-Next click the `SHOW` button next to `API Key` and copy that value into your `join_config.json` `apikey` section.
-```json
-{
-  "apikey": "paste api key here",
-  "deviceId": "paste device id here"
-}
-```
 
 #### Testing notifications
 
-Once you have setup your desired notification handlers you can test them by running `python app.py test-notifications` from within your pipenv shell. This will send a test notification to all configured notificaiton handlers.
+Once you have setup your `apprise_config.json ` you can test it by running `python app.py test-notifications` from within your pipenv shell. This will send a test notification to all configured notification services.
 
 ## Troubleshooting
 
@@ -259,7 +185,7 @@ I suggest joining the #tech-support channel in [Discord](https://discord.gg/hQeU
 **Error: ```selenium.common.exceptions.WebDriverException: Message: unknown error: cannot find Chrome binary```** 
 The issue is that chrome is not installed in the expected location. See [Selenium Wiki](https://github.com/SeleniumHQ/selenium/wiki/ChromeDriver#requirements) and the section on [overriding the Chrome binary location .](https://sites.google.com/a/chromium.org/chromedriver/capabilities#TOC-Using-a-Chrome-executable-in-a-non-standard-location)
 
-The easy fix for this is to add an option where selenium is used (amazon.py)
+The easy fix for this is to add an option where selenium is used (`selenium_utils.py``)
 ```python
 chrome_options.binary_location="C:\Users\%USERNAME%\AppData\Local\Google\Chrome\Application\chrome.exe"
 ```
@@ -305,11 +231,7 @@ Yes. For example you can run one instance to check stock on the Nvidia store and
 
 ### 2. Does Nvidia Bot automatically bypass CAPTCHA's on the store sites?
 * For the Nvidia store, no. The Nvidia bot just notifys you when the desired card is in stock, and tries to add it to your cart. The rest of the checkout process is up to you.
-* For EVGA, no. You will need to enter the CAPTCHA.
 * For Amazon, yes. The bot will try and auto-solve CAPTCHA's during the checkout process.
-
-### 3. Can I add multiple P/N numbers to the EVGA bot 
-Not currently. If you want to check for multiple card models you will need to run a separate instance of the bot (each with different P/Ns in `evga_config.json`) for each model you want to check for.
 
 ## Attribution
 
