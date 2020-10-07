@@ -23,5 +23,5 @@ prompt_toolkit = "*"
 aiohttp = "*"
 pyobjc = {version = "*", sys_platform = "== 'darwin'"}
 async-timeout = "*"
-amazoncaptcha = "==0.3.10"
+amazoncaptcha = "==0.4.4"
 browser-cookie3 = "*"
