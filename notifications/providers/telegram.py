@@ -28,6 +28,10 @@ class TelegramHandler:
         else:
             log.debug("No Telegram config found.")
 
+    def generate_apprise_url(self):
+        self.enabled = False
+        return f"tgram://{self.bot_token}/{self.bot_chat_id}/"
+
     def send(self, message_body):
         try:
             for chat_id in self.bot_chat_id:

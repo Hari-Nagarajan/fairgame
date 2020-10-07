@@ -18,7 +18,6 @@ import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
-from notifications.notifications import NotificationHandler
 from utils.json_utils import find_values
 from utils.logger import log
 from utils.selenium_utils import enable_headless
@@ -47,8 +46,8 @@ options.add_argument("user-data-dir=.profile-bb")
 
 
 class BestBuyHandler:
-    def __init__(self, sku_id, headless=False):
-        self.notification_handler = NotificationHandler()
+    def __init__(self, sku_id, notification_handler, headless=False):
+        self.notification_handler = notification_handler
         self.sku_id = sku_id
         self.session = requests.Session()
         self.auto_buy = False

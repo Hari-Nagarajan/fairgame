@@ -9,7 +9,6 @@ import browser_cookie3
 import requests
 from spinlog import Spinner
 
-from notifications.notifications import NotificationHandler
 from utils.http import TimeoutHTTPAdapter
 from utils.logger import log
 
@@ -68,7 +67,9 @@ PRODUCT_IDS = json.load(open(PRODUCT_IDS_FILE))
 
 
 class NvidiaBuyer:
-    def __init__(self, gpu, locale="en_us", test=False, interval=5):
+    def __init__(
+        self, gpu, notification_handler, locale="en_us", test=False, interval=5
+    ):
         self.product_ids = set([])
         self.cli_locale = locale.lower()
         self.locale = self.map_locales()
@@ -93,7 +94,7 @@ class NvidiaBuyer:
         self.adapter = TimeoutHTTPAdapter()
         self.session.mount("https://", self.adapter)
         self.session.mount("http://", self.adapter)
-        self.notification_handler = NotificationHandler()
+        self.notification_handler = notification_handler
 
         self.get_product_ids()
 

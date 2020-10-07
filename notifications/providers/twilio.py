@@ -39,6 +39,10 @@ class TwilioHandler:
         else:
             return False
 
+    def generate_apprise_url(self):
+        self.enabled = False
+        return f'twilio://{self.config["account_sid"]}:{self.config["auth_token"]}@{self.config["from"]}/{self.config["to"]}'
+
     def send(self, message_body):
         try:
             message = self.client.messages.create(

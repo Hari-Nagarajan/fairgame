@@ -2,18 +2,15 @@ import json
 from os import path
 
 from slack import WebClient
-
 from slack.errors import SlackApiError
 
 from utils.logger import log
-
 
 SLACK_CONFIG_PATH = "slack_config.json"
 SLACK_CONFIG_KEYS = ["slack_user", "slack_channel", "slack_token"]
 
 
 class SlackHandler:
-
     enabled = False
 
     def __init__(self):
@@ -26,6 +23,12 @@ class SlackHandler:
                     self.enabled = True
                     try:
                         self.client = WebClient(token=self.config["slack_token"])
+                        self.token = self.config["slack_token"]
+                        self.channel = self.config["slack_channel"]
+                        if (
+                            self.channel[0] == "#"
+                        ):  # remove the # from the channel name.
+                            self.channel = self.channel[1:]
                     except Exception as e:
                         log.warn(
                             "Slack client creation failed. Disabling Slack notifications."
@@ -33,6 +36,10 @@ class SlackHandler:
                         self.enabled = False
         else:
             log.debug("No Slack creds found.")
+
+    def generate_apprise_url(self):
+        self.enabled = False
+        return f"slack://{self.token}/#{self.channel}"
 
     def has_valid_creds(self):
         if all(item in self.config.keys() for item in SLACK_CONFIG_KEYS):
