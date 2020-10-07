@@ -1,5 +1,0 @@
-{
-  "slack_user": "Notify Bot", 
-  "slack_channel": "ReportToThisSlackChannel", 
-  "slack_token": "ENTER-YOUR-SLACK-TOKEN-HERE"
-}

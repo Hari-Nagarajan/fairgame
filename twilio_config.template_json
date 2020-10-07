@@ -1,6 +1,0 @@
-{
-  "account_sid": "ACCOUNT_SID",
-  "auth_token": "AUTH_TOKEN",
-  "from": "YOUR TWILIO NUMBER",
-  "to": "THE NUMBER YOU WANT TO SEND SMS TO"
-}

@@ -25,6 +25,8 @@ pyobjc = {version = "*", sys_platform = "== 'darwin'"}
 async-timeout = "*"
 amazoncaptcha = "==0.4.4"
 browser-cookie3 = "*"
+apprise = "*"
+
 
 
 [requires]
