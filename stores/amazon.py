@@ -103,7 +103,6 @@ class Amazon:
 
         for key in AMAZON_URLS.keys():
             AMAZON_URLS[key] = AMAZON_URLS[key].format(domain=self.amazon_website)
-        print(AMAZON_URLS)
         self.driver.get(AMAZON_URLS["BASE_URL"])
         log.info("Waiting for home page.")
         self.check_if_captcha(self.wait_for_pages, HOME_PAGE_TITLES)
@@ -195,7 +194,7 @@ class Amazon:
             else:
                 self.driver.save_screenshot("screenshot.png")
                 self.notification_handler.send_notification(
-                    f"Solving Captcha: {solution}"
+                    f"Solving Captcha: {solution}", True
                 )
                 self.driver.find_element_by_xpath(
                     '//*[@id="captchacharacters"]'
@@ -235,7 +234,7 @@ class Amazon:
                 self.driver.save_screenshot(f"amazon-{func.__name__}.png")
                 self.driver.save_screenshot("screenshot.png")
                 self.notification_handler.send_notification(
-                    f"Error on {self.driver.title}"
+                    f"Error on {self.driver.title}", True
                 )
                 time.sleep(60)
                 self.driver.close()
@@ -296,13 +295,13 @@ class Amazon:
     def checkout(self, test):
         log.info("Clicking continue.")
         self.driver.save_screenshot("screenshot.png")
-        self.notification_handler.send_notification("Starting Checkout")
+        self.notification_handler.send_notification("Starting Checkout", True)
         self.driver.find_element_by_xpath('//input[@value="add"]').click()
 
         log.info("Waiting for Cart Page")
         self.check_if_captcha(self.wait_for_pages, SHOPING_CART_TITLES)
         self.driver.save_screenshot("screenshot.png")
-        self.notification_handler.send_notification("Cart Page")
+        self.notification_handler.send_notification("Cart Page", True)
 
         try:  # This is fast.
             log.info("Quick redirect to checkout page")
@@ -322,7 +321,7 @@ class Amazon:
             finally:
                 self.driver.save_screenshot("screenshot.png")
                 self.notification_handler.send_notification(
-                    "Failed to checkout. Returning to stock check."
+                    "Failed to checkout. Returning to stock check.", True
                 )
                 log.info("Failed to checkout. Returning to stock check.")
                 self.run_item(test=test)
@@ -332,7 +331,7 @@ class Amazon:
 
         log.info("Finishing checkout")
         self.driver.save_screenshot("screenshot.png")
-        self.notification_handler.send_notification("Finishing checkout")
+        self.notification_handler.send_notification("Finishing checkout", True)
 
         self.finalize_order_button(test)
 
@@ -341,6 +340,6 @@ class Amazon:
 
         log.info("Order Placed.")
         self.driver.save_screenshot("screenshot.png")
-        self.notification_handler.send_notification("Order Placed")
+        self.notification_handler.send_notification("Order Placed", True)
 
         time.sleep(20)

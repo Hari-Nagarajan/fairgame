@@ -97,7 +97,7 @@ def test_notifications():
     enabled_handlers = ", ".join(notification_handler.get_enabled_handlers())
     time = datetime.now().strftime(TIME_FORMAT)
     notification_handler.send_notification(
-        f"🤖 Beep boop. This is a test notification from Nvidia bot. Sent {time}."
+        f"Beep boop. This is a test notification from Nvidia bot. Sent {time}."
     )
     log.info(f"A notification was sent to the following handlers: {enabled_handlers}")
 
