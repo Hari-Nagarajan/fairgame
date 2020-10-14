@@ -1,6 +1,7 @@
 import json
 import secrets
 import time
+import random
 from os import path
 
 from amazoncaptcha import AmazonCaptcha
@@ -141,9 +142,11 @@ class Amazon:
 
         log.info(f"Logged in as {self.username}")
 
-    def run_item(self, delay=3, test=False):
+    def run_item(self, delay=0, test=False):
         log.info("Checking stock for items.")
         while not self.something_in_stock():
+            delay=random.randint(3, 10)
+            log.info("Next check in " + str(delay) + " seconds.")
             time.sleep(delay)
         self.notification_handler.send_notification(
             "Your items on Amazon.com were found!"
