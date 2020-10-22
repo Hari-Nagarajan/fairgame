@@ -104,7 +104,7 @@ INFO: "2020-09-25 14:41:04,617 - Order Placed.
 
 ### Nvidia 
 **NOTE**:
-**As of October 19, 2020, NVIDIA has indicated that they are no longer selling the Founder's Edition on the NVIDIA store in the US. It is possible they may continue selling them in Europe at a future date, however the bot may not be functional if they modify the store interface before they add new cards to the website. At this point, the NVIDIA store portion of the bot is deprecated.**
+**As of [October 19, 2020](https://www.nvidia.com/en-us/geforce/forums/geforce-graphics-cards/5/402196/updated-1019-nvidia-store-update-geforce-rtx-3080-/), NVIDIA has indicated that they are no longer selling the Founder's Edition on the NVIDIA store in the US. It is possible they may continue selling them in Europe at a future date, however the bot may not be functional if they modify the store interface before they add new cards to the website. At this point, the NVIDIA store portion of the bot is deprecated.**
 
 Will check stock and open an add to cart link in your browser and send notifications.
 
