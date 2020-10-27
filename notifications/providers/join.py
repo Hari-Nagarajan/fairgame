@@ -51,6 +51,6 @@ class JoinHandler:
             )
             log.info(f"Join notification status: {response.status_code}")
         except Exception as e:
-            log.debug(str(e))
+            log.debug(e)
             log.warn("Join notification failed")
             self.enabled = False

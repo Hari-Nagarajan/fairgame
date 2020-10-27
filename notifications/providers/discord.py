@@ -40,6 +40,6 @@ class DiscordHandler:
             response = web_hook.execute()
             log.info(f"Discord hook status: {response.status_code}")
         except Exception as e:
-            log.debug(str(e))
+            log.debug(e)
             log.warn("Discord send message failed. Disabling Discord notifications.")
             self.enabled = False
