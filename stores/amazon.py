@@ -92,6 +92,7 @@ class Amazon:
                     self.amazon_website = config.get("amazon_website", "amazon.com")
                     assert isinstance(self.asin_list, list)
                 except Exception:
+                    log.debug(e)
                     raise InvalidAutoBuyConfigException(
                         "amazon_config.json file not formatted properly."
                     )
@@ -214,14 +215,14 @@ class Amazon:
             ):
                 return True
         except Exception:
-            pass
+            log.debug(e)
         return False
 
     def check_if_captcha(self, func, args):
         try:
             func(args)
         except Exception as e:
-            log.debug(str(e))
+            log.debug(e)
             if self.on_captcha_page():
                 self.get_captcha_help()
                 func(args, t=300)

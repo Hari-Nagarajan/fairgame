@@ -9,10 +9,10 @@ logging.basicConfig(
 )
 
 log = logging.getLogger("nvidia-bot")
-log.setLevel(logging.DEBUG)
 
 LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
 stream_handler = logging.StreamHandler()
+stream_handler.setLevel(logging.INFO)
 stream_handler.setFormatter(
     logging.Formatter('%(levelname)s: "%(asctime)s - %(message)s')
 )

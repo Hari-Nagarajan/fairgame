@@ -25,7 +25,7 @@ class JoinHandler:
                     self.apikey = self.config["apikey"]
                     self.enabled = True
         else:
-            log.debug("No join config found.")
+            log.info("No join config found.")
 
     def generate_apprise_url(self):
         self.enabled = False
@@ -51,6 +51,6 @@ class JoinHandler:
             )
             log.info(f"Join notification status: {response.status_code}")
         except Exception as e:
-            log.error(e)
+            log.debug(str(e))
             log.warn("Join notification failed")
             self.enabled = False

@@ -27,7 +27,8 @@ def notify_on_crash(func):
             func(*args, **kwargs)
         except KeyboardInterrupt:
             pass
-        except:
+        except Exception as e:
+            log.debug(str(e))
             notification_handler.send_notification(f"nvidia-bot has crashed.")
             raise
 

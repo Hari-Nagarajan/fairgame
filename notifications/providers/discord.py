@@ -23,7 +23,7 @@ class DiscordHandler:
                     self.user_id = self.config.get("user_id", "N/A")
                     self.enabled = True
         else:
-            log.debug("No Discord creds found.")
+            log.info("No Discord creds found.")
 
     def generate_apprise_url(self):
         self.enabled = False
@@ -40,6 +40,6 @@ class DiscordHandler:
             response = web_hook.execute()
             log.info(f"Discord hook status: {response.status_code}")
         except Exception as e:
-            log.error(e)
+            log.debug(str(e))
             log.warn("Discord send message failed. Disabling Discord notifications.")
             self.enabled = False

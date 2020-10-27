@@ -26,7 +26,7 @@ class TelegramHandler:
                         self.bot_chat_id = [self.bot_chat_id]
                     self.enabled = True
         else:
-            log.debug("No Telegram config found.")
+            log.info("No Telegram config found.")
 
     def generate_apprise_url(self):
         self.enabled = False
@@ -40,6 +40,6 @@ class TelegramHandler:
                     f"chat_id={chat_id}&text={quote(message_body)}"
                 )
         except Exception as e:
-            log.error(e)
+            log.debug(e)
             log.warn("Telegram send message failed. Disabling Telegram notifications.")
             self.enabled = False

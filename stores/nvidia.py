@@ -170,7 +170,7 @@ class NvidiaBuyer:
             )
             log.debug(f"Stock check response code: {response.status_code}")
             if response.status_code != 200:
-                log.debug(response.text)
+                log.info(response.text)
             if "PRODUCT_INVENTORY_IN_STOCK" in response.text:
                 return True
             else:

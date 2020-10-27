@@ -17,13 +17,13 @@ class AudioHandler:
         if path.exists(NOTIFICATION_SOUND_PATH):
             self.enabled = True
         else:
-            log.debug("No notificaiton sound file found.")
+            log.info("No notification sound file found.")
 
     def play(self, audio_file=None, **kwargs):
         try:
             playsound(audio_file if audio_file else NOTIFICATION_SOUND_PATH, True)
         except Exception as e:
-            log.error(e)
+            log.debug(e)
             log.warn(
                 "Error playing notification sound. Disabling local audio notifications."
             )

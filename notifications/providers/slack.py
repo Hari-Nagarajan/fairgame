@@ -30,12 +30,13 @@ class SlackHandler:
                         ):  # remove the # from the channel name.
                             self.channel = self.channel[1:]
                     except Exception as e:
+                        log.debug(e)
                         log.warn(
                             "Slack client creation failed. Disabling Slack notifications."
                         )
                         self.enabled = False
         else:
-            log.debug("No Slack creds found.")
+            log.info("No Slack creds found.")
 
     def generate_apprise_url(self):
         self.enabled = False

@@ -26,12 +26,13 @@ class TwilioHandler:
                             self.config["account_sid"], self.config["auth_token"]
                         )
                     except Exception as e:
+                        log.debug(e)
                         log.warn(
                             "Twilio client creation failed. Disabling Twilio notifications."
                         )
                         self.enabled = False
         else:
-            log.debug("No Twilio creds found.")
+            log.info("No Twilio creds found.")
 
     def has_valid_creds(self):
         if all(item in self.config.keys() for item in TWILIO_CONFIG_KEYS):
@@ -50,6 +51,6 @@ class TwilioHandler:
             )
             log.info("SMS Sent: " + message.sid)
         except Exception as e:
-            log.error(e)
+            log.debug(e)
             log.warn("Twilio send message failed. Disabling Twilio notifications.")
             self.enabled = False

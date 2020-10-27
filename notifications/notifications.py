@@ -35,7 +35,7 @@ class NotificationHandler:
             self.enabled = True
         else:
             self.enabled = False
-            log.debug("No Apprise config found.")
+            log.info("No Apprise config found.")
 
         log.info("Initializing other notification handlers")
         self.audio_handler = AudioHandler()
