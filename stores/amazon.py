@@ -24,7 +24,7 @@ CHECKOUT_URL = "https://www.{domain}/gp/cart/desktop/go-to-checkout.html/ref=ox_
 
 AUTOBUY_CONFIG_PATH = "amazon_config.json"
 
-SIGN_IN_TITLES = ["Amazon Sign In", "Amazon Sign-In", "Amazon Anmelden", "Iniciar sesión en Amazon", "Connexion Amazon"]
+SIGN_IN_TITLES = ["Amazon Sign In", "Amazon Sign-In", "Amazon Anmelden", "Iniciar sesión en Amazon", "Connexion Amazon", "Amazon Accedi"]
 CAPTCHA_PAGE_TITLES = ["Robot Check"]
 HOME_PAGE_TITLES = [
     "Amazon.com: Online Shopping for Electronics, Apparel, Computers, Books, DVDs & more",
@@ -35,6 +35,7 @@ HOME_PAGE_TITLES = [
     "Amazon.es: compra online de electrónica, libros, deporte, hogar, moda y mucho más.",
     "Amazon.de: Günstige Preise für Elektronik & Foto, Filme, Musik, Bücher, Games, Spielzeug & mehr",
     "Amazon.fr : livres, DVD, jeux vidéo, musique, high-tech, informatique, jouets, vêtements, chaussures, sport, bricolage, maison, beauté, puériculture, épicerie et plus encore !",
+    "Amazon.it: elettronica, libri, musica, fashion, videogiochi, DVD e tanto altro",
 ]
 SHOPING_CART_TITLES = [
     "Amazon.com Shopping Cart",
@@ -44,6 +45,7 @@ SHOPING_CART_TITLES = [
     "Amazon.de Einkaufswagen",
     "Cesta de compra Amazon.es",
     "Amazon.fr Panier",
+    "Carrello Amazon.it",
 ]
 CHECKOUT_TITLES = [
     "Amazon.com Checkout",
@@ -59,6 +61,7 @@ CHECKOUT_TITLES = [
     "Processus de paiement Amazon.com",
     "Confirmar pedido - Compra Amazon.es",
     "Passez votre commande - Processus de paiement Amazon.fr",
+    "Ordina - Cassa Amazon.it",
 ]
 ORDER_COMPLETE_TITLES = [
     "Amazon.com Thanks You",
@@ -68,6 +71,7 @@ ORDER_COMPLETE_TITLES = [
     "Merci",
     "Amazon.es te da las gracias",
     "Amazon.fr vous remercie.",
+    "Grazie da Amazon.it",
 ]
 ADD_TO_CART_TITLES = [
     "Amazon.com: Please Confirm Your Action",
@@ -75,6 +79,7 @@ ADD_TO_CART_TITLES = [
     "Amazon.de: Please Confirm Your Action",
     "Amazon.es: confirma tu acción",
     "Amazon.com : Veuillez confirmer votre action",  # Careful, required non-breaking space after .com (&nbsp)
+    "Amazon.it: confermare l'operazione",
 ]
 
 
