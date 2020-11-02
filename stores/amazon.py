@@ -187,7 +187,9 @@ class Amazon:
             solution = captcha.solve()
             log.info(f"The solution is: {solution}")
             if solution == "Not solved":
-                log.info(f"Failed to solve {captcha.image_link}, lets reload and get a new captcha.")
+                log.info(
+                    f"Failed to solve {captcha.image_link}, lets reload and get a new captcha."
+                )
                 self.driver.refresh()
                 time.sleep(5)
                 self.get_captcha_help()
