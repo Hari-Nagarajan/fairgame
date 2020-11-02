@@ -93,11 +93,11 @@ class Amazon:
                     assert isinstance(self.asin_list, list)
                 except Exception:
                     raise InvalidAutoBuyConfigException(
-                        "amazon_config.json file not formatted properly."
+                        "amazon_config.json file not formatted properly: https://github.com/Hari-Nagarajan/nvidia-bot/wiki/Usage#json-configuration"
                     )
         else:
             log.error(
-                "No config file found, see here on how to fix this: https://github.com/Hari-Nagarajan/nvidia-bot#amazon"
+                "No config file found, see here on how to fix this: https://github.com/Hari-Nagarajan/nvidia-bot/wiki/Usage#json-configuration"
             )
             exit(0)
 
