@@ -204,12 +204,12 @@ class Amazon:
                 self.get_captcha_help()
             else:
                 self.driver.save_screenshot("screenshot.png")
-                self.notification_handler.send_notification(
-                    f"Solving Captcha: {solution}", True
-                )
                 self.driver.find_element_by_xpath(
                     '//*[@id="captchacharacters"]'
                 ).send_keys(solution + Keys.RETURN)
+                self.notification_handler.send_notification(
+                    f"Solved captcha with solution: {solution}", True
+                )
         except Exception as e:
             log.debug(e)
             log.info("Error trying to solve captcha. Refresh and retry.")
