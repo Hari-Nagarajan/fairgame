@@ -102,11 +102,11 @@ class Amazon:
                     assert isinstance(self.asin_list, list)
                 except Exception:
                     raise InvalidAutoBuyConfigException(
-                        "amazon_config.json file not formatted properly."
+                        "amazon_config.json file not formatted properly: https://github.com/Hari-Nagarajan/nvidia-bot/wiki/Usage#json-configuration"
                     )
         else:
             log.error(
-                "No config file found, see here on how to fix this: https://github.com/Hari-Nagarajan/nvidia-bot#amazon"
+                "No config file found, see here on how to fix this: https://github.com/Hari-Nagarajan/nvidia-bot/wiki/Usage#json-configuration"
             )
             exit(0)
 
@@ -196,7 +196,9 @@ class Amazon:
             solution = captcha.solve()
             log.info(f"The solution is: {solution}")
             if solution == "Not solved":
-                log.info(f"Failed to solve {captcha.image_link}, lets reload and get a new captcha.")
+                log.info(
+                    f"Failed to solve {captcha.image_link}, lets reload and get a new captcha."
+                )
                 self.driver.refresh()
                 time.sleep(5)
                 self.get_captcha_help()
