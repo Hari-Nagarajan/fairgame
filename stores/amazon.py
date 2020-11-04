@@ -18,7 +18,7 @@ from utils.selenium_utils import options, enable_headless, wait_for_element
 
 AMAZON_URLS = {
     "BASE_URL": "https://www.{domain}/",
-    "CART_URL": "https://www.{domain}/gp/aws/cart/add.html",
+    "CART_URL": "https://smile.{domain}/gp/aws/cart/add.html",
 }
 CHECKOUT_URL = "https://www.{domain}/gp/cart/desktop/go-to-checkout.html/ref=ox_sc_proceed?partialCheckoutCart=1&isToBeGiftWrappedBefore=0&proceedToRetailCheckout=Proceed+to+checkout&proceedToCheckout=1&cartInitiateId={cart_id}"
 
@@ -28,6 +28,7 @@ SIGN_IN_TITLES = ["Amazon Sign In", "Amazon Sign-In", "Amazon Anmelden", "Inicia
 CAPTCHA_PAGE_TITLES = ["Robot Check"]
 HOME_PAGE_TITLES = [
     "Amazon.com: Online Shopping for Electronics, Apparel, Computers, Books, DVDs & more",
+    "AmazonSmile: You shop. Amazon gives",
     "Amazon.ca: Low Prices – Fast Shipping – Millions of Items",
     "Amazon.co.uk: Low Prices in Electronics, Books, Sports Equipment & more",
     "Amazon.de: Low Prices in Electronics, Books, Sports Equipment & more",
@@ -39,6 +40,7 @@ HOME_PAGE_TITLES = [
 ]
 SHOPING_CART_TITLES = [
     "Amazon.com Shopping Cart",
+    "AmazonSmile Shopping Cart",
     "Amazon.ca Shopping Cart",
     "Amazon.co.uk Shopping Basket",
     "Amazon.de Basket",
@@ -49,6 +51,7 @@ SHOPING_CART_TITLES = [
 ]
 CHECKOUT_TITLES = [
     "Amazon.com Checkout",
+    "AmazonSmile Checkout",
     "Amazon.co.uk Checkout",
     "Place Your Order - Amazon.ca Checkout",
     "Place Your Order - Amazon.co.uk Checkout",
@@ -65,6 +68,7 @@ CHECKOUT_TITLES = [
 ]
 ORDER_COMPLETE_TITLES = [
     "Amazon.com Thanks You",
+    "AmazonSmile Thanks You"
     "Amazon.ca Thanks You",
     "Thank you",
     "Amazon.fr Merci",
@@ -75,13 +79,13 @@ ORDER_COMPLETE_TITLES = [
 ]
 ADD_TO_CART_TITLES = [
     "Amazon.com: Please Confirm Your Action",
+    "AmazonSmile: Please Confirm Your Action",
     "Amazon.de: Bitte bestätigen Sie Ihre Aktion",
     "Amazon.de: Please Confirm Your Action",
     "Amazon.es: confirma tu acción",
     "Amazon.com : Veuillez confirmer votre action",  # Careful, required non-breaking space after .com (&nbsp)
     "Amazon.it: confermare l'operazione",
 ]
-
 
 class Amazon:
     def __init__(self, notification_handler, headless=False):
@@ -98,6 +102,7 @@ class Amazon:
                     self.username = config["username"]
                     self.password = config["password"]
                     self.asin_list = config["asin_list"]
+                    self.reserve = config["reserve"]
                     self.amazon_website = config.get("amazon_website", "amazon.com")
                     assert isinstance(self.asin_list, list)
                 except Exception:
@@ -179,10 +184,18 @@ class Amazon:
         f.set(params)
         self.driver.get(f.url)
         self.check_if_captcha(self.wait_for_pages, ADD_TO_CART_TITLES)
-        if self.driver.find_elements_by_xpath('//td[@class="price item-row"]'):
-            log.info("One or more items in stock!")
+        price_element = self.driver.find_elements_by_xpath('//td[@class="price item-row"]')
+        if price_element:
+            price = float(price_element[0].text[1:])
+            log.info(f'Item Cost: {price}')
+            if price <= self.reserve:
+                log.info("One or more items in stock and under reserve!")
+                return True
+            else:
+                log.info("Shit costs too much fuck that")
+                return False
 
-            return True
+            return False
         else:
             return False
 

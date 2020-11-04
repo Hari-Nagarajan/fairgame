@@ -69,15 +69,18 @@ Thankfully Amazon.com has 1 click order canceling so its not a huge issue. We ar
 --test : This will not finish the checkout
 ```
 
-Make a copy of `amazon_config.template_json` to `amazon_config.json`:
+Make a copy of `amazon_config.template_json` to `amazon_config.json`:   
 ```json
 {
   "username": "",
   "password": "",
   "asin_list": ["B07JH53M4T","B08HR7SV3M"],
-  "amazon_website": "amazon.com"
+  "amazon_website": "amazon.com",
+  "reserve": 1000
 }
 ```
+* `reserve` is the most amount you want to spend, ensures you don't buy scalper stuff
+
 Example usage:
 
 ```
