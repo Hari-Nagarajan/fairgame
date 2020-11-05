@@ -17,10 +17,10 @@ from utils.logger import log
 from utils.selenium_utils import options, enable_headless, wait_for_element
 
 AMAZON_URLS = {
-    "BASE_URL": "https://www.{domain}/",
-    "CART_URL": "https://smile.{domain}/gp/aws/cart/add.html",
+    "BASE_URL": "https://{domain}/",
+    "CART_URL": "https://{domain}/gp/aws/cart/add.html",
 }
-CHECKOUT_URL = "https://www.{domain}/gp/cart/desktop/go-to-checkout.html/ref=ox_sc_proceed?partialCheckoutCart=1&isToBeGiftWrappedBefore=0&proceedToRetailCheckout=Proceed+to+checkout&proceedToCheckout=1&cartInitiateId={cart_id}"
+CHECKOUT_URL = "https://{domain}/gp/cart/desktop/go-to-checkout.html/ref=ox_sc_proceed?partialCheckoutCart=1&isToBeGiftWrappedBefore=0&proceedToRetailCheckout=Proceed+to+checkout&proceedToCheckout=1&cartInitiateId={cart_id}"
 
 AUTOBUY_CONFIG_PATH = "amazon_config.json"
 
@@ -192,7 +192,7 @@ class Amazon:
                 log.info("One or more items in stock and under reserve!")
                 return True
             else:
-                log.info("Shit costs too much fuck that")
+                log.info("No stock available under reserve price")
                 return False
 
             return False

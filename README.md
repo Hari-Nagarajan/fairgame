@@ -75,7 +75,7 @@ Make a copy of `amazon_config.template_json` to `amazon_config.json`:
   "username": "",
   "password": "",
   "asin_list": ["B07JH53M4T","B08HR7SV3M"],
-  "amazon_website": "amazon.com",
+  "amazon_website": "www.amazon.com",
   "reserve": 1000
 }
 ```
