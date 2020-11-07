@@ -69,7 +69,7 @@ Thankfully Amazon.com has 1 click order canceling so its not a huge issue. We ar
 --test : This will not finish the checkout
 ```
 
-Make a copy of `amazon_config.template_json` to `amazon_config.json`:   
+Make a copy of `amazon_config.template_json` to `amazon_config.json`:
 ```json
 {
   "username": "",
