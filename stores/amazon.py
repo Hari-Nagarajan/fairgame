@@ -68,7 +68,7 @@ CHECKOUT_TITLES = [
 ]
 ORDER_COMPLETE_TITLES = [
     "Amazon.com Thanks You",
-    "AmazonSmile Thanks You"
+    "AmazonSmile Thanks You",
     "Amazon.ca Thanks You",
     "Thank you",
     "Amazon.fr Merci",
