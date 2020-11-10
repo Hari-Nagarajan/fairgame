@@ -81,6 +81,9 @@ ADD_TO_CART_TITLES = [
     "Amazon.com : Veuillez confirmer votre action",  # Careful, required non-breaking space after .com (&nbsp)
     "Amazon.it: confermare l'operazione",
 ]
+DOGGO_TITLES = [
+    "Sorry! Something went wrong!"
+]
 
 
 class Amazon:
@@ -148,6 +151,11 @@ class Amazon:
         except:
             log.info("Email not needed.")
             pass
+        
+        if self.driver.find_elements_by_xpath('//*[@id="auth-error-message-box"]'):
+            log.error("Login failed, check your username in amazon_config.json")
+            time.sleep(240)
+            exit(1)
 
         log.info("Remember me checkbox")
         selenium_utils.button_click_using_xpath(self.driver, '//*[@name="rememberMe"]')
@@ -178,6 +186,22 @@ class Amazon:
         f = furl(AMAZON_URLS["CART_URL"])
         f.set(params)
         self.driver.get(f.url)
+        title = self.driver.title
+        if title in DOGGO_TITLES:
+            for asin in self.asin_list:
+                checkparams = {}
+                checkparams[f"ASIN.1"] = asin
+                checkparams[f"Quantity.1"] = 1
+                check = furl(AMAZON_URLS["CART_URL"])
+                check.set(checkparams)
+                self.driver.get(check.url)
+                sanity_check = self.driver.title
+                if sanity_check in DOGGO_TITLES:
+                    log.error("{} blocked from bulk adding by Amazon".format(asin))
+                    self.asin_list.remove(asin)
+                else:
+                    log.info("{} appears to allow bulk adding".format(asin))
+            return False
         self.check_if_captcha(self.wait_for_pages, ADD_TO_CART_TITLES)
         if self.driver.find_elements_by_xpath('//td[@class="price item-row"]'):
             log.info("One or more items in stock!")
@@ -249,11 +273,19 @@ class Amazon:
                 )
                 time.sleep(60)
                 self.driver.close()
-                raise e
+                log.debug(e)
+                pass
 
     def wait_for_pages(self, page_titles, t=30):
         log.debug(f"wait_for_pages({page_titles}, {t})")
-        selenium_utils.wait_for_any_title(self.driver, page_titles, t)
+        try:
+            title = selenium_utils.wait_for_any_title(self.driver, page_titles, t)
+            if not title in page_titles:
+                log.error("{} is not a recognized title, report to #tech-support or open an issue on github".format())
+            return title
+        except Exception as e:
+            log.debug(e)
+            pass
 
     def wait_for_pyo_page(self):
         self.check_if_captcha(self.wait_for_pages, CHECKOUT_TITLES + SIGN_IN_TITLES)
