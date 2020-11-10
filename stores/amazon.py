@@ -72,6 +72,7 @@ CHECKOUT_TITLES = [
     "Confirmar pedido - Compra Amazon.es",
     "Passez votre commande - Processus de paiement Amazon.fr",
     "Ordina - Cassa Amazon.it",
+    "AmazonSmile Checkout",
 ]
 ORDER_COMPLETE_TITLES = [
     "Amazon.com Thanks You",
