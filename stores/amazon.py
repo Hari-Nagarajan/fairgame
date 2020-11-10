@@ -56,6 +56,7 @@ SHOPING_CART_TITLES = [
     "Cesta de compra Amazon.es",
     "Amazon.fr Panier",
     "Carrello Amazon.it",
+    "AmazonSmile Shopping Cart",
 ]
 CHECKOUT_TITLES = [
     "Amazon.com Checkout",
@@ -77,6 +78,7 @@ CHECKOUT_TITLES = [
 ORDER_COMPLETE_TITLES = [
     "Amazon.com Thanks You",
     "Amazon.ca Thanks You",
+    "AmazonSmile Thanks You",
     "Thank you",
     "Amazon.fr Merci",
     "Merci",
