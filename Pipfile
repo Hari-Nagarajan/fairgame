@@ -27,6 +27,7 @@ amazoncaptcha = "==0.4.4"
 browser-cookie3 = "*"
 coloredlogs = "*"
 apprise = "*"
+price-parser = "*"
 
 
 

@@ -15,6 +15,7 @@ from utils import selenium_utils
 from utils.json_utils import InvalidAutoBuyConfigException
 from utils.logger import log
 from utils.selenium_utils import options, enable_headless, wait_for_element
+from price_parser import parse_price
 
 AMAZON_URLS = {
     "BASE_URL": "https://{domain}/",
@@ -97,7 +98,7 @@ class Amazon:
                     self.username = config["username"]
                     self.password = config["password"]
                     self.asin_list = config["asin_list"]
-                    self.reserve = config["reserve"]
+                    self.reserve = float(config["reserve"])
                     self.amazon_website = config.get("amazon_website", "amazon.com")
                     assert isinstance(self.asin_list, list)
                 except Exception:
@@ -181,10 +182,11 @@ class Amazon:
         self.check_if_captcha(self.wait_for_pages, ADD_TO_CART_TITLES)
         price_element = self.driver.find_elements_by_xpath('//td[@class="price item-row"]')
         if price_element:
-            str_price = float(price_element[0].text[1:])
-            price = float(str_price.replace(',',''))
-            log.info(f'Item Cost: {price}')
-            if price <= self.reserve:
+            str_price = price_element[0].text
+            log.info(f'Item Cost: {str_price}')
+            price = parse_price(str_price)
+            priceFloat = price.amount
+            if priceFloat <= self.reserve:
                 log.info("One or more items in stock and under reserve!")
                 return True
             else:
