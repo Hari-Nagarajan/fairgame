@@ -24,7 +24,14 @@ CHECKOUT_URL = "https://www.{domain}/gp/cart/desktop/go-to-checkout.html/ref=ox_
 
 AUTOBUY_CONFIG_PATH = "amazon_config.json"
 
-SIGN_IN_TITLES = ["Amazon Sign In", "Amazon Sign-In", "Amazon Anmelden", "Iniciar sesión en Amazon", "Connexion Amazon", "Amazon Accedi"]
+SIGN_IN_TITLES = [
+    "Amazon Sign In",
+    "Amazon Sign-In",
+    "Amazon Anmelden",
+    "Iniciar sesión en Amazon",
+    "Connexion Amazon",
+    "Amazon Accedi",
+]
 CAPTCHA_PAGE_TITLES = ["Robot Check"]
 HOME_PAGE_TITLES = [
     "Amazon.com: Online Shopping for Electronics, Apparel, Computers, Books, DVDs & more",
@@ -81,9 +88,7 @@ ADD_TO_CART_TITLES = [
     "Amazon.com : Veuillez confirmer votre action",  # Careful, required non-breaking space after .com (&nbsp)
     "Amazon.it: confermare l'operazione",
 ]
-DOGGO_TITLES = [
-    "Sorry! Something went wrong!"
-]
+DOGGO_TITLES = ["Sorry! Something went wrong!"]
 
 
 class Amazon:
@@ -151,7 +156,7 @@ class Amazon:
         except:
             log.info("Email not needed.")
             pass
-        
+
         if self.driver.find_elements_by_xpath('//*[@id="auth-error-message-box"]'):
             log.error("Login failed, check your username in amazon_config.json")
             time.sleep(240)
@@ -284,7 +289,9 @@ class Amazon:
         try:
             title = selenium_utils.wait_for_any_title(self.driver, page_titles, t)
             if not title in page_titles:
-                log.error("{} is not a recognized title, report to #tech-support or open an issue on github".format())
+                log.error(
+                    "{} is not a recognized title, report to #tech-support or open an issue on github".format()
+                )
             return title
         except Exception as e:
             log.debug(e)
