@@ -90,7 +90,7 @@ ADD_TO_CART_TITLES = [
     "Amazon.es: confirma tu acción",
     "Amazon.com : Veuillez confirmer votre action",  # Careful, required non-breaking space after .com (&nbsp)
     "Amazon.it: confermare l'operazione",
-    "AmazonSmile: Please Confirm Your Action"
+    "AmazonSmile: Please Confirm Your Action",
 ]
 DOGGO_TITLES = [
     "Sorry! Something went wrong!"
