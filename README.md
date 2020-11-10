@@ -51,7 +51,7 @@ Commands:
 
 | **Website** | **Auto Checkout** | **Open Cart Link** | **Test flag** |
 |:---:|:---:|:---:|:---:|
-~~| nvidia.com | |`✔`| |~~
+| ~~nvidia.com~~ | |~~`✔`~~| |
 | amazon.com |`✔`| | |
 | bestbuy.com | |`✔`| |
 
