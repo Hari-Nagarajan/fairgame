@@ -17,10 +17,10 @@ from utils.logger import log
 from utils.selenium_utils import options, enable_headless, wait_for_element
 
 AMAZON_URLS = {
-    "BASE_URL": "https://www.{domain}/",
-    "CART_URL": "https://www.{domain}/gp/aws/cart/add.html",
+    "BASE_URL": "https://{domain}/",
+    "CART_URL": "https://{domain}/gp/aws/cart/add.html",
 }
-CHECKOUT_URL = "https://www.{domain}/gp/cart/desktop/go-to-checkout.html/ref=ox_sc_proceed?partialCheckoutCart=1&isToBeGiftWrappedBefore=0&proceedToRetailCheckout=Proceed+to+checkout&proceedToCheckout=1&cartInitiateId={cart_id}"
+CHECKOUT_URL = "https://{domain}/gp/cart/desktop/go-to-checkout.html/ref=ox_sc_proceed?partialCheckoutCart=1&isToBeGiftWrappedBefore=0&proceedToRetailCheckout=Proceed+to+checkout&proceedToCheckout=1&cartInitiateId={cart_id}"
 
 AUTOBUY_CONFIG_PATH = "amazon_config.json"
 
@@ -90,7 +90,6 @@ ADD_TO_CART_TITLES = [
 ]
 DOGGO_TITLES = ["Sorry! Something went wrong!"]
 
-
 class Amazon:
     def __init__(self, notification_handler, headless=False):
         self.notification_handler = notification_handler
@@ -106,6 +105,7 @@ class Amazon:
                     self.username = config["username"]
                     self.password = config["password"]
                     self.asin_list = config["asin_list"]
+                    self.reserve = config["reserve"]
                     self.amazon_website = config.get("amazon_website", "amazon.com")
                     assert isinstance(self.asin_list, list)
                 except Exception:
@@ -211,10 +211,19 @@ class Amazon:
                     log.info("{} appears to allow bulk adding".format(asin))
             return False
         self.check_if_captcha(self.wait_for_pages, ADD_TO_CART_TITLES)
-        if self.driver.find_elements_by_xpath('//td[@class="price item-row"]'):
-            log.info("One or more items in stock!")
+        price_element = self.driver.find_elements_by_xpath('//td[@class="price item-row"]')
+        if price_element:
+            str_price = float(price_element[0].text[1:])
+            price = float(str_price.replace(',',''))
+            log.info(f'Item Cost: {price}')
+            if price <= self.reserve:
+                log.info("One or more items in stock and under reserve!")
+                return True
+            else:
+                log.info("No stock available under reserve price")
+                return False
 
-            return True
+            return False
         else:
             return False
 
