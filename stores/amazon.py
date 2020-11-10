@@ -222,10 +222,10 @@ class Amazon:
         self.check_if_captcha(self.wait_for_pages, ADD_TO_CART_TITLES)
         price_element = self.driver.find_elements_by_xpath('//td[@class="price item-row"]')
         if price_element:
-            str_price = float(price_element[0].text[1:])
-            price = float(str_price.replace(',',''))
+            str_price = str(price_element[0].text[1:])
+            price = str_price.replace(',','')
             log.info(f'Item Cost: {price}')
-            if price <= self.reserve:
+            if float(price) <= self.reserve:
                 log.info("One or more items in stock and under reserve!")
                 return True
             else:
