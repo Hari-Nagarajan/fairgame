@@ -2,6 +2,7 @@ import json
 import secrets
 import time
 from os import path
+from price_parser import parse_price
 
 from amazoncaptcha import AmazonCaptcha
 from chromedriver_py import binary_path  # this will get you the path variable
@@ -15,6 +16,7 @@ from utils import selenium_utils
 from utils.json_utils import InvalidAutoBuyConfigException
 from utils.logger import log
 from utils.selenium_utils import options, enable_headless, wait_for_element
+from price_parser import parse_price
 
 AMAZON_URLS = {
     "BASE_URL": "https://{domain}/",
@@ -47,7 +49,6 @@ HOME_PAGE_TITLES = [
 ]
 SHOPING_CART_TITLES = [
     "Amazon.com Shopping Cart",
-    "AmazonSmile Shopping Cart",
     "Amazon.ca Shopping Cart",
     "Amazon.co.uk Shopping Basket",
     "Amazon.de Basket",
@@ -58,7 +59,6 @@ SHOPING_CART_TITLES = [
 ]
 CHECKOUT_TITLES = [
     "Amazon.com Checkout",
-    "AmazonSmile Checkout",
     "Amazon.co.uk Checkout",
     "Place Your Order - Amazon.ca Checkout",
     "Place Your Order - Amazon.co.uk Checkout",
@@ -75,7 +75,6 @@ CHECKOUT_TITLES = [
 ]
 ORDER_COMPLETE_TITLES = [
     "Amazon.com Thanks You",
-    "AmazonSmile Thanks You",
     "Amazon.ca Thanks You",
     "Thank you",
     "Amazon.fr Merci",
@@ -86,7 +85,6 @@ ORDER_COMPLETE_TITLES = [
 ]
 ADD_TO_CART_TITLES = [
     "Amazon.com: Please Confirm Your Action",
-    "AmazonSmile: Please Confirm Your Action",
     "Amazon.de: Bitte bestätigen Sie Ihre Aktion",
     "Amazon.de: Please Confirm Your Action",
     "Amazon.es: confirma tu acción",
@@ -103,8 +101,12 @@ class Amazon:
         if headless:
             enable_headless()
         options.add_argument(f"user-data-dir=.profile-amz")
-        self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
-        self.wait = WebDriverWait(self.driver, 10)
+        try:
+            self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
+            self.wait = WebDriverWait(self.driver, 10)
+        except Exception:
+            log.error("Another instance of chrome is running, close that and try again.")
+            exit(1)
         if path.exists(AUTOBUY_CONFIG_PATH):
             with open(AUTOBUY_CONFIG_PATH) as json_file:
                 try:
@@ -112,11 +114,11 @@ class Amazon:
                     self.username = config["username"]
                     self.password = config["password"]
                     self.asin_list = config["asin_list"]
-                    self.reserve = config["reserve"]
-                    self.amazon_website = config.get("amazon_website", "amazon.com")
+                    self.reserve = float(config["reserve"])
+                    self.amazon_website = config.get("amazon_website", "smile.amazon.com")
                     assert isinstance(self.asin_list, list)
                 except Exception:
-                    raise InvalidAutoBuyConfigException(
+                    log.error(
                         "amazon_config.json file not formatted properly: https://github.com/Hari-Nagarajan/nvidia-bot/wiki/Usage#json-configuration"
                     )
         else:
@@ -229,18 +231,17 @@ class Amazon:
         self.check_if_captcha(self.wait_for_pages, ADD_TO_CART_TITLES)
         price_element = self.driver.find_elements_by_xpath('//td[@class="price item-row"]')
         if price_element:
-            str_price = str(price_element[0].text[1:])
-            price = str_price.replace(',','')
-            log.info(f'Item Cost: {price}')
-            if float(price) <= self.reserve:
+            str_price = price_element[0].text
+            log.info(f'Item Cost: {str_price}')
+            price = parse_price(str_price)
+            priceFloat = price.amount
+            if priceFloat <= self.reserve:
                 log.info("One or more items in stock and under reserve!")
                 return True
             else:
                 log.info("No stock available under reserve price")
                 log.info("{}".format(self.asin_list))
                 return False
-
-            return False
         else:
             return False
 
