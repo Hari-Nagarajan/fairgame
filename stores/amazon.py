@@ -35,6 +35,7 @@ SIGN_IN_TITLES = [
 CAPTCHA_PAGE_TITLES = ["Robot Check"]
 HOME_PAGE_TITLES = [
     "Amazon.com: Online Shopping for Electronics, Apparel, Computers, Books, DVDs & more",
+    "AmazonSmile: You shop. Amazon gives.",
     "Amazon.ca: Low Prices – Fast Shipping – Millions of Items",
     "Amazon.co.uk: Low Prices in Electronics, Books, Sports Equipment & more",
     "Amazon.de: Low Prices in Electronics, Books, Sports Equipment & more",
@@ -46,6 +47,7 @@ HOME_PAGE_TITLES = [
 ]
 SHOPING_CART_TITLES = [
     "Amazon.com Shopping Cart",
+    "AmazonSmile Shopping Cart",
     "Amazon.ca Shopping Cart",
     "Amazon.co.uk Shopping Basket",
     "Amazon.de Basket",
@@ -56,6 +58,7 @@ SHOPING_CART_TITLES = [
 ]
 CHECKOUT_TITLES = [
     "Amazon.com Checkout",
+    "AmazonSmile Checkout",
     "Amazon.co.uk Checkout",
     "Place Your Order - Amazon.ca Checkout",
     "Place Your Order - Amazon.co.uk Checkout",
@@ -72,6 +75,7 @@ CHECKOUT_TITLES = [
 ]
 ORDER_COMPLETE_TITLES = [
     "Amazon.com Thanks You",
+    "AmazonSmile Thanks You",
     "Amazon.ca Thanks You",
     "Thank you",
     "Amazon.fr Merci",
@@ -82,6 +86,7 @@ ORDER_COMPLETE_TITLES = [
 ]
 ADD_TO_CART_TITLES = [
     "Amazon.com: Please Confirm Your Action",
+    "AmazonSmile: Please Confirm Your Action",
     "Amazon.de: Bitte bestätigen Sie Ihre Aktion",
     "Amazon.de: Please Confirm Your Action",
     "Amazon.es: confirma tu acción",
@@ -128,8 +133,12 @@ class Amazon:
             log.info("Already logged in")
         else:
             log.info("Lets log in.")
+
+            is_smile = "smile" in AMAZON_URLS["BASE_URL"]
+            xpath = '//*[@id="ge-hello"]/div/span/a' if is_smile else '//*[@id="nav-link-accountList"]/div/span'
             selenium_utils.button_click_using_xpath(
-                self.driver, '//*[@id="nav-link-accountList"]/div/span'
+                self.driver,
+                xpath
             )
             log.info("Wait for Sign In page")
             self.check_if_captcha(self.wait_for_pages, SIGN_IN_TITLES)
