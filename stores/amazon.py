@@ -90,6 +90,7 @@ ADD_TO_CART_TITLES = [
     "Amazon.es: confirma tu acción",
     "Amazon.com : Veuillez confirmer votre action",  # Careful, required non-breaking space after .com (&nbsp)
     "Amazon.it: confermare l'operazione",
+    "AmazonSmile: Please Confirm Your Action"
 ]
 DOGGO_TITLES = [
     "Sorry! Something went wrong!"
@@ -240,8 +241,9 @@ class Amazon:
                 return True
             else:
                 log.info("No stock available under reserve price")
-                log.info("{}".format(self.asin_list))
+                #log.info("{}".format(self.asin_list))
                 return False
+            return False
         else:
             return False
 
@@ -319,7 +321,7 @@ class Amazon:
                 log.error(
                     "{} is not a recognized title, report to #tech-support or open an issue on github".format()
                 )
-            return title
+            pass
         except Exception as e:
             log.debug(e)
             pass
