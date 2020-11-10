@@ -199,6 +199,9 @@ class Amazon:
                 if sanity_check in DOGGO_TITLES:
                     log.error("{} blocked from bulk adding by Amazon".format(asin))
                     self.asin_list.remove(asin)
+                    if len(self.asin_list) == 0:
+                        log.error("No ASIN's left in list")
+                        exit(1)
                 else:
                     log.info("{} appears to allow bulk adding".format(asin))
             return False
