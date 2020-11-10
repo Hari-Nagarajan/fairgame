@@ -93,7 +93,9 @@ ADD_TO_CART_TITLES = [
     "Amazon.com : Veuillez confirmer votre action",  # Careful, required non-breaking space after .com (&nbsp)
     "Amazon.it: confermare l'operazione",
 ]
-DOGGO_TITLES = ["Sorry! Something went wrong!"]
+DOGGO_TITLES = [
+    "Sorry! Something went wrong!"
+]
 
 class Amazon:
     def __init__(self, notification_handler, headless=False):
@@ -191,8 +193,8 @@ class Amazon:
         self.checkout(test=test)
 
     def something_in_stock(self):
-        params = {"anticache": str(secrets.token_urlsafe(32))}
-
+        #params = {"anticache": str(secrets.token_urlsafe(32))}
+        params = {}
         for x in range(len(self.asin_list)):
             params[f"ASIN.{x + 1}"] = self.asin_list[x]
             params[f"Quantity.{x + 1}"] = 1
@@ -201,6 +203,7 @@ class Amazon:
         f.set(params)
         self.driver.get(f.url)
         title = self.driver.title
+        #if len(self.asin_list) > 1 and title in DOGGO_TITLES:
         if title in DOGGO_TITLES:
             for asin in self.asin_list:
                 checkparams = {}
@@ -211,14 +214,18 @@ class Amazon:
                 self.driver.get(check.url)
                 sanity_check = self.driver.title
                 if sanity_check in DOGGO_TITLES:
-                    log.error("{} blocked from bulk adding by Amazon".format(asin))
-                    self.asin_list.remove(asin)
-                    if len(self.asin_list) == 0:
-                        log.error("No ASIN's left in list")
-                        exit(1)
+                    #log.error("{} blocked from bulk adding by Amazon".format(asin))
+                    #if len(self.asin_list) == 1:
+                    #    log.info("Only one ASIN remains, refreshing")
+                    #    return False
+                    #self.asin_list.remove(asin)
+                    #if len(self.asin_list) == 0:
+                    #    log.error("No ASIN's left in list")
+                    #    exit(1)
+                    continue
                 else:
-                    log.info("{} appears to allow bulk adding".format(asin))
-            return False
+                    log.info("{} appears to allow adding".format(asin))
+                    return True
         self.check_if_captcha(self.wait_for_pages, ADD_TO_CART_TITLES)
         price_element = self.driver.find_elements_by_xpath('//td[@class="price item-row"]')
         if price_element:
@@ -230,6 +237,7 @@ class Amazon:
                 return True
             else:
                 log.info("No stock available under reserve price")
+                log.info("{}".format(self.asin_list))
                 return False
 
             return False
