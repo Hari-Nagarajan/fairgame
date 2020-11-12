@@ -239,7 +239,10 @@ class Amazon:
             log.info(f'Item Cost: {str_price}')
             price = parse_price(str_price)
             priceFloat = price.amount
-            if priceFloat <= self.reserve:
+            if priceFloat is None:
+                log.info("No price information available.")
+                return False
+            elif priceFloat <= self.reserve:
                 log.info("One or more items in stock and under reserve!")
                 return True
             else:
