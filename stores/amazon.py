@@ -221,7 +221,7 @@ class Amazon:
                 self.driver.get(check.url)
                 sanity_check = self.driver.title
                 if sanity_check in DOGGO_TITLES:
-                    log.info("{} does not appear to work".format(asin))
+                    log.info("{} does not appear to work and may be blocked by Amazon".format(asin))
                     #log.error("{} blocked from bulk adding by Amazon".format(asin))
                     #if len(self.asin_list) == 1:
                     #    log.info("Only one ASIN remains, refreshing")
