@@ -211,7 +211,7 @@ class Amazon:
         title = self.driver.title
         #if len(self.asin_list) > 1 and title in DOGGO_TITLES:
         if title in DOGGO_TITLES:
-            flag_goodASIN = 0
+            good_asin_list = []
             for asin in self.asin_list:
                 checkparams = {}
                 checkparams[f"ASIN.1"] = asin
@@ -221,23 +221,17 @@ class Amazon:
                 self.driver.get(check.url)
                 sanity_check = self.driver.title
                 if sanity_check in DOGGO_TITLES:
-                    log.info("{} does not appear to work and may be blocked by Amazon".format(asin))
-                    #log.error("{} blocked from bulk adding by Amazon".format(asin))
-                    #if len(self.asin_list) == 1:
-                    #    log.info("Only one ASIN remains, refreshing")
-                    #    return False
-                    #self.asin_list.remove(asin)
-                    #if len(self.asin_list) == 0:
-                    #    log.error("No ASIN's left in list")
-                    #    exit(1)
+                    log.error(f"{asin} blocked from bulk adding by Amazon")
+                    time.sleep(1)
                 else:
-                    log.info("{} appears to allow adding".format(asin))
-                    flag_goodASIN = 1
-            if flag_goodASIN:
-                log.info("Include only the good ASINs listed above in your list.")
+                    log.info(f"{asin} appears to allow adding")
+                    good_asin_list.append(asin)
+            if len(good_asin_list)>0:
+                log.info("Revising ASIN list to include only good ASINs listed above")
+                self.asin_list = good_asin_list
             else:
-                log.info("The ASINs included in your list do not appear to work, if possible try using smile.amazon.com")
-            exit("Please address the above issues and restart the bot")
+                log.error("No ASINs work in list. Try using smile.amazon.com")
+                exit(1)
         self.check_if_captcha(self.wait_for_pages, ADD_TO_CART_TITLES)
         price_element = self.driver.find_elements_by_xpath('//td[@class="price item-row"]')
         if price_element:
