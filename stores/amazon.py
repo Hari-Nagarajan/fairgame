@@ -211,6 +211,7 @@ class Amazon:
         title = self.driver.title
         #if len(self.asin_list) > 1 and title in DOGGO_TITLES:
         if title in DOGGO_TITLES:
+            flag_goodASIN = 0
             for asin in self.asin_list:
                 checkparams = {}
                 checkparams[f"ASIN.1"] = asin
@@ -220,6 +221,7 @@ class Amazon:
                 self.driver.get(check.url)
                 sanity_check = self.driver.title
                 if sanity_check in DOGGO_TITLES:
+                    log.info("{} does not appear to work".format(asin))
                     #log.error("{} blocked from bulk adding by Amazon".format(asin))
                     #if len(self.asin_list) == 1:
                     #    log.info("Only one ASIN remains, refreshing")
@@ -228,10 +230,14 @@ class Amazon:
                     #if len(self.asin_list) == 0:
                     #    log.error("No ASIN's left in list")
                     #    exit(1)
-                    continue
                 else:
                     log.info("{} appears to allow adding".format(asin))
-                    return True
+                    flag_goodASIN = 1
+            if flag_goodASIN:
+                log.info("Include only the good ASINs listed above in your list.")
+            else:
+                log.info("The ASINs included in your list do not appear to work, if possible try using smile.amazon.com")
+            exit("Please address the above issues and restart the bot")
         self.check_if_captcha(self.wait_for_pages, ADD_TO_CART_TITLES)
         price_element = self.driver.find_elements_by_xpath('//td[@class="price item-row"]')
         if price_element:
@@ -239,7 +245,10 @@ class Amazon:
             log.info(f'Item Cost: {str_price}')
             price = parse_price(str_price)
             priceFloat = price.amount
-            if priceFloat <= self.reserve:
+            if priceFloat is None:
+                log.error("Error reading price information on page.")
+                return False
+            elif priceFloat <= self.reserve:
                 log.info("One or more items in stock and under reserve!")
                 return True
             else:
@@ -249,7 +258,7 @@ class Amazon:
             return False
         else:
             return False
-
+        
     def get_captcha_help(self):
         if not self.on_captcha_page():
             log.info("Not on captcha page.")
