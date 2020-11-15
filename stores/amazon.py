@@ -123,16 +123,8 @@ class Amazon:
                     log.info(f"number of ASIN groups {self.asin_groups}")
                     self.amazon_website = config.get("amazon_website", "smile.amazon.com")
                     for x in range(self.asin_groups):
-                        log.info(f"x is {x+1}")
-                        check_str = f"asin_list_{x+1}"
-                        log.info(check_str)
-                        self.asin_list.append(config[check_str])
-                        log.info(f"adding to asin list group {x+1}")
-                        #self.asin_list = config["asin_list"]
-                        check_str = f"reserve_{x+1}"
-                        log.info(check_str)
-                        self.reserve.append(float(config[check_str]))
-                        log.info(f"adding to reserve list group {x+1}")
+                        self.asin_list.append(config[f"asin_list_{x+1}"])
+                        self.reserve.append(float(config[f"reserve_{x+1}"]))
                     #assert isinstance(self.asin_list, list)
                 except Exception:
                     log.error(
