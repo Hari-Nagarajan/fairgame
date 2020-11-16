@@ -78,8 +78,8 @@ def amazon(no_image, headless, test):
         selenium_utils.yes_amazon_image()
 
     amzn_obj = Amazon(headless=headless, notification_handler=notification_handler)
-    amzn_obj.run_item_it(test=test)
-
+    amzn_obj.run_item_mass(test=test)
+#   amzn_obj.run_items_it(test=test)
 
 @click.command()
 @click.option("--sku", type=str, required=True)

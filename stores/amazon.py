@@ -194,14 +194,24 @@ class Amazon:
 
         log.info(f"Logged in as {self.username}")
 
-    # def run_item(self, delay=3, test=False):
-    #     log.info("Checking stock for items.")
-    #     while not self.something_in_stock():
-    #         time.sleep(delay)
-    #     self.notification_handler.send_notification(
-    #         "Your items on Amazon.com were found!", True
-    #     )
-    #     self.checkout(test=test)
+    def run_item_mass(self, delay=3, test=False):
+        log.info("Checking stock for items.")
+        checkout_success = False
+        while not checkout_success:
+            purchase_list = self.something_in_stock_mass()
+            while not purchase_list:
+                time.sleep(delay)
+                purchase_list = self.something_in_stock_mass()
+            self.notification_handler.send_notification(
+                f"An item in list {purchase_list} on Amazon.com was found!", True
+            )
+            checkout_success = self.checkout(test=test)
+            if checkout_success:
+                self.asin_list.pop(purchase_list-1)
+                if self.asin_list:
+                    checkout_success = False
+                    log.info("Additional ASIN list(s) remain, bot will continue")
+        log.info("No ASIN lists remain, closing bot")
 
     def run_item_it(self, delay=3, test=False):
         log.info("Checking stock for items.")
@@ -214,7 +224,7 @@ class Amazon:
             self.notification_handler.send_notification(
                 f'ASIN {purchase_asin} on Amazon was found!', True
             )
-            checkout_success = self.checkout_it(test=test)
+            checkout_success = self.checkout(test=test)
             if checkout_success:
                 for x in range(len(self.asin_list)):
                     if purchase_asin in self.asin_list[x]:
@@ -266,70 +276,74 @@ class Amazon:
         return 0
 
 
-    # def something_in_stock(self):
-    #     #params = {"anticache": str(secrets.token_urlsafe(32))}
-    #     params = {}
-    #     for x in range(len(self.asin_list)):
-    #         params[f"ASIN.{x + 1}"] = self.asin_list[x]
-    #         params[f"Quantity.{x + 1}"] = 1
-    #
-    #     f = furl(AMAZON_URLS["CART_URL"])
-    #     f.set(params)
-    #     self.driver.get(f.url)
-    #     title = self.driver.title
-    #     #if len(self.asin_list) > 1 and title in DOGGO_TITLES:
-    #     if title in DOGGO_TITLES:
-    #         good_asin_list = []
-    #         for asin in self.asin_list:
-    #             checkparams = {}
-    #             checkparams[f"ASIN.1"] = asin
-    #             checkparams[f"Quantity.1"] = 1
-    #             check = furl(AMAZON_URLS["CART_URL"])
-    #             check.set(checkparams)
-    #             self.driver.get(check.url)
-    #             sanity_check = self.driver.title
-    #             if sanity_check in DOGGO_TITLES:
-    #                 log.error(f"{asin} blocked from bulk adding by Amazon")
-    #                 time.sleep(1)
-    #             else:
-    #                 log.info(f"{asin} appears to allow adding")
-    #                 good_asin_list.append(asin)
-    #         if len(good_asin_list)>0:
-    #             log.info("Revising ASIN list to include only good ASINs listed above")
-    #             self.asin_list = good_asin_list
-    #         else:
-    #             log.error("No ASINs work in list. Try using smile.amazon.com")
-    #             exit(1)
-    #     self.check_if_captcha(self.wait_for_pages, ADD_TO_CART_TITLES)
-    #     price_element = self.driver.find_elements_by_xpath('//td[@class="price item-row"]')
-    #     if price_element:
-    #         price_flag = False
-    #         price_warning_flag = False
-    #         for price_e in price_element:
-    #             str_price = price_e.text
-    #             log.info(f'Item Cost: {str_price}')
-    #             price = parse_price(str_price)
-    #             priceFloat = price.amount
-    #             if priceFloat is None:
-    #                 log.error("Error reading price information on page.")
-    #             elif priceFloat <= self.reserve:
-    #                 log.info("Item in stock and under reserve!")
-    #                 price_flag = True
-    #             else:
-    #                 log.info("Item greater than reserve price")
-    #                 price_warning_flag = True
-    #                 #log.info("{}".format(self.asin_list))
-    #         if price_flag:
-    #             log.info("Attempting to purchase")
-    #             if price_warning_flag:
-    #                 log.info("Cart included items below and above reserve price, cancel unwanted items ASAP!")
-    #                 self.driver.save_screenshot("screenshot.png")
-    #                 self.notification_handler.send_notification("Cart included items below and above reserve price, cancel unwanted items ASAP!", True)
-    #             return True
-    #         else:
-    #             return False
-    #     else:
-    #         return False
+    def something_in_stock_mass(self):
+        for i in range(len(self.asin_list)):
+            #params = {"anticache": str(secrets.token_urlsafe(32))}
+            params = {}
+            for x in range(len(self.asin_list[i])):
+                params[f"ASIN.{x + 1}"] = self.asin_list[i][x]
+                params[f"Quantity.{x + 1}"] = 1
+            f = furl(AMAZON_URLS["CART_URL"])
+            f.set(params)
+            self.driver.get(f.url)
+            title = self.driver.title
+            #if len(self.asin_list) > 1 and title in DOGGO_TITLES:
+            bad_list_flag = False
+            if title in DOGGO_TITLES:
+                good_asin_list = []
+                for asin in self.asin_list[i]:
+                    checkparams = {}
+                    checkparams[f"ASIN.1"] = asin
+                    checkparams[f"Quantity.1"] = 1
+                    check = furl(AMAZON_URLS["CART_URL"])
+                    check.set(checkparams)
+                    self.driver.get(check.url)
+                    sanity_check = self.driver.title
+                    if sanity_check in DOGGO_TITLES:
+                        log.error(f"{asin} blocked from bulk adding by Amazon")
+                    else:
+                        log.info(f"{asin} appears to allow adding")
+                        good_asin_list.append(asin)
+                    time.sleep(1)
+                if len(good_asin_list)>0:
+                    log.info("Revising ASIN list to include only good ASINs listed above")
+                    self.asin_list[i] = good_asin_list
+                else:
+                    log.error(f"No ASINs work in list {i+1}.")
+                    self.asin_list[i] = self.asin_list[i][0] # just assign one asin to list, can't remove during execution
+                    bad_list_flag = True
+            if bad_list_flag:
+                continue
+            self.check_if_captcha(self.wait_for_pages, ADD_TO_CART_TITLES)
+            price_element = self.driver.find_elements_by_xpath('//td[@class="price item-row"]')
+            if price_element:
+                price_flag = False
+                price_warning_flag = False
+                for price_e in price_element:
+                    str_price = price_e.text
+                    log.info(f'Item Cost: {str_price}')
+                    price = parse_price(str_price)
+                    priceFloat = price.amount
+                    if priceFloat is None:
+                        log.error("Error reading price information on page.")
+                    elif priceFloat <= self.reserve[i]:
+                        log.info("Item in stock and under reserve!")
+                        price_flag = True
+                    else:
+                        log.info("Item greater than reserve price")
+                        price_warning_flag = True
+                        #log.info("{}".format(self.asin_list))
+                if price_flag:
+                    log.info("Attempting to purchase")
+                    if price_warning_flag:
+                        log.info("Cart included items below and above reserve price, cancel unwanted items ASAP!")
+                        self.driver.save_screenshot("screenshot.png")
+                        self.notification_handler.send_notification("Cart included items below and above reserve price, cancel unwanted items ASAP!", True)
+                    return i+1
+        return 0
+
+
+
         
     def get_captcha_help(self):
         if not self.on_captcha_page():
@@ -459,58 +473,6 @@ class Amazon:
             )
 
     def checkout(self, test):
-        log.info("Clicking continue.")
-        self.driver.save_screenshot("screenshot.png")
-        self.notification_handler.send_notification("Starting Checkout", True)
-        self.driver.find_element_by_xpath('//input[@value="add"]').click()
-
-        log.info("Waiting for Cart Page")
-        self.check_if_captcha(self.wait_for_pages, SHOPING_CART_TITLES)
-        self.driver.save_screenshot("screenshot.png")
-        self.notification_handler.send_notification("Cart Page", True)
-
-        try:  # This is fast.
-            log.info("Quick redirect to checkout page")
-            cart_initiate_id = self.driver.find_element_by_name("cartInitiateId")
-            cart_initiate_id = cart_initiate_id.get_attribute("value")
-            self.driver.get(
-                CHECKOUT_URL.format(
-                    domain=self.amazon_website, cart_id=cart_initiate_id
-                )
-            )
-        except:
-            log.info("clicking checkout.")
-            try:
-                self.driver.find_element_by_xpath(
-                    '//*[@id="sc-buy-box-ptc-button"]/span/input'
-                ).click()
-            finally:
-                self.driver.save_screenshot("screenshot.png")
-                self.notification_handler.send_notification(
-                    "Failed to checkout. Returning to stock check.", True
-                )
-                log.info("Failed to checkout. Returning to stock check.")
-                self.run_item(test=test)
-
-        log.info("Waiting for Place Your Order Page")
-        self.wait_for_pyo_page()
-
-        log.info("Finishing checkout")
-        self.driver.save_screenshot("screenshot.png")
-        self.notification_handler.send_notification("Finishing checkout", True)
-
-        self.finalize_order_button(test)
-
-        log.info("Waiting for Order completed page.")
-        self.wait_for_order_completed(test)
-
-        log.info("Order Placed.")
-        self.driver.save_screenshot("screenshot.png")
-        self.notification_handler.send_notification("Order Placed", True)
-
-        time.sleep(20)
-
-    def checkout_it(self, test):
         log.info("Clicking continue.")
         self.driver.save_screenshot("screenshot.png")
         self.notification_handler.send_notification("Starting Checkout", True)
