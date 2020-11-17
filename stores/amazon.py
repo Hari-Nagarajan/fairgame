@@ -225,7 +225,7 @@ class Amazon:
                             break
             if self.asin_list:  # keep bot going if additional ASINs left
                 checkout_success = False
-                log.info("Additional lists remaining, bot will continue")
+                #log.info("Additional lists remaining, bot will continue")
 
     def check_stock(self, asin, reserve):
         f = furl(AMAZON_URLS["OFFER_URL"] + asin)
