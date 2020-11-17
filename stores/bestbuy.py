@@ -154,6 +154,7 @@ class BestBuyHandler:
             self.notification_handler.send_notification(
                 f"SKU: {self.sku_id} in stock: {cart_url}"
             )
+            sleep(5)
 
     def in_stock(self):
         log.info("Checking stock")
