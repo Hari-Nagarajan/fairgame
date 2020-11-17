@@ -78,8 +78,8 @@ def amazon(no_image, headless, test):
         selenium_utils.yes_amazon_image()
 
     amzn_obj = Amazon(headless=headless, notification_handler=notification_handler)
-#    amzn_obj.run_item_mass(test=test)  # mass add each ASIN group
-   amzn_obj.run_items_it(test=test)     # iterate over ASINs
+    amzn_obj.run_item(test=test)
+
 
 @click.command()
 @click.option("--sku", type=str, required=True)
