@@ -465,6 +465,7 @@ class Amazon:
 
     def finalize_order_button(self, test, retry=0):
         button_xpaths = [
+            '//*[@id="orderSummaryPrimaryActionBtn"]',
             '//*[@id="bottomSubmitOrderButtonId"]/span/input',
             '//*[@id="placeYourOrder"]/span/input',
             '//*[@id="submitOrderButtonId"]/span/input',
