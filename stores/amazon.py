@@ -221,6 +221,7 @@ class Amazon:
                     for i in range(len(self.asin_list)):
                         if asin in self.asin_list[i]:
                             self.asin_list.pop(i)
+                            self.reserve.pop(i)
                             break
             if self.asin_list:  # keep bot going if additional ASINs left
                 checkout_success = False
@@ -527,9 +528,9 @@ class Amazon:
             log.info("clicking checkout.")
             try:
                 self.driver.find_element_by_xpath(
-                    '//*[@id="sc-buy-box-ptc-button"]/span/input'
+                    '//*[@id="hlb-ptc-btn-native"]'
                 ).click()
-            finally:
+            except:
                 self.driver.save_screenshot("screenshot.png")
                 self.notification_handler.send_notification(
                     "Failed to checkout. Returning to stock check.", True
