@@ -26,6 +26,13 @@ CHECKOUT_URL = "https://{domain}/gp/cart/desktop/go-to-checkout.html/ref=ox_sc_p
 
 AUTOBUY_CONFIG_PATH = "amazon_config.json"
 
+SIGN_IN_TEXT = [
+    "Hello, Sign in",
+    "Hola, Identifícate",
+    "Bonjour, Identifiez-vous",
+    "Ciao, Accedi",
+    "Hallo, Anmelden"
+]
 SIGN_IN_TITLES = [
     "Amazon Sign In",
     "Amazon Sign-In",
@@ -162,7 +169,11 @@ class Amazon:
     def is_logged_in(self):
         try:
             text = wait_for_element(self.driver, "nav-link-accountList").text
-            return "Hello, Sign in" not in text
+            for sign_in in SIGN_IN_TEXT:
+                if sign_in in text:
+                    return False
+
+            return True
         except Exception:
             return False
 
