@@ -8,7 +8,7 @@ from amazoncaptcha import AmazonCaptcha
 from chromedriver_py import binary_path  # this will get you the path variable
 from furl import furl
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, SessionNotCreatedException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 
@@ -108,9 +108,11 @@ class Amazon:
         try:
             self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
             self.wait = WebDriverWait(self.driver, 10)
-        except Exception:
-            log.error("Another instance of chrome is running, close that and try again.")
+        except SessionNotCreatedException as e:
+            log.error(e)
             exit(1)
+        except Exception as e:
+            log.error(e)
         if path.exists(AUTOBUY_CONFIG_PATH):
             with open(AUTOBUY_CONFIG_PATH) as json_file:
                 try:
@@ -125,6 +127,7 @@ class Amazon:
                     log.error(
                         "amazon_config.json file not formatted properly: https://github.com/Hari-Nagarajan/nvidia-bot/wiki/Usage#json-configuration"
                     )
+                    exit(0)
         else:
             log.error(
                 "No config file found, see here on how to fix this: https://github.com/Hari-Nagarajan/nvidia-bot/wiki/Usage#json-configuration"
