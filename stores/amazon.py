@@ -110,10 +110,8 @@ class Amazon:
         try:
             self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
             self.wait = WebDriverWait(self.driver, 10)
-        except Exception:
-            log.error(
-                "Another instance of chrome is running, close that and try again."
-            )
+        except Exception as e:
+            log.error(e)
             exit(1)
         if path.exists(AUTOBUY_CONFIG_PATH):
             with open(AUTOBUY_CONFIG_PATH) as json_file:
