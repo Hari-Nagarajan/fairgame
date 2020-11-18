@@ -158,6 +158,7 @@ class Amazon:
             log.info("Wait for Sign In page")
             self.check_if_captcha(self.wait_for_pages, SIGN_IN_TITLES)
             self.login()
+            self.notification_handler.send_notification("Logged in and running", False)
             log.info("Waiting 15 seconds.")
             time.sleep(
                 15
