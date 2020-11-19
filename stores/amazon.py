@@ -1,23 +1,20 @@
 import json
-import secrets
+import os
 import time
 from os import path
-import os
-from price_parser import parse_price
 
 from amazoncaptcha import AmazonCaptcha
 from chromedriver_py import binary_path  # this will get you the path variable
 from furl import furl
+from price_parser import parse_price
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 
 from utils import selenium_utils
-from utils.json_utils import InvalidAutoBuyConfigException
 from utils.logger import log
 from utils.selenium_utils import options, enable_headless, wait_for_element
-from price_parser import parse_price
 
 AMAZON_URLS = {
     "BASE_URL": "https://{domain}/",
