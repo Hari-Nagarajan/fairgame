@@ -1,6 +1,7 @@
 import json
 import secrets
 import time
+import hashlib
 from os import path
 from price_parser import parse_price
 
@@ -104,7 +105,10 @@ class Amazon:
         self.notification_handler = notification_handler
         if headless:
             enable_headless()
-        options.add_argument(f"user-data-dir=.profile-amz")
+        md5 = hashlib.md5()
+        md5.update(config_file.encode('utf-8'))
+        digest = md5.hexdigest()
+        options.add_argument(f"user-data-dir=.profile-amz-{digest}")
         try:
             self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
             self.wait = WebDriverWait(self.driver, 10)
