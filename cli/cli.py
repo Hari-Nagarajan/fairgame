@@ -6,7 +6,7 @@ import click
 
 from cli.utils import QuestionaryOption
 from notifications.notifications import NotificationHandler, TIME_FORMAT
-from stores.amazon import Amazon
+from stores.amazon import Amazon, DEFAULT_AUTOBUY_CONFIG_PATH as DEFAULT_AMAZON_CONFIG_PATH
 from stores.bestbuy import BestBuyHandler
 from stores.nvidia import NvidiaBuyer, GPU_DISPLAY_NAMES, CURRENCY_LOCALE_MAP
 from utils import selenium_utils
@@ -70,14 +70,15 @@ def nvidia(gpu, locale, test, interval):
 @click.option("--no-image", is_flag=True)
 @click.option("--headless", is_flag=True)
 @click.option("--test", is_flag=True)
+@click.option("--config-file", default=DEFAULT_AMAZON_CONFIG_PATH, type=str, show_default=True)
 @notify_on_crash
-def amazon(no_image, headless, test):
+def amazon(no_image, headless, test, config_file):
     if no_image:
         selenium_utils.no_amazon_image()
     else:
         selenium_utils.yes_amazon_image()
 
-    amzn_obj = Amazon(headless=headless, notification_handler=notification_handler)
+    amzn_obj = Amazon(headless=headless, notification_handler=notification_handler, config_file=config_file)
     amzn_obj.run_item(test=test)
 
 

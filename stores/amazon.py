@@ -24,7 +24,7 @@ AMAZON_URLS = {
 }
 CHECKOUT_URL = "https://{domain}/gp/cart/desktop/go-to-checkout.html/ref=ox_sc_proceed?partialCheckoutCart=1&isToBeGiftWrappedBefore=0&proceedToRetailCheckout=Proceed+to+checkout&proceedToCheckout=1&cartInitiateId={cart_id}"
 
-AUTOBUY_CONFIG_PATH = "amazon_config.json"
+DEFAULT_AUTOBUY_CONFIG_PATH = "amazon_config.json"
 
 SIGN_IN_TITLES = [
     "Amazon Sign In",
@@ -100,7 +100,7 @@ DOGGO_TITLES = [
 ]
 
 class Amazon:
-    def __init__(self, notification_handler, headless=False):
+    def __init__(self, notification_handler, headless=False, config_file=DEFAULT_AUTOBUY_CONFIG_PATH):
         self.notification_handler = notification_handler
         if headless:
             enable_headless()
@@ -113,8 +113,8 @@ class Amazon:
             exit(1)
         except Exception as e:
             log.error(e)
-        if path.exists(AUTOBUY_CONFIG_PATH):
-            with open(AUTOBUY_CONFIG_PATH) as json_file:
+        if path.exists(config_file):
+            with open(config_file) as json_file:
                 try:
                     config = json.load(json_file)
                     self.username = config["username"]
