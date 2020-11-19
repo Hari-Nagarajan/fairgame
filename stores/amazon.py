@@ -2,6 +2,7 @@ import json
 import secrets
 import time
 from os import path
+import os
 from price_parser import parse_price
 
 from amazoncaptcha import AmazonCaptcha
@@ -368,7 +369,7 @@ class Amazon:
                         log.info(
                             "Cart included items below and above reserve price, cancel unwanted items ASAP!"
                         )
-                        self.driver.save_screenshot("screenshot.png")
+                        self.save_screenshot()
                         self.notification_handler.send_notification(
                             "Cart included items below and above reserve price, cancel unwanted items ASAP!",
                             True,
@@ -393,7 +394,7 @@ class Amazon:
                 time.sleep(5)
                 self.get_captcha_help()
             else:
-                self.driver.save_screenshot("screenshot.png")
+                self.save_screenshot()
                 self.driver.find_element_by_xpath(
                     '//*[@id="captchacharacters"]'
                 ).send_keys(solution + Keys.RETURN)
@@ -433,7 +434,7 @@ class Amazon:
                     f"selenium browser is on. There may be a file saved at: amazon-{func.__name__}.png"
                 )
                 self.driver.save_screenshot(f"amazon-{func.__name__}.png")
-                self.driver.save_screenshot("screenshot.png")
+                self.save_screenshot()
                 self.notification_handler.send_notification(
                     f"Error on {self.driver.title}", True
                 )
@@ -512,7 +513,7 @@ class Amazon:
 
         log.info("Waiting for Cart Page")
         self.check_if_captcha(self.wait_for_pages, SHOPING_CART_TITLES)
-        self.driver.save_screenshot("screenshot.png")
+        self.save_screenshot()
         self.notification_handler.send_notification("Cart Page", True)
 
         try:  # This is fast.
@@ -531,7 +532,7 @@ class Amazon:
                     '//*[@id="hlb-ptc-btn-native"]'
                 ).click()
             except:
-                self.driver.save_screenshot("screenshot.png")
+                self.save_screenshot()
                 self.notification_handler.send_notification(
                     "Failed to checkout. Returning to stock check.", True
                 )
@@ -542,7 +543,7 @@ class Amazon:
         self.wait_for_pyo_page()
 
         log.info("Finishing checkout")
-        self.driver.save_screenshot("screenshot.png")
+        self.save_screenshot()
         self.notification_handler.send_notification("Finishing checkout", True)
 
         self.finalize_order_button(test)
@@ -551,6 +552,10 @@ class Amazon:
         self.wait_for_order_completed(test)
 
         log.info("Order Placed.")
-        self.driver.save_screenshot("screenshot.png")
+        self.save_screenshot()
         self.notification_handler.send_notification("Order Placed", True)
         return True
+
+    def save_screenshot(self):
+        self.driver.save_screenshot(f"screenshot-{os.getpid()}-{time.time()}.png")
+
