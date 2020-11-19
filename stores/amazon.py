@@ -102,15 +102,7 @@ class Amazon:
         self.notification_handler = notification_handler
         self.asin_list = []
         self.reserve = []
-        if headless:
-            enable_headless()
-        options.add_argument(f"user-data-dir=.profile-amz")
-        try:
-            self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
-            self.wait = WebDriverWait(self.driver, 10)
-        except Exception as e:
-            log.error(e)
-            exit(1)
+
         if path.exists(AUTOBUY_CONFIG_PATH):
             with open(AUTOBUY_CONFIG_PATH) as json_file:
                 try:
@@ -134,6 +126,16 @@ class Amazon:
                 "No config file found, see here on how to fix this: https://github.com/Hari-Nagarajan/nvidia-bot/wiki/Usage#json-configuration"
             )
             exit(0)
+
+        if headless:
+            enable_headless()
+        options.add_argument(f"user-data-dir=.profile-amz")
+        try:
+            self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
+            self.wait = WebDriverWait(self.driver, 10)
+        except Exception as e:
+            log.error(e)
+            exit(1)
 
         for key in AMAZON_URLS.keys():
             AMAZON_URLS[key] = AMAZON_URLS[key].format(domain=self.amazon_website)
