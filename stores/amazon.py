@@ -34,7 +34,6 @@ SIGN_IN_TITLES = [
     "Iniciar sesión en Amazon",
     "Connexion Amazon",
     "Amazon Accedi",
-    "Amazonサインイン",
 ]
 CAPTCHA_PAGE_TITLES = ["Robot Check"]
 HOME_PAGE_TITLES = [
@@ -48,7 +47,6 @@ HOME_PAGE_TITLES = [
     "Amazon.de: Günstige Preise für Elektronik & Foto, Filme, Musik, Bücher, Games, Spielzeug & mehr",
     "Amazon.fr : livres, DVD, jeux vidéo, musique, high-tech, informatique, jouets, vêtements, chaussures, sport, bricolage, maison, beauté, puériculture, épicerie et plus encore !",
     "Amazon.it: elettronica, libri, musica, fashion, videogiochi, DVD e tanto altro",
-    "Amazon | 本, ファッション, 家電から食品まで | アマゾン",
 ]
 SHOPING_CART_TITLES = [
     "Amazon.com Shopping Cart",
