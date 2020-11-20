@@ -1,7 +1,10 @@
 {
   "username": "",
   "password": "",
-  "asin_list": ["B07JH53M4T","B08HR7SV3M"],
-  "amazon_website": "www.amazon.co.uk",
-  "reserve": 1000
+  "asin_groups": 2,
+  "asin_list_1": ["B07JH53M4T"],
+  "reserve_1": 15,
+  "asin_list_2": ["B08HR7SV3M"],
+  "reserve_2": 20,
+  "amazon_website": "smile.amazon.com"
 }

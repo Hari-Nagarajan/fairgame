@@ -22,10 +22,6 @@ This project uses [Pipenv](https://pypi.org/project/pipenv/) to manage dependenc
 
 To get started you'll first need to clone this repository. If you are unfamiliar with Git, follow the [guide on how to do that on our Wiki](https://github.com/Hari-Nagarajan/nvidia-bot/wiki/How-to-use-GitHub-Desktop-App). You *can* use the "Download Zip" button on the GitHub repository's homepage but this makes receieving updates more difficult. If you can get setup with the GitHub Desktop app, updating to the latest version of the bot takes 1 click.
 
-[TerryFrench](https://github.com/TerryFrench) has also created a youtube video detailing how to get this project running on Windows 10 as well. Huge thanks to him. 
-
-[![Alt text](https://img.youtube.com/vi/TvOQubunx6o/0.jpg)](https://www.youtube.com/watch?v=TvOQubunx6o)
-
 !!! YOU WILL NEED TO USE THE 3.8 BRANCH OF PYTHON, 3.9.0 BREAKS DEPENDENCIES !!!
 ```
 pip install pipenv
@@ -60,26 +56,35 @@ Commands:
 
 ### Amazon 
 
-***Warning***: This will buy every ASIN that is in stock the first time anything is in stock. So there is a possibility you can end up with multiple items.
-Thankfully Amazon.com has 1 click order canceling so its not a huge issue. We are working on a solution for this and price limits soon.
-
 **Amazon flags**
 ```
 --no-image : prevents images from loading on amazon webdriver
 --test : This will not finish the checkout
 ```
 
-Make a copy of `amazon_config.template_json` to `amazon_config.json`:
+Make a copy of `amazon_config.template_json` and rename to `amazon_config.json`:
 ```json
 {
   "username": "",
   "password": "",
-  "asin_list": ["B07JH53M4T","B08HR7SV3M"],
-  "amazon_website": "www.amazon.com",
-  "reserve": 1000
+  "asin_groups": 2,
+  "asin_list_1": ["B07JH53M4T","B08HR7SV3M"],
+  "reserve_1": 1000,
+  "asin_list_2": ["B07JH53M4T","B08HR7SV3M"],
+  "reserve_2": 750,
+  "amazon_website": "smile.amazon.com"
 }
 ```
-* `reserve` is the most amount you want to spend, ensures you don't buy scalper stuff
+* `username` is your Amazon account email address
+* `password` is your Amazon account password
+* `asin_groups` indicates the number of ASIN groups you want to use.
+* `asin_list_x` list of ASINs for products you want to purchase. You must locate these (see Discord or lookup the ASIN on product pages). 
+    * The first time an item from list "x" is in stock and under its associated reserve, it will purchase it. 
+    * If the purchase is successful, the bot will not buy anything else from list "x".
+* `reserve_x` is the most amount you want to spend for ASINs in `asin_list_x`, ensures you don't buy scalper stuff.
+* `amazon_website` amazon domain you want to use. smile subdomain appears to work better, if available in your country.
+
+At run time, the bot will automatically prune ASINs that cause errors.
 
 Example usage:
 
