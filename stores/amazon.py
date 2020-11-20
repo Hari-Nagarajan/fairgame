@@ -1,5 +1,4 @@
 import json
-import os
 import time
 from os import path
 
@@ -556,5 +555,5 @@ class Amazon:
         return True
 
     def save_screenshot(self):
-        self.driver.save_screenshot(f"screenshot-{os.getpid()}-{time.time()}.png")
+        self.driver.save_screenshot(f"screenshot.png")
 
