@@ -215,7 +215,7 @@ class Amazon:
                         else:
                             log.info(f"checkout for {asin} failed")
                             checkout_success = False
-                    time.sleep(1)
+                    time.sleep(delay)
             if pop_list:
                 for asin in pop_list:
                     for i in range(len(self.asin_list)):
@@ -547,7 +547,8 @@ class Amazon:
         self.driver.save_screenshot("screenshot.png")
         self.notification_handler.send_notification("Finishing checkout", True)
 
-        self.finalize_order_button(test)
+        if not self.finalize_order_button(test):
+            return False
 
         log.info("Waiting for Order completed page.")
         self.wait_for_order_completed(test)
