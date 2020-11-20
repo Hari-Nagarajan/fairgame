@@ -464,6 +464,7 @@ class Amazon:
             self.login()
 
     def finalize_order_button(self, test, retry=0):
+        returnVal = False
         button_xpaths = [
             '//*[@id="orderSummaryPrimaryActionBtn"]',
             '//*[@id="bottomSubmitOrderButtonId"]/span/input',
@@ -481,23 +482,22 @@ class Amazon:
                     button = self.driver.find_element_by_xpath(button_xpath)
             except NoSuchElementException:
                 log.debug(f"{button_xpath}, lets try a different one.")
-                return False
-
+                
         if button:
             log.info(f"Clicking Button: {button.text}")
             if not test:
                 button.click()
-            return
+            return True
         else:
             if retry < 3:
                 log.info("Couldn't find button. Lets retry in a sec.")
                 time.sleep(5)
-                self.finalize_order_button(test, retry + 1)
+                returnVal = self.finalize_order_button(test, retry + 1)
             else:
                 log.info(
                     "Couldn't find button after 3 retries. Open a GH issue for this."
                 )
-                return False
+        return returnVal
 
     def wait_for_order_completed(self, test):
         if not test:
