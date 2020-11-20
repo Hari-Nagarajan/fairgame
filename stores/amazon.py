@@ -228,7 +228,7 @@ class Amazon:
                 #log.info("Additional lists remaining, bot will continue")
 
     def check_stock(self, asin, reserve):
-        f = furl(AMAZON_URLS["OFFER_URL"] + asin)
+        f = furl(AMAZON_URLS["OFFER_URL"] + asin + "/ref=olp_f_new?f_new=true")
         try:
             self.driver.get(f.url)
             elements = self.driver.find_elements_by_xpath(
@@ -464,6 +464,7 @@ class Amazon:
             self.login()
 
     def finalize_order_button(self, test, retry=0):
+        returnVal = False
         button_xpaths = [
             '//*[@id="orderSummaryPrimaryActionBtn"]',
             '//*[@id="bottomSubmitOrderButtonId"]/span/input',
@@ -481,21 +482,21 @@ class Amazon:
                     button = self.driver.find_element_by_xpath(button_xpath)
             except NoSuchElementException:
                 log.debug(f"{button_xpath}, lets try a different one.")
-
         if button:
             log.info(f"Clicking Button: {button.text}")
             if not test:
                 button.click()
-            return
+            return True
         else:
             if retry < 3:
                 log.info("Couldn't find button. Lets retry in a sec.")
                 time.sleep(5)
-                self.finalize_order_button(test, retry + 1)
+                returnVal = self.finalize_order_button(test, retry + 1)
             else:
                 log.info(
                     "Couldn't find button after 3 retries. Open a GH issue for this."
                 )
+        return returnVal
 
     def wait_for_order_completed(self, test):
         if not test:
