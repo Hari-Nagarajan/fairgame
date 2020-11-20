@@ -215,7 +215,7 @@ class Amazon:
                         else:
                             log.info(f"checkout for {asin} failed")
                             checkout_success = False
-                    time.sleep(1)
+                    time.sleep(delay)
             if pop_list:
                 for asin in pop_list:
                     for i in range(len(self.asin_list)):
@@ -228,7 +228,7 @@ class Amazon:
                 #log.info("Additional lists remaining, bot will continue")
 
     def check_stock(self, asin, reserve):
-        f = furl(AMAZON_URLS["OFFER_URL"] + asin)
+        f = furl(AMAZON_URLS["OFFER_URL"] + asin+"/ref=olp_f_new?f_new=true")
         try:
             self.driver.get(f.url)
             elements = self.driver.find_elements_by_xpath(
@@ -481,6 +481,7 @@ class Amazon:
                     button = self.driver.find_element_by_xpath(button_xpath)
             except NoSuchElementException:
                 log.debug(f"{button_xpath}, lets try a different one.")
+                return False
 
         if button:
             log.info(f"Clicking Button: {button.text}")
@@ -496,6 +497,7 @@ class Amazon:
                 log.info(
                     "Couldn't find button after 3 retries. Open a GH issue for this."
                 )
+                return False
 
     def wait_for_order_completed(self, test):
         if not test:
@@ -546,7 +548,8 @@ class Amazon:
         self.driver.save_screenshot("screenshot.png")
         self.notification_handler.send_notification("Finishing checkout", True)
 
-        self.finalize_order_button(test)
+        if not self.finalize_order_button(test):
+            return False
 
         log.info("Waiting for Order completed page.")
         self.wait_for_order_completed(test)
