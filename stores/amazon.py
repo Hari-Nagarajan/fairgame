@@ -481,6 +481,7 @@ class Amazon:
                     button = self.driver.find_element_by_xpath(button_xpath)
             except NoSuchElementException:
                 log.debug(f"{button_xpath}, lets try a different one.")
+                return False
 
         if button:
             log.info(f"Clicking Button: {button.text}")
@@ -496,6 +497,7 @@ class Amazon:
                 log.info(
                     "Couldn't find button after 3 retries. Open a GH issue for this."
                 )
+                return False
 
     def wait_for_order_completed(self, test):
         if not test:
@@ -546,7 +548,8 @@ class Amazon:
         self.driver.save_screenshot("screenshot.png")
         self.notification_handler.send_notification("Finishing checkout", True)
 
-        self.finalize_order_button(test)
+        if not self.finalize_order_button(test)
+            return False
 
         log.info("Waiting for Order completed page.")
         self.wait_for_order_completed(test)
