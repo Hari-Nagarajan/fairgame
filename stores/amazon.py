@@ -228,7 +228,7 @@ class Amazon:
                 #log.info("Additional lists remaining, bot will continue")
 
     def check_stock(self, asin, reserve):
-        f = furl(AMAZON_URLS["OFFER_URL"] + asin)
+        f = furl(AMAZON_URLS["OFFER_URL"] + asin + "/ref=olp_f_new?f_new=true")
         try:
             self.driver.get(f.url)
             elements = self.driver.find_elements_by_xpath(
