@@ -56,26 +56,35 @@ Commands:
 
 ### Amazon 
 
-***Warning***: This will buy every ASIN that is in stock the first time anything is in stock. So there is a possibility you can end up with multiple items.
-Thankfully Amazon.com has 1 click order canceling so its not a huge issue. We are working on a solution for this and price limits soon.
-
 **Amazon flags**
 ```
 --no-image : prevents images from loading on amazon webdriver
 --test : This will not finish the checkout
 ```
 
-Make a copy of `amazon_config.template_json` to `amazon_config.json`:
+Make a copy of `amazon_config.template_json` and rename to `amazon_config.json`:
 ```json
 {
   "username": "",
   "password": "",
-  "asin_list": ["B07JH53M4T","B08HR7SV3M"],
-  "amazon_website": "smile.amazon.com",
-  "reserve": 1000
+  "asin_groups": 2,
+  "asin_list_1": ["B07JH53M4T","B08HR7SV3M"],
+  "reserve_1": 1000,
+  "asin_list_2": ["B07JH53M4T","B08HR7SV3M"],
+  "reserve_2": 750,
+  "amazon_website": "smile.amazon.com"
 }
 ```
-* `reserve` is the most amount you want to spend, ensures you don't buy scalper stuff
+* `username` is your Amazon account email address
+* `password` is your Amazon account password
+* `asin_groups` indicates the number of ASIN groups you want to use.
+* `asin_list_x` list of ASINs for products you want to purchase. You must locate these (see Discord or lookup the ASIN on product pages). 
+    * The first time an item from list "x" is in stock and under its associated reserve, it will purchase it. 
+    * If the purchase is successful, the bot will not buy anything else from list "x".
+* `reserve_x` is the most amount you want to spend for ASINs in `asin_list_x`, ensures you don't buy scalper stuff.
+* `amazon_website` amazon domain you want to use. smile subdomain appears to work better, if available in your country.
+
+At run time, the bot will automatically prune ASINs that cause errors.
 
 Example usage:
 

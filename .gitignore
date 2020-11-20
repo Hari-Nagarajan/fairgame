@@ -13,3 +13,4 @@ __pycache__/
 .vscode/
 /config/apprise_config.json
 /config/apprise_config.json
+*.png
