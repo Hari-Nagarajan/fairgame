@@ -215,7 +215,7 @@ class Amazon:
                         else:
                             log.info(f"checkout for {asin} failed")
                             checkout_success = False
-                    time.sleep(1)
+                    time.sleep(delay)
             if pop_list:
                 for asin in pop_list:
                     for i in range(len(self.asin_list)):
@@ -228,7 +228,7 @@ class Amazon:
                 #log.info("Additional lists remaining, bot will continue")
 
     def check_stock(self, asin, reserve):
-        f = furl(AMAZON_URLS["OFFER_URL"] + asin)
+        f = furl(AMAZON_URLS["OFFER_URL"] + asin+"/ref=olp_f_new?f_new=true")
         try:
             self.driver.get(f.url)
             elements = self.driver.find_elements_by_xpath(
@@ -548,7 +548,7 @@ class Amazon:
         self.driver.save_screenshot("screenshot.png")
         self.notification_handler.send_notification("Finishing checkout", True)
 
-        if not self.finalize_order_button(test)
+        if not self.finalize_order_button(test):
             return False
 
         log.info("Waiting for Order completed page.")
