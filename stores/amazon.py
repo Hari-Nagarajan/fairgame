@@ -548,6 +548,7 @@ class Amazon:
         self.notification_handler.send_notification("Finishing checkout", True)
 
         if not self.finalize_order_button(test):
+            log.info("Failed to finalize the order, trying again.")
             return False
 
         log.info("Waiting for Order completed page.")
