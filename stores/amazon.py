@@ -496,6 +496,7 @@ class Amazon:
                 log.info(
                     "Couldn't find button after 3 retries. Open a GH issue for this."
                 )
+        return returnVal
 
     def wait_for_order_completed(self, test):
         if not test:
