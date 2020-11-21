@@ -8,7 +8,6 @@ from notifications.notifications import NotificationHandler, TIME_FORMAT
 from stores.amazon import Amazon
 from stores.bestbuy import BestBuyHandler
 from stores.nvidia import NvidiaBuyer, GPU_DISPLAY_NAMES, CURRENCY_LOCALE_MAP
-from selenium import webdriver
 from utils import selenium_utils
 from utils.logger import log
 
