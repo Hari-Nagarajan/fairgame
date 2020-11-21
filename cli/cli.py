@@ -78,7 +78,9 @@ def amazon(no_image, headless, test, debug):
     else:
         selenium_utils.yes_amazon_image()
 
-    amzn_obj = Amazon(headless=headless, notification_handler=notification_handler, debug=debug)
+    amzn_obj = Amazon(
+        headless=headless, notification_handler=notification_handler, debug=debug
+    )
     amzn_obj.run_item(test=test)
 
 

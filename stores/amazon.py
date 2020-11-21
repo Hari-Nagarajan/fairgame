@@ -496,7 +496,7 @@ class Amazon:
         else:
             if retry < 3:
                 log.info("Couldn't find button. Lets retry in a sec.")
-
+                self.driver.get(self.driver.current_url)
                 time.sleep(5)
                 returnVal = self.finalize_order_button(test, retry + 1)
             else:
