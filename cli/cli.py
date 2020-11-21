@@ -13,6 +13,7 @@ from utils.logger import log
 
 notification_handler = NotificationHandler()
 
+
 def notify_on_crash(func):
     @wraps(func)
     def decorator(*args, **kwargs):
