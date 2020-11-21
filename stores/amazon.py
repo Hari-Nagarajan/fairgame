@@ -8,7 +8,10 @@ from amazoncaptcha import AmazonCaptcha
 from chromedriver_py import binary_path  # this will get you the path variable
 from furl import furl
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException, SessionNotCreatedException
+from selenium.common.exceptions import (
+    NoSuchElementException,
+    SessionNotCreatedException,
+)
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 
@@ -100,10 +103,11 @@ DOGGO_TITLES = ["Sorry! Something went wrong!"]
 
 
 class Amazon:
-    def __init__(self, notification_handler, headless=False):
+    def __init__(self, notification_handler, headless=False, debug=False):
         self.notification_handler = notification_handler
         self.asin_list = []
         self.reserve = []
+        self.debug = debug
         if headless:
             enable_headless()
         options.add_argument(f"user-data-dir=.profile-amz")
@@ -225,7 +229,7 @@ class Amazon:
                             break
             if self.asin_list:  # keep bot going if additional ASINs left
                 checkout_success = False
-                #log.info("Additional lists remaining, bot will continue")
+                # log.info("Additional lists remaining, bot will continue")
 
     def check_stock(self, asin, reserve):
         f = furl(AMAZON_URLS["OFFER_URL"] + asin + "/ref=olp_f_new?f_new=true")
@@ -449,7 +453,7 @@ class Amazon:
             title = selenium_utils.wait_for_any_title(self.driver, page_titles, t)
             if not title in page_titles:
                 log.error(
-                    "{} is not a recognized title, report to #tech-support or open an issue on github".format()
+                    "{} is not a recognized title, report to #tech-support or open an issue on github"
                 )
             pass
         except Exception as e:
@@ -474,6 +478,8 @@ class Amazon:
         ]
         button = None
         for button_xpath in button_xpaths:
+            if self.debug and retry < 3:
+                break
             try:
                 if (
                     self.driver.find_element_by_xpath(button_xpath).is_displayed()
@@ -490,6 +496,7 @@ class Amazon:
         else:
             if retry < 3:
                 log.info("Couldn't find button. Lets retry in a sec.")
+
                 time.sleep(5)
                 returnVal = self.finalize_order_button(test, retry + 1)
             else:
