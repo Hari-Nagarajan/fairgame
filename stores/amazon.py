@@ -164,7 +164,6 @@ class Amazon:
             log.info("Wait for Sign In page")
             self.check_if_captcha(self.wait_for_pages, SIGN_IN_TITLES)
             self.login()
-            self.notification_handler.send_notification("Logged in and running", False)
             log.info("Waiting 15 seconds.")
             time.sleep(
                 15
@@ -230,7 +229,6 @@ class Amazon:
                             break
             if self.asin_list:  # keep bot going if additional ASINs left
                 checkout_success = False
-                # log.info("Additional lists remaining, bot will continue")
 
     def check_stock(self, asin, reserve):
         f = furl(AMAZON_URLS["OFFER_URL"] + asin + "/ref=olp_f_new?f_new=true")
@@ -266,7 +264,6 @@ class Amazon:
         for x in range(len(self.asin_list)):
             bad_asin_list = []
             for asin in self.asin_list[x]:
-                # params = {"anticache": str(secrets.token_urlsafe(32))}
                 params = {}
                 params[f"ASIN.1"] = asin
                 params[f"Quantity.1"] = 1
@@ -314,10 +311,12 @@ class Amazon:
         except TimeoutException:
             log.info("Timed out taking screenshot, trying to continue anyway")
             pass
+        except Exception as e:
+            log.error(f"Trying to recover from error: {e}")
+            pass
 
     def something_in_stock_mass(self):
         for i in range(len(self.asin_list)):
-            # params = {"anticache": str(secrets.token_urlsafe(32))}
             params = {}
             for x in range(len(self.asin_list[i])):
                 params[f"ASIN.{x + 1}"] = self.asin_list[i][x]
@@ -326,7 +325,6 @@ class Amazon:
             f.set(params)
             self.driver.get(f.url)
             title = self.driver.title
-            # if len(self.asin_list) > 1 and title in DOGGO_TITLES:
             bad_list_flag = False
             if title in DOGGO_TITLES:
                 good_asin_list = []
@@ -377,7 +375,6 @@ class Amazon:
                     else:
                         log.info("Item greater than reserve price")
                         price_warning_flag = True
-                        # log.info("{}".format(self.asin_list))
                 if price_flag:
                     log.info("Attempting to purchase")
                     if price_warning_flag:
@@ -385,10 +382,6 @@ class Amazon:
                             "Cart included items below and above reserve price, cancel unwanted items ASAP!"
                         )
                         self.take_screenshot("attempting-to-purchase")
-                        self.notification_handler.send_notification(
-                            "Cart included items below and above reserve price, cancel unwanted items ASAP!",
-                            True,
-                        )
                     return i + 1
         return 0
 
@@ -413,9 +406,6 @@ class Amazon:
                 self.driver.find_element_by_xpath(
                     '//*[@id="captchacharacters"]'
                 ).send_keys(solution + Keys.RETURN)
-                self.notification_handler.send_notification(
-                    f"Solved captcha with solution: {solution}", True
-                )
         except Exception as e:
             log.debug(e)
             log.info("Error trying to solve captcha. Refresh and retry.")
@@ -449,9 +439,6 @@ class Amazon:
                     f"selenium browser is on. There may be a file saved at: amazon-{func.__name__}.png"
                 )
                 self.take_screenshot("title-fail")
-                self.notification_handler.send_notification(
-                    f"Error on {self.driver.title}", True
-                )
                 time.sleep(60)
                 self.driver.close()
                 log.debug(e)
@@ -524,7 +511,6 @@ class Amazon:
         log.info("Waiting for Cart Page")
         self.check_if_captcha(self.wait_for_pages, SHOPING_CART_TITLES)
         self.take_screenshot("waiting-for-cart")
-        self.notification_handler.send_notification("Cart Page", True)
 
         try:  # This is fast.
             log.info("Quick redirect to checkout page")
@@ -543,9 +529,6 @@ class Amazon:
                 ).click()
             except:
                 self.take_screenshot("start-checkout")
-                self.notification_handler.send_notification(
-                    "Failed to checkout. Returning to stock check.", True
-                )
                 log.info("Failed to checkout. Returning to stock check.")
                 return False
 
@@ -554,10 +537,10 @@ class Amazon:
 
         log.info("Finishing checkout")
         self.take_screenshot("finish-checkout")
-        self.notification_handler.send_notification("Finishing checkout", True)
 
         if not self.finalize_order_button(test):
             log.info("Failed to finalize the order, trying again.")
+            self.take_screenshot("finalize-fail")
             return False
 
         log.info("Waiting for Order completed page.")
@@ -565,5 +548,4 @@ class Amazon:
 
         log.info("Order Placed.")
         self.take_screenshot("order-placed")
-        self.notification_handler.send_notification("Order Placed", True)
         return True
