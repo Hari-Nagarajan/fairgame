@@ -37,7 +37,8 @@ SIGN_IN_TEXT = [
     "Hola, Identifícate",
     "Bonjour, Identifiez-vous",
     "Ciao, Accedi",
-    "Hallo, Anmelden"
+    "Hallo, Anmelden",
+    "Hallo, Inloggen"
 ]
 SIGN_IN_TITLES = [
     "Amazon Sign In",
@@ -46,6 +47,7 @@ SIGN_IN_TITLES = [
     "Iniciar sesión en Amazon",
     "Connexion Amazon",
     "Amazon Accedi",
+    "Inloggen bij Amazon"
 ]
 CAPTCHA_PAGE_TITLES = ["Robot Check"]
 HOME_PAGE_TITLES = [
@@ -59,6 +61,7 @@ HOME_PAGE_TITLES = [
     "Amazon.de: Günstige Preise für Elektronik & Foto, Filme, Musik, Bücher, Games, Spielzeug & mehr",
     "Amazon.fr : livres, DVD, jeux vidéo, musique, high-tech, informatique, jouets, vêtements, chaussures, sport, bricolage, maison, beauté, puériculture, épicerie et plus encore !",
     "Amazon.it: elettronica, libri, musica, fashion, videogiochi, DVD e tanto altro",
+    "Amazon.nl: Groot aanbod, kleine prijzen in o.a. Elektronica, boeken, sport en meer"
 ]
 SHOPING_CART_TITLES = [
     "Amazon.com Shopping Cart",
@@ -70,6 +73,7 @@ SHOPING_CART_TITLES = [
     "Amazon.fr Panier",
     "Carrello Amazon.it",
     "AmazonSmile Shopping Cart",
+    "Amazon.nl-winkelwagen"
 ]
 CHECKOUT_TITLES = [
     "Amazon.com Checkout",
@@ -79,6 +83,7 @@ CHECKOUT_TITLES = [
     "Amazon.de Checkout",
     "Place Your Order - Amazon.de Checkout",
     "Amazon.de - Bezahlvorgang",
+    "Bestellung aufgeben - Amazon.de-Bezahlvorgang",
     "Place Your Order - Amazon.com Checkout",
     "Place Your Order - Amazon.com",
     "Tramitar pedido en Amazon.es",
@@ -87,6 +92,7 @@ CHECKOUT_TITLES = [
     "Passez votre commande - Processus de paiement Amazon.fr",
     "Ordina - Cassa Amazon.it",
     "AmazonSmile Checkout",
+    "Plaats je bestelling - Amazon.nl-kassa"
 ]
 ORDER_COMPLETE_TITLES = [
     "Amazon.com Thanks You",
@@ -98,6 +104,7 @@ ORDER_COMPLETE_TITLES = [
     "Amazon.es te da las gracias",
     "Amazon.fr vous remercie.",
     "Grazie da Amazon.it",
+    "Hartelijk dank"
 ]
 ADD_TO_CART_TITLES = [
     "Amazon.com: Please Confirm Your Action",
@@ -107,6 +114,7 @@ ADD_TO_CART_TITLES = [
     "Amazon.com : Veuillez confirmer votre action",  # Careful, required non-breaking space after .com (&nbsp)
     "Amazon.it: confermare l'operazione",
     "AmazonSmile: Please Confirm Your Action",
+    "" # Amazon.nl has en empty title, sigh.
 ]
 DOGGO_TITLES = ["Sorry! Something went wrong!"]
 
