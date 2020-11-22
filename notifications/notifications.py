@@ -112,7 +112,7 @@ class NotificationHandler:
             enabled_handlers.append("Slack")
         return enabled_handlers
 
-    def send_notification(self, message, ss_name, **kwargs):
+    def send_notification(self, message, ss_name=[], **kwargs):
         if self.enabled:
             self.queue.put((message, ss_name))
 
@@ -131,10 +131,7 @@ class NotificationHandler:
 
     def message_sender(self):
         while True:
-            try:
-                message, ss_name = self.queue.get()
-            except:
-                message = self.queue.get()
+            message, ss_name = self.queue.get()
 
             if ss_name:
                 self.apb.notify(body=message, attach=ss_name)

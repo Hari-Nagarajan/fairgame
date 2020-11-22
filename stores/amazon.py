@@ -450,7 +450,7 @@ class Amazon:
             title = selenium_utils.wait_for_any_title(self.driver, page_titles, t)
             if not title in page_titles:
                 log.error(
-                    "{} is not a recognized title, report to #tech-support or open an issue on github".format()
+                    "{} is not a recognized title, report to #tech-support or open an issue on github"
                 )
             pass
         except Exception as e:
