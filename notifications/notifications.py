@@ -112,9 +112,9 @@ class NotificationHandler:
             enabled_handlers.append("Slack")
         return enabled_handlers
 
-    def send_notification(self, message, screenshot=False, **kwargs):
+    def send_notification(self, message, ss_name=[], **kwargs):
         if self.enabled:
-            self.queue.put((message, screenshot))
+            self.queue.put((message, ss_name))
 
         if self.audio_handler.enabled:
             self.executor.submit(self.audio_handler.play, **kwargs)
@@ -131,9 +131,10 @@ class NotificationHandler:
 
     def message_sender(self):
         while True:
-            message, screenshot = self.queue.get()
-            if screenshot:
-                self.apb.notify(body=message, attach="screenshot.png")
+            message, ss_name = self.queue.get()
+
+            if ss_name:
+                self.apb.notify(body=message, attach=ss_name)
             else:
                 self.apb.notify(body=message)
             self.queue.task_done()

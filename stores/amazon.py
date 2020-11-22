@@ -2,6 +2,7 @@ import json
 import secrets
 import time
 from os import path
+from datetime import datetime
 from price_parser import parse_price
 
 from amazoncaptcha import AmazonCaptcha
@@ -11,6 +12,7 @@ from selenium import webdriver
 from selenium.common.exceptions import (
     NoSuchElementException,
     SessionNotCreatedException,
+    TimeoutException,
 )
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
@@ -164,7 +166,6 @@ class Amazon:
             log.info("Wait for Sign In page")
             self.check_if_captcha(self.wait_for_pages, SIGN_IN_TITLES)
             self.login()
-            self.notification_handler.send_notification("Logged in and running", False)
             log.info("Waiting 15 seconds.")
             time.sleep(
                 15
@@ -230,7 +231,6 @@ class Amazon:
                             break
             if self.asin_list:  # keep bot going if additional ASINs left
                 checkout_success = False
-                # log.info("Additional lists remaining, bot will continue")
 
     def check_stock(self, asin, reserve):
         f = furl(AMAZON_URLS["OFFER_URL"] + asin + "/ref=olp_f_new?f_new=true")
@@ -266,7 +266,6 @@ class Amazon:
         for x in range(len(self.asin_list)):
             bad_asin_list = []
             for asin in self.asin_list[x]:
-                # params = {"anticache": str(secrets.token_urlsafe(32))}
                 params = {}
                 params[f"ASIN.1"] = asin
                 params[f"Quantity.1"] = 1
@@ -299,15 +298,27 @@ class Amazon:
                             return asin
                         else:
                             log.info("Item greater than reserve price")
-                            # log.info("{}".format(self.asin_list))
             if bad_asin_list:
                 for bad_asin in bad_asin_list:
                     self.asin_list[x].remove(bad_asin)
         return 0
 
+    def take_screenshot(self, page):
+        try:
+            self.now = datetime.now()
+            self.date = self.now.strftime("%m-%d-%Y_%H_%M_%S")
+            self.ss_name = "screenshot-" + page + "_" + self.date + ".png"
+            self.driver.save_screenshot(self.ss_name)
+            self.notification_handler.send_notification(page, self.ss_name)
+        except TimeoutException:
+            log.info("Timed out taking screenshot, trying to continue anyway")
+            pass
+        except Exception as e:
+            log.error(f"Trying to recover from error: {e}")
+            pass
+
     def something_in_stock_mass(self):
         for i in range(len(self.asin_list)):
-            # params = {"anticache": str(secrets.token_urlsafe(32))}
             params = {}
             for x in range(len(self.asin_list[i])):
                 params[f"ASIN.{x + 1}"] = self.asin_list[i][x]
@@ -316,7 +327,6 @@ class Amazon:
             f.set(params)
             self.driver.get(f.url)
             title = self.driver.title
-            # if len(self.asin_list) > 1 and title in DOGGO_TITLES:
             bad_list_flag = False
             if title in DOGGO_TITLES:
                 good_asin_list = []
@@ -367,18 +377,13 @@ class Amazon:
                     else:
                         log.info("Item greater than reserve price")
                         price_warning_flag = True
-                        # log.info("{}".format(self.asin_list))
                 if price_flag:
                     log.info("Attempting to purchase")
                     if price_warning_flag:
                         log.info(
                             "Cart included items below and above reserve price, cancel unwanted items ASAP!"
                         )
-                        self.driver.save_screenshot("screenshot.png")
-                        self.notification_handler.send_notification(
-                            "Cart included items below and above reserve price, cancel unwanted items ASAP!",
-                            True,
-                        )
+                        self.take_screenshot("attempting-to-purchase")
                     return i + 1
         return 0
 
@@ -399,13 +404,10 @@ class Amazon:
                 time.sleep(5)
                 self.get_captcha_help()
             else:
-                self.driver.save_screenshot("screenshot.png")
+                self.take_screenshot("captcha")
                 self.driver.find_element_by_xpath(
                     '//*[@id="captchacharacters"]'
                 ).send_keys(solution + Keys.RETURN)
-                self.notification_handler.send_notification(
-                    f"Solved captcha with solution: {solution}", True
-                )
         except Exception as e:
             log.debug(e)
             log.info("Error trying to solve captcha. Refresh and retry.")
@@ -438,27 +440,17 @@ class Amazon:
                     f"An error happened, please submit a bug report including a screenshot of the page the "
                     f"selenium browser is on. There may be a file saved at: amazon-{func.__name__}.png"
                 )
-                self.driver.save_screenshot(f"amazon-{func.__name__}.png")
-                self.driver.save_screenshot("screenshot.png")
-                self.notification_handler.send_notification(
-                    f"Error on {self.driver.title}", True
-                )
+                self.take_screenshot("title-fail")
                 time.sleep(60)
                 self.driver.close()
                 log.debug(e)
                 pass
 
     def wait_for_pages(self, page_titles, t=30):
-        log.debug(f"wait_for_pages({page_titles}, {t})")
         try:
-            title = selenium_utils.wait_for_any_title(self.driver, page_titles, t)
-            if not title in page_titles:
-                log.error(
-                    "{} is not a recognized title, report to #tech-support or open an issue on github".format()
-                )
-            pass
+            selenium_utils.wait_for_any_title(self.driver, page_titles, t)
         except Exception as e:
-            log.debug(e)
+            log.debug(f"wait_for_pages exception: {e}")
             pass
 
     def wait_for_pyo_page(self):
@@ -512,15 +504,9 @@ class Amazon:
             )
 
     def checkout(self, test):
-        # log.info("Clicking continue.")
-        # self.driver.save_screenshot("screenshot.png")
-        # self.notification_handler.send_notification("Starting Checkout", True)
-        # self.driver.find_element_by_xpath('//input[@value="add"]').click()
-
         log.info("Waiting for Cart Page")
         self.check_if_captcha(self.wait_for_pages, SHOPING_CART_TITLES)
-        self.driver.save_screenshot("screenshot.png")
-        self.notification_handler.send_notification("Cart Page", True)
+        self.take_screenshot("waiting-for-cart")
 
         try:  # This is fast.
             log.info("Quick redirect to checkout page")
@@ -538,10 +524,7 @@ class Amazon:
                     '//*[@id="hlb-ptc-btn-native"]'
                 ).click()
             except:
-                self.driver.save_screenshot("screenshot.png")
-                self.notification_handler.send_notification(
-                    "Failed to checkout. Returning to stock check.", True
-                )
+                self.take_screenshot("start-checkout")
                 log.info("Failed to checkout. Returning to stock check.")
                 return False
 
@@ -549,16 +532,16 @@ class Amazon:
         self.wait_for_pyo_page()
 
         log.info("Finishing checkout")
-        self.driver.save_screenshot("screenshot.png")
-        self.notification_handler.send_notification("Finishing checkout", True)
+        self.take_screenshot("finish-checkout")
 
         if not self.finalize_order_button(test):
+            log.info("Failed to finalize the order, trying again.")
+            self.take_screenshot("finalize-fail")
             return False
 
         log.info("Waiting for Order completed page.")
         self.wait_for_order_completed(test)
 
         log.info("Order Placed.")
-        self.driver.save_screenshot("screenshot.png")
-        self.notification_handler.send_notification("Order Placed", True)
+        self.take_screenshot("order-placed")
         return True

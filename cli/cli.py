@@ -70,15 +70,16 @@ def nvidia(gpu, locale, test, interval):
 @click.option("--no-image", is_flag=True)
 @click.option("--headless", is_flag=True)
 @click.option("--test", is_flag=True)
+@click.option("--delay", type=int, default=3)
 @notify_on_crash
-def amazon(no_image, headless, test):
+def amazon(no_image, headless, test, delay):
     if no_image:
         selenium_utils.no_amazon_image()
     else:
         selenium_utils.yes_amazon_image()
 
     amzn_obj = Amazon(headless=headless, notification_handler=notification_handler)
-    amzn_obj.run_item(test=test)
+    amzn_obj.run_item(delay=delay, test=test)
 
 
 @click.command()
