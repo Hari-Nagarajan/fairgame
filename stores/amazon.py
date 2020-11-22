@@ -8,7 +8,10 @@ from amazoncaptcha import AmazonCaptcha
 from chromedriver_py import binary_path  # this will get you the path variable
 from furl import furl
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException, SessionNotCreatedException
+from selenium.common.exceptions import (
+    NoSuchElementException,
+    SessionNotCreatedException,
+)
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 
@@ -225,7 +228,7 @@ class Amazon:
                             break
             if self.asin_list:  # keep bot going if additional ASINs left
                 checkout_success = False
-                #log.info("Additional lists remaining, bot will continue")
+                # log.info("Additional lists remaining, bot will continue")
 
     def check_stock(self, asin, reserve):
         f = furl(AMAZON_URLS["OFFER_URL"] + asin + "/ref=olp_f_new?f_new=true")
