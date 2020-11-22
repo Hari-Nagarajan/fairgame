@@ -445,16 +445,10 @@ class Amazon:
                 pass
 
     def wait_for_pages(self, page_titles, t=30):
-        log.debug(f"wait_for_pages({page_titles}, {t})")
         try:
-            title = selenium_utils.wait_for_any_title(self.driver, page_titles, t)
-            if not title in page_titles:
-                log.error(
-                    "{} is not a recognized title, report to #tech-support or open an issue on github"
-                )
-            pass
+            selenium_utils.wait_for_any_title(self.driver, page_titles, t)
         except Exception as e:
-            log.debug(e)
+            log.debug(f"wait_for_pages exception: {e}")
             pass
 
     def wait_for_pyo_page(self):
