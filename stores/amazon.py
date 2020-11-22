@@ -299,21 +299,18 @@ class Amazon:
                             return asin
                         else:
                             log.info("Item greater than reserve price")
-                            # log.info("{}".format(self.asin_list))
             if bad_asin_list:
                 for bad_asin in bad_asin_list:
                     self.asin_list[x].remove(bad_asin)
         return 0
 
-    def take_screenshot(self, position):
+    def take_screenshot(self, page):
         try:
             self.now = datetime.now()
-            self.date = self.now.strftime("%m-%d-%Y_%H_%S_%S")
-            self.ss_name = "screenshot-" + position + "_" + self.date + ".png"
+            self.date = self.now.strftime("%m-%d-%Y_%H_%M_%S")
+            self.ss_name = "screenshot-" + page + "_" + self.date + ".png"
             self.driver.save_screenshot(self.ss_name)
-            log.info(f"ss_name: {self.ss_name}")
-            return self.ss_name
-            self.notification_handler.send_notification(self.position, True)
+            self.notification_handler.send_notification(page, self.ss_name)
         except TimeoutException:
             log.info("Timed out taking screenshot, trying to continue anyway")
             pass
@@ -387,7 +384,6 @@ class Amazon:
                         log.info(
                             "Cart included items below and above reserve price, cancel unwanted items ASAP!"
                         )
-                        # self.driver.save_screenshot("screenshot.png")
                         self.take_screenshot("attempting-to-purchase")
                         self.notification_handler.send_notification(
                             "Cart included items below and above reserve price, cancel unwanted items ASAP!",
@@ -413,7 +409,6 @@ class Amazon:
                 time.sleep(5)
                 self.get_captcha_help()
             else:
-                # self.driver.save_screenshot("screenshot.png")
                 self.take_screenshot("captcha")
                 self.driver.find_element_by_xpath(
                     '//*[@id="captchacharacters"]'
@@ -453,8 +448,6 @@ class Amazon:
                     f"An error happened, please submit a bug report including a screenshot of the page the "
                     f"selenium browser is on. There may be a file saved at: amazon-{func.__name__}.png"
                 )
-                # self.driver.save_screenshot(f"amazon-{func.__name__}.png")
-                # self.driver.save_screenshot("screenshot.png")
                 self.take_screenshot("title-fail")
                 self.notification_handler.send_notification(
                     f"Error on {self.driver.title}", True
@@ -528,14 +521,8 @@ class Amazon:
             )
 
     def checkout(self, test):
-        # log.info("Clicking continue.")
-        # self.driver.save_screenshot("screenshot.png")
-        # self.notification_handler.send_notification("Starting Checkout", True)
-        # self.driver.find_element_by_xpath('//input[@value="add"]').click()
-
         log.info("Waiting for Cart Page")
         self.check_if_captcha(self.wait_for_pages, SHOPING_CART_TITLES)
-        # self.driver.save_screenshot("screenshot.png")
         self.take_screenshot("waiting-for-cart")
         self.notification_handler.send_notification("Cart Page", True)
 
@@ -555,7 +542,6 @@ class Amazon:
                     '//*[@id="hlb-ptc-btn-native"]'
                 ).click()
             except:
-                # self.driver.save_screenshot("screenshot.png")
                 self.take_screenshot("start-checkout")
                 self.notification_handler.send_notification(
                     "Failed to checkout. Returning to stock check.", True
@@ -567,7 +553,6 @@ class Amazon:
         self.wait_for_pyo_page()
 
         log.info("Finishing checkout")
-        # self.driver.save_screenshot("screenshot.png")
         self.take_screenshot("finish-checkout")
         self.notification_handler.send_notification("Finishing checkout", True)
 
@@ -579,7 +564,6 @@ class Amazon:
         self.wait_for_order_completed(test)
 
         log.info("Order Placed.")
-        # self.driver.save_screenshot("screenshot.png")
         self.take_screenshot("order-placed")
         self.notification_handler.send_notification("Order Placed", True)
         return True
