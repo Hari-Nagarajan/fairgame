@@ -233,7 +233,11 @@ class Amazon:
                 checkout_success = False
 
     def check_stock(self, asin, reserve):
-        f = furl(AMAZON_URLS["OFFER_URL"] + asin + "/ref=olp_f_new?f_new=true")
+        f = furl(
+            AMAZON_URLS["OFFER_URL"]
+            + asin
+            + "/f_freeShipping=on&ref=olp_f_new?f_new=true"
+        )
         try:
             self.driver.get(f.url)
             elements = self.driver.find_elements_by_xpath(
