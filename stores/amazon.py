@@ -1,25 +1,23 @@
 import json
-import secrets
+import platform
 import time
 from os import path
-from price_parser import parse_price
 
+import psutil
 from amazoncaptcha import AmazonCaptcha
 from chromedriver_py import binary_path  # this will get you the path variable
 from furl import furl
+from price_parser import parse_price
 from selenium import webdriver
 from selenium.common.exceptions import (
     NoSuchElementException,
-    SessionNotCreatedException,
 )
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 
 from utils import selenium_utils
-from utils.json_utils import InvalidAutoBuyConfigException
 from utils.logger import log
 from utils.selenium_utils import options, enable_headless, wait_for_element
-from price_parser import parse_price
 
 AMAZON_URLS = {
     "BASE_URL": "https://{domain}/",
@@ -107,12 +105,15 @@ class Amazon:
         self.notification_handler = notification_handler
         self.asin_list = []
         self.reserve = []
+        self.driver_sub_pids = []
+
         if headless:
             enable_headless()
         options.add_argument(f"user-data-dir=.profile-amz")
         try:
             self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
             self.wait = WebDriverWait(self.driver, 10)
+            self.get_webdriver_pids()
         except Exception as e:
             log.error(e)
             exit(1)
@@ -127,8 +128,8 @@ class Amazon:
                         "amazon_website", "smile.amazon.com"
                     )
                     for x in range(self.asin_groups):
-                        self.asin_list.append(config[f"asin_list_{x+1}"])
-                        self.reserve.append(float(config[f"reserve_{x+1}"]))
+                        self.asin_list.append(config[f"asin_list_{x + 1}"])
+                        self.reserve.append(float(config[f"reserve_{x + 1}"]))
                     # assert isinstance(self.asin_list, list)
                 except Exception:
                     log.error(
@@ -170,12 +171,30 @@ class Amazon:
 
     def __del__(self):
         try:
-            if (self.driver):
-                log.debug(f"Quitting WebDriver...")
-                self.driver.quit()
+            if platform.system() == "Windows" and self.driver:
+                log.info("Cleaning up after web driver...")
+                # brute force kill child Chrome pids with fire
+                for pid in self.driver_sub_pids:
+                    try:
+                        log.debug(f"Killing {pid}...")
+                        process = psutil.Process(pid)
+                        process.kill()
+                    except psutil.NoSuchProcess:
+                        log.debug(f"{pid} not found. Continuing...")
+                        pass
+
         except Exception as e:
             log.info(e)
-            log.info("Failed to close driver")
+            log.info(
+                "Failed to clean up after web driver.  Please manually close browser."
+            )
+
+    def get_webdriver_pids(self):
+        pid = self.driver.service.process.pid
+        driver_process = psutil.Process(pid)
+        children = driver_process.children(recursive=True)
+        for child in children:
+            self.driver_sub_pids.append(child.pid)
 
     def is_logged_in(self):
         try:
@@ -347,7 +366,7 @@ class Amazon:
                     )
                     self.asin_list[i] = good_asin_list
                 else:
-                    log.error(f"No ASINs work in list {i+1}.")
+                    log.error(f"No ASINs work in list {i + 1}.")
                     self.asin_list[i] = self.asin_list[i][
                         0
                     ]  # just assign one asin to list, can't remove during execution
