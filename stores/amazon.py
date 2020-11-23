@@ -236,7 +236,7 @@ class Amazon:
         f = furl(
             AMAZON_URLS["OFFER_URL"]
             + asin
-            + "/f_freeShipping=on&ref=olp_f_new?f_new=true"
+            + "f_freeShipping=on&ref=olp_f_new&f_new=true"
         )
         try:
             self.driver.get(f.url)
