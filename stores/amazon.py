@@ -1,4 +1,5 @@
 import json
+import re
 import secrets
 import time
 from os import path
@@ -233,11 +234,7 @@ class Amazon:
                 checkout_success = False
 
     def check_stock(self, asin, reserve):
-        f = furl(
-            AMAZON_URLS["OFFER_URL"]
-            + asin
-            + "/ref=olp_f_new&f_new=true&f_freeShipping=on"
-        )
+        f = furl(AMAZON_URLS["OFFER_URL"] + asin + "/ref=olp_f_new?f_new=true")
         try:
             self.driver.get(f.url)
             elements = self.driver.find_elements_by_xpath(
@@ -246,18 +243,34 @@ class Amazon:
             prices = self.driver.find_elements_by_xpath(
                 '//*[@class="a-size-large a-color-price olpOfferPrice a-text-bold"]'
             )
+            shipping = self.driver.find_elements_by_xpath(
+                '//*[@class="a-color-secondary"]'
+            )
+            i = 0
+            prices_combined = list()
+            for str_shipping_price in shipping:
+                stripped_shipping = str(str_shipping_price.text.strip())
+                price = float(0)
+                price_match = re.findall("\$[0-9]+\.[0-9][0-9]", stripped_shipping)
+                if len(price_match) > 0:
+                    price = float(price_match[0][1:])
+                elif "FREE" not in stripped_shipping:
+                    log.debug("Could not identify shipping cost from string: " + stripped_shipping)
+                prices_combined.append((prices[i], price))
+                i += 1
+
         except Exception as e:
             log.debug(e)
             return False
         x = 0
-        for str_price in prices:
+        for (str_price, shipping_price) in prices_combined:
             price = parse_price(str_price.text)
             priceFloat = price.amount
             if priceFloat is None:
                 log.error("Error reading price information on row.")
                 x = x + 1
                 continue
-            elif priceFloat <= reserve:
+            elif float(priceFloat)+shipping_price <= reserve:
                 log.info("Item in stock and under reserve!")
                 elements[x].click()
                 log.info("clicking add to cart")
