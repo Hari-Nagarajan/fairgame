@@ -168,6 +168,15 @@ class Amazon:
                 15
             )  # We can remove this once I get more info on the phone verification page.
 
+    def __del__(self):
+        try:
+            if (self.driver):
+                log.debug(f"Quitting WebDriver...")
+                self.driver.quit()
+        except Exception as e:
+            log.info(e)
+            log.info("Failed to close driver")
+
     def is_logged_in(self):
         try:
             text = wait_for_element(self.driver, "nav-link-accountList").text

@@ -9,11 +9,6 @@ from stores.amazon import Amazon
 
 def handler(signal, frame):
     log.info("Caught a ctrl-c, exiting...")
-    try:
-        webdriver.quit(Amazon(driver))
-    except Exception as e:
-        log.info(e)
-        log.info("Failed to close driver")
     exit(0)
 
 
