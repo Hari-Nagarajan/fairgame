@@ -189,11 +189,7 @@ class Amazon:
     def is_logged_in(self):
         try:
             text = wait_for_element(self.driver, "nav-link-accountList").text
-            for sign_in in SIGN_IN_TEXT:
-                if sign_in in text:
-                    return False
-
-            return True
+            return not any(sign_in in text for sign_in in SIGN_IN_TEXT)
         except Exception:
             return False
 
