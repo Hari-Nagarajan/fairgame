@@ -472,6 +472,8 @@ class Amazon:
             '//*[@id="placeYourOrder"]/span/input',
             '//*[@id="submitOrderButtonId"]/span/input',
             '//input[@name="placeYourOrder1"]',
+            '//*[@id="hlb-ptc-btn-native"]',
+            '//*[@id="sc-buy-box-ptc-button"]/span/input',
         ]
         button = None
         for button_xpath in button_xpaths:
@@ -490,8 +492,8 @@ class Amazon:
             return True
         else:
             if retry < 3:
-                log.info("Couldn't find button. Lets retry in a sec.")
-                time.sleep(5)
+                # log.info("Couldn't find button. Lets retry in a sec.")
+                time.sleep(2)
                 returnVal = self.finalize_order_button(test, retry + 1)
             else:
                 log.info(
