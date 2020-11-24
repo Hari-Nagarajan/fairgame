@@ -91,12 +91,13 @@ def bestbuy(sku, headless):
         sku, notification_handler=notification_handler, headless=headless
     )
     bb.run_item()
-  
+
+
 @click.command()
 @click.option("--no-image", is_flag=True)
 @click.option("--headless", is_flag=True)
 @click.option("--test", is_flag=True)
-@notify_on_crash 
+@notify_on_crash
 def walmart(no_image, headless, test):
     if no_image:
         selenium_utils.no_walmart_image()
@@ -105,6 +106,7 @@ def walmart(no_image, headless, test):
 
     walmrt_obj = Walmart(headless=headless, notification_handler=notification_handler)
     walmrt_obj.run_item(test=test)
+
 
 @click.command()
 def test_notifications():
