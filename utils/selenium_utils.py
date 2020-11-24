@@ -7,7 +7,9 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 
 options = Options()
-options.add_experimental_option("excludeSwitches", ["enable-automation", "enable-logging"])
+options.add_experimental_option(
+    "excludeSwitches", ["enable-automation", "enable-logging"]
+)
 options.add_experimental_option("useAutomationExtension", False)
 
 
@@ -36,8 +38,8 @@ def no_amazon_image():
 def yes_amazon_image():
     prefs = {"profile.managed_default_content_settings.images": 0}
     options.add_experimental_option("prefs", prefs)
-    
-    
+
+
 def no_walmart_image():
     prefs = {"profile.managed_default_content_settings.images": 2}
     options.add_experimental_option("prefs", prefs)
