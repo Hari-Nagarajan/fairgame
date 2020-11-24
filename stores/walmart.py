@@ -9,7 +9,10 @@ from price_parser import parse_price
 from chromedriver_py import binary_path  # this will get you the path variable
 from furl import furl
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException, SessionNotCreatedException
+from selenium.common.exceptions import (
+    NoSuchElementException,
+    SessionNotCreatedException,
+)
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 
@@ -19,8 +22,8 @@ from utils.logger import log
 from utils.selenium_utils import options, enable_headless, wait_for_element
 from price_parser import parse_price
 
-API_KEY = 'API'  # Your 2captcha API KEY
-site_key = 'Captcha Site Key'  # site-key, read the 2captcha docs on how to get this
+API_KEY = "API"  # Your 2captcha API KEY
+site_key = "Site_Key"  # site-key, read the 2captcha docs on how to get this
 
 WALMART_URLS = {
     "BASE_URL": "https://{domain}/",
@@ -50,10 +53,17 @@ CHECKOUT_TITLES = [
 ]
 ORDER_COMPLETE_TITLES = [
     "Walmart.com Thanks You",
+    "Walmart.ca Thanks You",
+    "AmazonSmile Thanks You",
+    "Thank you",
+    "Walmart.fr Merci",
+    "Merci",
+    "Walmart.es te da las gracias",
+    "Walmart.fr vous remercie.",
+    "Grazie da Walmart.it",
 ]
-ADD_TO_CART_TITLES = [
-    "Item added to cart - Walmart.com"
-]
+ADD_TO_CART_TITLES = ["Item added to cart - Walmart.com"]
+
 
 class Walmart:
     def __init__(self, notification_handler, headless=False):
@@ -77,9 +87,7 @@ class Walmart:
                     self.password = config["password"]
                     self.civ = config["civ"]
                     self.url_groups = int(config["url_groups"])
-                    self.walmart_website = config.get(
-                        "walmart_website", "walmart.com"
-                    )
+                    self.walmart_website = config.get("walmart_website", "walmart.com")
                     for x in range(self.url_groups):
                         self.url_list.append(config[f"url_list_{x+1}"])
                         self.reserve.append(float(config[f"reserve_{x+1}"]))
@@ -100,7 +108,7 @@ class Walmart:
         self.driver.get(WALMART_URLS["BASE_URL"])
         log.info("Waiting for home page.")
         if self.driver.title in CAPTCHA_URL:
-                self.defeat_captcha(self.driver.current_url)
+            self.defeat_captcha(self.driver.current_url)
         if self.is_logged_in():
             log.info("Already logged in")
         else:
@@ -112,13 +120,17 @@ class Walmart:
             time.sleep(
                 5
             )  # We can remove this once I get more info on the phone verification page.
-    
+
     def is_logged_in(self):
         try:
             time.sleep(5)
-            accountbutt = self.driver.find_element_by_xpath('/html/body/div[1]/div/div/div[1]/section/div[2]/div/div[3]/div[2]/div/div[2]/div[1]/button')
+            accountbutt = self.driver.find_element_by_xpath(
+                "/html/body/div[1]/div/div/div[1]/section/div[2]/div/div[3]/div[2]/div/div[2]/div[1]/button"
+            )
             accountbutt.click()
-            signin = self.driver.find_element_by_xpath('/html/body/div[1]/div[1]/div/div[1]/section/div[3]/div[2]/div/div/div[1]/div/span').text
+            signin = self.driver.find_element_by_xpath(
+                "/html/body/div[1]/div[1]/div/div[1]/section/div[3]/div[2]/div/div/div[1]/div/span"
+            ).text
             log.info("Logged in account " + signin)
             log.info("Checking login")
             if signin == "Account":
@@ -129,11 +141,13 @@ class Walmart:
             return False
 
     def login(self):
-    
-        signin = self.driver.find_element_by_xpath('/html/body/div[1]/div/div/div[1]/section/div[3]/div[2]/div/div/div[2]/div/a[1]/div/span/div')
+
+        signin = self.driver.find_element_by_xpath(
+            "/html/body/div[1]/div/div/div[1]/section/div[3]/div[2]/div/div/div[2]/div/a[1]/div/span/div"
+        )
         signin.click()
         time.sleep(1)
- 
+
         if self.driver.title == "Login":
             try:
                 log.info("Email")
@@ -160,7 +174,7 @@ class Walmart:
                 time.sleep(2)
             except:
                 pass
-                
+
         if self.driver.find_elements_by_xpath('//*[@id="global-error"]'):
             log.error("Login failed, check your username in walmart_config.json")
             time.sleep(240)
@@ -194,28 +208,30 @@ class Walmart:
                             break
             if self.url_list:  # keep bot going if additional URLs left
                 checkout_success = False
-                #log.info("Additional lists remaining, bot will continue")
+                # log.info("Additional lists remaining, bot will continue")
 
     def check_captcha(self, url):
         if self.driver.title in CAPTCHA_URL:
-                self.defeat_captcha(self.driver.current_url)
-    
+            self.defeat_captcha(self.driver.current_url)
+
     def check_stock(self, url, reserve):
         log.info("Checking stock for items.")
         f = furl(WALMART_URLS["OFFER_URL"] + url)
         self.driver.get(f.url)
         self.check_captcha(url)
         try:
-            element = self.check_exists_by_xpath("/html/body/div[1]/div[1]/div/div[2]/div/div[1]/div[1]/div[1]/div/div/div/div/div[3]/div[5]/div/div[3]/div/div[2]/div[2]/div[1]/section/div[1]/div[3]/button/span")
+            element = self.check_exists_by_xpath(
+                "/html/body/div[1]/div[1]/div/div[2]/div/div[1]/div[1]/div[1]/div/div/div/div/div[3]/div[5]/div/div[3]/div/div[2]/div[2]/div[1]/section/div[1]/div[3]/button/span"
+            )
             str_price = self.driver.find_element_by_xpath('//*[@id="price"]')
             log.info("Found price " + str_price.text)
         except NoSuchElementException:
             return False
-            
+
         if not element:
             log.info("Product not available")
             self.check_stock(url, reserve)
-        
+
         price = parse_price(str_price.text)
         priceFloat = price.amount
         if priceFloat is None:
@@ -227,7 +243,7 @@ class Walmart:
             element.click()
             return True
         return False
-        
+
     def check_exists_by_xpath(self, xpath):
         log.info("Testing XPath")
         try:
@@ -256,7 +272,9 @@ class Walmart:
             self.login()
 
     def finalize_order_button(self, test, retry=0):
-        button = ['/html/body/div[1]/div/div[1]/div/div[1]/div[3]/div/div/div[2]/div[1]/div[2]/div/div/div[2]/div/form/div/button']
+        button = [
+            "/html/body/div[1]/div/div[1]/div/div[1]/div[3]/div/div/div[2]/div[1]/div[2]/div/div/div[2]/div/form/div/button"
+        ]
 
         if button:
             log.info(f"Clicking Place Order")
@@ -266,49 +284,60 @@ class Walmart:
 
     def wait_for_order_completed(self, test):
         if not test:
-            log.info(
-                "This is not a test"
-            )
+            log.info("This is not a test")
         else:
             log.info(
                 "This is a test, so we don't need to wait for the order completed page."
             )
+
     def defeat_captcha(self, url):
-        
+
         s = requests.Session()
-        
+
         # here we post site key to 2captcha to get captcha ID (and we parse it here too)
-        captcha_id = s.post("https://2captcha.com/in.php?key={}&method=userrecaptcha&googlekey={}&pageurl={}".format(
-            API_KEY, site_key, url)).text.split('|')[1] 
+        captcha_id = s.post(
+            "https://2captcha.com/in.php?key={}&method=userrecaptcha&googlekey={}&pageurl={}".format(
+                API_KEY, site_key, url
+            )
+        ).text.split("|")[1]
         log.info("Testing captcha id")
         log.info(captcha_id)
         # then we parse gresponse from 2captcha response
         recaptcha_answer = s.get(
-            "http://2captcha.com/res.php?key={}&action=get&id={}".format(API_KEY, captcha_id)).text  
+            "http://2captcha.com/res.php?key={}&action=get&id={}".format(
+                API_KEY, captcha_id
+            )
+        ).text
         log.info("Solving captcha...")
         sleep(15)
-        while 'CAPCHA_NOT_READY' in recaptcha_answer:
+        while "CAPCHA_NOT_READY" in recaptcha_answer:
             recaptcha_answer = s.get(
-                "http://2captcha.com/res.php?key={}&action=get&id={}".format(API_KEY, captcha_id)).text
+                "http://2captcha.com/res.php?key={}&action=get&id={}".format(
+                    API_KEY, captcha_id
+                )
+            ).text
             sleep(5)
         if recaptcha_answer == "ERROR_CAPTCHA_UNSOLVABLE":
             self.defeat_captcha(url)
-        recaptcha_answer = recaptcha_answer.split('|')[1]
+        recaptcha_answer = recaptcha_answer.split("|")[1]
         log.info(recaptcha_answer)
-        
+
         log.info("Submitting Captcha")
-        #self.driver.execute_script("document.getElementById('g-recaptcha-response').innerHTML = '{0}';".format(
+        # self.driver.execute_script("document.getElementById('g-recaptcha-response').innerHTML = '{0}';".format(
         #    recaptcha_answer))
-        callback_method = self.driver.find_element_by_class_name("g-recaptcha").get_attribute("data-callback")
-        #log.info("waiting to execute Callback")
-        #sleep(30)
-        self.driver.execute_script("{0}(\"{1}\");".format(
-            callback_method, recaptcha_answer))
+        callback_method = self.driver.find_element_by_class_name(
+            "g-recaptcha"
+        ).get_attribute("data-callback")
+        # log.info("waiting to execute Callback")
+        # sleep(30)
+        self.driver.execute_script(
+            '{0}("{1}");'.format(callback_method, recaptcha_answer)
+        )
         sleep(90)
         self.check_captcha(url)
-        self.driver.execute_script("___grecaptcha_cfg_client[0].l.l.callback('{}')".format(g_response))
+
         return
-    
+
     def checkout(self, test):
         # log.info("Clicking continue.")
         # self.driver.save_screenshot("screenshot.png")
@@ -321,25 +350,35 @@ class Walmart:
 
         log.info("Clicking checkout.")
         try:
-            self.driver.find_element_by_xpath('/html/body/div[1]/div/div/div/div/div/div[1]/div/div[1]/div/div[2]/div/div/div/div/div[3]/div/div/div[2]/div[1]/div[2]/div').click()
+            self.driver.find_element_by_xpath(
+                "/html/body/div[1]/div/div/div/div/div/div[1]/div/div[1]/div/div[2]/div/div/div/div/div[3]/div/div/div[2]/div[1]/div[2]/div"
+            ).click()
             log.info("Waiting for order page")
             self.wait_for_order_page()
             log.info("Continuing to confirm product")
-            self.driver.find_element_by_xpath('/html/body/div[1]/div/div[1]/div/div[1]/div[3]/div/div/div/div[1]/div/div[2]/div/div/div/div[3]/div/div/div[2]/button').click()
+            self.driver.find_element_by_xpath(
+                "/html/body/div[1]/div/div[1]/div/div[1]/div[3]/div/div/div/div[1]/div/div[2]/div/div/div/div[3]/div/div/div[2]/button"
+            ).click()
             time.sleep(5)
             log.info("Continuing to confirm address")
-            self.driver.find_element_by_xpath('/html/body/div[1]/div/div[1]/div/div[1]/div[3]/div/div/div/div[2]/div[1]/div[2]/div/div/div/div[3]/div/div/div/div/div[3]/div[2]/button').click()
+            self.driver.find_element_by_xpath(
+                "/html/body/div[1]/div/div[1]/div/div[1]/div[3]/div/div/div/div[2]/div[1]/div[2]/div/div/div/div[3]/div/div/div/div/div[3]/div[2]/button"
+            ).click()
             time.sleep(5)
             log.info("Enter CIV")
             self.driver.find_element_by_xpath('//*[@id="cvv-confirm"]').send_keys(
-                    self.civ
+                self.civ
             )
             log.info("Clicking Review Order")
-            self.driver.find_element_by_xpath('/html/body/div[1]/div/div[1]/div/div[1]/div[3]/div/div/div/div[3]/div[1]/div[2]/div/div/div/div[3]/div[2]/div/button').click()
+            self.driver.find_element_by_xpath(
+                "/html/body/div[1]/div/div[1]/div/div[1]/div[3]/div/div/div/div[3]/div[1]/div[2]/div/div/div/div[3]/div[2]/div/button"
+            ).click()
             time.sleep(3)
         except:
             self.driver.save_screenshot("screenshot.png")
-            self.notification_handler.send_notification("Failed to checkout. Returning to stock check.", True)
+            self.notification_handler.send_notification(
+                "Failed to checkout. Returning to stock check.", True
+            )
             log.info("Failed to checkout. Returning to stock check.")
             return False
 
