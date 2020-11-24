@@ -53,14 +53,6 @@ CHECKOUT_TITLES = [
 ]
 ORDER_COMPLETE_TITLES = [
     "Walmart.com Thanks You",
-    "Walmart.ca Thanks You",
-    "AmazonSmile Thanks You",
-    "Thank you",
-    "Walmart.fr Merci",
-    "Merci",
-    "Walmart.es te da las gracias",
-    "Walmart.fr vous remercie.",
-    "Grazie da Walmart.it",
 ]
 ADD_TO_CART_TITLES = ["Item added to cart - Walmart.com"]
 
