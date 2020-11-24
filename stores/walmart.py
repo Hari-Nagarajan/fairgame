@@ -19,8 +19,8 @@ from utils.logger import log
 from utils.selenium_utils import options, enable_headless, wait_for_element
 from price_parser import parse_price
 
-API_KEY = '5998050db106e5e27fb04058d77854c9'  # Your 2captcha API KEY
-site_key = '6Lcj-R8TAAAAABs3FrRPuQhLMbp5QrHsHufzLf7b'  # site-key, read the 2captcha docs on how to get this
+API_KEY = 'API'  # Your 2captcha API KEY
+site_key = 'Captcha Site Key'  # site-key, read the 2captcha docs on how to get this
 
 WALMART_URLS = {
     "BASE_URL": "https://{domain}/",
