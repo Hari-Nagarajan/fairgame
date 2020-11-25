@@ -70,7 +70,7 @@ def nvidia(gpu, locale, test, interval):
 @click.option("--no-image", is_flag=True)
 @click.option("--headless", is_flag=True)
 @click.option("--test", is_flag=True)
-@click.option("--delay", type=int, default=3)
+@click.option("--delay", type=float, default=3.0)
 @notify_on_crash
 def amazon(no_image, headless, test, delay):
     if no_image:
