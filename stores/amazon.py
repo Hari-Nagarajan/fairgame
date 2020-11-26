@@ -2,6 +2,7 @@ import json
 import secrets
 import time
 import os
+import math
 from datetime import datetime
 from price_parser import parse_price
 
@@ -21,7 +22,6 @@ from utils import selenium_utils
 from utils.json_utils import InvalidAutoBuyConfigException
 from utils.logger import log
 from utils.selenium_utils import options, enable_headless, wait_for_element
-from price_parser import parse_price
 
 AMAZON_URLS = {
     "BASE_URL": "https://{domain}/",
@@ -258,7 +258,7 @@ class Amazon:
                 '//*[@class="a-color-secondary"]'
             )
         except Exception as e:
-            log.debug(e)
+            log.error(e)
             return False
 
         for i in range(len(elements)):
@@ -266,10 +266,14 @@ class Amazon:
             ship_price = parse_price(shipping[i].text)
             ship_float = ship_price.amount
             price_float = price.amount
-            if price_float is None or ship_float is None:
-                log.error("Error reading price information on row.")
-                continue
-            elif (price_float + ship_float) <= reserve:
+            if price_float is None:
+                return False
+            if ship_float is None:
+                ship_float = 0
+
+            if (ship_float + price_float) <= reserve or math.isclose(
+                (price_float + ship_float), reserve, abs_tol=0.01
+            ):
                 log.info("Item in stock and under reserve!")
                 elements[i].click()
                 log.info("clicking add to cart")
