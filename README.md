@@ -192,7 +192,7 @@ Once you have setup your `apprise_config.json ` you can test it by running `pyth
 
 ## Troubleshooting
 
-I suggest joining the #tech-support channel in [Discord](https://discord.gg/hQeUbRv) for personal assistance if these common fixes don't help.
+I suggest joining the #tech-support channel in [Discord](https://discord.gg/qDY2QBtAW6) for personal assistance if these common fixes don't help.
 
 **Error: ```selenium.common.exceptions.WebDriverException: Message: unknown error: cannot find Chrome binary```** 
 The issue is that chrome is not installed in the expected location. See [Selenium Wiki](https://github.com/SeleniumHQ/selenium/wiki/ChromeDriver#requirements) and the section on [overriding the Chrome binary location .](https://sites.google.com/a/chromium.org/chromedriver/capabilities#TOC-Using-a-Chrome-executable-in-a-non-standard-location)
