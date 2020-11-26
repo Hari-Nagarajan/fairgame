@@ -104,7 +104,7 @@ def walmart(no_image, headless, test):
         selenium_utils.no_walmart_image()
     else:
         selenium_utils.yes_walmart_image()
-
+    log.info("Walmart branch is very work in progress and might not even function - don't ask tech-support for help with this")
     walmrt_obj = Walmart(headless=headless, notification_handler=notification_handler)
     walmrt_obj.run_item(test=test)
 
