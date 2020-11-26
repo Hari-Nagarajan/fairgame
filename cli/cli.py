@@ -8,6 +8,7 @@ from cli.utils import QuestionaryOption
 from notifications.notifications import NotificationHandler, TIME_FORMAT
 from stores.amazon import Amazon
 from stores.bestbuy import BestBuyHandler
+from stores.walmart import Walmart
 from stores.nvidia import NvidiaBuyer, GPU_DISPLAY_NAMES, CURRENCY_LOCALE_MAP
 from utils import selenium_utils
 from utils.logger import log
@@ -94,6 +95,21 @@ def bestbuy(sku, headless):
 
 
 @click.command()
+@click.option("--no-image", is_flag=True)
+@click.option("--headless", is_flag=True)
+@click.option("--test", is_flag=True)
+@notify_on_crash
+def walmart(no_image, headless, test):
+    if no_image:
+        selenium_utils.no_walmart_image()
+    else:
+        selenium_utils.yes_walmart_image()
+
+    walmrt_obj = Walmart(headless=headless, notification_handler=notification_handler)
+    walmrt_obj.run_item(test=test)
+
+
+@click.command()
 def test_notifications():
     enabled_handlers = ", ".join(notification_handler.get_enabled_handlers())
     time = datetime.now().strftime(TIME_FORMAT)
@@ -108,4 +124,5 @@ signal(SIGINT, handler)
 main.add_command(nvidia)
 main.add_command(amazon)
 main.add_command(bestbuy)
+main.add_command(walmart)
 main.add_command(test_notifications)

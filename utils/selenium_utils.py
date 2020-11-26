@@ -40,6 +40,16 @@ def yes_amazon_image():
     options.add_experimental_option("prefs", prefs)
 
 
+def no_walmart_image():
+    prefs = {"profile.managed_default_content_settings.images": 2}
+    options.add_experimental_option("prefs", prefs)
+
+
+def yes_walmart_image():
+    prefs = {"profile.managed_default_content_settings.images": 0}
+    options.add_experimental_option("prefs", prefs)
+
+
 def wait_for_element(d, e_id, time=30):
     """
     Uses webdriver(d) to wait for page title(title) to become visible
