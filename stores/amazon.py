@@ -38,7 +38,7 @@ SIGN_IN_TEXT = [
     "Bonjour, Identifiez-vous",
     "Ciao, Accedi",
     "Hallo, Anmelden",
-    "Hallo, Inloggen"
+    "Hallo, Inloggen",
 ]
 SIGN_IN_TITLES = [
     "Amazon Sign In",
@@ -47,7 +47,7 @@ SIGN_IN_TITLES = [
     "Iniciar sesión en Amazon",
     "Connexion Amazon",
     "Amazon Accedi",
-    "Inloggen bij Amazon"
+    "Inloggen bij Amazon",
 ]
 CAPTCHA_PAGE_TITLES = ["Robot Check"]
 HOME_PAGE_TITLES = [
@@ -61,7 +61,7 @@ HOME_PAGE_TITLES = [
     "Amazon.de: Günstige Preise für Elektronik & Foto, Filme, Musik, Bücher, Games, Spielzeug & mehr",
     "Amazon.fr : livres, DVD, jeux vidéo, musique, high-tech, informatique, jouets, vêtements, chaussures, sport, bricolage, maison, beauté, puériculture, épicerie et plus encore !",
     "Amazon.it: elettronica, libri, musica, fashion, videogiochi, DVD e tanto altro",
-    "Amazon.nl: Groot aanbod, kleine prijzen in o.a. Elektronica, boeken, sport en meer"
+    "Amazon.nl: Groot aanbod, kleine prijzen in o.a. Elektronica, boeken, sport en meer",
 ]
 SHOPING_CART_TITLES = [
     "Amazon.com Shopping Cart",
@@ -73,7 +73,7 @@ SHOPING_CART_TITLES = [
     "Amazon.fr Panier",
     "Carrello Amazon.it",
     "AmazonSmile Shopping Cart",
-    "Amazon.nl-winkelwagen"
+    "Amazon.nl-winkelwagen",
 ]
 CHECKOUT_TITLES = [
     "Amazon.com Checkout",
@@ -92,7 +92,7 @@ CHECKOUT_TITLES = [
     "Passez votre commande - Processus de paiement Amazon.fr",
     "Ordina - Cassa Amazon.it",
     "AmazonSmile Checkout",
-    "Plaats je bestelling - Amazon.nl-kassa"
+    "Plaats je bestelling - Amazon.nl-kassa",
 ]
 ORDER_COMPLETE_TITLES = [
     "Amazon.com Thanks You",
@@ -104,7 +104,7 @@ ORDER_COMPLETE_TITLES = [
     "Amazon.es te da las gracias",
     "Amazon.fr vous remercie.",
     "Grazie da Amazon.it",
-    "Hartelijk dank"
+    "Hartelijk dank",
 ]
 ADD_TO_CART_TITLES = [
     "Amazon.com: Please Confirm Your Action",
@@ -114,7 +114,7 @@ ADD_TO_CART_TITLES = [
     "Amazon.com : Veuillez confirmer votre action",  # Careful, required non-breaking space after .com (&nbsp)
     "Amazon.it: confermare l'operazione",
     "AmazonSmile: Please Confirm Your Action",
-    "" # Amazon.nl has en empty title, sigh.
+    "",  # Amazon.nl has en empty title, sigh.
 ]
 DOGGO_TITLES = ["Sorry! Something went wrong!"]
 
@@ -312,6 +312,15 @@ class Amazon:
         else:
             log.error("Error taking screenshot due to File I/O error")
 
+    def get_page_source(self):
+        now = datetime.now()
+        date = now.strftime("%m-%d-%Y_%H_%M_%S")
+        file_name = "page_source" + "_" + date + ".txt"
+
+        page_source = self.driver.page_source
+        with open(file_name, "w", encoding="utf-8") as f:
+            f.write(page_source)
+
     def get_captcha_help(self):
         if not self.on_captcha_page():
             log.info("Not on captcha page.")
@@ -420,6 +429,7 @@ class Amazon:
                 log.info(
                     "Couldn't find button after 3 retries. Open a GH issue for this."
                 )
+                self.get_page_source()
                 self.take_screenshot("finalize-order-button-fail")
         return returnVal
 
