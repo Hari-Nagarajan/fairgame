@@ -272,7 +272,9 @@ class Amazon:
                     continue
                 else:
                     ship_float = 0
-            if math.isclose((price_float + ship_float), reserve, abs_tol=0.01):
+            if (ship_float + price_float) <= reserve or math.isclose(
+                (price_float + ship_float), reserve, abs_tol=0.01
+            ):
                 log.info("Item in stock and under reserve!")
                 elements[i].click()
                 log.info("clicking add to cart")
