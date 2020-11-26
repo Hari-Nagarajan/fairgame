@@ -209,7 +209,7 @@ class Amazon:
         log.info(f"Logged in as {self.username}")
 
     def run_item(self, delay=3, test=False):
-        self.take_screenshot("Start-up Screenshot")
+        self.take_screenshot("start-up")
         log.info("Checking stock for items.")
         checkout_success = False
         while not checkout_success:
