@@ -267,11 +267,10 @@ class Amazon:
             ship_float = ship_price.amount
             price_float = price.amount
             if price_float is None:
-                if ship_float is None:
-                    log.error("Error reading price information on row.")
-                    continue
-                else:
-                    ship_float = 0
+                return False
+            if ship_float is None:
+                ship_float = 0
+
             if (ship_float + price_float) <= reserve or math.isclose(
                 (price_float + ship_float), reserve, abs_tol=0.01
             ):
