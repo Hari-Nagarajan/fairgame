@@ -263,15 +263,9 @@ class Amazon:
 
         for i in range(len(elements)):
             price = parse_price(prices[i].text)
-            log.info(f"Price: {price}")
             ship_price = parse_price(shipping[i].text)
-            log.info(f"Ship Price: {ship_price}")
             ship_float = ship_price.amount
-            log.info(f"Ship Float: {ship_float}")
             price_float = price.amount
-            log.info(f"Price Float: {price_float}")
-            teststring = price_float + ship_float
-            log.info("Check it: " + str(teststring) + " with reserve " + str(reserve))
             if price_float is None:
                 if ship_float is None:
                     log.error("Error reading price information on row.")
