@@ -405,6 +405,7 @@ class Amazon:
                 self.check_if_captcha(self.wait_for_pages, ORDER_COMPLETE_TITLES)
             except:
                 log.error("error during order completion")
+                self.take_screenshot("order-failed")
                 return False
         else:
             log.info(
