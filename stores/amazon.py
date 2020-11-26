@@ -105,11 +105,11 @@ DOGGO_TITLES = ["Sorry! Something went wrong!"]
 
 
 class Amazon:
-    def __init__(self, notification_handler, headless=False):
+    def __init__(self, notification_handler, headless=False, checkshipping=False):
         self.notification_handler = notification_handler
         self.asin_list = []
         self.reserve = []
-
+        self.checkshipping = checkshipping
         if os.path.exists(AUTOBUY_CONFIG_PATH):
             with open(AUTOBUY_CONFIG_PATH) as json_file:
                 try:
@@ -238,11 +238,14 @@ class Amazon:
                 checkout_success = False
 
     def check_stock(self, asin, reserve):
-        f = furl(
-            AMAZON_URLS["OFFER_URL"]
-            + asin
-            + "/ref=olp_f_new&f_new=true&f_freeShipping=on"
-        )
+        if self.checkshipping:
+            f = furl(AMAZON_URLS["OFFER_URL"] + asin + "/ref=olp_f_new&f_new=true")
+        else:
+            f = furl(
+                AMAZON_URLS["OFFER_URL"]
+                + asin
+                + "/ref=olp_f_new&f_new=true&f_freeShipping=on"
+            )
         try:
             self.driver.get(f.url)
             elements = self.driver.find_elements_by_xpath(
@@ -251,24 +254,26 @@ class Amazon:
             prices = self.driver.find_elements_by_xpath(
                 '//*[@class="a-size-large a-color-price olpOfferPrice a-text-bold"]'
             )
+            shipping = self.driver.find_elements_by_xpath(
+                '//*[@class="a-color-secondary"]'
+            )
         except Exception as e:
             log.debug(e)
             return False
-        x = 0
-        for str_price in prices:
-            price = parse_price(str_price.text)
-            priceFloat = price.amount
-            if priceFloat is None:
+
+        for i in range(len(elements)):
+            price = parse_price(prices[i].text)
+            ship_price = parse_price(shipping[i].text)
+            ship_float = ship_price.amount
+            price_float = price.amount
+            if price_float is None or ship_float is None:
                 log.error("Error reading price information on row.")
-                x = x + 1
                 continue
-            elif priceFloat <= reserve:
+            elif (price_float + ship_float) <= reserve:
                 log.info("Item in stock and under reserve!")
-                elements[x].click()
+                elements[i].click()
                 log.info("clicking add to cart")
                 return True
-            else:
-                x = x + 1
         return False
 
     def take_screenshot(self, page):
