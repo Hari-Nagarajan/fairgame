@@ -109,15 +109,7 @@ class Amazon:
         self.notification_handler = notification_handler
         self.asin_list = []
         self.reserve = []
-        if headless:
-            enable_headless()
-        options.add_argument(f"user-data-dir=.profile-amz")
-        try:
-            self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
-            self.wait = WebDriverWait(self.driver, 10)
-        except Exception as e:
-            log.error(e)
-            exit(1)
+
         if path.exists(AUTOBUY_CONFIG_PATH):
             with open(AUTOBUY_CONFIG_PATH) as json_file:
                 try:
@@ -129,8 +121,8 @@ class Amazon:
                         "amazon_website", "smile.amazon.com"
                     )
                     for x in range(self.asin_groups):
-                        self.asin_list.append(config[f"asin_list_{x+1}"])
-                        self.reserve.append(float(config[f"reserve_{x+1}"]))
+                        self.asin_list.append(config[f"asin_list_{x + 1}"])
+                        self.reserve.append(float(config[f"reserve_{x + 1}"]))
                     # assert isinstance(self.asin_list, list)
                 except Exception:
                     log.error(
@@ -142,6 +134,16 @@ class Amazon:
                 "No config file found, see here on how to fix this: https://github.com/Hari-Nagarajan/nvidia-bot/wiki/Usage#json-configuration"
             )
             exit(0)
+
+        if headless:
+            enable_headless()
+        options.add_argument(f"user-data-dir=.profile-amz")
+        try:
+            self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
+            self.wait = WebDriverWait(self.driver, 10)
+        except Exception as e:
+            log.error(e)
+            exit(1)
 
         for key in AMAZON_URLS.keys():
             AMAZON_URLS[key] = AMAZON_URLS[key].format(domain=self.amazon_website)
@@ -231,7 +233,11 @@ class Amazon:
                 checkout_success = False
 
     def check_stock(self, asin, reserve):
-        f = furl(AMAZON_URLS["OFFER_URL"] + asin + "/ref=olp_f_new?f_new=true")
+        f = furl(
+            AMAZON_URLS["OFFER_URL"]
+            + asin
+            + "/ref=olp_f_new&f_new=true&f_freeShipping=on"
+        )
         try:
             self.driver.get(f.url)
             elements = self.driver.find_elements_by_xpath(
@@ -348,7 +354,7 @@ class Amazon:
                     )
                     self.asin_list[i] = good_asin_list
                 else:
-                    log.error(f"No ASINs work in list {i+1}.")
+                    log.error(f"No ASINs work in list {i + 1}.")
                     self.asin_list[i] = self.asin_list[i][
                         0
                     ]  # just assign one asin to list, can't remove during execution
@@ -445,16 +451,10 @@ class Amazon:
                 pass
 
     def wait_for_pages(self, page_titles, t=30):
-        log.debug(f"wait_for_pages({page_titles}, {t})")
         try:
-            title = selenium_utils.wait_for_any_title(self.driver, page_titles, t)
-            if not title in page_titles:
-                log.error(
-                    "{} is not a recognized title, report to #tech-support or open an issue on github"
-                )
-            pass
+            selenium_utils.wait_for_any_title(self.driver, page_titles, t)
         except Exception as e:
-            log.debug(e)
+            log.debug(f"wait_for_pages exception: {e}")
             pass
 
     def wait_for_pyo_page(self):
@@ -472,6 +472,8 @@ class Amazon:
             '//*[@id="placeYourOrder"]/span/input',
             '//*[@id="submitOrderButtonId"]/span/input',
             '//input[@name="placeYourOrder1"]',
+            '//*[@id="hlb-ptc-btn-native"]',
+            '//*[@id="sc-buy-box-ptc-button"]/span/input',
         ]
         button = None
         for button_xpath in button_xpaths:
@@ -490,8 +492,8 @@ class Amazon:
             return True
         else:
             if retry < 3:
-                log.info("Couldn't find button. Lets retry in a sec.")
-                time.sleep(5)
+                # log.info("Couldn't find button. Lets retry in a sec.")
+                time.sleep(2)
                 returnVal = self.finalize_order_button(test, retry + 1)
             else:
                 log.info(
