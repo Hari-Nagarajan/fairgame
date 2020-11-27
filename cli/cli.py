@@ -67,12 +67,26 @@ def nvidia(gpu, locale, test, interval):
 
 
 @click.command()
-@click.option("--no-image", is_flag=True)
+@click.option("--no-image", is_flag=True, help="Do no load images")
 @click.option("--headless", is_flag=True)
-@click.option("--test", is_flag=True)
-@click.option("--delay", type=float, default=3.0)
-@click.option("--checkshipping", is_flag=True)
-@click.option("--detailed", is_flag=True)
+@click.option(
+    "--test",
+    is_flag=True,
+    help="Run the checkout flow, but do not actually purchase the item[s]",
+)
+@click.option(
+    "--delay", type=float, default=3.0, help="Time to wait between checks for item[s]"
+)
+@click.option(
+    "--checkshipping",
+    is_flag=True,
+    help="Factor shipping costs into reserve price and look for items with a shipping price",
+)
+@click.option(
+    "--detailed",
+    is_flag=True,
+    help="Take more screenshots. !!!!!! This could cause you to miss checkouts !!!!!!",
+)
 @notify_on_crash
 def amazon(no_image, headless, test, delay, checkshipping, detailed):
     if no_image:
