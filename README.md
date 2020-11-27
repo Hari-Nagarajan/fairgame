@@ -16,7 +16,7 @@ See the [FAQs](#frequently-asked-questions) first.
 
 ## Installation
 
-For Raspberry Pi installation and setup, go [here](#Raspberry-Pi-Setup).
+Easy_XII has created a great cheat sheet for getting started, [please follow this guide](https://docs.google.com/document/d/1grN282tPodM9N57bPq4bbNyKZC01t_4A-sLpzzu_7lM/).
 
 This project uses [Pipenv](https://pypi.org/project/pipenv/) to manage dependencies. Hop in my [Discord](https://discord.gg/qDY2QBtAW6) if you have ideas, need help or just want to tell me about how you got your new 3080. 
 
@@ -40,14 +40,13 @@ Options:
 
 Commands:
   amazon
-  nvidia
+  bestbuy
 ```
 
 ## Current Functionality
 
 | **Website** | **Auto Checkout** | **Open Cart Link** | **Test flag** |
 |:---:|:---:|:---:|:---:|
-| ~~nvidia.com~~ | |~~`✔`~~| |
 | amazon.com |`✔`| | |
 | bestbuy.com | |`✔`| |
 
@@ -86,8 +85,6 @@ Make a copy of `amazon_config.template_json` and rename to `amazon_config.json`:
 * `reserve_x` is the most amount you want to spend for ASINs in `asin_list_x`, ensures you don't buy scalper stuff.
 * `amazon_website` amazon domain you want to use. smile subdomain appears to work better, if available in your country.
 
-At run time, the bot will automatically prune ASINs that cause errors.
-
 Example usage:
 
 ```
@@ -112,33 +109,6 @@ INFO: "2020-09-25 14:41:04,617 - This is a test, so we don't need to wait for th
 INFO: "2020-09-25 14:41:04,617 - Order Placed.
 ```
 
-### Nvidia 
-**NOTE**:
-**As of [October 19, 2020](https://www.nvidia.com/en-us/geforce/forums/geforce-graphics-cards/5/402196/updated-1019-nvidia-store-update-geforce-rtx-3080-/), NVIDIA has indicated that they are no longer selling the Founder's Edition on the NVIDIA store in the US. It is possible they may continue selling them in Europe at a future date, however the bot may not be functional if they modify the store interface before they add new cards to the website. At this point, the NVIDIA store portion of the bot is deprecated.**
-
-Will check stock and open an add to cart link in your browser and send notifications.
-
-**Nvidia flags**
-```
---test : runs a test of the checkout process, without actually making the purchase
---interval: How many seconds between each stock check (default: 5)
-```
-
-Example usage:
-```python
-python app.py nvidia
-What GPU are you after?: 3080
-What locale shall we use? [en_us]:
-...
-INFO: "2020-09-23 21:43:56,152 - We have 1 product IDs for NVIDIA GEFORCE RTX 3080
-INFO: "2020-09-23 21:43:56,153 - Product IDs: ['5438481700']
-INFO: "2020-09-23 21:43:56,153 - Checking stock for 5438481700 at 5 second intervals.
-```
-
-Quick run:
-```python
-python app.py nvidia --gpu 3080 --locale en_us
-```
 
 ## Best Buy
 This is fairly basic right now. Just login to the best buy website in your default browser and then run the command as follows:
@@ -171,6 +141,9 @@ Apprise Example blobs:
   },
   {
   "url": "slack://{OAuthToken}/#{channel}"
+  },
+  {
+  "url": "{COPY AND PASTE DISCORD WEBHOOK HERE}"
   }
 ]
 ```
@@ -203,11 +176,12 @@ The easy fix for this is to add an option where selenium is used (`selenium_util
 chrome_options.binary_location="C:\Users\%USERNAME%\AppData\Local\Google\Chrome\Application\chrome.exe"
 ```
 
-**Error: ```selenium.common.exceptions.SessionNotCreatedException: Message: session not created: This version of ChromeDriver only supports Chrome version 85```**
+**Error: ```selenium.common.exceptions.SessionNotCreatedException: Message: session not created: This version of ChromeDriver only supports Chrome version 87```**
 
-You are not running the proper version of Chrome this requires. As of this update, the current version is Chrome 85. Check your version by going to ```chrome://version/``` in your browser. We are going to be targeting the current stable build of chrome. If you are behind, please update, if you are on a beta or canary branch, you'll have to build your own version of chromedriver-py.
+You are not running the proper version of Chrome this requires. As of this update, the current version is Chrome 87. Check your version by going to ```chrome://version/``` in your browser. We are going to be targeting the current stable build of chrome. If you are behind, please update, if you are on a beta or canary branch, you'll have to build your own version of chromedriver-py.
 
 ## Raspberry-Pi-Setup
+Maybe this works?
 
 1. Prereqs and Setup
 ```shell
@@ -243,7 +217,6 @@ python app.py
 Yes. For example you can run one instance to check stock on the Nvidia store and a separate instance to check stock on Amazon. Bear in mind that if you do this you may end up with multiple purchases going through at the same time.
 
 ### 2. Does Nvidia Bot automatically bypass CAPTCHA's on the store sites?
-* For the Nvidia store, no. The Nvidia bot just notifys you when the desired card is in stock, and tries to add it to your cart. The rest of the checkout process is up to you.
 * For Amazon, yes. The bot will try and auto-solve CAPTCHA's during the checkout process.
 
 ## Attribution
