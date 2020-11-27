@@ -296,13 +296,11 @@ class Amazon:
         return False
 
     def take_screenshot(self, page):
-        now = datetime.now()
-        date = now.strftime("%m-%d-%Y_%H_%M_%S")
-        ss_name = "screenshot-" + page + "_" + date + ".png"
+        file_name = get_timestamp_filename("screenshot-" + page, ".png")
 
-        if self.driver.save_screenshot(ss_name):
+        if self.driver.save_screenshot(file_name):
             try:
-                self.notification_handler.send_notification(page, ss_name)
+                self.notification_handler.send_notification(page, file_name)
             except TimeoutException:
                 log.info("Timed out taking screenshot, trying to continue anyway")
                 pass
@@ -312,14 +310,21 @@ class Amazon:
         else:
             log.error("Error taking screenshot due to File I/O error")
 
-    def get_page_source(self):
-        now = datetime.now()
-        date = now.strftime("%m-%d-%Y_%H_%M_%S")
-        file_name = "page_source" + "_" + date + ".txt"
+    def get_page_source(self, page):
+        file_name = get_timestamp_filename(page + "_source", "html")
 
         page_source = self.driver.page_source
         with open(file_name, "w", encoding="utf-8") as f:
             f.write(page_source)
+
+    def save_rendered_page_source(self, page):
+        file_name = get_timestamp_filename(page + "_source_rendered", "html")
+        """Retuns rendered DOM as page source using JavaScript"""
+        rendered_html = self.driver.execute_script(
+            "return document.getElementsByTagName('html')[0].innerHTML"
+        )
+        with open(file_name, "w", encoding="utf-8") as f:
+            f.write(rendered_html)
 
     def get_captcha_help(self):
         if not self.on_captcha_page():
@@ -429,7 +434,7 @@ class Amazon:
                 log.info(
                     "Couldn't find button after 3 retries. Open a GH issue for this."
                 )
-                self.get_page_source()
+                self.get_page_source("finalize-order-button-fail")
                 self.take_screenshot("finalize-order-button-fail")
         return returnVal
 
@@ -492,3 +497,14 @@ class Amazon:
         log.info("Order Placed.")
         self.take_screenshot("order-placed")
         return True
+
+
+def get_timestamp_filename(name, extension):
+    """Utility method to create a filename with a timestamp appended to the root and before
+    the provided file extension"""
+    now = datetime.now()
+    date = now.strftime("%m-%d-%Y_%H_%M_%S")
+    if extension.startswith("."):
+        return name + "_" + date + extension
+    else:
+        return name + "_" + date + "." + extension
