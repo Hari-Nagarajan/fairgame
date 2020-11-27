@@ -120,11 +120,14 @@ DOGGO_TITLES = ["Sorry! Something went wrong!"]
 
 
 class Amazon:
-    def __init__(self, notification_handler, headless=False, checkshipping=False):
+    def __init__(
+        self, notification_handler, headless=False, checkshipping=False, detailed=False
+    ):
         self.notification_handler = notification_handler
         self.asin_list = []
         self.reserve = []
         self.checkshipping = checkshipping
+        self.detailed = detailed
         if os.path.exists(AUTOBUY_CONFIG_PATH):
             with open(AUTOBUY_CONFIG_PATH) as json_file:
                 try:
@@ -451,7 +454,8 @@ class Amazon:
         log.info("Waiting for Cart Page")
         self.notification_handler.send_notification("Attempting to checkout")
         self.check_if_captcha(self.wait_for_pages, SHOPING_CART_TITLES)
-        # self.take_screenshot("waiting-for-cart")
+        if self.detailed:
+            self.take_screenshot("waiting-for-cart")
 
         try:  # This is fast.
             log.info("Quick redirect to checkout page")
@@ -477,11 +481,13 @@ class Amazon:
         self.wait_for_pyo_page()
 
         log.info("Attempting to Finish checkout")
-        # self.take_screenshot("finish-checkout")
+        if self.detailed:
+            self.take_screenshot("finish-checkout")
 
         if not self.finalize_order_button(test):
             log.info("Failed to click finalize the order")
-            # self.take_screenshot("finalize-fail")
+            if self.detailed:
+                self.take_screenshot("finalize-fail")
             return False
 
         log.info("Waiting for Order completed page.")
