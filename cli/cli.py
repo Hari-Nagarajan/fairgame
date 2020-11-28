@@ -84,7 +84,7 @@ def amazon(no_image, headless, test, delay, checkshipping):
         notification_handler=notification_handler,
         checkshipping=checkshipping,
     )
-    amzn_obj.run_item(delay=delay, test=test)
+    amzn_obj.run(delay=delay, test=test)
 
 
 @click.command()

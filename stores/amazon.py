@@ -10,11 +10,13 @@ from amazoncaptcha import AmazonCaptcha
 from chromedriver_py import binary_path  # this will get you the path variable
 from furl import furl
 from selenium import webdriver
-from selenium.common.exceptions import (
-    NoSuchElementException,
-    SessionNotCreatedException,
-    TimeoutException,
-)
+from selenium.common import exceptions
+
+# from selenium.common.exceptions import (
+#     NoSuchElementException,
+#     SessionNotCreatedException,
+#     TimeoutException,
+# )
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 
@@ -118,6 +120,8 @@ ADD_TO_CART_TITLES = [
 ]
 DOGGO_TITLES = ["Sorry! Something went wrong!"]
 
+TWOFA_TITLES = ["Two-Step Verification"]
+
 
 class Amazon:
     def __init__(self, notification_handler, headless=False, checkshipping=False):
@@ -167,28 +171,6 @@ class Amazon:
 
         for key in AMAZON_URLS.keys():
             AMAZON_URLS[key] = AMAZON_URLS[key].format(domain=self.amazon_website)
-        self.driver.get(AMAZON_URLS["BASE_URL"])
-        log.info("Waiting for home page.")
-        self.check_if_captcha(self.wait_for_pages, HOME_PAGE_TITLES)
-        if self.is_logged_in():
-            log.info("Already logged in")
-        else:
-            log.info("Lets log in.")
-
-            is_smile = "smile" in AMAZON_URLS["BASE_URL"]
-            xpath = (
-                '//*[@id="ge-hello"]/div/span/a'
-                if is_smile
-                else '//*[@id="nav-link-accountList"]/div/span'
-            )
-            selenium_utils.button_click_using_xpath(self.driver, xpath)
-            log.info("Wait for Sign In page")
-            self.check_if_captcha(self.wait_for_pages, SIGN_IN_TITLES)
-            self.login()
-            log.info("Waiting 15 seconds.")
-            time.sleep(
-                15
-            )  # We can remove this once I get more info on the phone verification page.
 
     def is_logged_in(self):
         try:
@@ -220,12 +202,18 @@ class Amazon:
         self.driver.find_element_by_xpath('//*[@id="ap_password"]').send_keys(
             self.password + Keys.RETURN
         )
-
+        time.sleep(1)
+        if self.driver.title in TWOFA_TITLES:
+            log.info("enter in your two-step verification code in browser")
+            while self.driver.title in TWOFA_TITLES:
+                time.sleep(3)
         log.info(f"Logged in as {self.username}")
 
     def run_item(self, delay=3, test=False):
-        self.save_screenshot("start-up")
-        log.info("Checking stock for items.")
+        # self.save_screenshot("start-up")
+        # log.info("Checking stock for items.")
+        # self.navigate_checkout(self)
+
         checkout_success = False
         while not checkout_success:
             pop_list = []
@@ -251,6 +239,15 @@ class Amazon:
                             break
             if self.asin_list:  # keep bot going if additional ASINs left
                 checkout_success = False
+
+    def run_asins(self, delay):
+        found_asin = False
+        while not found_asin:
+            for i in range(len(self.asin_list)):
+                for asin in self.asin_list[i]:
+                    if self.check_stock(asin, self.reserve[i]):
+                        return asin
+                    time.sleep(delay)
 
     def check_stock(self, asin, reserve):
         if self.checkshipping:
@@ -301,7 +298,7 @@ class Amazon:
         if self.driver.save_screenshot(file_name):
             try:
                 self.notification_handler.send_notification(page, file_name)
-            except TimeoutException:
+            except exceptions.TimeoutException:
                 log.info("Timed out taking screenshot, trying to continue anyway")
                 pass
             except Exception as e:
@@ -410,7 +407,7 @@ class Amazon:
                     and self.driver.find_element_by_xpath(button_xpath).is_enabled()
                 ):
                     button = self.driver.find_element_by_xpath(button_xpath)
-            except NoSuchElementException:
+            except exceptions.NoSuchElementException:
                 log.debug(f"{button_xpath}, lets try a different one.")
         if button:
             log.info(f"Clicking Button: {button.text}")
@@ -489,6 +486,187 @@ class Amazon:
         log.info("Order Placed.")
         self.save_screenshot("order-placed")
         return True
+
+    def run(self, delay=3, test=False):
+        self.driver.get(AMAZON_URLS["BASE_URL"])
+        log.info("Waiting for home page.")
+        self.handle_startup()
+        if not self.is_logged_in():
+            self.login()
+
+        keep_going = True
+
+        while keep_going:
+            asin = self.run_asins(delay)
+            # found something in stock and under reserve
+            self.try_to_checkout = True
+            self.checkout_retry = 0
+            self.order_retry = 0
+            while self.try_to_checkout:
+                self.navigate_pages(test)
+                if not self.try_to_checkout:
+                    self.remove_asin_list(asin)
+                elif self.checkout_retry == 3:
+                    self.try_to_checkout = False
+                elif self.order_retry == 3:
+                    if test:
+                        self.remove_asin_list(asin)
+                    self.try_to_checkout = False
+            if not self.asin_list:
+                keep_going = False
+
+    def remove_asin_list(self, asin):
+        for i in range(len(self.asin_list)):
+            if asin in self.asin_list[i]:
+                self.asin_list.pop(i)
+                self.reserve.pop(i)
+                break
+
+    def navigate_pages(self, test):
+        title = self.driver.title
+        # print(title)
+        if title in SIGN_IN_TITLES:
+            self.login()
+        elif title in CAPTCHA_PAGE_TITLES:
+            self.handle_captcha()
+        elif title in SHOPING_CART_TITLES:
+            self.handle_cart()
+        elif title in CHECKOUT_TITLES:
+            self.handle_checkout(test)
+        # elif title in ADD_TO_CART_TITLES:
+        #     self.handle_atc
+        elif title in ORDER_COMPLETE_TITLES:
+            self.handle_order_complete()
+        # elif title in HOME_PAGE_TITLES:
+        #     self.handle_startup()
+        #     self.login()
+        elif title in DOGGO_TITLES:
+            self.handle_doggos()
+        else:
+            log.error(
+                f"{title} is not a known title, please create issue indicating the title with a screenshot of page"
+            )
+
+    def handle_cart(self):
+        try:  # This is fast.
+            log.info("Quick redirect to checkout page")
+            cart_initiate_id = self.driver.find_element_by_name("cartInitiateId")
+            cart_initiate_id = cart_initiate_id.get_attribute("value")
+            self.driver.get(
+                CHECKOUT_URL.format(
+                    domain=self.amazon_website, cart_id=cart_initiate_id
+                )
+            )
+        except:
+            log.info("clicking checkout.")
+            try:
+                self.driver.find_element_by_xpath(
+                    '//*[@id="hlb-ptc-btn-native"]'
+                ).click()
+            except:
+                self.save_screenshot("start-checkout-fail")
+                log.info("Failed to checkout.")
+                self.checkout_retry += 1
+
+    def handle_checkout(self, test):
+        button_xpaths = [
+            '//*[@id="orderSummaryPrimaryActionBtn"]',
+            '//*[@id="bottomSubmitOrderButtonId"]/span/input',
+            '//*[@id="placeYourOrder"]/span/input',
+            '//*[@id="submitOrderButtonId"]/span/input',
+            '//input[@name="placeYourOrder1"]',
+            '//*[@id="hlb-ptc-btn-native"]',
+            '//*[@id="sc-buy-box-ptc-button"]/span/input',
+        ]
+        button = None
+        for button_xpath in button_xpaths:
+            try:
+                if (
+                    self.driver.find_element_by_xpath(button_xpath).is_displayed()
+                    and self.driver.find_element_by_xpath(button_xpath).is_enabled()
+                ):
+                    button = self.driver.find_element_by_xpath(button_xpath)
+            except exceptions.NoSuchElementException:
+                log.debug(f"{button_xpath}, lets try a different one.")
+            if button:
+                log.info(f"Clicking Button: {button.text}")
+                if not test:
+                    button.click()
+        self.order_retry += 1
+        # else:
+        #     if retry < 3:
+        #         # log.info("Couldn't find button. Lets retry in a sec.")
+        #         time.sleep(2)
+        #         returnVal = self.finalize_order_button(test, retry + 1)
+        #     else:
+        #         log.info(
+        #             "Couldn't find button after 3 retries. Open a GH issue for this."
+        #         )
+        #         self.save_page_source("finalize-order-button-fail")
+        #         self.save_screenshot("finalize-order-button-fail")
+        # return returnVal
+
+    def handle_order_complete(self):
+        log.info("Order Placed.")
+        self.save_screenshot("order-placed")
+        self.try_to_checkout = False
+
+    def handle_doggos(self):
+        pass
+
+    def handle_startup(self):
+        if self.is_logged_in():
+            log.info("Already logged in")
+        else:
+            log.info("Lets log in.")
+
+            is_smile = "smile" in AMAZON_URLS["BASE_URL"]
+            xpath = (
+                '//*[@id="ge-hello"]/div/span/a'
+                if is_smile
+                else '//*[@id="nav-link-accountList"]/div/span'
+            )
+            selenium_utils.button_click_using_xpath(self.driver, xpath)
+            log.info("Wait for Sign In page")
+            time.sleep(1)
+
+            # self.check_if_captcha(self.wait_for_pages, SIGN_IN_TITLES)
+            # self.login()
+            # log.info("Waiting 15 seconds.")
+            # time.sleep(
+            #     15
+            # )  # We can remove this once I get more info on the phone verification page.
+
+    def handle_captcha(self):
+        try:
+            if self.driver.find_element_by_xpath(
+                '//form[@action="/errors/validateCaptcha"]'
+            ):
+                try:
+                    log.info("Stuck on a captcha... Lets try to solve it.")
+                    captcha = AmazonCaptcha.fromdriver(self.driver)
+                    solution = captcha.solve()
+                    log.info(f"The solution is: {solution}")
+                    if solution == "Not solved":
+                        log.info(
+                            f"Failed to solve {captcha.image_link}, lets reload and get a new captcha."
+                        )
+                        self.driver.refresh()
+                        time.sleep(5)
+                    else:
+                        self.save_screenshot("captcha")
+                        self.driver.find_element_by_xpath(
+                            '//*[@id="captchacharacters"]'
+                        ).send_keys(solution + Keys.RETURN)
+                except Exception as e:
+                    log.debug(e)
+                    log.info("Error trying to solve captcha. Refresh and retry.")
+                    self.driver.refresh()
+                    time.sleep(5)
+        except exceptions.NoSuchElementException:
+            log.error("captcha page does not contain captcha element")
+            log.error("restarting at home page")
+            self.driver.get(AMAZON_URLS["BASE_URL"])
 
 
 def get_timestamp_filename(name, extension):
