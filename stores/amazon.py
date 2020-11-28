@@ -224,7 +224,7 @@ class Amazon:
         log.info(f"Logged in as {self.username}")
 
     def run_item(self, delay=3, test=False):
-        self.take_screenshot("start-up")
+        self.save_screenshot("start-up")
         log.info("Checking stock for items.")
         checkout_success = False
         while not checkout_success:
@@ -295,7 +295,7 @@ class Amazon:
                 return True
         return False
 
-    def take_screenshot(self, page):
+    def save_screenshot(self, page):
         file_name = get_timestamp_filename("screenshot-" + page, ".png")
 
         if self.driver.save_screenshot(file_name):
@@ -335,7 +335,7 @@ class Amazon:
                 time.sleep(5)
                 self.get_captcha_help()
             else:
-                self.take_screenshot("captcha")
+                self.save_screenshot("captcha")
                 self.driver.find_element_by_xpath(
                     '//*[@id="captchacharacters"]'
                 ).send_keys(solution + Keys.RETURN)
@@ -371,7 +371,7 @@ class Amazon:
                     f"An error happened, please submit a bug report including a screenshot of the page the "
                     f"selenium browser is on. There may be a file saved at: amazon-{func.__name__}.png"
                 )
-                self.take_screenshot("title-fail")
+                self.save_screenshot("title-fail")
                 time.sleep(60)
                 # self.driver.close()
                 log.debug(e)
@@ -426,8 +426,8 @@ class Amazon:
                 log.info(
                     "Couldn't find button after 3 retries. Open a GH issue for this."
                 )
-                self.get_page_source("finalize-order-button-fail")
-                self.take_screenshot("finalize-order-button-fail")
+                self.save_page_source("finalize-order-button-fail")
+                self.save_screenshot("finalize-order-button-fail")
         return returnVal
 
     def wait_for_order_completed(self, test):
@@ -436,7 +436,7 @@ class Amazon:
                 self.check_if_captcha(self.wait_for_pages, ORDER_COMPLETE_TITLES)
             except:
                 log.error("error during order completion")
-                self.take_screenshot("order-failed")
+                self.save_screenshot("order-failed")
                 return False
         else:
             log.info(
@@ -466,7 +466,7 @@ class Amazon:
                     '//*[@id="hlb-ptc-btn-native"]'
                 ).click()
             except:
-                self.take_screenshot("start-checkout-fail")
+                self.save_screenshot("start-checkout-fail")
                 log.info("Failed to checkout. Returning to stock check.")
                 return False
 
@@ -487,7 +487,7 @@ class Amazon:
             return False
 
         log.info("Order Placed.")
-        self.take_screenshot("order-placed")
+        self.save_screenshot("order-placed")
         return True
 
 
