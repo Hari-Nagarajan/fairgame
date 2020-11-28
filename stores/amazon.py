@@ -310,21 +310,13 @@ class Amazon:
         else:
             log.error("Error taking screenshot due to File I/O error")
 
-    def get_page_source(self, page):
+    def save_page_source(self, page):
+        """Saves DOM at the current state when called.  This includes state changes from DOM manipulation via JS"""
         file_name = get_timestamp_filename(page + "_source", "html")
 
         page_source = self.driver.page_source
         with open(file_name, "w", encoding="utf-8") as f:
             f.write(page_source)
-
-    def save_rendered_page_source(self, page):
-        file_name = get_timestamp_filename(page + "_source_rendered", "html")
-        """Retuns rendered DOM as page source using JavaScript"""
-        rendered_html = self.driver.execute_script(
-            "return document.getElementsByTagName('html')[0].innerHTML"
-        )
-        with open(file_name, "w", encoding="utf-8") as f:
-            f.write(rendered_html)
 
     def get_captcha_help(self):
         if not self.on_captcha_page():
