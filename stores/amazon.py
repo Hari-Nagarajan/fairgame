@@ -34,6 +34,7 @@ AUTOBUY_CONFIG_PATH = "amazon_config.json"
 
 SIGN_IN_TEXT = [
     "Hello, Sign in",
+    "Sign in",
     "Hola, Identifícate",
     "Bonjour, Identifiez-vous",
     "Ciao, Accedi",
@@ -195,7 +196,8 @@ class Amazon:
 
     def is_logged_in(self):
         try:
-            text = wait_for_element(self.driver, "nav-link-accountList").text
+            # text = wait_for_element(self.driver, "nav-link-accountList").text
+            text = self.driver.find_element_by_id("nav-link-accountList").text
             return not any(sign_in in text for sign_in in SIGN_IN_TEXT)
         except Exception:
             return False
