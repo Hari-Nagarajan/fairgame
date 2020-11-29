@@ -134,6 +134,7 @@ class Amazon:
         self.reserve = []
         self.checkshipping = checkshipping
         self.detailed = detailed
+        self.used = used
         if os.path.exists(AUTOBUY_CONFIG_PATH):
             with open(AUTOBUY_CONFIG_PATH) as json_file:
                 try:
