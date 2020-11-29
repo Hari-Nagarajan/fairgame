@@ -59,7 +59,7 @@ Commands:
 ```
 --no-image : prevents images from loading on amazon webdriver
 --test : This will not finish the checkout
---delay : modify default delay between page refreshes (3 seconds), use --delay=x, where is is time in seconds
+--delay : modify default delay between page refreshes (3 seconds), use --delay=x, where is is time in seconds (accepts decimals)
 --checkshipping : Bot will consider shipping + sales price in reserve check. Without this flag, only free shipping items will be considered
 ```
 
@@ -82,7 +82,7 @@ Make a copy of `amazon_config.template_json` and rename to `amazon_config.json`:
 * `asin_list_x` list of ASINs for products you want to purchase. You must locate these (see Discord or lookup the ASIN on product pages). 
     * The first time an item from list "x" is in stock and under its associated reserve, it will purchase it. 
     * If the purchase is successful, the bot will not buy anything else from list "x".
-* `reserve_x` is the most amount you want to spend for ASINs in `asin_list_x`, ensures you don't buy scalper stuff.
+* `reserve_x` is the most amount you want to spend for a single item (i.e., ASIN) in `asin_list_x`. Does not include tax. If --checkshipping flag is active, this includes shipping listed on offer page.
 * `amazon_website` amazon domain you want to use. smile subdomain appears to work better, if available in your country.
 
 Example usage:
