@@ -122,13 +122,19 @@ DOGGO_TITLES = ["Sorry! Something went wrong!"]
 
 class Amazon:
     def __init__(
-        self, notification_handler, headless=False, checkshipping=False, detailed=False
+        self,
+        notification_handler,
+        headless=False,
+        checkshipping=False,
+        detailed=False,
+        used=False,
     ):
         self.notification_handler = notification_handler
         self.asin_list = []
         self.reserve = []
         self.checkshipping = checkshipping
         self.detailed = detailed
+        self.used = used
         if os.path.exists(AUTOBUY_CONFIG_PATH):
             with open(AUTOBUY_CONFIG_PATH) as json_file:
                 try:
@@ -258,13 +264,19 @@ class Amazon:
 
     def check_stock(self, asin, reserve):
         if self.checkshipping:
-            f = furl(AMAZON_URLS["OFFER_URL"] + asin + "/ref=olp_f_new&f_new=true")
+            if self.used:
+                f = furl(AMAZON_URLS["OFFER_URL"] + asin)
+            else:
+                f = furl(AMAZON_URLS["OFFER_URL"] + asin + "/ref=olp_f_new&f_new=true")
         else:
-            f = furl(
-                AMAZON_URLS["OFFER_URL"]
-                + asin
-                + "/ref=olp_f_new&f_new=true&f_freeShipping=on"
-            )
+            if self.used:
+                f = furl(AMAZON_URLS["OFFER_URL"] + asin + "/f_freeShipping=on")
+            else:
+                f = furl(
+                    AMAZON_URLS["OFFER_URL"]
+                    + asin
+                    + "/ref=olp_f_new&f_new=true&f_freeShipping=on"
+                )
         try:
             self.driver.get(f.url)
             elements = self.driver.find_elements_by_xpath(
