@@ -93,7 +93,7 @@ def nvidia(gpu, locale, test, interval):
     help="Show used items in search listings.",
 )
 @notify_on_crash
-def amazon(no_image, headless, test, delay, checkshipping, detailed):
+def amazon(no_image, headless, test, delay, checkshipping, detailed, used):
     if no_image:
         selenium_utils.no_amazon_image()
     else:
