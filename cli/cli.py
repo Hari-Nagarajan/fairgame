@@ -87,6 +87,11 @@ def nvidia(gpu, locale, test, interval):
     is_flag=True,
     help="Take more screenshots. !!!!!! This could cause you to miss checkouts !!!!!!",
 )
+@click.option(
+    "--used",
+    is_flag=True,
+    help="Show used items in search listings.",
+)
 @notify_on_crash
 def amazon(no_image, headless, test, delay, checkshipping, detailed):
     if no_image:
@@ -99,6 +104,7 @@ def amazon(no_image, headless, test, delay, checkshipping, detailed):
         notification_handler=notification_handler,
         checkshipping=checkshipping,
         detailed=detailed,
+        used=used,
     )
     amzn_obj.run_item(delay=delay, test=test)
 
