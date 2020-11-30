@@ -96,7 +96,7 @@ CHECKOUT_TITLES = [
     "AmazonSmile Checkout",
     "Plaats je bestelling - Amazon.nl-kassa",
     "Place Your Order - AmazonSmile Checkout",
-    "Preparing your order"
+    "Preparing your order",
 ]
 ORDER_COMPLETE_TITLES = [
     "Amazon.com Thanks You",
@@ -412,12 +412,14 @@ class Amazon:
                 )
             except exceptions.NoSuchElementException:
                 try:
-                    button = self.driver.find_element_by_partial_link_text('No Thanks')
+                    button = self.driver.find_element_by_partial_link_text("No Thanks")
                 except exceptions.NoSuchElementException:
                     log.error("could not find button")
                     log.info("check if PYO button hidden")
                     try:
-                        button = self.driver.find_element_by_xpath('//*[@id="placeYourOrder"]/span/input')
+                        button = self.driver.find_element_by_xpath(
+                            '//*[@id="placeYourOrder"]/span/input'
+                        )
                     except exceptions.NoSuchElementException:
                         self.save_page_source("prime-signup-error")
                         self.save_screenshot("prime-signup-error")
@@ -475,7 +477,7 @@ class Amazon:
         button_xpaths = [
             '//*[@id="submitOrderButtonId"]/span/input',
             '//*[@id="bottomSubmitOrderButtonId"]/span/input',
-            '//*[@id="placeYourOrder"]/span/input'
+            '//*[@id="placeYourOrder"]/span/input',
         ]
         # restarting with this, not sure where all of these came from, can add more as needed.
         # '//*[@id="orderSummaryPrimaryActionBtn"]',
@@ -574,6 +576,7 @@ class Amazon:
         page_source = self.driver.page_source
         with open(file_name, "w", encoding="utf-8") as f:
             f.write(page_source)
+
 
 def get_timestamp_filename(name, extension):
     """Utility method to create a filename with a timestamp appended to the root and before
