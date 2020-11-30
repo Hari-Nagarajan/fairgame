@@ -3,6 +3,7 @@ import secrets
 import time
 import os
 import math
+import re
 from datetime import datetime
 from price_parser import parse_price
 
@@ -118,6 +119,7 @@ ADD_TO_CART_TITLES = [
     "",  # Amazon.nl has en empty title, sigh.
 ]
 DOGGO_TITLES = ["Sorry! Something went wrong!"]
+SHIPPING_ONLY_IF = "FREE Shipping on orders over"
 
 
 class Amazon:
@@ -294,7 +296,10 @@ class Amazon:
 
         for i in range(len(elements)):
             price = parse_price(prices[i].text)
-            ship_price = parse_price(shipping[i].text)
+            if SHIPPING_ONLY_IF in shipping[i].text:
+                ship_price = parse_price("0")
+            else:
+                ship_price = parse_price(shipping[i].text)
             ship_float = ship_price.amount
             price_float = price.amount
             if price_float is None:
