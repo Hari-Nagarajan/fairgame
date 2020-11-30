@@ -137,6 +137,11 @@ class Amazon:
         self.checkshipping = checkshipping
         self.detailed = detailed
         self.used = used
+        self.headless = headless
+
+        self.start_browser()
+
+    def start_browser(self):
         if os.path.exists(AUTOBUY_CONFIG_PATH):
             with open(AUTOBUY_CONFIG_PATH) as json_file:
                 try:
@@ -162,7 +167,7 @@ class Amazon:
             )
             exit(0)
 
-        if headless:
+        if self.headless:
             enable_headless()
 
         # profile_amz = ".profile-amz"
@@ -201,6 +206,16 @@ class Amazon:
             time.sleep(
                 15
             )  # We can remove this once I get more info on the phone verification page.
+
+    def restart_browser(self):
+        try:
+            self.driver.quit()
+            self.start_browser()
+        except Exception as e:
+            log.error(e)
+            self.notification_handler.send_notification(
+                "Amazon bot has failed: " + str(e)
+            )
 
     def is_logged_in(self):
         try:
@@ -241,6 +256,7 @@ class Amazon:
         checkout_success = False
         while not checkout_success:
             pop_list = []
+            log.info("Checking stock for items...")
             for i in range(len(self.asin_list)):
                 for asin in self.asin_list[i]:
                     checkout_success = self.check_stock(asin, self.reserve[i])
@@ -292,6 +308,8 @@ class Amazon:
             )
         except Exception as e:
             log.error(e)
+            log.info("Attempting to re-open window...")
+            self.restart_browser()
             return False
 
         for i in range(len(elements)):
