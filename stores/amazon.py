@@ -299,7 +299,7 @@ class Amazon:
             price_float = price.amount
             if price_float is None:
                 return False
-            if ship_float is None:
+            if ship_float is None or is not self.checkshipping:
                 ship_float = 0
 
             if (ship_float + price_float) <= reserve or math.isclose(
