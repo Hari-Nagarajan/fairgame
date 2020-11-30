@@ -115,10 +115,10 @@ def amazon(no_image, headless, test, delay, checkshipping, detailed, used):
     "--delay", type=float, default=3.0, help="Time to wait between checks for item[s]"
 )
 @notify_on_crash
-def bestbuy(headless, delay): #headless mode is not working and was not working earlier either.
-    bb = BestBuyHandler(
-        notification_handler=notification_handler, headless=headless
-    )
+def bestbuy(
+    headless, delay
+):  # headless mode is not working and was not working earlier either.
+    bb = BestBuyHandler(notification_handler=notification_handler, headless=headless)
     bb.run_item(delay=delay)
 
 

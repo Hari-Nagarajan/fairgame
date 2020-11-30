@@ -43,7 +43,11 @@ options = Options()
 options.page_load_strategy = "eager"
 options.add_experimental_option("excludeSwitches", ["enable-automation"])
 options.add_experimental_option("useAutomationExtension", False)
-prefs = {"profile.managed_default_content_settings.images": 2,"profile.default_content_setting_values.media_stream_mic": 2,"profile.default_content_setting_values.media_stream_camera": 2} #Disable camera and mic by default.
+prefs = {
+    "profile.managed_default_content_settings.images": 2,
+    "profile.default_content_setting_values.media_stream_mic": 2,
+    "profile.default_content_setting_values.media_stream_camera": 2,
+}  # Disable camera and mic by default.
 options.add_experimental_option("prefs", prefs)
 options.add_argument("user-data-dir=.profile-bb")
 AUTOBUY_CONFIG_PATH = "bestbuy_config.json"
@@ -53,7 +57,7 @@ class BestBuyHandler:
     def __init__(self, notification_handler, headless=False):
         self.notification_handler = notification_handler
         self.session = requests.Session()
-        self.auto_buy = False #not working, is currently disabled.
+        self.auto_buy = False  # not working, is currently disabled.
         self.sku_list = []
         self.reserve = []
         self.account = {"username": "", "password": ""}
@@ -97,7 +101,7 @@ class BestBuyHandler:
             exit(1)
         self.driver.get("https://www.bestbuy.com/")
         log.info("Loading home page.")
-        
+
         if self.is_logged_in():
             log.info("Already logged in")
         else:
@@ -108,8 +112,8 @@ class BestBuyHandler:
                 60
             )  # We can remove this once I get more info on the phone verification page.
         self.save_screenshot("start-up")
-        self.driver.close() #Close the window, but leave the session running. When autobuying it will popup the add cart window.
-        #Test all the SKUs for validity.
+        self.driver.close()  # Close the window, but leave the session running. When autobuying it will popup the add cart window.
+        # Test all the SKUs for validity.
         for i in range(len(self.sku_list)):
             for skuid in self.sku_list[i]:
                 response = self.session.get(
@@ -121,15 +125,16 @@ class BestBuyHandler:
 
                 self.session.get(self.product_url)
                 log.info(f"Product URL Request: {response.status_code}")
-                
 
     def is_logged_in(self):
         try:
-            text = self.driver.find_element_by_xpath("/html/body/div[2]/div/div/div/header/div[2]/div[2]/div/nav[2]/ul/li[1]/button/div[2]/span").text
+            text = self.driver.find_element_by_xpath(
+                "/html/body/div[2]/div/div/div/header/div[2]/div[2]/div/nav[2]/ul/li[1]/button/div[2]/span"
+            ).text
             print(text)
             return "Account" != text
         except Exception as e:
-            print (repr(e))
+            print(repr(e))
             return False
 
     def login(self):
@@ -141,9 +146,7 @@ class BestBuyHandler:
             self.driver.find_element_by_xpath('//*[@id="fld-p1"]').send_keys(
                 self.account["password"]
             )
-            self.driver.find_element_by_xpath(
-                '//*[@id="ca-remember-me"]'
-            ).click()
+            self.driver.find_element_by_xpath('//*[@id="ca-remember-me"]').click()
             self.driver.find_element_by_xpath(
                 "/html/body/div[1]/div/section/main/div[1]/div/div/div/div/form/div[4]/button"
             ).click()
@@ -152,7 +155,7 @@ class BestBuyHandler:
         WebDriverWait(self.driver, 10).until(
             lambda x: "Official Online Store" in self.driver.title
         )
-            
+
     def run_item(self, delay=3, test=False):
         log.info("Checking stock for items.")
         checkout_success = False
@@ -160,7 +163,9 @@ class BestBuyHandler:
             pop_list = []
             for i in range(len(self.sku_list)):
                 for sku in self.sku_list[i]:
-                    checkout_success = self.in_stock(sku, self.reserve[i]) #reserve is not used yet.
+                    checkout_success = self.in_stock(
+                        sku, self.reserve[i]
+                    )  # reserve is not used yet.
                     if checkout_success:
                         log.info(f"attempting to buy {sku}")
                         if self.auto_buy:
@@ -182,7 +187,7 @@ class BestBuyHandler:
             if self.sku_list:  # keep bot going if additional ASINs left
                 checkout_success = False
 
-    def in_stock(self,skuid,reserve):
+    def in_stock(self, skuid, reserve):
         log.info("Checking stock")
         url = "https://www.bestbuy.com/api/tcfb/model.json?paths=%5B%5B%22shop%22%2C%22scds%22%2C%22v2%22%2C%22page%22%2C%22tenants%22%2C%22bbypres%22%2C%22pages%22%2C%22globalnavigationv5sv%22%2C%22header%22%5D%2C%5B%22shop%22%2C%22buttonstate%22%2C%22v5%22%2C%22item%22%2C%22skus%22%2C{}%2C%22conditions%22%2C%22NONE%22%2C%22destinationZipCode%22%2C%22%2520%22%2C%22storeId%22%2C%22%2520%22%2C%22context%22%2C%22cyp%22%2C%22addAll%22%2C%22false%22%5D%5D&method=get".format(
             skuid
@@ -214,16 +219,16 @@ class BestBuyHandler:
                 log.info("Item is out of stock")
                 return False
 
-    def add_to_cart(self,skuid):
+    def add_to_cart(self, skuid):
         webbrowser.open_new(BEST_BUY_CART_URL.format(sku=skuid))
         return BEST_BUY_CART_URL.format(sku=skuid)
 
-    def auto_checkout(self,skuid):
+    def auto_checkout(self, skuid):
         self.auto_add_to_cart(skuid)
         self.start_checkout()
         self.driver.get("https://www.bestbuy.com/checkout/c/r/fast-track")
 
-    def auto_add_to_cart(self,skuid):
+    def auto_add_to_cart(self, skuid):
         log.info("Attempting to auto add to cart...")
 
         body = {"items": [{"skuId": skuid}]}
@@ -358,7 +363,7 @@ class BestBuyHandler:
         ]
         log.info(r.status_code)
         log.info(r.text)
-        
+
     def save_screenshot(self, page):
         file_name = get_timestamp_filename("bestbuy-screenshot-" + page, ".png")
 
@@ -381,7 +386,7 @@ class BestBuyHandler:
         page_source = self.driver.page_source
         with open(file_name, "w", encoding="utf-8") as f:
             f.write(page_source)
-            
+
     def get_tas_data(self):
         headers = {
             "accept": "*/*",
@@ -401,6 +406,7 @@ class BestBuyHandler:
                 return json.loads(r.text)
             except Exception as e:
                 sleep(5)
+
 
 def get_timestamp_filename(name, extension):
     """Utility method to create a filename with a timestamp appended to the root and before
