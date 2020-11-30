@@ -110,14 +110,16 @@ def amazon(no_image, headless, test, delay, checkshipping, detailed, used):
 
 
 @click.command()
-@click.option("--sku", type=str, required=True)
 @click.option("--headless", is_flag=True)
+@click.option(
+    "--delay", type=float, default=3.0, help="Time to wait between checks for item[s]"
+)
 @notify_on_crash
-def bestbuy(sku, headless):
+def bestbuy(headless, delay): #headless mode is not working and was not working earlier either.
     bb = BestBuyHandler(
-        sku, notification_handler=notification_handler, headless=headless
+        notification_handler=notification_handler, headless=headless
     )
-    bb.run_item()
+    bb.run_item(delay=delay)
 
 
 @click.command()

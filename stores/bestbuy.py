@@ -1,5 +1,8 @@
 import json
 import webbrowser
+import time
+import os
+from datetime import datetime
 from time import sleep
 
 from chromedriver_py import binary_path  # this will get you the path variable
@@ -40,19 +43,20 @@ options = Options()
 options.page_load_strategy = "eager"
 options.add_experimental_option("excludeSwitches", ["enable-automation"])
 options.add_experimental_option("useAutomationExtension", False)
-prefs = {"profile.managed_default_content_settings.images": 2}
+prefs = {"profile.managed_default_content_settings.images": 2,"profile.default_content_setting_values.media_stream_mic": 2,"profile.default_content_setting_values.media_stream_camera": 2} #Disable camera and mic by default.
 options.add_experimental_option("prefs", prefs)
 options.add_argument("user-data-dir=.profile-bb")
+AUTOBUY_CONFIG_PATH = "bestbuy_config.json"
 
 
 class BestBuyHandler:
-    def __init__(self, sku_id, notification_handler, headless=False):
+    def __init__(self, notification_handler, headless=False):
         self.notification_handler = notification_handler
-        self.sku_id = sku_id
         self.session = requests.Session()
-        self.auto_buy = False
+        self.auto_buy = False #not working, is currently disabled.
+        self.sku_list = []
+        self.reserve = []
         self.account = {"username": "", "password": ""}
-
         adapter = HTTPAdapter(
             max_retries=Retry(
                 total=3,
@@ -64,102 +68,124 @@ class BestBuyHandler:
         self.session.mount("https://", adapter)
         self.session.mount("http://", adapter)
 
-        response = self.session.get(
-            BEST_BUY_PDP_URL.format(sku=self.sku_id), headers=DEFAULT_HEADERS
-        )
-        log.info(f"PDP Request: {response.status_code}")
-        self.product_url = response.url
-        log.info(f"Product URL: {self.product_url}")
-
-        self.session.get(self.product_url)
-        log.info(f"Product URL Request: {response.status_code}")
-
-        if self.auto_buy:
-            log.info("Loading headless driver.")
-            if headless:
-                enable_headless()  # TODO - check if this still messes up the cookies.
-            options.add_argument(
-                "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
-            )
-
-            self.driver = webdriver.Chrome(
-                executable_path=binary_path,
-                options=options,
-            )
-            log.info("Loading https://www.bestbuy.com.")
-            self.login()
-
-            self.driver.get(self.product_url)
-            cookies = self.driver.get_cookies()
-
-            [
-                self.session.cookies.set_cookie(
-                    requests.cookies.create_cookie(
-                        domain=cookie["domain"],
-                        name=cookie["name"],
-                        value=cookie["value"],
+        if os.path.exists(AUTOBUY_CONFIG_PATH):
+            with open(AUTOBUY_CONFIG_PATH) as json_file:
+                try:
+                    config = json.load(json_file)
+                    self.account["username"] = config["username"]
+                    self.account["password"] = config["password"]
+                    self.sku_groups = int(config["sku_groups"])
+                    for x in range(self.sku_groups):
+                        self.sku_list.append(config[f"sku_list_{x + 1}"])
+                        self.reserve.append(float(config[f"reserve_{x + 1}"]))
+                except Exception as e:
+                    print(e)
+                    log.error(
+                        "bestbuy_config.json file not formatted properly: https://github.com/Hari-Nagarajan/nvidia-bot/wiki/Usage#json-configuration"
                     )
+                    exit(0)
+        else:
+            log.error(
+                "No bestbuy_config.json file found, see here on how to fix this: https://github.com/Hari-Nagarajan/nvidia-bot/wiki/Usage#json-configuration"
+            )
+            exit(0)
+        try:
+            self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
+            self.wait = WebDriverWait(self.driver, 10)
+        except Exception as e:
+            log.error(e)
+            exit(1)
+        self.driver.get("https://www.bestbuy.com/")
+        log.info("Loading home page.")
+        
+        if self.is_logged_in():
+            log.info("Already logged in")
+        else:
+            log.info("Lets log in.")
+            self.login()
+            log.info("Waiting 6- seconds for SMS 2FA verification if requested.")
+            time.sleep(
+                60
+            )  # We can remove this once I get more info on the phone verification page.
+        self.save_screenshot("start-up")
+        self.driver.close() #Close the window, but leave the session running. When autobuying it will popup the add cart window.
+        #Test all the SKUs for validity.
+        for i in range(len(self.sku_list)):
+            for skuid in self.sku_list[i]:
+                response = self.session.get(
+                    BEST_BUY_PDP_URL.format(sku=skuid), headers=DEFAULT_HEADERS
                 )
-                for cookie in cookies
-            ]
+                log.info(f"PDP Request: {response.status_code}")
+                self.product_url = response.url
+                log.info(f"Product URL: {self.product_url}")
 
-            # self.driver.quit()
+                self.session.get(self.product_url)
+                log.info(f"Product URL Request: {response.status_code}")
+                
 
-            log.info("Calling location/v1/US/approximate")
-            log.info(
-                self.session.get(
-                    "https://www.bestbuy.com/location/v1/US/approximate",
-                    headers=DEFAULT_HEADERS,
-                ).status_code
-            )
-
-            log.info("Calling basket/v1/basketCount")
-            log.info(
-                self.session.get(
-                    "https://www.bestbuy.com/basket/v1/basketCount",
-                    headers={
-                        "x-client-id": "browse",
-                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36",
-                        "Accept": "application/json",
-                    },
-                ).status_code
-            )
+    def is_logged_in(self):
+        try:
+            text = self.driver.find_element_by_xpath("/html/body/div[2]/div/div/div/header/div[2]/div[2]/div/nav[2]/ul/li[1]/button/div[2]/span").text
+            print(text)
+            return "Account" != text
+        except Exception as e:
+            print (repr(e))
+            return False
 
     def login(self):
         self.driver.get("https://www.bestbuy.com/identity/global/signin")
-        self.driver.find_element_by_xpath('//*[@id="fld-e"]').send_keys(
-            self.account["username"]
-        )
-        self.driver.find_element_by_xpath('//*[@id="fld-p1"]').send_keys(
-            self.account["password"]
-        )
-        self.driver.find_element_by_xpath(
-            "/html/body/div[1]/div/section/main/div[1]/div/div/div/div/form/div[3]/div/label/div/i"
-        ).click()
-        self.driver.find_element_by_xpath(
-            "/html/body/div[1]/div/section/main/div[1]/div/div/div/div/form/div[4]/button"
-        ).click()
+        try:
+            self.driver.find_element_by_xpath('//*[@id="fld-e"]').send_keys(
+                self.account["username"]
+            )
+            self.driver.find_element_by_xpath('//*[@id="fld-p1"]').send_keys(
+                self.account["password"]
+            )
+            self.driver.find_element_by_xpath(
+                '//*[@id="ca-remember-me"]'
+            ).click()
+            self.driver.find_element_by_xpath(
+                "/html/body/div[1]/div/section/main/div[1]/div/div/div/div/form/div[4]/button"
+            ).click()
+        except:
+            pass
         WebDriverWait(self.driver, 10).until(
             lambda x: "Official Online Store" in self.driver.title
         )
+            
+    def run_item(self, delay=3, test=False):
+        log.info("Checking stock for items.")
+        checkout_success = False
+        while not checkout_success:
+            pop_list = []
+            for i in range(len(self.sku_list)):
+                for sku in self.sku_list[i]:
+                    checkout_success = self.in_stock(sku, self.reserve[i]) #reserve is not used yet.
+                    if checkout_success:
+                        log.info(f"attempting to buy {sku}")
+                        if self.auto_buy:
+                            self.auto_checkout(sku)
+                        else:
+                            cart_url = self.add_to_cart(sku)
+                            self.notification_handler.send_notification(
+                                f"SKU: {sku} in stock: {cart_url}"
+                            )
+                            time.sleep(delay)
+                    time.sleep(delay)
+            if pop_list:
+                for sku in pop_list:
+                    for i in range(len(self.sku_list)):
+                        if sku in self.sku_list[i]:
+                            self.sku_list.pop(i)
+                            self.reserve.pop(i)
+                            break
+            if self.sku_list:  # keep bot going if additional ASINs left
+                checkout_success = False
 
-    def run_item(self):
-        while not self.in_stock():
-            sleep(5)
-        log.info(f"Item {self.sku_id} is in stock!")
-        if self.auto_buy:
-            self.auto_checkout()
-        else:
-            cart_url = self.add_to_cart()
-            self.notification_handler.send_notification(
-                f"SKU: {self.sku_id} in stock: {cart_url}"
-            )
-            sleep(5)
-
-    def in_stock(self):
+    def in_stock(self,skuid,reserve):
         log.info("Checking stock")
         url = "https://www.bestbuy.com/api/tcfb/model.json?paths=%5B%5B%22shop%22%2C%22scds%22%2C%22v2%22%2C%22page%22%2C%22tenants%22%2C%22bbypres%22%2C%22pages%22%2C%22globalnavigationv5sv%22%2C%22header%22%5D%2C%5B%22shop%22%2C%22buttonstate%22%2C%22v5%22%2C%22item%22%2C%22skus%22%2C{}%2C%22conditions%22%2C%22NONE%22%2C%22destinationZipCode%22%2C%22%2520%22%2C%22storeId%22%2C%22%2520%22%2C%22context%22%2C%22cyp%22%2C%22addAll%22%2C%22false%22%5D%5D&method=get".format(
-            self.sku_id
+            skuid
         )
         response = self.session.get(url, headers=DEFAULT_HEADERS)
         log.info(f"Stock check response code: {response.status_code}")
@@ -170,7 +196,7 @@ class BestBuyHandler:
             )
             item_state = item_json[0][0]["buttonState"]
             log.info(f"Item state is: {item_state}")
-            if item_json[0][0]["skuId"] == self.sku_id and item_state in [
+            if item_json[0][0]["skuId"] == skuid and item_state in [
                 "ADD_TO_CART",
                 "PRE_ORDER",
             ]:
@@ -188,19 +214,19 @@ class BestBuyHandler:
                 log.info("Item is out of stock")
                 return False
 
-    def add_to_cart(self):
-        webbrowser.open_new(BEST_BUY_CART_URL.format(sku=self.sku_id))
-        return BEST_BUY_CART_URL.format(sku=self.sku_id)
+    def add_to_cart(self,skuid):
+        webbrowser.open_new(BEST_BUY_CART_URL.format(sku=skuid))
+        return BEST_BUY_CART_URL.format(sku=skuid)
 
-    def auto_checkout(self):
-        self.auto_add_to_cart()
+    def auto_checkout(self,skuid):
+        self.auto_add_to_cart(skuid)
         self.start_checkout()
         self.driver.get("https://www.bestbuy.com/checkout/c/r/fast-track")
 
-    def auto_add_to_cart(self):
+    def auto_add_to_cart(self,skuid):
         log.info("Attempting to auto add to cart...")
 
-        body = {"items": [{"skuId": self.sku_id}]}
+        body = {"items": [{"skuId": skuid}]}
         headers = {
             "Accept": "application/json",
             "authority": "www.bestbuy.com",
@@ -225,9 +251,9 @@ class BestBuyHandler:
         if (
             response.status_code == 200
             and response.json()["cartCount"] > 0
-            and self.sku_id in response.text
+            and skuid in response.text
         ):
-            log.info(f"Added {self.sku_id} to cart!")
+            log.info(f"Added {skuid} to cart!")
             log.info(response.json())
         else:
             log.info(response.status_code)
@@ -332,7 +358,30 @@ class BestBuyHandler:
         ]
         log.info(r.status_code)
         log.info(r.text)
+        
+    def save_screenshot(self, page):
+        file_name = get_timestamp_filename("bestbuy-screenshot-" + page, ".png")
 
+        if self.driver.save_screenshot(file_name):
+            try:
+                self.notification_handler.send_notification(page, file_name)
+            except TimeoutException:
+                log.info("Timed out taking screenshot, trying to continue anyway")
+                pass
+            except Exception as e:
+                log.error(f"Trying to recover from error: {e}")
+                pass
+        else:
+            log.error("Error taking screenshot due to File I/O error")
+
+    def save_page_source(self, page):
+        """Saves DOM at the current state when called.  This includes state changes from DOM manipulation via JS"""
+        file_name = get_timestamp_filename("bestbuy-" + page + "_source", "html")
+
+        page_source = self.driver.page_source
+        with open(file_name, "w", encoding="utf-8") as f:
+            f.write(page_source)
+            
     def get_tas_data(self):
         headers = {
             "accept": "*/*",
@@ -352,3 +401,13 @@ class BestBuyHandler:
                 return json.loads(r.text)
             except Exception as e:
                 sleep(5)
+
+def get_timestamp_filename(name, extension):
+    """Utility method to create a filename with a timestamp appended to the root and before
+    the provided file extension"""
+    now = datetime.now()
+    date = now.strftime("%m-%d-%Y_%H_%M_%S")
+    if extension.startswith("."):
+        return name + "_" + date + extension
+    else:
+        return name + "_" + date + "." + extension

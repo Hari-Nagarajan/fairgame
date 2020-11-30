@@ -1,0 +1,9 @@
+{
+  "username": "",
+  "password": "",
+  "sku_groups": 2,
+  "sku_list_1": ["6430175","6432400"],
+  "reserve_1": 800,
+  "sku_list_2": ["6436223","6436219"],
+  "reserve_2": 800
+}

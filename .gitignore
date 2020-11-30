@@ -5,6 +5,7 @@ Pipfile.lock
 geckodriver.log
 .profile
 .profile-amz*
+.profile-bb*
 *_config.json
 *.log
 __pycache__/
