@@ -95,6 +95,7 @@ CHECKOUT_TITLES = [
     "Ordina - Cassa Amazon.it",
     "AmazonSmile Checkout",
     "Plaats je bestelling - Amazon.nl-kassa",
+    "Place Your Order - AmazonSmile Checkout",
 ]
 ORDER_COMPLETE_TITLES = [
     "Amazon.com Thanks You",
@@ -120,17 +121,21 @@ ADD_TO_CART_TITLES = [
 ]
 DOGGO_TITLES = ["Sorry! Something went wrong!"]
 
+# this is not non-US friendly
+SHIPPING_ONLY_IF = "FREE Shipping on orders over"
+
 TWOFA_TITLES = ["Two-Step Verification"]
 
 PRIME_TITLES = ["Complete your Amazon Prime sign up"]
 
-OFFER_PAGE_TITLES = ["Amazon.com: Buying Choices:"]
+# OFFER_PAGE_TITLES = ["Amazon.com: Buying Choices:"]
 
 DEFAULT_MAX_CHECKOUT_LOOPS = 20
 DEFAULT_MAX_PTC_TRIES = 3
 DEFAULT_MAX_PYO_TRIES = 3
 DEFAULT_MAX_ATC_TRIES = 3
 DEFAULT_MAX_WEIRD_PAGE_DELAY = 5
+DEFAULT_PAGE_WAIT_DELAY = 0.5
 
 
 class Amazon:
@@ -139,6 +144,7 @@ class Amazon:
         self.asin_list = []
         self.reserve = []
         self.checkshipping = checkshipping
+        self.page_wait_delay = DEFAULT_PAGE_WAIT_DELAY
         if os.path.exists(AUTOBUY_CONFIG_PATH):
             with open(AUTOBUY_CONFIG_PATH) as json_file:
                 try:
@@ -172,6 +178,7 @@ class Amazon:
         # if os.path.isdir(profile_amz):
         #     os.remove(profile_amz)
         options.add_argument(f"user-data-dir=.profile-amz")
+
         try:
             self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
             self.wait = WebDriverWait(self.driver, 10)
@@ -194,6 +201,7 @@ class Amazon:
         while keep_going:
             asin = self.run_asins(delay)
             # found something in stock and under reserve
+            # initialize loop limiter variables
             self.try_to_checkout = True
             self.checkout_retry = 0
             self.order_retry = 0
@@ -216,6 +224,22 @@ class Amazon:
             # if no items left it list, let loop end
             if not self.asin_list:
                 keep_going = False
+
+    def handle_startup(self):
+        if self.is_logged_in():
+            log.info("Already logged in")
+        else:
+            log.info("Lets log in.")
+
+            is_smile = "smile" in AMAZON_URLS["BASE_URL"]
+            xpath = (
+                '//*[@id="ge-hello"]/div/span/a'
+                if is_smile
+                else '//*[@id="nav-link-accountList"]/div/span'
+            )
+            selenium_utils.button_click_using_xpath(self.driver, xpath)
+            log.info("Wait for Sign In page")
+            time.sleep(self.page_wait_delay)
 
     def is_logged_in(self):
         try:
@@ -251,7 +275,7 @@ class Amazon:
         if self.driver.title in TWOFA_TITLES:
             log.info("enter in your two-step verification code in browser")
             while self.driver.title in TWOFA_TITLES:
-                time.sleep(3)
+                time.sleep(DEFAULT_MAX_WEIRD_PAGE_DELAY)
         log.info(f"Logged in as {self.username}")
 
     def run_asins(self, delay):
@@ -292,12 +316,15 @@ class Amazon:
 
         for i in range(len(elements)):
             price = parse_price(prices[i].text)
-            ship_price = parse_price(shipping[i].text)
+            if SHIPPING_ONLY_IF in shipping[i].text:
+                ship_price = parse_price("0")
+            else:
+                ship_price = parse_price(shipping[i].text)
             ship_float = ship_price.amount
             price_float = price.amount
             if price_float is None:
                 return False
-            if ship_float is None:
+            if ship_float is None or not self.checkshipping:
                 ship_float = 0
 
             if (ship_float + price_float) <= reserve or math.isclose(
@@ -306,7 +333,7 @@ class Amazon:
                 log.info("Item in stock and under reserve!")
                 log.info("clicking add to cart")
                 elements[i].click()
-                time.sleep(1)
+                time.sleep(self.page_wait_delay)
                 if self.driver.title in SHOPING_CART_TITLES:
                     return True
                 else:
@@ -314,94 +341,25 @@ class Amazon:
                     self.check_stock(asin=asin, reserve=reserve, retry=retry + 1)
         return False
 
-    def save_screenshot(self, page):
-        file_name = get_timestamp_filename("screenshot-" + page, ".png")
-
-        if self.driver.save_screenshot(file_name):
-            try:
-                self.notification_handler.send_notification(page, file_name)
-            except exceptions.TimeoutException:
-                log.info("Timed out taking screenshot, trying to continue anyway")
-                pass
-            except Exception as e:
-                log.error(f"Trying to recover from error: {e}")
-                pass
-        else:
-            log.error("Error taking screenshot due to File I/O error")
-
-    def save_page_source(self, page):
-        """Saves DOM at the current state when called.  This includes state changes from DOM manipulation via JS"""
-        file_name = get_timestamp_filename(page + "_source", "html")
-
-        page_source = self.driver.page_source
-        with open(file_name, "w", encoding="utf-8") as f:
-            f.write(page_source)
-
-    def get_captcha_help(self):
-        if not self.on_captcha_page():
-            log.info("Not on captcha page.")
-            return
-        try:
-            log.info("Stuck on a captcha... Lets try to solve it.")
-            captcha = AmazonCaptcha.fromdriver(self.driver)
-            solution = captcha.solve()
-            log.info(f"The solution is: {solution}")
-            if solution == "Not solved":
-                log.info(
-                    f"Failed to solve {captcha.image_link}, lets reload and get a new captcha."
-                )
-                self.driver.refresh()
-                time.sleep(5)
-                self.get_captcha_help()
-            else:
-                self.save_screenshot("captcha")
-                self.driver.find_element_by_xpath(
-                    '//*[@id="captchacharacters"]'
-                ).send_keys(solution + Keys.RETURN)
-        except Exception as e:
-            log.debug(e)
-            log.info("Error trying to solve captcha. Refresh and retry.")
-            self.driver.refresh()
-            time.sleep(5)
-
-    def on_captcha_page(self):
-        try:
-            if self.driver.title in CAPTCHA_PAGE_TITLES:
-                return True
-            if self.driver.find_element_by_xpath(
-                '//form[@action="/errors/validateCaptcha"]'
-            ):
-                return True
-        except Exception:
-            pass
-        return False
-
-    def check_if_captcha(self, func, args):
-        try:
-            func(args)
-        except Exception as e:
-            log.debug(str(e))
-            if self.on_captcha_page():
-                self.get_captcha_help()
-                func(args, t=300)
-            else:
-                log.debug(self.driver.title)
-                log.error(
-                    f"An error happened, please submit a bug report including a screenshot of the page the "
-                    f"selenium browser is on. There may be a file saved at: amazon-{func.__name__}.png"
-                )
-                self.save_screenshot("title-fail")
-                time.sleep(60)
-                # self.driver.close()
-                log.debug(e)
-                pass
-
-    def wait_for_pages(self, page_titles, t=30):
-        try:
-            selenium_utils.wait_for_any_title(self.driver, page_titles, t)
-        except Exception as e:
-            log.debug(f"wait_for_pages exception: {e}")
-            pass
+    # def check_if_captcha(self, func, args):
+    #     try:
+    #         func(args)
+    #     except Exception as e:
+    #         log.debug(str(e))
+    #         if self.on_captcha_page():
+    #             self.get_captcha_help()
+    #             func(args, t=300)
+    #         else:
+    #             log.debug(self.driver.title)
+    #             log.error(
+    #                 f"An error happened, please submit a bug report including a screenshot of the page the "
+    #                 f"selenium browser is on. There may be a file saved at: amazon-{func.__name__}.png"
+    #             )
+    #             self.save_screenshot("title-fail")
+    #             time.sleep(60)
+    #             # self.driver.close()
+    #             log.debug(e)
+    #             pass
 
     def remove_asin_list(self, asin):
         for i in range(len(self.asin_list)):
@@ -410,8 +368,10 @@ class Amazon:
                 self.reserve.pop(i)
                 break
 
-    def navigate_pages(self, test, page_nav_delay=0.5):
-        time.sleep(page_nav_delay)
+    # checkout page navigator
+    def navigate_pages(self, test):
+        # delay to wait for page load - probably want to change this to something more adjustable
+        time.sleep(self.page_wait_delay)
         title = self.driver.title
         if title in SIGN_IN_TITLES:
             self.login()
@@ -452,7 +412,7 @@ class Amazon:
             self.notification_handler.send_notification(
                 "Prime offer page popped up, user intervention required"
             )
-            time.sleep(5)
+            time.sleep(DEFAULT_MAX_WEIRD_PAGE_DELAY)
 
     def handle_home_page(self):
         log.info("On home page, trying to get back to checkout")
@@ -518,24 +478,15 @@ class Amazon:
             except exceptions.NoSuchElementException:
                 log.debug(f"{button_xpath}, lets try a different one.")
             if button:
-                log.info(f"Clicking Button: {button.text}")
                 if not test:
+                    log.info(f"Clicking Button: {button.text}")
                     button.click()
+                    time.sleep(self.page_wait_delay)
+                else:
+                    log.info(f"Found button{button.text}, but this is a test")
         # Could not click button, refresh page and try again
         self.driver.refresh()
         self.order_retry += 1
-        # else:
-        #     if retry < 3:
-        #         # log.info("Couldn't find button. Lets retry in a sec.")
-        #         time.sleep(2)
-        #         returnVal = self.finalize_order_button(test, retry + 1)
-        #     else:
-        #         log.info(
-        #             "Couldn't find button after 3 retries. Open a GH issue for this."
-        #         )
-        #         self.save_page_source("finalize-order-button-fail")
-        #         self.save_screenshot("finalize-order-button-fail")
-        # return returnVal
 
     def handle_order_complete(self):
         log.info("Order Placed.")
@@ -547,29 +498,6 @@ class Amazon:
             "You got dogs, bot may not work correctly. Ending Checkout"
         )
         self.try_to_checkout = False
-
-    def handle_startup(self):
-        if self.is_logged_in():
-            log.info("Already logged in")
-        else:
-            log.info("Lets log in.")
-
-            is_smile = "smile" in AMAZON_URLS["BASE_URL"]
-            xpath = (
-                '//*[@id="ge-hello"]/div/span/a'
-                if is_smile
-                else '//*[@id="nav-link-accountList"]/div/span'
-            )
-            selenium_utils.button_click_using_xpath(self.driver, xpath)
-            log.info("Wait for Sign In page")
-            time.sleep(1)
-
-            # self.check_if_captcha(self.wait_for_pages, SIGN_IN_TITLES)
-            # self.login()
-            # log.info("Waiting 15 seconds.")
-            # time.sleep(
-            #     15
-            # )  # We can remove this once I get more info on the phone verification page.
 
     def handle_captcha(self):
         try:
@@ -586,7 +514,7 @@ class Amazon:
                             f"Failed to solve {captcha.image_link}, lets reload and get a new captcha."
                         )
                         self.driver.refresh()
-                        time.sleep(5)
+                        time.sleep(DEFAULT_MAX_WEIRD_PAGE_DELAY)
                     else:
                         self.save_screenshot("captcha")
                         self.driver.find_element_by_xpath(
@@ -596,12 +524,34 @@ class Amazon:
                     log.debug(e)
                     log.info("Error trying to solve captcha. Refresh and retry.")
                     self.driver.refresh()
-                    time.sleep(5)
+                    time.sleep(DEFAULT_MAX_WEIRD_PAGE_DELAY)
         except exceptions.NoSuchElementException:
             log.error("captcha page does not contain captcha element")
-            log.error("restarting at home page")
-            self.driver.get(AMAZON_URLS["BASE_URL"])
+            log.error("refreshing")
+            self.driver.refresh()
 
+    def save_screenshot(self, page):
+        file_name = get_timestamp_filename("screenshot-" + page, ".png")
+
+        if self.driver.save_screenshot(file_name):
+            try:
+                self.notification_handler.send_notification(page, file_name)
+            except exceptions.TimeoutException:
+                log.info("Timed out taking screenshot, trying to continue anyway")
+                pass
+            except Exception as e:
+                log.error(f"Trying to recover from error: {e}")
+                pass
+        else:
+            log.error("Error taking screenshot due to File I/O error")
+
+    def save_page_source(self, page):
+        """Saves DOM at the current state when called.  This includes state changes from DOM manipulation via JS"""
+        file_name = get_timestamp_filename(page + "_source", "html")
+
+        page_source = self.driver.page_source
+        with open(file_name, "w", encoding="utf-8") as f:
+            f.write(page_source)
 
 def get_timestamp_filename(name, extension):
     """Utility method to create a filename with a timestamp appended to the root and before
