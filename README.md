@@ -61,6 +61,8 @@ Commands:
 --test : This will not finish the checkout
 --delay : modify default delay between page refreshes (3 seconds), use --delay=x, where is is time in seconds (accepts decimals)
 --checkshipping : Bot will consider shipping + sales price in reserve check. Without this flag, only free shipping items will be considered
+--detailed : Take more screenshots. !!!!!! This could cause you to miss checkouts !!!!!!
+--used : Show used items in search listings
 ```
 
 Make a copy of `amazon_config.template_json` and rename to `amazon_config.json`:
