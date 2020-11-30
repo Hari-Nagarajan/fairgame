@@ -46,9 +46,9 @@ options.add_argument("user-data-dir=.profile-bb")
 
 
 class BestBuyHandler:
-    def __init__(self, sku_id, notification_handler, headless=False):
+    def __init__(self, skus, notification_handler, headless=False):
         self.notification_handler = notification_handler
-        self.sku_id = sku_id
+        self.skus = skus
         self.session = requests.Session()
         self.auto_buy = False
         self.account = {"username": "", "password": ""}
@@ -64,66 +64,68 @@ class BestBuyHandler:
         self.session.mount("https://", adapter)
         self.session.mount("http://", adapter)
 
-        response = self.session.get(
-            BEST_BUY_PDP_URL.format(sku=self.sku_id), headers=DEFAULT_HEADERS
-        )
-        log.info(f"PDP Request: {response.status_code}")
-        self.product_url = response.url
-        log.info(f"Product URL: {self.product_url}")
-
-        self.session.get(self.product_url)
-        log.info(f"Product URL Request: {response.status_code}")
-
-        if self.auto_buy:
-            log.info("Loading headless driver.")
-            if headless:
-                enable_headless()  # TODO - check if this still messes up the cookies.
-            options.add_argument(
-                "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+        for sku_id in skus:
+            self.sku_id = sku_id
+            response = self.session.get(
+                BEST_BUY_PDP_URL.format(sku=self.sku_id), headers=DEFAULT_HEADERS
             )
+            log.info(f"PDP Request: {response.status_code}")
+            self.product_url = response.url
+            log.info(f"Product URL: {self.product_url}")
 
-            self.driver = webdriver.Chrome(
-                executable_path=binary_path,
-                options=options,
-            )
-            log.info("Loading https://www.bestbuy.com.")
-            self.login()
+            self.session.get(self.product_url)
+            log.info(f"Product URL Request: {response.status_code}")
 
-            self.driver.get(self.product_url)
-            cookies = self.driver.get_cookies()
-
-            [
-                self.session.cookies.set_cookie(
-                    requests.cookies.create_cookie(
-                        domain=cookie["domain"],
-                        name=cookie["name"],
-                        value=cookie["value"],
-                    )
+            if self.auto_buy:
+                log.info("Loading headless driver.")
+                if headless:
+                    enable_headless()  # TODO - check if this still messes up the cookies.
+                options.add_argument(
+                    "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
                 )
-                for cookie in cookies
-            ]
 
-            # self.driver.quit()
+                self.driver = webdriver.Chrome(
+                    executable_path=binary_path,
+                    options=options,
+                )
+                log.info("Loading https://www.bestbuy.com.")
+                self.login()
 
-            log.info("Calling location/v1/US/approximate")
-            log.info(
-                self.session.get(
-                    "https://www.bestbuy.com/location/v1/US/approximate",
-                    headers=DEFAULT_HEADERS,
-                ).status_code
-            )
+                self.driver.get(self.product_url)
+                cookies = self.driver.get_cookies()
 
-            log.info("Calling basket/v1/basketCount")
-            log.info(
-                self.session.get(
-                    "https://www.bestbuy.com/basket/v1/basketCount",
-                    headers={
-                        "x-client-id": "browse",
-                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36",
-                        "Accept": "application/json",
-                    },
-                ).status_code
-            )
+                [
+                    self.session.cookies.set_cookie(
+                        requests.cookies.create_cookie(
+                            domain=cookie["domain"],
+                            name=cookie["name"],
+                            value=cookie["value"],
+                        )
+                    )
+                    for cookie in cookies
+                ]
+
+                # self.driver.quit()
+
+                log.info("Calling location/v1/US/approximate")
+                log.info(
+                    self.session.get(
+                        "https://www.bestbuy.com/location/v1/US/approximate",
+                        headers=DEFAULT_HEADERS,
+                    ).status_code
+                )
+
+                log.info("Calling basket/v1/basketCount")
+                log.info(
+                    self.session.get(
+                        "https://www.bestbuy.com/basket/v1/basketCount",
+                        headers={
+                            "x-client-id": "browse",
+                            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36",
+                            "Accept": "application/json",
+                        },
+                    ).status_code
+                )
 
     def login(self):
         self.driver.get("https://www.bestbuy.com/identity/global/signin")
@@ -157,36 +159,38 @@ class BestBuyHandler:
             sleep(5)
 
     def in_stock(self):
-        log.info("Checking stock")
-        url = "https://www.bestbuy.com/api/tcfb/model.json?paths=%5B%5B%22shop%22%2C%22scds%22%2C%22v2%22%2C%22page%22%2C%22tenants%22%2C%22bbypres%22%2C%22pages%22%2C%22globalnavigationv5sv%22%2C%22header%22%5D%2C%5B%22shop%22%2C%22buttonstate%22%2C%22v5%22%2C%22item%22%2C%22skus%22%2C{}%2C%22conditions%22%2C%22NONE%22%2C%22destinationZipCode%22%2C%22%2520%22%2C%22storeId%22%2C%22%2520%22%2C%22context%22%2C%22cyp%22%2C%22addAll%22%2C%22false%22%5D%5D&method=get".format(
-            self.sku_id
-        )
-        response = self.session.get(url, headers=DEFAULT_HEADERS)
-        log.info(f"Stock check response code: {response.status_code}")
-        try:
-            response_json = response.json()
-            item_json = find_values(
-                json.dumps(response_json), "buttonStateResponseInfos"
+        for sku_id in self.skus:
+            self.sku_id = sku_id
+            log.info(f"Checking stock for {sku_id}")
+            url = "https://www.bestbuy.com/api/tcfb/model.json?paths=%5B%5B%22shop%22%2C%22scds%22%2C%22v2%22%2C%22page%22%2C%22tenants%22%2C%22bbypres%22%2C%22pages%22%2C%22globalnavigationv5sv%22%2C%22header%22%5D%2C%5B%22shop%22%2C%22buttonstate%22%2C%22v5%22%2C%22item%22%2C%22skus%22%2C{}%2C%22conditions%22%2C%22NONE%22%2C%22destinationZipCode%22%2C%22%2520%22%2C%22storeId%22%2C%22%2520%22%2C%22context%22%2C%22cyp%22%2C%22addAll%22%2C%22false%22%5D%5D&method=get".format(
+                self.sku_id
             )
-            item_state = item_json[0][0]["buttonState"]
-            log.info(f"Item state is: {item_state}")
-            if item_json[0][0]["skuId"] == self.sku_id and item_state in [
-                "ADD_TO_CART",
-                "PRE_ORDER",
-            ]:
-                return True
-            else:
-                return False
-        except Exception as e:
-            log.warning("Error parsing json. Using string search to determine state.")
-            log.info(response_json)
-            log.error(e)
-            if "ADD_TO_CART" in response.text:
-                log.info("Item is in stock!")
-                return True
-            else:
-                log.info("Item is out of stock")
-                return False
+            response = self.session.get(url, headers=DEFAULT_HEADERS)
+            log.info(f"Stock check response code: {response.status_code}")
+            try:
+                response_json = response.json()
+                item_json = find_values(
+                    json.dumps(response_json), "buttonStateResponseInfos"
+                )
+                item_state = item_json[0][0]["buttonState"]
+                log.info(f"Item state for {sku_id} is: {item_state}")
+                if item_json[0][0]["skuId"] == self.sku_id and item_state in [
+                    "ADD_TO_CART",
+                    "PRE_ORDER",
+                ]:
+                    return True
+                else:
+                    return False
+            except Exception as e:
+                log.warning("Error parsing json. Using string search to determine state.")
+                log.info(response_json)
+                log.error(e)
+                if "ADD_TO_CART" in response.text:
+                    log.info("Item is in stock!")
+                    return True
+                else:
+                    log.info("Item is out of stock")
+                    return False
 
     def add_to_cart(self):
         webbrowser.open_new(BEST_BUY_CART_URL.format(sku=self.sku_id))

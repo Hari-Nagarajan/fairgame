@@ -110,13 +110,26 @@ def amazon(no_image, headless, test, delay, checkshipping, detailed, used):
 
 
 @click.command()
-@click.option("--sku", type=str, required=True)
+@click.option("--sku", type=str, required=False, multiple=True)
 @click.option("--headless", is_flag=True)
+@click.option("--skus", type=str, required=False)
 @notify_on_crash
-def bestbuy(sku, headless):
-    bb = BestBuyHandler(
-        sku, notification_handler=notification_handler, headless=headless
-    )
+def bestbuy(sku, headless, skus):
+    if not sku and not skus:
+        log.error("--sku or --skus must be provided as an argument")
+        exit(-1)
+    sku_list = []
+    skus_list = []
+    if sku:
+        sku_list = list(sku)
+    if skus:
+        skus_list = skus.split(',')
+
+    # merge both command line options into a unique sku list
+    merged_skus = skus_list + sku_list
+    unique_skus = list(set(merged_skus))
+    log.info(f"Found {len(unique_skus)} unique SKUs to hunt.")
+    bb = BestBuyHandler(unique_skus, notification_handler=notification_handler, headless=headless)
     bb.run_item()
 
 
