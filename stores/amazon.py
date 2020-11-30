@@ -122,6 +122,16 @@ DOGGO_TITLES = ["Sorry! Something went wrong!"]
 
 TWOFA_TITLES = ["Two-Step Verification"]
 
+PRIME_TITLES = ["Complete your Amazon Prime sign up"]
+
+OFFER_PAGE_TITLES = ["Amazon.com: Buying Choices:"]
+
+DEFAULT_MAX_CHECKOUT_LOOPS = 20
+DEFAULT_MAX_PTC_TRIES = 3
+DEFAULT_MAX_PYO_TRIES = 3
+DEFAULT_MAX_ATC_TRIES = 3
+DEFAULT_MAX_WEIRD_PAGE_DELAY = 5
+
 
 class Amazon:
     def __init__(self, notification_handler, headless=False, checkshipping=False):
@@ -172,6 +182,41 @@ class Amazon:
         for key in AMAZON_URLS.keys():
             AMAZON_URLS[key] = AMAZON_URLS[key].format(domain=self.amazon_website)
 
+    def run(self, delay=3, test=False):
+        self.driver.get(AMAZON_URLS["BASE_URL"])
+        log.info("Waiting for home page.")
+        self.handle_startup()
+        if not self.is_logged_in():
+            self.login()
+        self.save_screenshot("Bot Logged in and Starting up")
+        keep_going = True
+
+        while keep_going:
+            asin = self.run_asins(delay)
+            # found something in stock and under reserve
+            self.try_to_checkout = True
+            self.checkout_retry = 0
+            self.order_retry = 0
+            loop_iterations = 0
+            while self.try_to_checkout:
+                self.navigate_pages(test)
+                # if successful after running navigate pages, remove the asin_list from the list
+                if not self.try_to_checkout:
+                    self.remove_asin_list(asin)
+                # checkout loop limiters
+                elif self.checkout_retry > DEFAULT_MAX_PTC_TRIES:
+                    self.try_to_checkout = False
+                elif self.order_retry > DEFAULT_MAX_PYO_TRIES:
+                    if test:
+                        self.remove_asin_list(asin)
+                    self.try_to_checkout = False
+                loop_iterations += 1
+                if loop_iterations > DEFAULT_MAX_CHECKOUT_LOOPS:
+                    self.try_to_checkout = False
+            # if no items left it list, let loop end
+            if not self.asin_list:
+                keep_going = False
+
     def is_logged_in(self):
         try:
             text = wait_for_element(self.driver, "nav-link-accountList").text
@@ -209,37 +254,6 @@ class Amazon:
                 time.sleep(3)
         log.info(f"Logged in as {self.username}")
 
-    def run_item(self, delay=3, test=False):
-        # self.save_screenshot("start-up")
-        # log.info("Checking stock for items.")
-        # self.navigate_checkout(self)
-
-        checkout_success = False
-        while not checkout_success:
-            pop_list = []
-            for i in range(len(self.asin_list)):
-                for asin in self.asin_list[i]:
-                    checkout_success = self.check_stock(asin, self.reserve[i])
-                    if checkout_success:
-                        log.info(f"attempting to buy {asin}")
-                        if self.checkout(test=test):
-                            log.info(f"bought {asin}")
-                            pop_list.append(asin)
-                            break
-                        else:
-                            log.info(f"checkout for {asin} failed")
-                            checkout_success = False
-                    time.sleep(delay)
-            if pop_list:
-                for asin in pop_list:
-                    for i in range(len(self.asin_list)):
-                        if asin in self.asin_list[i]:
-                            self.asin_list.pop(i)
-                            self.reserve.pop(i)
-                            break
-            if self.asin_list:  # keep bot going if additional ASINs left
-                checkout_success = False
-
     def run_asins(self, delay):
         found_asin = False
         while not found_asin:
@@ -249,7 +263,10 @@ class Amazon:
                         return asin
                     time.sleep(delay)
 
-    def check_stock(self, asin, reserve):
+    def check_stock(self, asin, reserve, retry=0):
+        if retry > DEFAULT_MAX_ATC_TRIES:
+            log.info("max add to cart retries hit, returning to asin check")
+            return False
         if self.checkshipping:
             f = furl(AMAZON_URLS["OFFER_URL"] + asin + "/ref=olp_f_new&f_new=true")
         else:
@@ -271,7 +288,7 @@ class Amazon:
             )
         except Exception as e:
             log.error(e)
-            return False
+            return None
 
         for i in range(len(elements)):
             price = parse_price(prices[i].text)
@@ -287,9 +304,14 @@ class Amazon:
                 (price_float + ship_float), reserve, abs_tol=0.01
             ):
                 log.info("Item in stock and under reserve!")
-                elements[i].click()
                 log.info("clicking add to cart")
-                return True
+                elements[i].click()
+                time.sleep(1)
+                if self.driver.title in SHOPING_CART_TITLES:
+                    return True
+                else:
+                    log.info("did not add to cart, trying again")
+                    self.check_stock(asin=asin, reserve=reserve, retry=retry + 1)
         return False
 
     def save_screenshot(self, page):
@@ -381,140 +403,6 @@ class Amazon:
             log.debug(f"wait_for_pages exception: {e}")
             pass
 
-    def wait_for_pyo_page(self):
-        self.check_if_captcha(self.wait_for_pages, CHECKOUT_TITLES + SIGN_IN_TITLES)
-
-        if self.driver.title in SIGN_IN_TITLES:
-            log.info("Need to sign in again")
-            self.login()
-
-    def finalize_order_button(self, test, retry=0):
-        returnVal = False
-        button_xpaths = [
-            '//*[@id="orderSummaryPrimaryActionBtn"]',
-            '//*[@id="bottomSubmitOrderButtonId"]/span/input',
-            '//*[@id="placeYourOrder"]/span/input',
-            '//*[@id="submitOrderButtonId"]/span/input',
-            '//input[@name="placeYourOrder1"]',
-            '//*[@id="hlb-ptc-btn-native"]',
-            '//*[@id="sc-buy-box-ptc-button"]/span/input',
-        ]
-        button = None
-        for button_xpath in button_xpaths:
-            try:
-                if (
-                    self.driver.find_element_by_xpath(button_xpath).is_displayed()
-                    and self.driver.find_element_by_xpath(button_xpath).is_enabled()
-                ):
-                    button = self.driver.find_element_by_xpath(button_xpath)
-            except exceptions.NoSuchElementException:
-                log.debug(f"{button_xpath}, lets try a different one.")
-        if button:
-            log.info(f"Clicking Button: {button.text}")
-            if not test:
-                button.click()
-            return True
-        else:
-            if retry < 3:
-                # log.info("Couldn't find button. Lets retry in a sec.")
-                time.sleep(2)
-                returnVal = self.finalize_order_button(test, retry + 1)
-            else:
-                log.info(
-                    "Couldn't find button after 3 retries. Open a GH issue for this."
-                )
-                self.save_page_source("finalize-order-button-fail")
-                self.save_screenshot("finalize-order-button-fail")
-        return returnVal
-
-    def wait_for_order_completed(self, test):
-        if not test:
-            try:
-                self.check_if_captcha(self.wait_for_pages, ORDER_COMPLETE_TITLES)
-            except:
-                log.error("error during order completion")
-                self.save_screenshot("order-failed")
-                return False
-        else:
-            log.info(
-                "This is a test, so we don't need to wait for the order completed page."
-            )
-        return True
-
-    def checkout(self, test):
-        log.info("Waiting for Cart Page")
-        self.notification_handler.send_notification("Attempting to checkout")
-        self.check_if_captcha(self.wait_for_pages, SHOPING_CART_TITLES)
-        # self.take_screenshot("waiting-for-cart")
-
-        try:  # This is fast.
-            log.info("Quick redirect to checkout page")
-            cart_initiate_id = self.driver.find_element_by_name("cartInitiateId")
-            cart_initiate_id = cart_initiate_id.get_attribute("value")
-            self.driver.get(
-                CHECKOUT_URL.format(
-                    domain=self.amazon_website, cart_id=cart_initiate_id
-                )
-            )
-        except:
-            log.info("clicking checkout.")
-            try:
-                self.driver.find_element_by_xpath(
-                    '//*[@id="hlb-ptc-btn-native"]'
-                ).click()
-            except:
-                self.save_screenshot("start-checkout-fail")
-                log.info("Failed to checkout. Returning to stock check.")
-                return False
-
-        log.info("Waiting for Place Your Order Page")
-        self.wait_for_pyo_page()
-
-        log.info("Attempting to Finish checkout")
-        # self.take_screenshot("finish-checkout")
-
-        if not self.finalize_order_button(test):
-            log.info("Failed to click finalize the order")
-            # self.take_screenshot("finalize-fail")
-            return False
-
-        log.info("Waiting for Order completed page.")
-        if not self.wait_for_order_completed(test):
-            log.info("order not completed, going back to stock check")
-            return False
-
-        log.info("Order Placed.")
-        self.save_screenshot("order-placed")
-        return True
-
-    def run(self, delay=3, test=False):
-        self.driver.get(AMAZON_URLS["BASE_URL"])
-        log.info("Waiting for home page.")
-        self.handle_startup()
-        if not self.is_logged_in():
-            self.login()
-
-        keep_going = True
-
-        while keep_going:
-            asin = self.run_asins(delay)
-            # found something in stock and under reserve
-            self.try_to_checkout = True
-            self.checkout_retry = 0
-            self.order_retry = 0
-            while self.try_to_checkout:
-                self.navigate_pages(test)
-                if not self.try_to_checkout:
-                    self.remove_asin_list(asin)
-                elif self.checkout_retry == 3:
-                    self.try_to_checkout = False
-                elif self.order_retry == 3:
-                    if test:
-                        self.remove_asin_list(asin)
-                    self.try_to_checkout = False
-            if not self.asin_list:
-                keep_going = False
-
     def remove_asin_list(self, asin):
         for i in range(len(self.asin_list)):
             if asin in self.asin_list[i]:
@@ -522,9 +410,9 @@ class Amazon:
                 self.reserve.pop(i)
                 break
 
-    def navigate_pages(self, test):
+    def navigate_pages(self, test, page_nav_delay=0.5):
+        time.sleep(page_nav_delay)
         title = self.driver.title
-        # print(title)
         if title in SIGN_IN_TITLES:
             self.login()
         elif title in CAPTCHA_PAGE_TITLES:
@@ -533,19 +421,53 @@ class Amazon:
             self.handle_cart()
         elif title in CHECKOUT_TITLES:
             self.handle_checkout(test)
-        # elif title in ADD_TO_CART_TITLES:
-        #     self.handle_atc
         elif title in ORDER_COMPLETE_TITLES:
             self.handle_order_complete()
-        # elif title in HOME_PAGE_TITLES:
-        #     self.handle_startup()
-        #     self.login()
+        elif title in PRIME_TITLES:
+            self.handle_prime_signup()
+        elif title in HOME_PAGE_TITLES:
+            # if home page, something went wrong
+            self.handle_home_page()
         elif title in DOGGO_TITLES:
             self.handle_doggos()
         else:
             log.error(
                 f"{title} is not a known title, please create issue indicating the title with a screenshot of page"
             )
+            self.save_screenshot("unknown-title")
+            self.save_page_source("unknown-title")
+
+    def handle_prime_signup(self):
+        log.info("Prime offer page popped up, attempting to click No Thanks")
+        button = None
+        try:
+            button = self.driver.find_element_by_xpath(
+                '//*[@="class=a-button a-button-base no-thanks-button"]'
+            )
+        except exceptions.NoSuchElementException:
+            log.error("could not find button")
+        if button:
+            button.click()
+        else:
+            self.notification_handler.send_notification(
+                "Prime offer page popped up, user intervention required"
+            )
+            time.sleep(5)
+
+    def handle_home_page(self):
+        log.info("On home page, trying to get back to checkout")
+        button = None
+        try:
+            button = self.driver.find_element_by_xpath('//*[@id="nav-cart"]')
+        except exceptions.NoSuchElementException:
+            log.info("Could not find cart button")
+        if button:
+            button.click()
+        else:
+            self.notification_handler.send_notification(
+                "Could not click cart button, user intervention required"
+            )
+            time.sleep(DEFAULT_MAX_WEIRD_PAGE_DELAY)
 
     def handle_cart(self):
         try:  # This is fast.
@@ -563,21 +485,28 @@ class Amazon:
                 self.driver.find_element_by_xpath(
                     '//*[@id="hlb-ptc-btn-native"]'
                 ).click()
-            except:
-                self.save_screenshot("start-checkout-fail")
-                log.info("Failed to checkout.")
-                self.checkout_retry += 1
+            except exceptions.NoSuchElementException:
+                try:
+                    self.driver.find_element_by_xpath('//*[@id="hlb-ptc-btn"]').click()
+                except exceptions.NoSuchElementException:
+                    self.save_screenshot("start-checkout-fail")
+                    log.info("Failed to checkout.")
+                    self.driver.refresh()
+                    self.checkout_retry += 1
 
     def handle_checkout(self, test):
         button_xpaths = [
-            '//*[@id="orderSummaryPrimaryActionBtn"]',
-            '//*[@id="bottomSubmitOrderButtonId"]/span/input',
-            '//*[@id="placeYourOrder"]/span/input',
             '//*[@id="submitOrderButtonId"]/span/input',
-            '//input[@name="placeYourOrder1"]',
-            '//*[@id="hlb-ptc-btn-native"]',
-            '//*[@id="sc-buy-box-ptc-button"]/span/input',
+            '//*[@id="bottomSubmitOrderButtonId"]/span/input',
         ]
+        # restarting with this, not sure where all of these came from, can add more as needed.
+        # '//*[@id="orderSummaryPrimaryActionBtn"]',
+        # '//*[@id="bottomSubmitOrderButtonId"]/span/input',
+        # '//*[@id="placeYourOrder"]/span/input',
+        # '//*[@id="submitOrderButtonId"]/span/input',
+        # '//input[@name="placeYourOrder1"]',
+        # '//*[@id="hlb-ptc-btn-native"]',
+        # '//*[@id="sc-buy-box-ptc-button"]/span/input',
         button = None
         for button_xpath in button_xpaths:
             try:
@@ -592,6 +521,8 @@ class Amazon:
                 log.info(f"Clicking Button: {button.text}")
                 if not test:
                     button.click()
+        # Could not click button, refresh page and try again
+        self.driver.refresh()
         self.order_retry += 1
         # else:
         #     if retry < 3:
@@ -612,7 +543,10 @@ class Amazon:
         self.try_to_checkout = False
 
     def handle_doggos(self):
-        pass
+        self.notification_handler.send_notification(
+            "You got dogs, bot may not work correctly. Ending Checkout"
+        )
+        self.try_to_checkout = False
 
     def handle_startup(self):
         if self.is_logged_in():
