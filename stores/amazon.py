@@ -465,7 +465,7 @@ class Amazon:
         self.notification_handler.send_notification("Attempting to checkout")
         self.check_if_captcha(self.wait_for_pages, SHOPING_CART_TITLES)
         if self.detailed:
-            self.take_screenshot("waiting-for-cart")
+            self.save_screenshot("waiting-for-cart")
 
         try:  # This is fast.
             log.info("Quick redirect to checkout page")
@@ -492,12 +492,12 @@ class Amazon:
 
         log.info("Attempting to Finish checkout")
         if self.detailed:
-            self.take_screenshot("finish-checkout")
+            self.save_screenshot("finish-checkout")
 
         if not self.finalize_order_button(test):
             log.info("Failed to click finalize the order")
             if self.detailed:
-                self.take_screenshot("finalize-fail")
+                self.save_screenshot("finalize-fail")
             return False
 
         log.info("Waiting for Order completed page.")
