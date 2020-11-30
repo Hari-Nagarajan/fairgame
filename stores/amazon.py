@@ -402,10 +402,20 @@ class Amazon:
         button = None
         try:
             button = self.driver.find_element_by_xpath(
-                '//*[@="class=a-button a-button-base no-thanks-button"]'
+                '//*[@class="a-button a-button-base no-thanks-button"]'
             )
         except exceptions.NoSuchElementException:
-            log.error("could not find button")
+            try:
+                button = self.driver.find_element_by_xpath(
+                    '//*[@class="a-button a-button-base prime-no-button"]'
+                )
+            except exceptions.NoSuchElementException:
+                try:
+                    button = self.driver.find_element_by_partial_link_text('No Thanks')
+                except exceptions.NoSuchElementException:
+                    log.error("could not find button")
+                    self.save_page_source("prime-signup-error")
+                    self.save_screenshot("prime-signup-error")
         if button:
             button.click()
         else:
@@ -449,8 +459,10 @@ class Amazon:
                 try:
                     self.driver.find_element_by_xpath('//*[@id="hlb-ptc-btn"]').click()
                 except exceptions.NoSuchElementException:
-                    self.save_screenshot("start-checkout-fail")
-                    log.info("Failed to checkout.")
+                    log.error("couldn't find buttons to proceed to checkout")
+                    self.save_page_source("ptc-error")
+                    self.save_screenshot("ptc-error")
+                    log.info("Refreshing page to try again")
                     self.driver.refresh()
                     self.checkout_retry += 1
 
@@ -485,6 +497,10 @@ class Amazon:
                 else:
                     log.info(f"Found button{button.text}, but this is a test")
         # Could not click button, refresh page and try again
+        log.error("couldn't find buttons to proceed to checkout")
+        self.save_page_source("ptc-error")
+        self.save_screenshot("ptc-error")
+        log.info("Refreshing page to try again")
         self.driver.refresh()
         self.order_retry += 1
 
