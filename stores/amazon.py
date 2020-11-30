@@ -121,6 +121,8 @@ ADD_TO_CART_TITLES = [
 DOGGO_TITLES = ["Sorry! Something went wrong!"]
 SHIPPING_ONLY_IF = "FREE Shipping on orders over"
 
+SCREENSHOT_DIR = "./screenshots/"
+
 
 class Amazon:
     def __init__(
@@ -137,6 +139,8 @@ class Amazon:
         self.checkshipping = checkshipping
         self.detailed = detailed
         self.used = used
+        if not os.path.exists(SCREENSHOT_DIR):
+            os.mkdir(SCREENSHOT_DIR)
         if os.path.exists(AUTOBUY_CONFIG_PATH):
             with open(AUTOBUY_CONFIG_PATH) as json_file:
                 try:
@@ -317,7 +321,10 @@ class Amazon:
         return False
 
     def save_screenshot(self, page):
-        file_name = get_timestamp_filename("screenshot-" + page, ".png")
+
+        file_name = SCREENSHOT_DIR + get_timestamp_filename(
+            "screenshot-" + page, ".png"
+        )
 
         if self.driver.save_screenshot(file_name):
             try:
