@@ -1,6 +1,7 @@
 import json
 import webbrowser
 from time import sleep
+from bs4 import BeautifulSoup
 
 from chromedriver_py import binary_path  # this will get you the path variable
 from selenium import webdriver
@@ -52,6 +53,7 @@ class BestBuyHandler:
         self.session = requests.Session()
         self.auto_buy = False
         self.account = {"username": "", "password": ""}
+        self.sku_product_info = {}
 
         adapter = HTTPAdapter(
             max_retries=Retry(
@@ -69,12 +71,24 @@ class BestBuyHandler:
             response = self.session.get(
                 BEST_BUY_PDP_URL.format(sku=self.sku_id), headers=DEFAULT_HEADERS
             )
-            log.info(f"PDP Request: {response.status_code}")
-            self.product_url = response.url
-            log.info(f"Product URL: {self.product_url}")
 
-            self.session.get(self.product_url)
-            log.info(f"Product URL Request: {response.status_code}")
+            soup = BeautifulSoup(response.text, "html.parser")
+            # Grab the Open Graph headers of interest
+            title = soup.find("meta", property="og:title")
+            url = soup.find("meta", property="og:url")
+
+            if response.status_code == 200:
+                # store the product details from BestBuy for later reference
+                self.sku_product_info[sku_id] = {
+                    "title": title["content"] if title else "No meta title given",
+                    "product_url": url["content"] if url else "No meta url given",
+                }
+                log.info(
+                    "Found SKU " + sku_id + ": " + self.sku_product_info[sku_id]["title"]
+                )
+            else:
+                log.info("Unable to locate SKU " + sku_id + ".  Removing from list.")
+                skus.remove(sku_id)
 
             if self.auto_buy:
                 log.info("Loading headless driver.")
@@ -91,7 +105,7 @@ class BestBuyHandler:
                 log.info("Loading https://www.bestbuy.com.")
                 self.login()
 
-                self.driver.get(self.product_url)
+                self.driver.get(self.sku_product_info[sku_id]["product_url"])
                 cookies = self.driver.get_cookies()
 
                 [
@@ -153,9 +167,10 @@ class BestBuyHandler:
             self.auto_checkout()
         else:
             cart_url = self.add_to_cart()
-            self.notification_handler.send_notification(
-                f"SKU: {self.sku_id} in stock: {cart_url}"
-            )
+            pdp_url = self.sku_product_info[self.sku_id]["product_url"]
+            message = f"SKU: {self.sku_id} in stock. Attempted add to cart.  Product page available at: {pdp_url}.  Add to cart url is: {cart_url}"
+            log.info(message)
+            self.notification_handler.send_notification(message)
             sleep(5)
 
     def in_stock(self):
@@ -166,7 +181,6 @@ class BestBuyHandler:
                 self.sku_id
             )
             response = self.session.get(url, headers=DEFAULT_HEADERS)
-            log.info(f"Stock check response code: {response.status_code}")
             try:
                 response_json = response.json()
                 item_json = find_values(
@@ -179,18 +193,17 @@ class BestBuyHandler:
                     "PRE_ORDER",
                 ]:
                     return True
-                else:
-                    return False
+
             except Exception as e:
-                log.warning("Error parsing json. Using string search to determine state.")
+                log.warning(
+                    "Error parsing json. Using string search to determine state."
+                )
                 log.info(response_json)
                 log.error(e)
                 if "ADD_TO_CART" in response.text:
                     log.info("Item is in stock!")
                     return True
-                else:
-                    log.info("Item is out of stock")
-                    return False
+        return False
 
     def add_to_cart(self):
         webbrowser.open_new(BEST_BUY_CART_URL.format(sku=self.sku_id))

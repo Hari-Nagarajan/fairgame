@@ -28,8 +28,7 @@ browser-cookie3 = "*"
 coloredlogs = "*"
 apprise = "*"
 price-parser = "*"
-
-
+beautifulsoup4 = "*"
 
 [requires]
 python_version = "3.8"
