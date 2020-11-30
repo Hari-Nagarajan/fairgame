@@ -96,6 +96,7 @@ CHECKOUT_TITLES = [
     "AmazonSmile Checkout",
     "Plaats je bestelling - Amazon.nl-kassa",
     "Place Your Order - AmazonSmile Checkout",
+    "Preparing your order"
 ]
 ORDER_COMPLETE_TITLES = [
     "Amazon.com Thanks You",
@@ -414,8 +415,12 @@ class Amazon:
                     button = self.driver.find_element_by_partial_link_text('No Thanks')
                 except exceptions.NoSuchElementException:
                     log.error("could not find button")
-                    self.save_page_source("prime-signup-error")
-                    self.save_screenshot("prime-signup-error")
+                    log.info("check if PYO button hidden")
+                    try:
+                        button = self.driver.find_element_by_xpath('//*[@id="placeYourOrder"]/span/input')
+                    except exceptions.NoSuchElementException:
+                        self.save_page_source("prime-signup-error")
+                        self.save_screenshot("prime-signup-error")
         if button:
             button.click()
         else:
@@ -470,6 +475,7 @@ class Amazon:
         button_xpaths = [
             '//*[@id="submitOrderButtonId"]/span/input',
             '//*[@id="bottomSubmitOrderButtonId"]/span/input',
+            '//*[@id="placeYourOrder"]/span/input'
         ]
         # restarting with this, not sure where all of these came from, can add more as needed.
         # '//*[@id="orderSummaryPrimaryActionBtn"]',
