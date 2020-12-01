@@ -137,6 +137,19 @@ class Amazon:
         self.checkshipping = checkshipping
         self.detailed = detailed
         self.used = used
+
+        if not os.path.exists("screenshots"):
+            try:
+                os.makedirs("screenshots")
+            except:
+                raise
+
+        if not os.path.exists("html_saves"):
+            try:
+                os.makedirs("html_saves")
+            except:
+                raise
+
         if os.path.exists(AUTOBUY_CONFIG_PATH):
             with open(AUTOBUY_CONFIG_PATH) as json_file:
                 try:
