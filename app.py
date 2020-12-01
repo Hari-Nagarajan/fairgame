@@ -6,7 +6,6 @@ from selenium import webdriver
 from stores.amazon import Amazon
 
 
-
 def handler(signal, frame):
     log.info("Caught a ctrl-c, exiting...")
     exit(0)
