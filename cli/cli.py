@@ -69,12 +69,6 @@ def main():
 @click.command()
 @click.option("--no-image", is_flag=True, help="Do no load images")
 @click.option("--headless", is_flag=True)
-@click.option("--test", is_flag=True)
-@click.option("--delay", type=float, default=3.0)
-@click.option("--checkshipping", is_flag=True)
-@click.option("--random-delay", is_flag=True)
-@notify_on_crash
-def amazon(no_image, headless, test, delay, checkshipping, random_delay):
 @click.option(
     "--test",
     is_flag=True,
@@ -98,8 +92,11 @@ def amazon(no_image, headless, test, delay, checkshipping, random_delay):
     is_flag=True,
     help="Show used items in search listings.",
 )
+@click.option("--random-delay", is_flag=True, help="Set delay to a random interval")
 @notify_on_crash
-def amazon(no_image, headless, test, delay, checkshipping, detailed, used):
+def amazon(
+    no_image, headless, test, delay, checkshipping, detailed, used, random_delay
+):
     if no_image:
         selenium_utils.no_amazon_image()
     else:
