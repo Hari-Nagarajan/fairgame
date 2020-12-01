@@ -10,6 +10,8 @@ from utils.logger import log
 
 
 def encrypt(pt, password):
+    """Encryption function to securely store user credentials, uses ChaCha_Poly1305
+    with a user defined SCrypt key."""
     salt = get_random_bytes(32)
     key = scrypt(password, salt, key_len=32, N=2 ** 20, r=8, p=1)
     nonce = get_random_bytes(12)
@@ -23,6 +25,7 @@ def encrypt(pt, password):
 
 
 def decrypt(ct, password):
+    """Decryption function to unwrap and return the decrypted creds back to the main thread."""
     try:
         b64Ct = json.loads(ct)
         json_k = ["nonce", "salt", "ct", "tag"]
@@ -39,6 +42,8 @@ def decrypt(ct, password):
 
 
 def create_encrypted_config(data, file_path):
+    """Creates an encrypted credential file if none exists.  Stores results in a
+    file in the root directory."""
     if isinstance(data, dict):
         data = json.dumps(data)
     payload = bytes(data, "utf-8")
@@ -56,12 +61,14 @@ def create_encrypted_config(data, file_path):
 
 
 def load_encrypted_config(config_path):
+    """Decrypts a previously encrypted credential file and returns the contents back
+    to the calling thread."""
     log.info("Reading credentials from: " + config_path)
     with open(config_path, "r") as json_file:
         data = json_file.read()
     try:
         if "nonce" in data:
-            password = getpass.getpass(prompt="Password: ")
+            password = getpass.getpass(prompt="Credential file password: ")
             decrypted = decrypt(data, password)
             return json.loads(decrypted)
         else:
@@ -72,7 +79,9 @@ def load_encrypted_config(config_path):
             return json.loads(data)
     except Exception as e:
         log.error(e)
-        log.error("Failed to decrypt the credential file.")
+        log.error(
+            f"Failed to decrypt the credential file. If you have forgotten the password, delete {config_path} and rerun the bot"
+        )
 
 
 # def main():
