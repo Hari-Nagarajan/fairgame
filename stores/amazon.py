@@ -704,6 +704,7 @@ class Amazon:
         self.save_screenshot("order-placed")
         return True
 
+
 def get_timestamp_filename(name, extension):
     """Utility method to create a filename with a timestamp appended to the root and before
     the provided file extension"""
