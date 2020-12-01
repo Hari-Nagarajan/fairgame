@@ -6,6 +6,7 @@ geckodriver.log
 .profile
 .profile-amz*
 *_config.json
+*_credentials.json
 *.log
 __pycache__/
 *.py[cod]
