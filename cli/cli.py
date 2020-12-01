@@ -39,31 +39,31 @@ def main():
     pass
 
 
-@click.command()
-@click.option(
-    "--gpu",
-    type=click.Choice(GPU_DISPLAY_NAMES, case_sensitive=False),
-    prompt="What GPU are you after?",
-    cls=QuestionaryOption,
-)
-@click.option(
-    "--locale",
-    type=click.Choice(CURRENCY_LOCALE_MAP.keys(), case_sensitive=False),
-    prompt="What locale shall we use?",
-    cls=QuestionaryOption,
-)
-@click.option("--test", is_flag=True)
-@click.option("--interval", type=int, default=5)
-@notify_on_crash
-def nvidia(gpu, locale, test, interval):
-    nv = NvidiaBuyer(
-        gpu,
-        notification_handler=notification_handler,
-        locale=locale,
-        test=test,
-        interval=interval,
-    )
-    nv.run_items()
+# @click.command()
+# @click.option(
+#     "--gpu",
+#     type=click.Choice(GPU_DISPLAY_NAMES, case_sensitive=False),
+#     prompt="What GPU are you after?",
+#     cls=QuestionaryOption,
+# )
+# @click.option(
+#     "--locale",
+#     type=click.Choice(CURRENCY_LOCALE_MAP.keys(), case_sensitive=False),
+#     prompt="What locale shall we use?",
+#     cls=QuestionaryOption,
+# )
+# @click.option("--test", is_flag=True)
+# @click.option("--interval", type=int, default=5)
+# @notify_on_crash
+# def nvidia(gpu, locale, test, interval):
+#     nv = NvidiaBuyer(
+#         gpu,
+#         notification_handler=notification_handler,
+#         locale=locale,
+#         test=test,
+#         interval=interval,
+#     )
+#     nv.run_items()
 
 
 @click.command()
@@ -72,8 +72,9 @@ def nvidia(gpu, locale, test, interval):
 @click.option("--test", is_flag=True)
 @click.option("--delay", type=float, default=3.0)
 @click.option("--checkshipping", is_flag=True)
+@click.option("--random-delay", is_flag=True)
 @notify_on_crash
-def amazon(no_image, headless, test, delay, checkshipping):
+def amazon(no_image, headless, test, delay, checkshipping, random_delay):
     if no_image:
         selenium_utils.no_amazon_image()
     else:
@@ -83,6 +84,7 @@ def amazon(no_image, headless, test, delay, checkshipping):
         headless=headless,
         notification_handler=notification_handler,
         checkshipping=checkshipping,
+        random_delay=random_delay,
     )
     amzn_obj.run(delay=delay, test=test)
 
@@ -110,7 +112,7 @@ def test_notifications():
 
 signal(SIGINT, handler)
 
-main.add_command(nvidia)
+# main.add_command(nvidia)
 main.add_command(amazon)
 main.add_command(bestbuy)
 main.add_command(test_notifications)

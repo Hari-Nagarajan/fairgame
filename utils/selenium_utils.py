@@ -7,7 +7,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 
 options = Options()
-options.page_load_strategy = 'eager'
+options.page_load_strategy = "eager"
 options.add_experimental_option(
     "excludeSwitches", ["enable-automation", "enable-logging"]
 )

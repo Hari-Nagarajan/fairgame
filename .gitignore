@@ -14,3 +14,4 @@ __pycache__/
 /config/apprise_config.json
 /config/apprise_config.json
 *.png
+*.html
