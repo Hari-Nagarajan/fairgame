@@ -1,5 +1,5 @@
+import getpass
 import json
-import secrets
 import time
 import os
 import math
@@ -25,6 +25,7 @@ from utils import selenium_utils
 from utils.json_utils import InvalidAutoBuyConfigException
 from utils.logger import log
 from utils.selenium_utils import options, enable_headless, wait_for_element
+from utils.encryption import create_encrypted_config, load_encrypted_config
 
 AMAZON_URLS = {
     "BASE_URL": "https://{domain}/",
@@ -34,6 +35,7 @@ AMAZON_URLS = {
 CHECKOUT_URL = "https://{domain}/gp/cart/desktop/go-to-checkout.html/ref=ox_sc_proceed?partialCheckoutCart=1&isToBeGiftWrappedBefore=0&proceedToRetailCheckout=Proceed+to+checkout&proceedToCheckout=1&cartInitiateId={cart_id}"
 
 AUTOBUY_CONFIG_PATH = "amazon_config.json"
+CREDENTIAL_FILE = "amazon_credentials.json"
 
 SIGN_IN_TEXT = [
     "Hello, Sign in",
@@ -168,12 +170,19 @@ class Amazon:
         self.checkshipping = checkshipping
         self.button_xpaths = BUTTON_XPATHS
         self.random_delay = random_delay
+        if os.path.exists(CREDENTIAL_FILE):
+            credential = load_encrypted_config(CREDENTIAL_FILE)
+            self.username = credential["username"]
+            self.password = credential["password"]
+        else:
+            log.info("No credential file found, let's make one")
+            credential = self.await_credential_input()
+            create_encrypted_config(credential, CREDENTIAL_FILE)
+
         if os.path.exists(AUTOBUY_CONFIG_PATH):
             with open(AUTOBUY_CONFIG_PATH) as json_file:
                 try:
                     config = json.load(json_file)
-                    self.username = config["username"]
-                    self.password = config["password"]
                     self.asin_groups = int(config["asin_groups"])
                     self.amazon_website = config.get(
                         "amazon_website", "smile.amazon.com"
@@ -211,6 +220,15 @@ class Amazon:
 
         for key in AMAZON_URLS.keys():
             AMAZON_URLS[key] = AMAZON_URLS[key].format(domain=self.amazon_website)
+
+    @staticmethod
+    def await_credential_input():
+        username = input("Amazon login ID: ")
+        password = getpass.getpass(prompt="Amazon Password: ")
+        return {
+            "username": username,
+            "password": password,
+        }
 
     def run(self, delay=3, test=False):
         self.driver.get(AMAZON_URLS["BASE_URL"])
