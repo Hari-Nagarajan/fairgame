@@ -113,15 +113,18 @@ INFO: "2020-09-25 14:41:04,617 - Order Placed.
 
 
 ## Best Buy
-This is fairly basic right now. Just login to the best buy website in your default browser and then run the command as follows:
+This is fairly basic right now.  The bot will monitor for the SKUs provided and if one shows as buyable, it will 
+attempt to open your default browser and add it to cart.  Just login to the best buy website in your default browser 
+and then run the command as follows:
 
 ```
-python app.py bestbuy --sku [SKU]
+python app.py bestbuy --sku [SKU] --skus [SKU1,SKU2,SKU3]
 ```
 
 Example:
 ```python
 python app.py bestbuy --sku 6429440
+python app.py bestbuy --skus 6429440,6430175,6432400,6436223
 ```
 
 
