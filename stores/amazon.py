@@ -3,6 +3,7 @@ import json
 import time
 import os
 import math
+import re
 from datetime import datetime
 from price_parser import parse_price
 import random
@@ -39,6 +40,7 @@ CREDENTIAL_FILE = "amazon_credentials.json"
 
 SIGN_IN_TEXT = [
     "Hello, Sign in",
+    "Sign in",
     "Hola, Identifícate",
     "Bonjour, Identifiez-vous",
     "Ciao, Accedi",
@@ -124,6 +126,7 @@ ADD_TO_CART_TITLES = [
     "",  # Amazon.nl has en empty title, sigh.
 ]
 DOGGO_TITLES = ["Sorry! Something went wrong!"]
+SHIPPING_ONLY_IF = "FREE Shipping on orders over"
 
 # this is not non-US friendly
 SHIPPING_ONLY_IF = "FREE Shipping on orders over"
@@ -163,6 +166,8 @@ class Amazon:
         headless=False,
         checkshipping=False,
         random_delay=False,
+        detailed=False,
+        used=False,
     ):
         self.notification_handler = notification_handler
         self.asin_list = []
@@ -170,6 +175,8 @@ class Amazon:
         self.checkshipping = checkshipping
         self.button_xpaths = BUTTON_XPATHS
         self.random_delay = random_delay
+        self.detailed = detailed
+        self.used = used
         if os.path.exists(CREDENTIAL_FILE):
             credential = load_encrypted_config(CREDENTIAL_FILE)
             self.username = credential["username"]
@@ -344,13 +351,19 @@ class Amazon:
             log.info("max add to cart retries hit, returning to asin check")
             return False
         if self.checkshipping:
-            f = furl(AMAZON_URLS["OFFER_URL"] + asin + "/ref=olp_f_new&f_new=true")
+            if self.used:
+                f = furl(AMAZON_URLS["OFFER_URL"] + asin)
+            else:
+                f = furl(AMAZON_URLS["OFFER_URL"] + asin + "/ref=olp_f_new&f_new=true")
         else:
-            f = furl(
-                AMAZON_URLS["OFFER_URL"]
-                + asin
-                + "/ref=olp_f_new&f_new=true&f_freeShipping=on"
-            )
+            if self.used:
+                f = furl(AMAZON_URLS["OFFER_URL"] + asin + "/f_freeShipping=on")
+            else:
+                f = furl(
+                    AMAZON_URLS["OFFER_URL"]
+                    + asin
+                    + "/ref=olp_f_new&f_new=true&f_freeShipping=on"
+                )
         try:
             self.driver.get(f.url)
             elements = self.driver.find_elements_by_xpath(
@@ -616,7 +629,80 @@ class Amazon:
             return random.uniform(DEFAULT_PAGE_WAIT_DELAY, DEFAULT_MAX_PAGE_WAIT_DELAY)
         else:
             return DEFAULT_PAGE_WAIT_DELAY
+            if retry < 3:
+                # log.info("Couldn't find button. Lets retry in a sec.")
+                time.sleep(2)
+                returnVal = self.finalize_order_button(test, retry + 1)
+            else:
+                log.info(
+                    "Couldn't find button after 3 retries. Open a GH issue for this."
+                )
+                self.save_page_source("finalize-order-button-fail")
+                self.save_screenshot("finalize-order-button-fail")
+        return returnVal
 
+    def wait_for_order_completed(self, test):
+        if not test:
+            try:
+                self.check_if_captcha(self.wait_for_pages, ORDER_COMPLETE_TITLES)
+            except:
+                log.error("error during order completion")
+                self.save_screenshot("order-failed")
+                return False
+        else:
+            log.info(
+                "This is a test, so we don't need to wait for the order completed page."
+            )
+        return True
+
+    def checkout(self, test):
+        log.info("Waiting for Cart Page")
+        self.notification_handler.send_notification("Attempting to checkout")
+        self.check_if_captcha(self.wait_for_pages, SHOPING_CART_TITLES)
+        if self.detailed:
+            self.save_screenshot("waiting-for-cart")
+
+        try:  # This is fast.
+            log.info("Quick redirect to checkout page")
+            cart_initiate_id = self.driver.find_element_by_name("cartInitiateId")
+            cart_initiate_id = cart_initiate_id.get_attribute("value")
+            self.driver.get(
+                CHECKOUT_URL.format(
+                    domain=self.amazon_website, cart_id=cart_initiate_id
+                )
+            )
+        except:
+            log.info("clicking checkout.")
+            try:
+                self.driver.find_element_by_xpath(
+                    '//*[@id="hlb-ptc-btn-native"]'
+                ).click()
+            except:
+                self.save_screenshot("start-checkout-fail")
+                log.info("Failed to checkout. Returning to stock check.")
+                return False
+
+        log.info("Waiting for Place Your Order Page")
+        self.wait_for_pyo_page()
+
+        log.info("Attempting to Finish checkout")
+        if self.detailed:
+            self.save_screenshot("finish-checkout")
+
+        if not self.finalize_order_button(test):
+            log.info("Failed to click finalize the order")
+            if self.detailed:
+                self.save_screenshot("finalize-fail")
+            return False
+
+        log.info("Waiting for Order completed page.")
+        if not self.wait_for_order_completed(test):
+            log.info("order not completed, going back to stock check")
+            return False
+
+        log.info("Order Placed.")
+        self.save_screenshot("order-placed")
+        return True
 
 def get_timestamp_filename(name, extension):
     """Utility method to create a filename with a timestamp appended to the root and before

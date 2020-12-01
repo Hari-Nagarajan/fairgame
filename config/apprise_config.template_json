@@ -7,5 +7,8 @@
   },
   {
   "url": "slack://{OAuthToken}/#{channel}"
+  },
+  {
+  "url": "{COPY AND PASTE DISCORD WEBHOOK URL HERE}"
   }
 ]

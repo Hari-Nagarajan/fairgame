@@ -67,7 +67,7 @@ def main():
 
 
 @click.command()
-@click.option("--no-image", is_flag=True)
+@click.option("--no-image", is_flag=True, help="Do no load images")
 @click.option("--headless", is_flag=True)
 @click.option("--test", is_flag=True)
 @click.option("--delay", type=float, default=3.0)
@@ -75,6 +75,31 @@ def main():
 @click.option("--random-delay", is_flag=True)
 @notify_on_crash
 def amazon(no_image, headless, test, delay, checkshipping, random_delay):
+@click.option(
+    "--test",
+    is_flag=True,
+    help="Run the checkout flow, but do not actually purchase the item[s]",
+)
+@click.option(
+    "--delay", type=float, default=3.0, help="Time to wait between checks for item[s]"
+)
+@click.option(
+    "--checkshipping",
+    is_flag=True,
+    help="Factor shipping costs into reserve price and look for items with a shipping price",
+)
+@click.option(
+    "--detailed",
+    is_flag=True,
+    help="Take more screenshots. !!!!!! This could cause you to miss checkouts !!!!!!",
+)
+@click.option(
+    "--used",
+    is_flag=True,
+    help="Show used items in search listings.",
+)
+@notify_on_crash
+def amazon(no_image, headless, test, delay, checkshipping, detailed, used):
     if no_image:
         selenium_utils.no_amazon_image()
     else:
@@ -85,6 +110,8 @@ def amazon(no_image, headless, test, delay, checkshipping, random_delay):
         notification_handler=notification_handler,
         checkshipping=checkshipping,
         random_delay=random_delay,
+        detailed=detailed,
+        used=used,
     )
     amzn_obj.run(delay=delay, test=test)
 
