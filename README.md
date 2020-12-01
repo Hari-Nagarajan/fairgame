@@ -68,8 +68,6 @@ Commands:
 Make a copy of `amazon_config.template_json` and rename to `amazon_config.json`:
 ```json
 {
-  "username": "",
-  "password": "",
   "asin_groups": 2,
   "asin_list_1": ["B07JH53M4T","B08HR7SV3M"],
   "reserve_1": 1000,
@@ -78,14 +76,47 @@ Make a copy of `amazon_config.template_json` and rename to `amazon_config.json`:
   "amazon_website": "smile.amazon.com"
 }
 ```
-* `username` is your Amazon account email address
-* `password` is your Amazon account password
 * `asin_groups` indicates the number of ASIN groups you want to use.
 * `asin_list_x` list of ASINs for products you want to purchase. You must locate these (see Discord or lookup the ASIN on product pages). 
     * The first time an item from list "x" is in stock and under its associated reserve, it will purchase it. 
     * If the purchase is successful, the bot will not buy anything else from list "x".
 * `reserve_x` is the most amount you want to spend for a single item (i.e., ASIN) in `asin_list_x`. Does not include tax. If --checkshipping flag is active, this includes shipping listed on offer page.
 * `amazon_website` amazon domain you want to use. smile subdomain appears to work better, if available in your country.
+
+
+Previously your username and password were entered into the config file, this is no longer the case. On first launch the bot will prompt
+you for your credentials. You will then be asked for a password to encrypt them. Once done, your encrypted credentials will be stored in
+`amazon_credentials.json`. If you ever forget your encryption password, just delete this file and the next launch of the bot will recreate
+it. An example of this will look like the following:
+
+```
+python app.py amazon
+INFO Initializing Apprise handler
+INFO Initializing other notification handlers
+INFO Enabled Handlers: ['Audio']
+INFO No credential file found, let's make one
+Amazon login ID: <your email address>
+Amazon Password: <your amazon password>
+INFO Create a password for the credential file
+Credential file password: <a password used to encrypt your amazon credentials>
+Verify credential file password: <the same password that was entered above>
+INFO Credentials safely stored.
+```
+
+Starting the bot when you have created an encrypted file:
+
+```
+python app.py amazon --test
+INFO Initializing Apprise handler
+INFO Initializing other notification handlers
+INFO Enabled Handlers: ['Audio']
+Reading credentials from: amazon_credentials.json
+Credential file password: <enter the previously created password>
+```
+
+At run time, the bot will automatically prune ASINs that cause errors.
+
+=======
 
 Example usage:
 
