@@ -84,7 +84,10 @@ class BestBuyHandler:
                     "product_url": url["content"] if url else "No meta url given",
                 }
                 log.info(
-                    "Found SKU " + sku_id + ": " + self.sku_product_info[sku_id]["title"]
+                    "Found SKU "
+                    + sku_id
+                    + ": "
+                    + self.sku_product_info[sku_id]["title"]
                 )
             else:
                 log.info("Unable to locate SKU " + sku_id + ".  Removing from list.")

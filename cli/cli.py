@@ -123,13 +123,15 @@ def bestbuy(sku, headless, skus):
     if sku:
         sku_list = list(sku)
     if skus:
-        skus_list = skus.split(',')
+        skus_list = skus.split(",")
 
     # merge both command line options into a unique sku list
     merged_skus = skus_list + sku_list
     unique_skus = list(set(merged_skus))
     log.info(f"Found {len(unique_skus)} unique SKUs to hunt.")
-    bb = BestBuyHandler(unique_skus, notification_handler=notification_handler, headless=headless)
+    bb = BestBuyHandler(
+        unique_skus, notification_handler=notification_handler, headless=headless
+    )
     bb.run_item()
 
 
