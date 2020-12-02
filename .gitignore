@@ -7,12 +7,12 @@ geckodriver.log
 .profile-amz*
 *_config.json
 *_credentials.json
-*.log
+*.log*
 __pycache__/
 *.py[cod]
 *.pkl
 .vscode/
 /config/apprise_config.json
 *.png
-/config/amazon_credentials.json
+/config/*_credentials.json
 *.html
