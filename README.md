@@ -1,26 +1,28 @@
-# nvidia-bot
+# Fairgame
 
 [Installation](#Installation) | [Usage](#Usage) | [Discord](https://discord.gg/qDY2QBtAW6)  | [Troubleshooting](#Troubleshooting)
 
 ## Why???
 
-I built this in response to the severe tech scalping situation that's happening right now. Almost every tech product that's coming
+We built this in response to the severe tech scalping situation that's happening right now. Almost every tech product that's coming
 out right now is being instantly brought out by scalping groups and then resold at at insane prices. $699 GPUs are being listed
 for $1700 on eBay, and these scalpers are buying 40 carts while normal consumers can't get a single one. Preorders for the PS5 are
-being resold for nearly $1000. My take on this is that if I release a bot that anyone can use, for free, then the number of items 
-that scalpers can buy goes down and normal consumers can buy items for MSRP. If everyone is botting, then no one is botting. 
+being resold for nearly $1000. Our take on this is that if we release a bot that anyone can use, for free, then the number of items 
+that scalpers can buy goes down and normal consumers can buy items for MSRP. 
+
+**If everyone is botting, then no one is botting.**
 
 ## Got a question?
 
-See the [FAQs](#frequently-asked-questions) first.
+Read through this document and the cheat sheet linked in the next sections. See the [FAQs](#frequently-asked-questions) if that does not answer your questions.
 
 ## Installation
 
 Easy_XII has created a great cheat sheet for getting started, [please follow this guide](https://docs.google.com/document/d/1grN282tPodM9N57bPq4bbNyKZC01t_4A-sLpzzu_7lM/).
 
-This project uses [Pipenv](https://pypi.org/project/pipenv/) to manage dependencies. Hop in my [Discord](https://discord.gg/qDY2QBtAW6) if you have ideas, need help or just want to tell me about how you got your new 3080. 
+This project uses [Pipenv](https://pypi.org/project/pipenv/) to manage dependencies. Hop in my [Discord](https://discord.gg/qDY2QBtAW6) if you have ideas, need help or just want to tell us about how you got your new toys. 
 
-To get started you'll first need to clone this repository. If you are unfamiliar with Git, follow the [guide on how to do that on our Wiki](https://github.com/Hari-Nagarajan/nvidia-bot/wiki/How-to-use-GitHub-Desktop-App). You *can* use the "Download Zip" button on the GitHub repository's homepage but this makes receieving updates more difficult. If you can get setup with the GitHub Desktop app, updating to the latest version of the bot takes 1 click.
+To get started you'll first need to clone this repository. If you are unfamiliar with Git, follow the [guide on how to do that on our Wiki](https://github.com/Hari-Nagarajan/fairgame/wiki/How-to-use-GitHub-Desktop-App). You *can* use the "Download Zip" button on the GitHub repository's homepage but this makes receieving updates more difficult. If you can get setup with the GitHub Desktop app, updating to the latest version of the bot takes 1 click.
 
 !!! YOU WILL NEED TO USE THE 3.8 BRANCH OF PYTHON, 3.9.0 BREAKS DEPENDENCIES !!!
 ```
@@ -80,6 +82,7 @@ Make a copy of `amazon_config.template_json` and rename to `amazon_config.json`:
 * `asin_list_x` list of ASINs for products you want to purchase. You must locate these (see Discord or lookup the ASIN on product pages). 
     * The first time an item from list "x" is in stock and under its associated reserve, it will purchase it. 
     * If the purchase is successful, the bot will not buy anything else from list "x".
+    * Use sequential numbers for x, starting from 1. x can be any integer from 1 to 18,446,744,073,709,551,616
 * `reserve_x` is the most amount you want to spend for a single item (i.e., ASIN) in `asin_list_x`. Does not include tax. If --checkshipping flag is active, this includes shipping listed on offer page.
 * `amazon_website` amazon domain you want to use. smile subdomain appears to work better, if available in your country.
 
@@ -221,8 +224,8 @@ Maybe this works?
 sudo apt update
 sudo apt upgrade
 sudo apt install chromium-chromedriver
-git clone https://github.com/Hari-Nagarajan/nvidia-bot
-cd nvidia-bot/
+git clone https://github.com/Hari-Nagarajan/fairgame
+cd fairgame/
 pip3 install pipenv
 export PATH=$PATH:/home/<YOURUSERNAME>/.local/bin
 pipenv shell 
@@ -247,9 +250,9 @@ python app.py
 ## Frequently Asked Questions
 
 ### 1. Can I run multiple instances of the bot? 
-Yes. For example you can run one instance to check stock on the Nvidia store and a separate instance to check stock on Amazon. Bear in mind that if you do this you may end up with multiple purchases going through at the same time.
+Yes. For example you can run one instance to check stock on Best Buy and a separate instance to check stock on Amazon. Bear in mind that if you do this you may end up with multiple purchases going through at the same time.
 
-### 2. Does Nvidia Bot automatically bypass CAPTCHA's on the store sites?
+### 2. Does Fairgame automatically bypass CAPTCHA's on the store sites?
 * For Amazon, yes. The bot will try and auto-solve CAPTCHA's during the checkout process.
 
 ## Attribution
