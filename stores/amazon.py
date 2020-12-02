@@ -168,6 +168,7 @@ class Amazon:
         random_delay=False,
         detailed=False,
         used=False,
+        single_shot=False,
     ):
         self.notification_handler = notification_handler
         self.asin_list = []
@@ -177,6 +178,7 @@ class Amazon:
         self.random_delay = random_delay
         self.detailed = detailed
         self.used = used
+        self.single_shot = single_shot
         if os.path.exists(CREDENTIAL_FILE):
             credential = load_encrypted_config(CREDENTIAL_FILE)
             self.username = credential["username"]
@@ -579,7 +581,10 @@ class Amazon:
     def handle_order_complete(self):
         log.info("Order Placed.")
         self.save_screenshot("order-placed")
-        self.try_to_checkout = False
+        if self.single_shot:
+            exit(0)
+        else:
+            self.try_to_checkout = False
 
     @debug
     def handle_doggos(self):
