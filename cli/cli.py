@@ -93,9 +93,18 @@ def main():
     help="Show used items in search listings.",
 )
 @click.option("--random-delay", is_flag=True, help="Set delay to a random interval")
+@click.option("--single-shot", is_flag=True, help="Quit after 1 successful purchase")
 @notify_on_crash
 def amazon(
-    no_image, headless, test, delay, checkshipping, detailed, used, random_delay
+    no_image,
+    headless,
+    test,
+    delay,
+    checkshipping,
+    detailed,
+    used,
+    random_delay,
+    single_shot,
 ):
     if no_image:
         selenium_utils.no_amazon_image()
@@ -109,6 +118,7 @@ def amazon(
         random_delay=random_delay,
         detailed=detailed,
         used=used,
+        single_shot=single_shot,
     )
     amzn_obj.run(delay=delay, test=test)
 
