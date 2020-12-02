@@ -378,6 +378,7 @@ class Amazon:
             log.error(e)
             return None
 
+        in_stock = False
         for i in range(len(elements)):
             price = parse_price(prices[i].text)
             if SHIPPING_ONLY_IF in shipping[i].text:
@@ -403,8 +404,8 @@ class Amazon:
                 else:
                     log.info("did not add to cart, trying again")
                     log.debug(f"failed title was {self.driver.title}")
-                    self.check_stock(asin=asin, reserve=reserve, retry=retry + 1)
-        return False
+                    in_stock = self.check_stock(asin=asin, reserve=reserve, retry=retry + 1)
+        return in_stock
 
     # search lists of asin lists, and remove the first list that matches provided asin
     def remove_asin_list(self, asin):
@@ -510,6 +511,7 @@ class Amazon:
     def handle_checkout(self, test):
         previous_title = self.driver.title
         button = None
+        i = 0
         for i in range(len(self.button_xpaths)):
             try:
                 if (
@@ -545,7 +547,6 @@ class Amazon:
                     "will not try to complete order"
                     self.try_to_checkout = False
             self.button_xpaths.append(self.button_xpaths.pop(0))
-            i += 1
         if not test and self.driver.title == previous_title:
             # Could not click button, refresh page and try again
             log.error("couldn't find buttons to proceed to checkout")
