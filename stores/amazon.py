@@ -1,21 +1,24 @@
+import getpass
 import json
-import secrets
 import time
 import os
 import math
 import re
 from datetime import datetime
 from price_parser import parse_price
+import random
 
 from amazoncaptcha import AmazonCaptcha
 from chromedriver_py import binary_path  # this will get you the path variable
 from furl import furl
 from selenium import webdriver
-from selenium.common.exceptions import (
-    NoSuchElementException,
-    SessionNotCreatedException,
-    TimeoutException,
-)
+from selenium.common import exceptions
+
+# from selenium.common.exceptions import (
+#     NoSuchElementException,
+#     SessionNotCreatedException,
+#     TimeoutException,
+# )
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 
@@ -23,6 +26,8 @@ from utils import selenium_utils
 from utils.json_utils import InvalidAutoBuyConfigException
 from utils.logger import log
 from utils.selenium_utils import options, enable_headless, wait_for_element
+from utils.encryption import create_encrypted_config, load_encrypted_config
+from utils.debugger import debug
 
 AMAZON_URLS = {
     "BASE_URL": "https://{domain}/",
@@ -31,7 +36,8 @@ AMAZON_URLS = {
 }
 CHECKOUT_URL = "https://{domain}/gp/cart/desktop/go-to-checkout.html/ref=ox_sc_proceed?partialCheckoutCart=1&isToBeGiftWrappedBefore=0&proceedToRetailCheckout=Proceed+to+checkout&proceedToCheckout=1&cartInitiateId={cart_id}"
 
-AUTOBUY_CONFIG_PATH = "amazon_config.json"
+AUTOBUY_CONFIG_PATH = "config/amazon_config.json"
+CREDENTIAL_FILE = "config/amazon_credentials.json"
 
 SIGN_IN_TEXT = [
     "Hello, Sign in",
@@ -95,6 +101,8 @@ CHECKOUT_TITLES = [
     "Ordina - Cassa Amazon.it",
     "AmazonSmile Checkout",
     "Plaats je bestelling - Amazon.nl-kassa",
+    "Place Your Order - AmazonSmile Checkout",
+    "Preparing your order",
 ]
 ORDER_COMPLETE_TITLES = [
     "Amazon.com Thanks You",
@@ -119,7 +127,36 @@ ADD_TO_CART_TITLES = [
     "",  # Amazon.nl has en empty title, sigh.
 ]
 DOGGO_TITLES = ["Sorry! Something went wrong!"]
+
+# this is not non-US friendly
 SHIPPING_ONLY_IF = "FREE Shipping on orders over"
+
+TWOFA_TITLES = ["Two-Step Verification"]
+
+PRIME_TITLES = ["Complete your Amazon Prime sign up"]
+
+# OFFER_PAGE_TITLES = ["Amazon.com: Buying Choices:"]
+
+BUTTON_XPATHS = [
+    '//*[@id="submitOrderButtonId"]/span/input',
+    '//*[@id="bottomSubmitOrderButtonId"]/span/input',
+    '//*[@id="placeYourOrder"]/span/input',
+]
+# old xpaths, not sure these were needed for current work flow
+# '//*[@id="orderSummaryPrimaryActionBtn"]',
+# '//input[@name="placeYourOrder1"]',
+# '//*[@id="hlb-ptc-btn-native"]',
+# '//*[@id="sc-buy-box-ptc-button"]/span/input',
+
+
+DEFAULT_MAX_CHECKOUT_LOOPS = 20
+DEFAULT_MAX_PTC_TRIES = 3
+DEFAULT_MAX_PYO_TRIES = 3
+DEFAULT_MAX_ATC_TRIES = 3
+DEFAULT_MAX_WEIRD_PAGE_DELAY = 5
+DEFAULT_PAGE_WAIT_DELAY = 0.5  # also serves as minimum wait for randomized delays
+DEFAULT_MAX_PAGE_WAIT_DELAY = 1.0  # used for random page wait delay
+MAX_CHECKOUT_BUTTON_WAIT = 3  # integers only
 
 
 class Amazon:
@@ -128,6 +165,7 @@ class Amazon:
         notification_handler,
         headless=False,
         checkshipping=False,
+        random_delay=False,
         detailed=False,
         used=False,
     ):
@@ -135,14 +173,23 @@ class Amazon:
         self.asin_list = []
         self.reserve = []
         self.checkshipping = checkshipping
+        self.button_xpaths = BUTTON_XPATHS
+        self.random_delay = random_delay
         self.detailed = detailed
         self.used = used
+        if os.path.exists(CREDENTIAL_FILE):
+            credential = load_encrypted_config(CREDENTIAL_FILE)
+            self.username = credential["username"]
+            self.password = credential["password"]
+        else:
+            log.info("No credential file found, let's make one")
+            credential = self.await_credential_input()
+            create_encrypted_config(credential, CREDENTIAL_FILE)
+
         if os.path.exists(AUTOBUY_CONFIG_PATH):
             with open(AUTOBUY_CONFIG_PATH) as json_file:
                 try:
                     config = json.load(json_file)
-                    self.username = config["username"]
-                    self.password = config["password"]
                     self.asin_groups = int(config["asin_groups"])
                     self.amazon_website = config.get(
                         "amazon_website", "smile.amazon.com"
@@ -170,6 +217,7 @@ class Amazon:
         # if os.path.isdir(profile_amz):
         #     os.remove(profile_amz)
         options.add_argument(f"user-data-dir=.profile-amz")
+
         try:
             self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
             self.wait = WebDriverWait(self.driver, 10)
@@ -179,9 +227,55 @@ class Amazon:
 
         for key in AMAZON_URLS.keys():
             AMAZON_URLS[key] = AMAZON_URLS[key].format(domain=self.amazon_website)
+
+    @staticmethod
+    def await_credential_input():
+        username = input("Amazon login ID: ")
+        password = getpass.getpass(prompt="Amazon Password: ")
+        return {
+            "username": username,
+            "password": password,
+        }
+
+    def run(self, delay=3, test=False):
         self.driver.get(AMAZON_URLS["BASE_URL"])
         log.info("Waiting for home page.")
-        self.check_if_captcha(self.wait_for_pages, HOME_PAGE_TITLES)
+        self.handle_startup()
+        if not self.is_logged_in():
+            self.login()
+        self.save_screenshot("Bot Logged in and Starting up")
+        keep_going = True
+
+        while keep_going:
+            asin = self.run_asins(delay)
+            # found something in stock and under reserve
+            # initialize loop limiter variables
+            self.try_to_checkout = True
+            self.checkout_retry = 0
+            self.order_retry = 0
+            loop_iterations = 0
+            while self.try_to_checkout:
+                self.navigate_pages(test)
+                # if successful after running navigate pages, remove the asin_list from the list
+                if not self.try_to_checkout:
+                    self.remove_asin_list(asin)
+                # checkout loop limiters
+                elif self.checkout_retry > DEFAULT_MAX_PTC_TRIES:
+                    self.try_to_checkout = False
+                elif self.order_retry > DEFAULT_MAX_PYO_TRIES:
+                    if test:
+                        self.remove_asin_list(asin)
+                    self.try_to_checkout = False
+                loop_iterations += 1
+                if loop_iterations > DEFAULT_MAX_CHECKOUT_LOOPS:
+                    self.try_to_checkout = False
+            # if no items left it list, let loop end
+            if not self.asin_list:
+                keep_going = False
+
+    @debug
+    def handle_startup(self):
+        time.sleep(self.page_wait_delay())
         if self.is_logged_in():
             log.info("Already logged in")
         else:
@@ -193,22 +287,22 @@ class Amazon:
                 if is_smile
                 else '//*[@id="nav-link-accountList"]/div/span'
             )
-            selenium_utils.button_click_using_xpath(self.driver, xpath)
+            try:
+                self.driver.find_element_by_xpath(xpath).click()
+            except exceptions.NoSuchElementException:
+                log.error("Log in button does not exist")
             log.info("Wait for Sign In page")
-            self.check_if_captcha(self.wait_for_pages, SIGN_IN_TITLES)
-            self.login()
-            log.info("Waiting 15 seconds.")
-            time.sleep(
-                15
-            )  # We can remove this once I get more info on the phone verification page.
+            time.sleep(self.page_wait_delay())
 
+    @debug
     def is_logged_in(self):
         try:
             text = self.driver.find_element_by_id("nav-link-accountList").text
             return not any(sign_in in text for sign_in in SIGN_IN_TEXT)
-        except Exception:
+        except exceptions.NoSuchElementException:
             return False
 
+    @debug
     def login(self):
 
         try:
@@ -216,7 +310,7 @@ class Amazon:
             self.driver.find_element_by_xpath('//*[@id="ap_email"]').send_keys(
                 self.username + Keys.RETURN
             )
-        except:
+        except exceptions.NoSuchElementException:
             log.info("Email not needed.")
             pass
 
@@ -226,45 +320,41 @@ class Amazon:
             exit(1)
 
         log.info("Remember me checkbox")
-        selenium_utils.button_click_using_xpath(self.driver, '//*[@name="rememberMe"]')
+        try:
+            self.driver.find_element_by_xpath('//*[@name="rememberMe"]').click()
+        except exceptions.NoSuchElementException:
+            log.error("Remember me checkbox did not exist")
 
         log.info("Password")
-        self.driver.find_element_by_xpath('//*[@id="ap_password"]').send_keys(
-            self.password + Keys.RETURN
-        )
+        try:
+            self.driver.find_element_by_xpath('//*[@id="ap_password"]').send_keys(
+                self.password + Keys.RETURN
+            )
+        except exceptions.NoSuchElementException:
+            log.error("Password entry box did not exist")
 
+        time.sleep(self.page_wait_delay())
+        if self.driver.title in TWOFA_TITLES:
+            log.info("enter in your two-step verification code in browser")
+            while self.driver.title in TWOFA_TITLES:
+                time.sleep(DEFAULT_MAX_WEIRD_PAGE_DELAY)
         log.info(f"Logged in as {self.username}")
 
-    def run_item(self, delay=3, test=False):
-        self.save_screenshot("start-up")
-        log.info("Checking stock for items.")
-        checkout_success = False
-        while not checkout_success:
-            pop_list = []
+    @debug
+    def run_asins(self, delay):
+        found_asin = False
+        while not found_asin:
             for i in range(len(self.asin_list)):
                 for asin in self.asin_list[i]:
-                    checkout_success = self.check_stock(asin, self.reserve[i])
-                    if checkout_success:
-                        log.info(f"attempting to buy {asin}")
-                        if self.checkout(test=test):
-                            log.info(f"bought {asin}")
-                            pop_list.append(asin)
-                            break
-                        else:
-                            log.info(f"checkout for {asin} failed")
-                            checkout_success = False
+                    if self.check_stock(asin, self.reserve[i]):
+                        return asin
                     time.sleep(delay)
-            if pop_list:
-                for asin in pop_list:
-                    for i in range(len(self.asin_list)):
-                        if asin in self.asin_list[i]:
-                            self.asin_list.pop(i)
-                            self.reserve.pop(i)
-                            break
-            if self.asin_list:  # keep bot going if additional ASINs left
-                checkout_success = False
 
-    def check_stock(self, asin, reserve):
+    @debug
+    def check_stock(self, asin, reserve, retry=0):
+        if retry > DEFAULT_MAX_ATC_TRIES:
+            log.info("max add to cart retries hit, returning to asin check")
+            return False
         if self.checkshipping:
             if self.used:
                 f = furl(AMAZON_URLS["OFFER_URL"] + asin)
@@ -292,8 +382,9 @@ class Amazon:
             )
         except Exception as e:
             log.error(e)
-            return False
+            return None
 
+        in_stock = False
         for i in range(len(elements)):
             price = parse_price(prices[i].text)
             if SHIPPING_ONLY_IF in shipping[i].text:
@@ -311,10 +402,221 @@ class Amazon:
                 (price_float + ship_float), reserve, abs_tol=0.01
             ):
                 log.info("Item in stock and under reserve!")
-                elements[i].click()
                 log.info("clicking add to cart")
-                return True
-        return False
+                elements[i].click()
+                time.sleep(self.page_wait_delay())
+                if self.driver.title in SHOPING_CART_TITLES:
+                    return True
+                else:
+                    log.info("did not add to cart, trying again")
+                    log.debug(f"failed title was {self.driver.title}")
+                    in_stock = self.check_stock(
+                        asin=asin, reserve=reserve, retry=retry + 1
+                    )
+        return in_stock
+
+    # search lists of asin lists, and remove the first list that matches provided asin
+    @debug
+    def remove_asin_list(self, asin):
+        for i in range(len(self.asin_list)):
+            if asin in self.asin_list[i]:
+                self.asin_list.pop(i)
+                self.reserve.pop(i)
+                break
+
+    # checkout page navigator
+    @debug
+    def navigate_pages(self, test):
+        # delay to wait for page load
+        time.sleep(self.page_wait_delay())
+
+        title = self.driver.title
+        if title in SIGN_IN_TITLES:
+            self.login()
+        elif title in CAPTCHA_PAGE_TITLES:
+            self.handle_captcha()
+        elif title in SHOPING_CART_TITLES:
+            self.handle_cart()
+        elif title in CHECKOUT_TITLES:
+            self.handle_checkout(test)
+        elif title in ORDER_COMPLETE_TITLES:
+            self.handle_order_complete()
+        elif title in PRIME_TITLES:
+            self.handle_prime_signup()
+        elif title in HOME_PAGE_TITLES:
+            # if home page, something went wrong
+            self.handle_home_page()
+        elif title in DOGGO_TITLES:
+            self.handle_doggos()
+        else:
+            log.error(
+                f"{title} is not a known title, please create issue indicating the title with a screenshot of page"
+            )
+            self.save_screenshot("unknown-title")
+            self.save_page_source("unknown-title")
+
+    @debug
+    def handle_prime_signup(self):
+        log.info("Prime offer page popped up, attempting to click No Thanks")
+        button = None
+        try:
+            button = self.driver.find_element_by_xpath(
+                '//*[@class="a-button a-button-base no-thanks-button"]'
+            )
+        except exceptions.NoSuchElementException:
+            try:
+                button = self.driver.find_element_by_xpath(
+                    '//*[@class="a-button a-button-base prime-no-button"]'
+                )
+            except exceptions.NoSuchElementException:
+                try:
+                    button = self.driver.find_element_by_partial_link_text("No Thanks")
+                except exceptions.NoSuchElementException:
+                    log.error("could not find button")
+                    log.info("check if PYO button hidden")
+                    try:
+                        button = self.driver.find_element_by_xpath(
+                            '//*[@id="placeYourOrder"]/span/input'
+                        )
+                    except exceptions.NoSuchElementException:
+                        self.save_page_source("prime-signup-error")
+                        self.save_screenshot("prime-signup-error")
+        if button:
+            button.click()
+        else:
+            self.notification_handler.send_notification(
+                "Prime offer page popped up, user intervention required"
+            )
+            time.sleep(DEFAULT_MAX_WEIRD_PAGE_DELAY)
+
+    @debug
+    def handle_home_page(self):
+        log.info("On home page, trying to get back to checkout")
+        button = None
+        try:
+            button = self.driver.find_element_by_xpath('//*[@id="nav-cart"]')
+        except exceptions.NoSuchElementException:
+            log.info("Could not find cart button")
+        if button:
+            button.click()
+        else:
+            self.notification_handler.send_notification(
+                "Could not click cart button, user intervention required"
+            )
+            time.sleep(DEFAULT_MAX_WEIRD_PAGE_DELAY)
+
+    @debug
+    def handle_cart(self):
+        log.info("clicking checkout.")
+        try:
+            self.driver.find_element_by_xpath('//*[@id="hlb-ptc-btn-native"]').click()
+        except exceptions.NoSuchElementException:
+            try:
+                self.driver.find_element_by_xpath('//*[@id="hlb-ptc-btn"]').click()
+            except exceptions.NoSuchElementException:
+                log.error("couldn't find buttons to proceed to checkout")
+                self.save_page_source("ptc-error")
+                self.save_screenshot("ptc-error")
+                log.info("Refreshing page to try again")
+                self.driver.refresh()
+                self.checkout_retry += 1
+
+    @debug
+    def handle_checkout(self, test):
+        previous_title = self.driver.title
+        button = None
+        i = 0
+        for i in range(len(self.button_xpaths)):
+            try:
+                if (
+                    self.driver.find_element_by_xpath(
+                        self.button_xpaths[0]
+                    ).is_displayed()
+                    and self.driver.find_element_by_xpath(
+                        self.button_xpaths[0]
+                    ).is_enabled()
+                ):
+                    button = self.driver.find_element_by_xpath(self.button_xpaths[0])
+            except exceptions.NoSuchElementException:
+                log.debug(f"{self.button_xpaths[0]}, lets try a different one.")
+            if button:
+                if not test:
+                    log.info(f"Clicking Button: {button.text}")
+                    button.click()
+                    j = 0
+                    while (
+                        self.driver.title == previous_title
+                        or j < MAX_CHECKOUT_BUTTON_WAIT
+                    ):
+                        time.sleep(self.page_wait_delay())
+                        j += 1
+                    if self.driver.title != previous_title:
+                        break
+                    else:
+                        log.info(
+                            f"Button {self.button_xpaths[0]} didn't work, trying another one"
+                        )
+                else:
+                    log.info(f"Found button {button.text}, but this is a test")
+                    "will not try to complete order"
+                    self.try_to_checkout = False
+            self.button_xpaths.append(self.button_xpaths.pop(0))
+        if not test and self.driver.title == previous_title:
+            # Could not click button, refresh page and try again
+            log.error("couldn't find buttons to proceed to checkout")
+            self.save_page_source("ptc-error")
+            self.save_screenshot("ptc-error")
+            self.notification_handler.send_notification(
+                "error in checkout, please check window"
+            )
+            log.info("Refreshing page to try again")
+            self.driver.refresh()
+            self.order_retry += 1
+
+    @debug
+    def handle_order_complete(self):
+        log.info("Order Placed.")
+        self.save_screenshot("order-placed")
+        self.try_to_checkout = False
+
+    @debug
+    def handle_doggos(self):
+        self.notification_handler.send_notification(
+            "You got dogs, bot may not work correctly. Ending Checkout"
+        )
+        self.try_to_checkout = False
+
+    @debug
+    def handle_captcha(self):
+        # wait for captcha to load
+        time.sleep(DEFAULT_MAX_WEIRD_PAGE_DELAY)
+        try:
+            if self.driver.find_element_by_xpath(
+                '//form[@action="/errors/validateCaptcha"]'
+            ):
+                try:
+                    log.info("Stuck on a captcha... Lets try to solve it.")
+                    captcha = AmazonCaptcha.fromdriver(self.driver)
+                    solution = captcha.solve()
+                    log.info(f"The solution is: {solution}")
+                    if solution == "Not solved":
+                        log.info(
+                            f"Failed to solve {captcha.image_link}, lets reload and get a new captcha."
+                        )
+                        self.driver.refresh()
+                    else:
+                        self.save_screenshot("captcha")
+                        self.driver.find_element_by_xpath(
+                            '//*[@id="captchacharacters"]'
+                        ).send_keys(solution + Keys.RETURN)
+                except Exception as e:
+                    log.debug(e)
+                    log.info("Error trying to solve captcha. Refresh and retry.")
+                    self.driver.refresh()
+        except exceptions.NoSuchElementException:
+            log.error("captcha page does not contain captcha element")
+            log.error("refreshing")
+            self.driver.refresh()
 
     def save_screenshot(self, page):
         file_name = get_timestamp_filename("screenshot-" + page, ".png")
@@ -322,7 +624,7 @@ class Amazon:
         if self.driver.save_screenshot(file_name):
             try:
                 self.notification_handler.send_notification(page, file_name)
-            except TimeoutException:
+            except exceptions.TimeoutException:
                 log.info("Timed out taking screenshot, trying to continue anyway")
                 pass
             except Exception as e:
@@ -339,180 +641,11 @@ class Amazon:
         with open(file_name, "w", encoding="utf-8") as f:
             f.write(page_source)
 
-    def get_captcha_help(self):
-        if not self.on_captcha_page():
-            log.info("Not on captcha page.")
-            return
-        try:
-            log.info("Stuck on a captcha... Lets try to solve it.")
-            captcha = AmazonCaptcha.fromdriver(self.driver)
-            solution = captcha.solve()
-            log.info(f"The solution is: {solution}")
-            if solution == "Not solved":
-                log.info(
-                    f"Failed to solve {captcha.image_link}, lets reload and get a new captcha."
-                )
-                self.driver.refresh()
-                time.sleep(5)
-                self.get_captcha_help()
-            else:
-                self.save_screenshot("captcha")
-                self.driver.find_element_by_xpath(
-                    '//*[@id="captchacharacters"]'
-                ).send_keys(solution + Keys.RETURN)
-        except Exception as e:
-            log.debug(e)
-            log.info("Error trying to solve captcha. Refresh and retry.")
-            self.driver.refresh()
-            time.sleep(5)
-
-    def on_captcha_page(self):
-        try:
-            if self.driver.title in CAPTCHA_PAGE_TITLES:
-                return True
-            if self.driver.find_element_by_xpath(
-                '//form[@action="/errors/validateCaptcha"]'
-            ):
-                return True
-        except Exception:
-            pass
-        return False
-
-    def check_if_captcha(self, func, args):
-        try:
-            func(args)
-        except Exception as e:
-            log.debug(str(e))
-            if self.on_captcha_page():
-                self.get_captcha_help()
-                func(args, t=300)
-            else:
-                log.debug(self.driver.title)
-                log.error(
-                    f"An error happened, please submit a bug report including a screenshot of the page the "
-                    f"selenium browser is on. There may be a file saved at: amazon-{func.__name__}.png"
-                )
-                self.save_screenshot("title-fail")
-                time.sleep(60)
-                # self.driver.close()
-                log.debug(e)
-                pass
-
-    def wait_for_pages(self, page_titles, t=30):
-        try:
-            selenium_utils.wait_for_any_title(self.driver, page_titles, t)
-        except Exception as e:
-            log.debug(f"wait_for_pages exception: {e}")
-            pass
-
-    def wait_for_pyo_page(self):
-        self.check_if_captcha(self.wait_for_pages, CHECKOUT_TITLES + SIGN_IN_TITLES)
-
-        if self.driver.title in SIGN_IN_TITLES:
-            log.info("Need to sign in again")
-            self.login()
-
-    def finalize_order_button(self, test, retry=0):
-        returnVal = False
-        button_xpaths = [
-            '//*[@id="orderSummaryPrimaryActionBtn"]',
-            '//*[@id="bottomSubmitOrderButtonId"]/span/input',
-            '//*[@id="placeYourOrder"]/span/input',
-            '//*[@id="submitOrderButtonId"]/span/input',
-            '//input[@name="placeYourOrder1"]',
-            '//*[@id="hlb-ptc-btn-native"]',
-            '//*[@id="sc-buy-box-ptc-button"]/span/input',
-        ]
-        button = None
-        for button_xpath in button_xpaths:
-            try:
-                if (
-                    self.driver.find_element_by_xpath(button_xpath).is_displayed()
-                    and self.driver.find_element_by_xpath(button_xpath).is_enabled()
-                ):
-                    button = self.driver.find_element_by_xpath(button_xpath)
-            except NoSuchElementException:
-                log.debug(f"{button_xpath}, lets try a different one.")
-        if button:
-            log.info(f"Clicking Button: {button.text}")
-            if not test:
-                button.click()
-            return True
+    def page_wait_delay(self):
+        if self.random_delay:
+            return random.uniform(DEFAULT_PAGE_WAIT_DELAY, DEFAULT_MAX_PAGE_WAIT_DELAY)
         else:
-            if retry < 3:
-                # log.info("Couldn't find button. Lets retry in a sec.")
-                time.sleep(2)
-                returnVal = self.finalize_order_button(test, retry + 1)
-            else:
-                log.info(
-                    "Couldn't find button after 3 retries. Open a GH issue for this."
-                )
-                self.save_page_source("finalize-order-button-fail")
-                self.save_screenshot("finalize-order-button-fail")
-        return returnVal
-
-    def wait_for_order_completed(self, test):
-        if not test:
-            try:
-                self.check_if_captcha(self.wait_for_pages, ORDER_COMPLETE_TITLES)
-            except:
-                log.error("error during order completion")
-                self.save_screenshot("order-failed")
-                return False
-        else:
-            log.info(
-                "This is a test, so we don't need to wait for the order completed page."
-            )
-        return True
-
-    def checkout(self, test):
-        log.info("Waiting for Cart Page")
-        self.notification_handler.send_notification("Attempting to checkout")
-        self.check_if_captcha(self.wait_for_pages, SHOPING_CART_TITLES)
-        if self.detailed:
-            self.save_screenshot("waiting-for-cart")
-
-        try:  # This is fast.
-            log.info("Quick redirect to checkout page")
-            cart_initiate_id = self.driver.find_element_by_name("cartInitiateId")
-            cart_initiate_id = cart_initiate_id.get_attribute("value")
-            self.driver.get(
-                CHECKOUT_URL.format(
-                    domain=self.amazon_website, cart_id=cart_initiate_id
-                )
-            )
-        except:
-            log.info("clicking checkout.")
-            try:
-                self.driver.find_element_by_xpath(
-                    '//*[@id="hlb-ptc-btn-native"]'
-                ).click()
-            except:
-                self.save_screenshot("start-checkout-fail")
-                log.info("Failed to checkout. Returning to stock check.")
-                return False
-
-        log.info("Waiting for Place Your Order Page")
-        self.wait_for_pyo_page()
-
-        log.info("Attempting to Finish checkout")
-        if self.detailed:
-            self.save_screenshot("finish-checkout")
-
-        if not self.finalize_order_button(test):
-            log.info("Failed to click finalize the order")
-            if self.detailed:
-                self.save_screenshot("finalize-fail")
-            return False
-
-        log.info("Waiting for Order completed page.")
-        if not self.wait_for_order_completed(test):
-            log.info("order not completed, going back to stock check")
-            return False
-
-        log.info("Order Placed.")
-        self.save_screenshot("order-placed")
-        return True
+            return DEFAULT_PAGE_WAIT_DELAY
 
 
 def get_timestamp_filename(name, extension):
