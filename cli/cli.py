@@ -15,6 +15,8 @@ from utils.discord_presence import start_presence
 
 notification_handler = NotificationHandler()
 
+version = "dev_0.1"
+
 
 def handler(signal, frame):
     log.info("Caught the stop, exiting.")
@@ -146,7 +148,12 @@ def test_notifications():
 
 
 signal(SIGINT, handler)
-start_presence()
+
+if amazon:
+    status = "Watching Amazon stock"
+else:
+    status = "Watching Bestbuy stock"
+start_presence(status, version)
 
 # main.add_command(nvidia)
 main.add_command(amazon)
