@@ -4,7 +4,7 @@ import os
 
 from logging import handlers
 
-LOG_FILENAME = "nvidia-bot.log"
+LOG_FILENAME = "fairgame.log"
 
 # This check *must* be executed before logging.basicConfig because, at least on Windows,
 # basicConfig creates a lock on the log file that prevents renaming.  Possibly a workaround
