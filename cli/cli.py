@@ -11,6 +11,7 @@ from stores.bestbuy import BestBuyHandler
 from stores.nvidia import NvidiaBuyer, GPU_DISPLAY_NAMES, CURRENCY_LOCALE_MAP
 from utils import selenium_utils
 from utils.logger import log
+from utils.discord_presence import start_presence
 
 notification_handler = NotificationHandler()
 
@@ -135,6 +136,7 @@ def test_notifications():
 
 
 signal(SIGINT, handler)
+start_presence()
 
 # main.add_command(nvidia)
 main.add_command(amazon)

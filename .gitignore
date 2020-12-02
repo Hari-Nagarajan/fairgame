@@ -14,5 +14,5 @@ __pycache__/
 .vscode/
 /config/apprise_config.json
 *.png
-/config/amazon_credentials.json
+/config/*_credentials.json
 *.html

@@ -28,7 +28,7 @@ browser-cookie3 = "*"
 coloredlogs = "*"
 apprise = "*"
 price-parser = "*"
-
+pypresence = "==4.0.0"
 
 
 [requires]
