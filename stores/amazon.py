@@ -27,6 +27,7 @@ from utils.json_utils import InvalidAutoBuyConfigException
 from utils.logger import log
 from utils.selenium_utils import options, enable_headless, wait_for_element
 from utils.encryption import create_encrypted_config, load_encrypted_config
+from utils.debugger import debug
 
 AMAZON_URLS = {
     "BASE_URL": "https://{domain}/",
@@ -272,6 +273,7 @@ class Amazon:
             if not self.asin_list:
                 keep_going = False
 
+    @debug
     def handle_startup(self):
         time.sleep(self.page_wait_delay())
         if self.is_logged_in():
@@ -292,6 +294,7 @@ class Amazon:
             log.info("Wait for Sign In page")
             time.sleep(self.page_wait_delay())
 
+    @debug
     def is_logged_in(self):
         try:
             text = self.driver.find_element_by_id("nav-link-accountList").text
@@ -299,6 +302,7 @@ class Amazon:
         except exceptions.NoSuchElementException:
             return False
 
+    @debug
     def login(self):
 
         try:
@@ -336,6 +340,7 @@ class Amazon:
                 time.sleep(DEFAULT_MAX_WEIRD_PAGE_DELAY)
         log.info(f"Logged in as {self.username}")
 
+    @debug
     def run_asins(self, delay):
         found_asin = False
         while not found_asin:
@@ -345,6 +350,7 @@ class Amazon:
                         return asin
                     time.sleep(delay)
 
+    @debug
     def check_stock(self, asin, reserve, retry=0):
         if retry > DEFAULT_MAX_ATC_TRIES:
             log.info("max add to cart retries hit, returning to asin check")
@@ -408,6 +414,7 @@ class Amazon:
         return in_stock
 
     # search lists of asin lists, and remove the first list that matches provided asin
+    @debug
     def remove_asin_list(self, asin):
         for i in range(len(self.asin_list)):
             if asin in self.asin_list[i]:
@@ -416,6 +423,7 @@ class Amazon:
                 break
 
     # checkout page navigator
+    @debug
     def navigate_pages(self, test):
         # delay to wait for page load
         time.sleep(self.page_wait_delay())
@@ -445,6 +453,7 @@ class Amazon:
             self.save_screenshot("unknown-title")
             self.save_page_source("unknown-title")
 
+    @debug
     def handle_prime_signup(self):
         log.info("Prime offer page popped up, attempting to click No Thanks")
         button = None
@@ -478,6 +487,7 @@ class Amazon:
             )
             time.sleep(DEFAULT_MAX_WEIRD_PAGE_DELAY)
 
+    @debug
     def handle_home_page(self):
         log.info("On home page, trying to get back to checkout")
         button = None
@@ -493,6 +503,7 @@ class Amazon:
             )
             time.sleep(DEFAULT_MAX_WEIRD_PAGE_DELAY)
 
+    @debug
     def handle_cart(self):
         log.info("clicking checkout.")
         try:
@@ -508,6 +519,7 @@ class Amazon:
                 self.driver.refresh()
                 self.checkout_retry += 1
 
+    @debug
     def handle_checkout(self, test):
         previous_title = self.driver.title
         button = None
@@ -559,17 +571,20 @@ class Amazon:
             self.driver.refresh()
             self.order_retry += 1
 
+    @debug
     def handle_order_complete(self):
         log.info("Order Placed.")
         self.save_screenshot("order-placed")
         self.try_to_checkout = False
 
+    @debug
     def handle_doggos(self):
         self.notification_handler.send_notification(
             "You got dogs, bot may not work correctly. Ending Checkout"
         )
         self.try_to_checkout = False
 
+    @debug
     def handle_captcha(self):
         # wait for captcha to load
         time.sleep(DEFAULT_MAX_WEIRD_PAGE_DELAY)
