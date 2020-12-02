@@ -410,6 +410,8 @@ class Amazon:
                 else:
                     log.info("did not add to cart, trying again")
                     log.debug(f"failed title was {self.driver.title}")
+                    self.save_screenshot("failed-atc")
+                    self.save_page_source("failed-atc")
                     in_stock = self.check_stock(
                         asin=asin, reserve=reserve, retry=retry + 1
                     )
