@@ -35,8 +35,8 @@ AMAZON_URLS = {
 }
 CHECKOUT_URL = "https://{domain}/gp/cart/desktop/go-to-checkout.html/ref=ox_sc_proceed?partialCheckoutCart=1&isToBeGiftWrappedBefore=0&proceedToRetailCheckout=Proceed+to+checkout&proceedToCheckout=1&cartInitiateId={cart_id}"
 
-AUTOBUY_CONFIG_PATH = "amazon_config.json"
-CREDENTIAL_FILE = "amazon_credentials.json"
+AUTOBUY_CONFIG_PATH = "config/amazon_config.json"
+CREDENTIAL_FILE = "config/amazon_credentials.json"
 
 SIGN_IN_TEXT = [
     "Hello, Sign in",
@@ -629,6 +629,7 @@ class Amazon:
             return random.uniform(DEFAULT_PAGE_WAIT_DELAY, DEFAULT_MAX_PAGE_WAIT_DELAY)
         else:
             return DEFAULT_PAGE_WAIT_DELAY
+
 
 
 def get_timestamp_filename(name, extension):
