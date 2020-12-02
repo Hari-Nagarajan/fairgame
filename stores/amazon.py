@@ -410,7 +410,9 @@ class Amazon:
                 else:
                     log.info("did not add to cart, trying again")
                     log.debug(f"failed title was {self.driver.title}")
-                    in_stock = self.check_stock(asin=asin, reserve=reserve, retry=retry + 1)
+                    in_stock = self.check_stock(
+                        asin=asin, reserve=reserve, retry=retry + 1
+                    )
         return in_stock
 
     # search lists of asin lists, and remove the first list that matches provided asin
@@ -644,7 +646,6 @@ class Amazon:
             return random.uniform(DEFAULT_PAGE_WAIT_DELAY, DEFAULT_MAX_PAGE_WAIT_DELAY)
         else:
             return DEFAULT_PAGE_WAIT_DELAY
-
 
 
 def get_timestamp_filename(name, extension):
