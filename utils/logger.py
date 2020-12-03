@@ -27,7 +27,7 @@ logging.basicConfig(
     format='%(levelname)s: "%(asctime)s - %(message)s',
 )
 
-log = logging.getLogger("nvidia-bot")
+log = logging.getLogger("fairgame")
 log.setLevel(logging.DEBUG)
 
 LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
