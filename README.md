@@ -52,7 +52,7 @@ docker build -t "nvidia-bot" .
 
 Run it
 ```
-docker run -v ~/Desktop/nvidia-bot/:/home/appuser/nvidia-bot -it nvidia-bot
+docker run -v ~/Desktop/nvidia-bot/:/nvidia-bot -it nvidia-bot
 ```
 
 Change ~/Desktop/nvidia-bot/ on volume to match the folder containing your nvidia-bot repo. It will use that folder for configuration and output for logs.  
