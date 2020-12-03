@@ -43,6 +43,22 @@ Commands:
   bestbuy
 ```
 
+## Docker
+
+Build docker image 
+```
+docker build -t "nvidia-bot" .
+```
+
+Run it
+```
+docker run -v ~/Desktop/nvidia-bot/:/home/appuser/nvidia-bot -it nvidia-bot
+```
+
+Change ~/Desktop/nvidia-bot/ on volume to match the folder containing your nvidia-bot repo. It will use that folder for configuration and output for logs.  
+
+Amazon requires the --headless flag
+
 ## Current Functionality
 
 | **Website** | **Auto Checkout** | **Open Cart Link** | **Test flag** |
