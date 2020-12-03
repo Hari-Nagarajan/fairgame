@@ -12,7 +12,9 @@ __pycache__/
 *.py[cod]
 *.pkl
 .vscode/
-/config/apprise_config.json
 *.png
-/config/*_credentials.json
 *.html
+/config/*_credentials.json
+/config/apprise_config.json
+screenshots/*.png
+html_saves/*.html

@@ -179,6 +179,18 @@ class Amazon:
         self.detailed = detailed
         self.used = used
         self.single_shot = single_shot
+
+        if not os.path.exists("screenshots"):
+            try:
+                os.makedirs("screenshots")
+            except:
+                raise
+        if not os.path.exists("html_saves"):
+            try:
+                os.makedirs("html_saves")
+            except:
+                raise
+
         if os.path.exists(CREDENTIAL_FILE):
             credential = load_encrypted_config(CREDENTIAL_FILE)
             self.username = credential["username"]
@@ -637,7 +649,7 @@ class Amazon:
             self.driver.refresh()
 
     def save_screenshot(self, page):
-        file_name = get_timestamp_filename("screenshot-" + page, ".png")
+        file_name = get_timestamp_filename("screenshots/screenshot-" + page, ".png")
 
         if self.driver.save_screenshot(file_name):
             try:
@@ -653,7 +665,7 @@ class Amazon:
 
     def save_page_source(self, page):
         """Saves DOM at the current state when called.  This includes state changes from DOM manipulation via JS"""
-        file_name = get_timestamp_filename(page + "_source", "html")
+        file_name = get_timestamp_filename("html_saves/" + page + "_source", "html")
 
         page_source = self.driver.page_source
         with open(file_name, "w", encoding="utf-8") as f:
