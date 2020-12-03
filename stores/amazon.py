@@ -219,6 +219,7 @@ class Amazon:
         # if os.path.isdir(profile_amz):
         #     os.remove(profile_amz)
         options.add_argument(f"user-data-dir=.profile-amz")
+        options.page_load_strategy = "eager"
 
         try:
             self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
@@ -240,7 +241,12 @@ class Amazon:
         }
 
     def run(self, delay=3, test=False):
-        self.driver.get(AMAZON_URLS["BASE_URL"])
+        while True:
+            try:
+                self.driver.get(AMAZON_URLS["BASE_URL"])
+                break
+            except Exception:
+                pass
         log.info("Waiting for home page.")
         self.handle_startup()
         if not self.is_logged_in():
@@ -372,7 +378,12 @@ class Amazon:
                     + "/ref=olp_f_new&f_new=true&f_freeShipping=on"
                 )
         try:
-            self.driver.get(f.url)
+            while True:
+                try:
+                    self.driver.get(f.url)
+                    break
+                except Exception:
+                    pass
             elements = self.driver.find_elements_by_xpath(
                 '//*[@name="submit.addToCart"]'
             )
