@@ -153,7 +153,10 @@ if amazon:
     status = "Watching Amazon stock"
 else:
     status = "Watching Bestbuy stock"
-start_presence(status, version)
+try:
+    start_presence(status, version)
+except:
+    pass
 
 # main.add_command(nvidia)
 main.add_command(amazon)
