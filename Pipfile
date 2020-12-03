@@ -29,6 +29,7 @@ coloredlogs = "*"
 apprise = "*"
 price-parser = "*"
 pypresence = "==4.0.0"
+pywin32 = {version = "*", sys_platform = "== 'win32'"}
 
 
 [requires]
