@@ -19,3 +19,4 @@ __pycache__/
 screenshots/*.png
 html_saves/*.html
 *.code-workspace
+/config/apprise.conf
