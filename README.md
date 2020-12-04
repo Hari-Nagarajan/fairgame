@@ -166,7 +166,7 @@ python app.py bestbuy --sku 6429440
 Notifications are now handled by Apprise. Apprise lets you send notifications to a large number of supported notification services.
 Check https://github.com/caronc/apprise/wiki for a detailed list. 
 
-To enable Apprise notifications, make a copy of `apprise.conf.template` in the `config` directory and name it 
+To enable Apprise notifications, make a copy of `apprise.conf_template` in the `config` directory and name it 
 `apprise.conf`. Then add apprise formatted urls for your desired notification services as simple text entries 
 in the config file.  Any recognized notification services will be reported on app start.   
 
