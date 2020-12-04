@@ -170,6 +170,7 @@ class Amazon:
         detailed=False,
         used=False,
         single_shot=False,
+        no_screenshots=False,
     ):
         self.notification_handler = notification_handler
         self.asin_list = []
@@ -180,12 +181,15 @@ class Amazon:
         self.detailed = detailed
         self.used = used
         self.single_shot = single_shot
+        self.no_screenshots = no_screenshots
 
-        if not os.path.exists("screenshots"):
-            try:
-                os.makedirs("screenshots")
-            except:
-                raise
+        if not self.no_screenshots:
+            if not os.path.exists("screenshots"):
+                try:
+                    os.makedirs("screenshots")
+                except:
+                    raise
+
         if not os.path.exists("html_saves"):
             try:
                 os.makedirs("html_saves")
@@ -265,7 +269,10 @@ class Amazon:
         self.handle_startup()
         if not self.is_logged_in():
             self.login()
-        self.save_screenshot("Bot Logged in and Starting up")
+        if self.no_screenshots:
+            self.notification_handler.send_notification("Bot Logged in and Starting up")
+        else:
+            self.save_screenshot("Bot Logged in and Starting up")
         keep_going = True
 
         while keep_going:
@@ -447,7 +454,10 @@ class Amazon:
                 else:
                     log.info("did not add to cart, trying again")
                     log.debug(f"failed title was {self.driver.title}")
-                    self.save_screenshot("failed-atc")
+                    if self.no_screenshots:
+                        self.notification_handler.send_notification("failed-atc")
+                    else:
+                        self.save_screenshot("failed-atc")
                     self.save_page_source("failed-atc")
                     in_stock = self.check_stock(
                         asin=asin, reserve=reserve, retry=retry + 1
@@ -491,7 +501,10 @@ class Amazon:
             log.error(
                 f"{title} is not a known title, please create issue indicating the title with a screenshot of page"
             )
-            self.save_screenshot("unknown-title")
+            if self.no_screenshots:
+                self.notification_handler.send_notification("unknown-title")
+            else:
+                self.save_screenshot("unknown-title")
             self.save_page_source("unknown-title")
 
     @debug
@@ -519,7 +532,13 @@ class Amazon:
                         )
                     except exceptions.NoSuchElementException:
                         self.save_page_source("prime-signup-error")
-                        self.save_screenshot("prime-signup-error")
+                        if self.no_screenshots:
+                            self.notification_handler.send_notification(
+                                "prime-signup-error"
+                            )
+                        else:
+                            self.save_screenshot("prime-signup-error")
+
         if button:
             button.click()
         else:
@@ -555,7 +574,10 @@ class Amazon:
             except exceptions.NoSuchElementException:
                 log.error("couldn't find buttons to proceed to checkout")
                 self.save_page_source("ptc-error")
-                self.save_screenshot("ptc-error")
+                if self.no_screenshots:
+                    self.notification_handler.send_notification("ptc-error")
+                else:
+                    self.save_screenshot("ptc-error")
                 log.info("Refreshing page to try again")
                 self.driver.refresh()
                 self.checkout_retry += 1
@@ -604,10 +626,12 @@ class Amazon:
             # Could not click button, refresh page and try again
             log.error("couldn't find buttons to proceed to checkout")
             self.save_page_source("ptc-error")
-            self.save_screenshot("ptc-error")
-            self.notification_handler.send_notification(
-                "error in checkout, please check window"
-            )
+            if self.no_screenshots:
+                self.notification_handler.send_notification(
+                    "error in checkout, please check window"
+                )
+            else:
+                self.save_screenshot("ptc-error")
             log.info("Refreshing page to try again")
             self.driver.refresh()
             self.order_retry += 1
@@ -615,7 +639,10 @@ class Amazon:
     @debug
     def handle_order_complete(self):
         log.info("Order Placed.")
-        self.save_screenshot("order-placed")
+        if self.no_screenshots:
+            self.notification_handler.send_notification("Order placed")
+        else:
+            self.save_screenshot("order-placed")
         if self.single_shot:
             exit(0)
         else:
@@ -647,7 +674,12 @@ class Amazon:
                         )
                         self.driver.refresh()
                     else:
-                        self.save_screenshot("captcha")
+                        if self.no_screenshots:
+                            self.notification_handler.send_notification(
+                                "Solving captcha"
+                            )
+                        else:
+                            self.save_screenshot("captcha")
                         self.driver.find_element_by_xpath(
                             '//*[@id="captchacharacters"]'
                         ).send_keys(solution + Keys.RETURN)

@@ -95,6 +95,11 @@ def main():
 )
 @click.option("--random-delay", is_flag=True, help="Set delay to a random interval")
 @click.option("--single-shot", is_flag=True, help="Quit after 1 successful purchase")
+@click.option(
+    "--no-screenshots",
+    is_flag=True,
+    help="Take NO screenshots, do not bother asking for help if you use this... Screenshots are the best tool we have for troubleshooting",
+)
 @notify_on_crash
 def amazon(
     no_image,
@@ -106,6 +111,7 @@ def amazon(
     used,
     random_delay,
     single_shot,
+    no_screenshots,
 ):
     if no_image:
         selenium_utils.no_amazon_image()
@@ -120,6 +126,7 @@ def amazon(
         detailed=detailed,
         used=used,
         single_shot=single_shot,
+        no_screenshots=no_screenshots,
     )
     amzn_obj.run(delay=delay, test=test)
 
