@@ -27,7 +27,7 @@ from utils.json_utils import InvalidAutoBuyConfigException
 from utils.logger import log
 from utils.selenium_utils import options, enable_headless, wait_for_element
 from utils.encryption import create_encrypted_config, load_encrypted_config
-from utils.discord_presence import searching_update
+from utils.discord_presence import searching_update, buy_update
 from utils.debugger import debug
 
 AMAZON_URLS = {
