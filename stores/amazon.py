@@ -182,6 +182,8 @@ class Amazon:
         self.used = used
         self.single_shot = single_shot
         self.no_screenshots = no_screenshots
+        self.start_time = time.time()
+        self.start_time_atc = 0
 
         if not self.no_screenshots:
             if not os.path.exists("screenshots"):
@@ -286,7 +288,7 @@ class Amazon:
             while self.try_to_checkout:
                 self.navigate_pages(test)
                 # if successful after running navigate pages, remove the asin_list from the list
-                if not self.try_to_checkout:
+                if not self.try_to_checkout and not self.single_shot:
                     self.remove_asin_list(asin)
                 # checkout loop limiters
                 elif self.checkout_retry > DEFAULT_MAX_PTC_TRIES:
@@ -301,6 +303,8 @@ class Amazon:
             # if no items left it list, let loop end
             if not self.asin_list:
                 keep_going = False
+        runtime = time.time() - self.start_time
+        log.info(f"FairGame bot ran for {runtime} seconds.")
 
     @debug
     def handle_startup(self):
@@ -565,6 +569,7 @@ class Amazon:
 
     @debug
     def handle_cart(self):
+        self.start_time_atc = time.time()
         log.info("clicking checkout.")
         try:
             self.driver.find_element_by_xpath('//*[@id="hlb-ptc-btn-native"]').click()
@@ -607,7 +612,7 @@ class Amazon:
                     j = 0
                     while (
                         self.driver.title == previous_title
-                        or j < MAX_CHECKOUT_BUTTON_WAIT
+                        and j < MAX_CHECKOUT_BUTTON_WAIT
                     ):
                         time.sleep(self.page_wait_delay())
                         j += 1
@@ -619,8 +624,9 @@ class Amazon:
                         )
                 else:
                     log.info(f"Found button {button.text}, but this is a test")
-                    "will not try to complete order"
+                    log.info("will not try to complete order")
                     self.try_to_checkout = False
+                    break
             self.button_xpaths.append(self.button_xpaths.pop(0))
         if not test and self.driver.title == previous_title:
             # Could not click button, refresh page and try again
@@ -644,9 +650,9 @@ class Amazon:
         else:
             self.save_screenshot("order-placed")
         if self.single_shot:
-            exit(0)
-        else:
-            self.try_to_checkout = False
+            self.asin_list = []
+        self.try_to_checkout = False
+        log.info(f"checkout completed in {time.time()-self.start_time_atc} seconds")
 
     @debug
     def handle_doggos(self):
