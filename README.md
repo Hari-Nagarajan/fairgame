@@ -67,7 +67,6 @@ Commands:
 --used : Show used items in search listings
 --random-delay : Set delay to a random interval
 --single-shot : Quit after 1 successful purchase
---no-screenshots : Do not take screenshots
 ```
 
 Make a copy of `amazon_config.template_json` and rename to `amazon_config.json`:
