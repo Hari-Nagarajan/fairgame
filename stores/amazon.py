@@ -280,6 +280,8 @@ class Amazon:
             self.save_screenshot("Bot Logged in and Starting up")
         keep_going = True
 
+        log.info("Checking stock for items.")
+
         while keep_going:
             asin = self.run_asins(delay)
             # found something in stock and under reserve
