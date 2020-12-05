@@ -19,33 +19,39 @@ def start_rpc():
 
 
 def start_presence(status):
-    start_rpc()
-    RPC.update(
-        large_image="fairgame",
-        state=f"{status}",
-        details=f"{version}",
-        start=start_time,
-    )
-    RPC.close()
+    try:
+        RPC.update(
+            large_image="fairgame",
+            state=f"{status}",
+            details=f"{version}",
+            start=start_time,
+        )
+    except:
+        start_rpc()
+        start_presence(status)
 
 
 def buy_update():
-    start_rpc()
-    RPC.update(
-        large_image="fairgame",
-        state="Going through checkout",
-        details=f"{version}",
-        start=start_time,
-    )
-    RPC.close()
+    try:
+        RPC.update(
+            large_image="fairgame",
+            state="Going through checkout",
+            details=f"{version}",
+            start=start_time,
+        )
+    except:
+        start_rpc()
+        buy_update()
 
 
 def searching_update():
-    start_rpc()
-    RPC.update(
-        large_image="fairgame",
-        state="Looking for stock",
-        details=f"{version}",
-        start=start_time,
-    )
-    RPC.close()
+    try:
+        RPC.update(
+            large_image="fairgame",
+            state="Looking for stock",
+            details=f"{version}",
+            start=start_time,
+        )
+    except:
+        start_rpc()
+        searching_update()
