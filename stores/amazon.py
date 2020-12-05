@@ -1,5 +1,6 @@
 import getpass
 import json
+import stdiomask
 import time
 import os
 import math
@@ -206,6 +207,8 @@ class Amazon:
             log.info("No credential file found, let's make one")
             credential = self.await_credential_input()
             create_encrypted_config(credential, CREDENTIAL_FILE)
+            self.username = credential["username"]
+            self.password = credential["password"]
 
         if os.path.exists(AUTOBUY_CONFIG_PATH):
             with open(AUTOBUY_CONFIG_PATH) as json_file:
@@ -253,7 +256,7 @@ class Amazon:
     @staticmethod
     def await_credential_input():
         username = input("Amazon login ID: ")
-        password = getpass.getpass(prompt="Amazon Password: ")
+        password = stdiomask.getpass(prompt="Amazon Password: ")
         return {
             "username": username,
             "password": password,
