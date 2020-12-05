@@ -10,7 +10,7 @@ except:
     pass
 
 start_time = time.time()
-version = "dev 0.1"
+version = "0.4"
 
 
 def start_presence(status):
