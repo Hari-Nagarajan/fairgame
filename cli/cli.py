@@ -29,7 +29,7 @@ def notify_on_crash(func):
         except KeyboardInterrupt:
             pass
         except:
-            notification_handler.send_notification(f"nvidia-bot has crashed.")
+            notification_handler.send_notification(f"FairGame has crashed.")
             raise
 
     return decorator
