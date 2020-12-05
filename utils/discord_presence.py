@@ -26,6 +26,7 @@ def start_presence(status):
         details=f"{version}",
         start=start_time,
     )
+    RPC.close()
 
 
 def buy_update():
@@ -36,6 +37,7 @@ def buy_update():
         details=f"{version}",
         start=start_time,
     )
+    RPC.close()
 
 
 def searching_update():
@@ -46,3 +48,4 @@ def searching_update():
         details=f"{version}",
         start=start_time,
     )
+    RPC.close()
