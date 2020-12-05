@@ -1,0 +1,35 @@
+# Apprise TEXT based configuration file for simplicity.
+#
+# Specification can be found here:
+#   https://github.com/caronc/apprise/wiki/config_text
+#
+# Notification Providers configurations can be found here:
+#   https://github.com/caronc/apprise/wiki
+
+# Example Configurations:
+
+# Discord (https://github.com/caronc/apprise/wiki/Notify_discord)
+#
+# https://discordapp.com/api/webhooks/{WebhookID}/{WebhookToken}
+#  OR
+# discord://{WebhookID}/{WebhookToken}/
+
+
+# Telegram
+
+# tgram://{bot_token}/{chat_id}/
+
+
+# Slack (https://github.com/caronc/apprise/wiki/Notify_slack)
+
+# https://hooks.slack.com/services/{tokenA}/{tokenB}/{tokenC}
+#  OR
+# slack://{tokenA}/{tokenB}/{tokenC}
+
+
+# Local OS Notification - NOTE: May require local installation of apprise (pip install apprise)
+# qt://
+# gnome://
+# kde://
+# macosx://
+# windows://
