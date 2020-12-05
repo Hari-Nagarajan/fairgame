@@ -8,50 +8,31 @@ version = "0.4.2"
 
 client_id = "783592971903696907"
 RPC = Presence(client_id=client_id)
-
-
-def start_rpc():
-    try:
-        RPC.connect()
-    except Exception as e:
-        log.error(e)
-        pass
+RPC.connect()
 
 
 def start_presence(status):
-    try:
-        RPC.update(
-            large_image="fairgame",
-            state=f"{status}",
-            details=f"{version}",
-            start=start_time,
-        )
-    except:
-        start_rpc()
-        start_presence(status)
+    RPC.update(
+        large_image="fairgame",
+        state=f"{status}",
+        details=f"{version}",
+        start=start_time,
+    )
 
 
 def buy_update():
-    try:
-        RPC.update(
-            large_image="fairgame",
-            state="Going through checkout",
-            details=f"{version}",
-            start=start_time,
-        )
-    except:
-        start_rpc()
-        buy_update()
+    RPC.update(
+        large_image="fairgame",
+        state="Going through checkout",
+        details=f"{version}",
+        start=start_time,
+    )
 
 
 def searching_update():
-    try:
-        RPC.update(
-            large_image="fairgame",
-            state="Looking for stock",
-            details=f"{version}",
-            start=start_time,
-        )
-    except:
-        start_rpc()
-        searching_update()
+    RPC.update(
+        large_image="fairgame",
+        state="Looking for stock",
+        details=f"{version}",
+        start=start_time,
+    )
