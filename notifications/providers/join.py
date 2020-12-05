@@ -36,7 +36,7 @@ class JoinHandler:
             url = self.url_re.search(message_body)
             payload = {
                 "text": message_body,
-                "title": "Nvidia-Bot Alert",
+                "title": "FairGame Alert",
                 "deviceId": self.deviceId,
                 "apikey": self.apikey,
             }

@@ -11,6 +11,7 @@ from stores.bestbuy import BestBuyHandler
 from stores.nvidia import NvidiaBuyer, GPU_DISPLAY_NAMES, CURRENCY_LOCALE_MAP
 from utils import selenium_utils
 from utils.logger import log
+from utils.discord_presence import start_presence
 
 notification_handler = NotificationHandler()
 
@@ -28,7 +29,7 @@ def notify_on_crash(func):
         except KeyboardInterrupt:
             pass
         except:
-            notification_handler.send_notification(f"nvidia-bot has crashed.")
+            notification_handler.send_notification(f"FairGame has crashed.")
             raise
 
     return decorator
@@ -39,31 +40,31 @@ def main():
     pass
 
 
-@click.command()
-@click.option(
-    "--gpu",
-    type=click.Choice(GPU_DISPLAY_NAMES, case_sensitive=False),
-    prompt="What GPU are you after?",
-    cls=QuestionaryOption,
-)
-@click.option(
-    "--locale",
-    type=click.Choice(CURRENCY_LOCALE_MAP.keys(), case_sensitive=False),
-    prompt="What locale shall we use?",
-    cls=QuestionaryOption,
-)
-@click.option("--test", is_flag=True)
-@click.option("--interval", type=int, default=5)
-@notify_on_crash
-def nvidia(gpu, locale, test, interval):
-    nv = NvidiaBuyer(
-        gpu,
-        notification_handler=notification_handler,
-        locale=locale,
-        test=test,
-        interval=interval,
-    )
-    nv.run_items()
+# @click.command()
+# @click.option(
+#     "--gpu",
+#     type=click.Choice(GPU_DISPLAY_NAMES, case_sensitive=False),
+#     prompt="What GPU are you after?",
+#     cls=QuestionaryOption,
+# )
+# @click.option(
+#     "--locale",
+#     type=click.Choice(CURRENCY_LOCALE_MAP.keys(), case_sensitive=False),
+#     prompt="What locale shall we use?",
+#     cls=QuestionaryOption,
+# )
+# @click.option("--test", is_flag=True)
+# @click.option("--interval", type=int, default=5)
+# @notify_on_crash
+# def nvidia(gpu, locale, test, interval):
+#     nv = NvidiaBuyer(
+#         gpu,
+#         notification_handler=notification_handler,
+#         locale=locale,
+#         test=test,
+#         interval=interval,
+#     )
+#     nv.run_items()
 
 
 @click.command()
@@ -92,8 +93,26 @@ def nvidia(gpu, locale, test, interval):
     is_flag=True,
     help="Show used items in search listings.",
 )
+@click.option("--random-delay", is_flag=True, help="Set delay to a random interval")
+@click.option("--single-shot", is_flag=True, help="Quit after 1 successful purchase")
+@click.option(
+    "--no-screenshots",
+    is_flag=True,
+    help="Take NO screenshots, do not bother asking for help if you use this... Screenshots are the best tool we have for troubleshooting",
+)
 @notify_on_crash
-def amazon(no_image, headless, test, delay, checkshipping, detailed, used):
+def amazon(
+    no_image,
+    headless,
+    test,
+    delay,
+    checkshipping,
+    detailed,
+    used,
+    random_delay,
+    single_shot,
+    no_screenshots,
+):
     if no_image:
         selenium_utils.no_amazon_image()
     else:
@@ -103,10 +122,13 @@ def amazon(no_image, headless, test, delay, checkshipping, detailed, used):
         headless=headless,
         notification_handler=notification_handler,
         checkshipping=checkshipping,
+        random_delay=random_delay,
         detailed=detailed,
         used=used,
+        single_shot=single_shot,
+        no_screenshots=no_screenshots,
     )
-    amzn_obj.run_item(delay=delay, test=test)
+    amzn_obj.run(delay=delay, test=test)
 
 
 @click.command()
@@ -132,7 +154,13 @@ def test_notifications():
 
 signal(SIGINT, handler)
 
-main.add_command(nvidia)
+try:
+    status = "Spinning up"
+    start_presence(status)
+except:
+    pass
+
+# main.add_command(nvidia)
 main.add_command(amazon)
 main.add_command(bestbuy)
 main.add_command(test_notifications)
