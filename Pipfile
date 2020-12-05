@@ -29,7 +29,7 @@ coloredlogs = "*"
 apprise = "*"
 price-parser = "*"
 pypresence = "==4.0.0"
-
+stdiomask = "*"
 
 [requires]
 python_version = "3.8"

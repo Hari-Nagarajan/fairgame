@@ -1,4 +1,5 @@
-import getpass
+import getpass as getpass
+import stdiomask
 import json
 import os
 from base64 import b64encode, b64decode
@@ -48,8 +49,8 @@ def create_encrypted_config(data, file_path):
         data = json.dumps(data)
     payload = bytes(data, "utf-8")
     log.info("Create a password for the credential file")
-    cpass = getpass.getpass(prompt="Credential file password: ")
-    vpass = getpass.getpass(prompt="Verify credential file password: ")
+    cpass = stdiomask.getpass(prompt="Credential file password: ", mask="*")
+    vpass = stdiomask.getpass(prompt="Verify credential file password: ", mask="*")
     if cpass == vpass:
         result = encrypt(payload, cpass)
         with open(file_path, "w") as f:
@@ -68,7 +69,7 @@ def load_encrypted_config(config_path):
         data = json_file.read()
     try:
         if "nonce" in data:
-            password = getpass.getpass(prompt="Credential file password: ")
+            password = stdiomask.getpass(prompt="Credential file password: ", mask="*")
             decrypted = decrypt(data, password)
             return json.loads(decrypted)
         else:
