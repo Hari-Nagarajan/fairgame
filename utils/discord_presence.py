@@ -1,7 +1,7 @@
 from pypresence import Presence
 import time
 import random
-from util.logger import log
+from utils.logger import log
 
 start_time = time.time()
 version = "0.4.2"
