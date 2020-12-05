@@ -67,6 +67,7 @@ Commands:
 --used : Show used items in search listings
 --random-delay : Set delay to a random interval
 --single-shot : Quit after 1 successful purchase
+--no-screenshots : Do not take screenshots
 ```
 
 Make a copy of `amazon_config.template_json` and rename to `amazon_config.json`:
@@ -237,7 +238,7 @@ pipenv install
 
 3. Open the following file in a text editor: 
 ```
-/home/<YOURUSERNAME>/.local/share/virtualenvs/nvidia-bot-<RANDOMCHARS>/lib/python3.7/site-packages/selenium/webdriver/common/service.py
+/home/<YOURUSERNAME>/.local/share/virtualenvs/fairgame-<RANDOMCHARS>/lib/python3.7/site-packages/selenium/webdriver/common/service.py
 ```
 4. Edit line 38 from `self.path = executable` to `self.path = "chromedriver"`, then save and close the file.
 
