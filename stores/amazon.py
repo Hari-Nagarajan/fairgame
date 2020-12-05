@@ -410,7 +410,8 @@ class Amazon:
                 try:
                     try:
                         searching_update()
-                    except Exception:
+                    except Exception as e:
+                        log.error(e)
                         pass
                     self.driver.get(f.url)
                     break
@@ -452,7 +453,8 @@ class Amazon:
                 log.info("clicking add to cart")
                 try:
                     buy_update()
-                except:
+                except Exception as e:
+                    log.error(e)
                     pass
                 elements[i].click()
                 time.sleep(self.page_wait_delay())

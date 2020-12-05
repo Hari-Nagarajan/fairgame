@@ -1,6 +1,7 @@
 from pypresence import Presence
 import time
 import random
+from util.logger import log
 
 start_time = time.time()
 version = "0.4.2"
@@ -12,7 +13,8 @@ RPC = Presence(client_id=client_id)
 def start_rpc():
     try:
         RPC.connect()
-    except:
+    except Exception as e:
+        log.error(e)
         pass
 
 
