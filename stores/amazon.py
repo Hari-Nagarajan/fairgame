@@ -1,35 +1,25 @@
-import getpass
 import json
-import stdiomask
-import time
-import os
 import math
-import re
-from datetime import datetime
-from price_parser import parse_price
+import os
 import random
+import time
+from datetime import datetime
 
+import stdiomask
 from amazoncaptcha import AmazonCaptcha
 from chromedriver_py import binary_path  # this will get you the path variable
 from furl import furl
+from price_parser import parse_price
 from selenium import webdriver
 from selenium.common import exceptions
-
-# from selenium.common.exceptions import (
-#     NoSuchElementException,
-#     SessionNotCreatedException,
-#     TimeoutException,
-# )
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 
-from utils import selenium_utils
-from utils.json_utils import InvalidAutoBuyConfigException
-from utils.logger import log
-from utils.selenium_utils import options, enable_headless, wait_for_element
-from utils.encryption import create_encrypted_config, load_encrypted_config
-from utils.discord_presence import searching_update, buy_update
 from utils.debugger import debug
+from utils.discord_presence import searching_update, buy_update
+from utils.encryption import create_encrypted_config, load_encrypted_config
+from utils.logger import log
+from utils.selenium_utils import options, enable_headless
 
 AMAZON_URLS = {
     "BASE_URL": "https://{domain}/",
@@ -182,16 +172,16 @@ class Amazon:
         self.detailed = detailed
         self.used = used
         self.single_shot = single_shot
-        self.no_screenshots = no_screenshots
+        self.take_screenshots = not no_screenshots
         self.start_time = time.time()
         self.start_time_atc = 0
 
-        if not self.no_screenshots:
-            if not os.path.exists("screenshots"):
-                try:
-                    os.makedirs("screenshots")
-                except:
-                    raise
+        # Create necessary sub-directories if they don't exist
+        if not os.path.exists("screenshots"):
+            try:
+                os.makedirs("screenshots")
+            except:
+                raise
 
         if not os.path.exists("html_saves"):
             try:
@@ -274,10 +264,10 @@ class Amazon:
         self.handle_startup()
         if not self.is_logged_in():
             self.login()
-        if self.no_screenshots:
-            self.notification_handler.send_notification("Bot Logged in and Starting up")
-        else:
-            self.save_screenshot("Bot Logged in and Starting up")
+        self.send_notification(
+            "Bot Logged in and Starting up", "Start-Up", self.take_screenshots
+        )
+
         keep_going = True
 
         log.info("Checking stock for items.")
@@ -463,10 +453,9 @@ class Amazon:
                 else:
                     log.info("did not add to cart, trying again")
                     log.debug(f"failed title was {self.driver.title}")
-                    if self.no_screenshots:
-                        self.notification_handler.send_notification("failed-atc")
-                    else:
-                        self.save_screenshot("failed-atc")
+                    self.send_notification(
+                        "Failed Add to Cart", "failed-atc", self.take_screenshots
+                    )
                     self.save_page_source("failed-atc")
                     in_stock = self.check_stock(
                         asin=asin, reserve=reserve, retry=retry + 1
@@ -510,10 +499,9 @@ class Amazon:
             log.error(
                 f"{title} is not a known title, please create issue indicating the title with a screenshot of page"
             )
-            if self.no_screenshots:
-                self.notification_handler.send_notification("unknown-title")
-            else:
-                self.save_screenshot("unknown-title")
+            self.send_notification(
+                "Encountered Unknown Page Title", "unknown-title", self.take_screenshots
+            )
             self.save_page_source("unknown-title")
 
     @debug
@@ -541,13 +529,11 @@ class Amazon:
                         )
                     except exceptions.NoSuchElementException:
                         self.save_page_source("prime-signup-error")
-                        if self.no_screenshots:
-                            self.notification_handler.send_notification(
-                                "prime-signup-error"
-                            )
-                        else:
-                            self.save_screenshot("prime-signup-error")
-
+                        self.send_notification(
+                            "Prime Sign-up Error occurred",
+                            "prime-signup-error",
+                            self.take_screenshots,
+                        )
         if button:
             button.click()
         else:
@@ -584,10 +570,11 @@ class Amazon:
             except exceptions.NoSuchElementException:
                 log.error("couldn't find buttons to proceed to checkout")
                 self.save_page_source("ptc-error")
-                if self.no_screenshots:
-                    self.notification_handler.send_notification("ptc-error")
-                else:
-                    self.save_screenshot("ptc-error")
+                self.send_notification(
+                    "Proceed to Checkout Error Occurred",
+                    "ptc-error",
+                    self.take_screenshots,
+                )
                 log.info("Refreshing page to try again")
                 self.driver.refresh()
                 self.checkout_retry += 1
@@ -637,12 +624,11 @@ class Amazon:
             # Could not click button, refresh page and try again
             log.error("couldn't find buttons to proceed to checkout")
             self.save_page_source("ptc-error")
-            if self.no_screenshots:
-                self.notification_handler.send_notification(
-                    "error in checkout, please check window"
-                )
-            else:
-                self.save_screenshot("ptc-error")
+            self.send_notification(
+                "Error in checkout.  Please check browser window.",
+                "ptc-error",
+                self.take_screenshots,
+            )
             log.info("Refreshing page to try again")
             self.driver.refresh()
             self.order_retry += 1
@@ -650,10 +636,7 @@ class Amazon:
     @debug
     def handle_order_complete(self):
         log.info("Order Placed.")
-        if self.no_screenshots:
-            self.notification_handler.send_notification("Order placed")
-        else:
-            self.save_screenshot("order-placed")
+        self.send_notification("Order placed.", "order-placed", self.take_screenshots)
         if self.single_shot:
             self.asin_list = []
         self.try_to_checkout = False
@@ -685,12 +668,9 @@ class Amazon:
                         )
                         self.driver.refresh()
                     else:
-                        if self.no_screenshots:
-                            self.notification_handler.send_notification(
-                                "Solving captcha"
-                            )
-                        else:
-                            self.save_screenshot("captcha")
+                        self.send_notification(
+                            "Solving catpcha", "captcha", self.take_screenshots
+                        )
                         self.driver.find_element_by_xpath(
                             '//*[@id="captchacharacters"]'
                         ).send_keys(solution + Keys.RETURN)
@@ -705,18 +685,16 @@ class Amazon:
 
     def save_screenshot(self, page):
         file_name = get_timestamp_filename("screenshots/screenshot-" + page, ".png")
-
-        if self.driver.save_screenshot(file_name):
-            try:
-                self.notification_handler.send_notification(page, file_name)
-            except exceptions.TimeoutException:
-                log.info("Timed out taking screenshot, trying to continue anyway")
-                pass
-            except Exception as e:
-                log.error(f"Trying to recover from error: {e}")
-                pass
-        else:
-            log.error("Error taking screenshot due to File I/O error")
+        try:
+            self.driver.save_screenshot(file_name)
+            return file_name
+        except exceptions.TimeoutException:
+            log.info("Timed out taking screenshot, trying to continue anyway")
+            pass
+        except Exception as e:
+            log.error(f"Trying to recover from error: {e}")
+            pass
+        return None
 
     def save_page_source(self, page):
         """Saves DOM at the current state when called.  This includes state changes from DOM manipulation via JS"""
@@ -731,6 +709,13 @@ class Amazon:
             return random.uniform(DEFAULT_PAGE_WAIT_DELAY, DEFAULT_MAX_PAGE_WAIT_DELAY)
         else:
             return DEFAULT_PAGE_WAIT_DELAY
+
+    def send_notification(self, message, page_name, take_screenshot=True):
+        if take_screenshot:
+            file_name = self.save_screenshot(page_name)
+            self.notification_handler.send_notification(message, file_name)
+        else:
+            self.notification_handler.send_notification(message)
 
 
 def get_timestamp_filename(name, extension):
