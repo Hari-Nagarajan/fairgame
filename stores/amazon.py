@@ -583,6 +583,7 @@ class Amazon:
     def handle_cart(self):
         self.start_time_atc = time.time()
         log.info("clicking checkout.")
+        self.save_screenshot("ptc-page")
         try:
             self.driver.find_element_by_xpath('//*[@id="hlb-ptc-btn-native"]').click()
         except exceptions.NoSuchElementException:
