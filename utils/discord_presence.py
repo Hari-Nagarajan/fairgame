@@ -10,7 +10,7 @@ except:
     pass
 
 start_time = time.time()
-version = "0.4.2"
+version = "0.4.3"
 
 
 def start_presence(status):
