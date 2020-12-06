@@ -224,8 +224,7 @@ class Amazon:
                         self.reserve_min.append(float(config[f"reserve_min_{x + 1}"]))
                         self.reserve_max.append(float(config[f"reserve_max_{x + 1}"]))
                     # assert isinstance(self.asin_list, list)
-                except Exception as e:
-                    log.error(e)
+                except Exception:
                     log.error(
                         "amazon_config.json file not formatted properly: https://github.com/Hari-Nagarajan/fairgame/wiki/Usage#json-configuration"
                     )
