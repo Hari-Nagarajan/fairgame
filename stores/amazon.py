@@ -23,7 +23,6 @@ from utils.selenium_utils import options, enable_headless
 
 AMAZON_URLS = {
     "BASE_URL": "https://{domain}/",
-    "CART_URL": "https://{domain}/gp/aws/cart/add.html",
     "OFFER_URL": "https://{domain}/gp/offer-listing/",
 }
 CHECKOUT_URL = "https://{domain}/gp/cart/desktop/go-to-checkout.html/ref=ox_sc_proceed?partialCheckoutCart=1&isToBeGiftWrappedBefore=0&proceedToRetailCheckout=Proceed+to+checkout&proceedToCheckout=1&cartInitiateId={cart_id}"
