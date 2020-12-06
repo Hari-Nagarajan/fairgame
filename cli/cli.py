@@ -4,14 +4,12 @@ from signal import signal, SIGINT
 
 import click
 
-from cli.utils import QuestionaryOption
 from notifications.notifications import NotificationHandler, TIME_FORMAT
 from stores.amazon import Amazon
 from stores.bestbuy import BestBuyHandler
-from stores.nvidia import NvidiaBuyer, GPU_DISPLAY_NAMES, CURRENCY_LOCALE_MAP
 from utils import selenium_utils
-from utils.logger import log
 from utils.discord_presence import start_presence
+from utils.logger import log
 
 notification_handler = NotificationHandler()
 
@@ -160,7 +158,6 @@ try:
 except:
     pass
 
-# main.add_command(nvidia)
 main.add_command(amazon)
 main.add_command(bestbuy)
 main.add_command(test_notifications)
