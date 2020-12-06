@@ -175,7 +175,8 @@ class Amazon:
     ):
         self.notification_handler = notification_handler
         self.asin_list = []
-        self.reserve = []
+        self.reserve_min = []
+        self.reserve_max = []
         self.checkshipping = checkshipping
         self.button_xpaths = BUTTON_XPATHS
         self.random_delay = random_delay
@@ -220,9 +221,11 @@ class Amazon:
                     )
                     for x in range(self.asin_groups):
                         self.asin_list.append(config[f"asin_list_{x + 1}"])
-                        self.reserve.append(float(config[f"reserve_{x + 1}"]))
+                        self.reserve_min.append(float(config[f"reserve_min_{x + 1}"]))
+                        self.reserve_max.append(float(config[f"reserve_max_{x + 1}"]))
                     # assert isinstance(self.asin_list, list)
-                except Exception:
+                except Exception as e:
+                    log.error(e)
                     log.error(
                         "amazon_config.json file not formatted properly: https://github.com/Hari-Nagarajan/fairgame/wiki/Usage#json-configuration"
                     )
@@ -241,7 +244,6 @@ class Amazon:
         # if os.path.isdir(profile_amz):
         #     os.remove(profile_amz)
         options.add_argument(f"user-data-dir=.profile-amz")
-        # options.page_load_strategy = "eager"
 
         try:
             self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
@@ -382,12 +384,12 @@ class Amazon:
         while not found_asin:
             for i in range(len(self.asin_list)):
                 for asin in self.asin_list[i]:
-                    if self.check_stock(asin, self.reserve[i]):
+                    if self.check_stock(asin, self.reserve_min[i], self.reserve_max[i]):
                         return asin
                     time.sleep(delay)
 
     @debug
-    def check_stock(self, asin, reserve, retry=0):
+    def check_stock(self, asin, reserve_min, reserve_max, retry=0):
         if retry > DEFAULT_MAX_ATC_TRIES:
             log.info("max add to cart retries hit, returning to asin check")
             return False
@@ -445,10 +447,14 @@ class Amazon:
             if ship_float is None or not self.checkshipping:
                 ship_float = 0
 
-            if (ship_float + price_float) <= reserve or math.isclose(
-                (price_float + ship_float), reserve, abs_tol=0.01
+            if (
+                (ship_float + price_float) <= reserve_max
+                or math.isclose((price_float + ship_float), reserve_max, abs_tol=0.01)
+            ) and (
+                (ship_float + price_float) >= reserve_min
+                or math.isclose((price_float + ship_float), reserve_min, abs_tol=0.01)
             ):
-                log.info("Item in stock and under reserve!")
+                log.info("Item in stock and in reserve range!")
                 log.info("clicking add to cart")
                 try:
                     buy_update()
@@ -467,7 +473,10 @@ class Amazon:
                         self.save_screenshot("failed-atc")
                     self.save_page_source("failed-atc")
                     in_stock = self.check_stock(
-                        asin=asin, reserve=reserve, retry=retry + 1
+                        asin=asin,
+                        reserve_max=reserve_max,
+                        reserve_min=reserve_min,
+                        retry=retry + 1,
                     )
         return in_stock
 
@@ -477,7 +486,8 @@ class Amazon:
         for i in range(len(self.asin_list)):
             if asin in self.asin_list[i]:
                 self.asin_list.pop(i)
-                self.reserve.pop(i)
+                self.reserve_max.pop(i)
+                self.reserve_min.pop(i)
                 break
 
     # checkout page navigator
