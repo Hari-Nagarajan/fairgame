@@ -253,6 +253,7 @@ class Amazon:
         }
 
     def run(self, delay=3, test=False):
+        log.info("Waiting for home page.")
         while True:
             try:
                 self.driver.get(AMAZON_URLS["BASE_URL"])
@@ -260,7 +261,6 @@ class Amazon:
             except Exception:
                 log.error("We didnt break out of the run() loop, in the exception now.")
                 pass
-        log.info("Waiting for home page.")
         self.handle_startup()
         if not self.is_logged_in():
             self.login()
