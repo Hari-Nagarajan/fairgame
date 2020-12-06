@@ -75,9 +75,11 @@ Make a copy of `amazon_config.template_json` and rename to `amazon_config.json`:
 {
   "asin_groups": 2,
   "asin_list_1": ["B07JH53M4T","B08HR7SV3M"],
-  "reserve_1": 1000,
+  "reserve_min_1": 800,
+  "reserve_max_1": 1000,
   "asin_list_2": ["B07JH53M4T","B08HR7SV3M"],
-  "reserve_2": 750,
+  "reserve_min_1": 700,
+  "reserve_max_2": 750,
   "amazon_website": "smile.amazon.com"
 }
 ```
@@ -86,7 +88,8 @@ Make a copy of `amazon_config.template_json` and rename to `amazon_config.json`:
     * The first time an item from list "x" is in stock and under its associated reserve, it will purchase it. 
     * If the purchase is successful, the bot will not buy anything else from list "x".
     * Use sequential numbers for x, starting from 1. x can be any integer from 1 to 18,446,744,073,709,551,616
-* `reserve_x` is the most amount you want to spend for a single item (i.e., ASIN) in `asin_list_x`. Does not include tax. If --checkshipping flag is active, this includes shipping listed on offer page.
+* `reserve_min_x` set a minimum limit to consider for purchasing an item. If a seller has a listing for a 700 dollar item a 1 dollar, it's likely fake.
+* `reserve_max_x` is the most amount you want to spend for a single item (i.e., ASIN) in `asin_list_x`. Does not include tax. If --checkshipping flag is active, this includes shipping listed on offer page.
 * `amazon_website` amazon domain you want to use. smile subdomain appears to work better, if available in your country.
 
 
@@ -119,11 +122,6 @@ INFO Enabled Handlers: ['Audio']
 Reading credentials from: amazon_credentials.json
 Credential file password: <enter the previously created password>
 ```
-
-At run time, the bot will automatically prune ASINs that cause errors.
-
-=======
-
 Example usage:
 
 ```
