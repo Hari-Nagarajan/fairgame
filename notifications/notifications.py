@@ -27,7 +27,8 @@ class NotificationHandler:
             self.enabled = True
         else:
             self.enabled = False
-            log.debug("No Apprise config found.")
+            log.info(f"No Apprise config found at {APPRISE_CONFIG_PATH}.")
+            log.info(f"For notifications, see {APPRISE_CONFIG_PATH}_template")
 
     def send_notification(self, message, ss_name=[], **kwargs):
         if self.enabled:

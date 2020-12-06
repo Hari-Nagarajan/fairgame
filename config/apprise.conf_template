@@ -1,3 +1,5 @@
+# Copy this file to a new file named apprise.conf in the same directory and edit accordingly
+#
 # Apprise TEXT based configuration file for simplicity.
 #
 # Specification can be found here:
