@@ -6,6 +6,8 @@ from utils.logger import log
 start_time = time.time()
 version = "0.4.2"
 
+log.info(f"FairGame version {version}")
+
 client_id = "783592971903696907"
 RPC = Presence(client_id=client_id)
 RPC.connect()
