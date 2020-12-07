@@ -104,6 +104,11 @@ def main():
     is_flag=True,
     help="Take NO screenshots, do not bother asking for help if you use this... Screenshots are the best tool we have for troubleshooting",
 )
+@click.option(
+    "--disable-presence",
+    is_flag=True,
+    help="Disable Discord Rich Presence functionallity",
+)
 @notify_on_crash
 def amazon(
     no_image,
@@ -116,6 +121,7 @@ def amazon(
     random_delay,
     single_shot,
     no_screenshots,
+    disable_presence,
 ):
     if no_image:
         selenium_utils.no_amazon_image()
@@ -131,6 +137,7 @@ def amazon(
         used=used,
         single_shot=single_shot,
         no_screenshots=no_screenshots,
+        disable_presence=disable_presence,
     )
     amzn_obj.run(delay=delay, test=test)
 
@@ -157,12 +164,6 @@ def test_notifications():
 
 
 signal(SIGINT, handler)
-
-try:
-    status = "Spinning up"
-    start_presence(status, version)
-except:
-    pass
 
 main.add_command(amazon)
 main.add_command(bestbuy)

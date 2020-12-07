@@ -163,6 +163,7 @@ class Amazon:
         used=False,
         single_shot=False,
         no_screenshots=False,
+        disable_presence=False,
     ):
         self.notification_handler = notification_handler
         self.asin_list = []
@@ -174,9 +175,17 @@ class Amazon:
         self.detailed = detailed
         self.used = used
         self.single_shot = single_shot
+        self.disable_presence = disable_presence
         self.take_screenshots = not no_screenshots
         self.start_time = time.time()
         self.start_time_atc = 0
+
+        if not self.disable_presence:
+            try:
+                status = "Spinning up"
+                start_presence(status)
+            except:
+                pass
 
         # Create necessary sub-directories if they don't exist
         if not os.path.exists("screenshots"):
@@ -403,10 +412,13 @@ class Amazon:
         try:
             while True:
                 try:
-                    try:
-                        searching_update(version)
-                    except:
-                        pass
+
+                    if not self.disable_presence:
+                        try:
+                            searching_update()
+                        except:
+                            pass
+
                     self.driver.get(f.url)
                     break
                 except Exception:
@@ -449,10 +461,13 @@ class Amazon:
             ):
                 log.info("Item in stock and in reserve range!")
                 log.info("clicking add to cart")
-                try:
-                    buy_update(version)
-                except:
-                    pass
+
+                if not self.disable_presence:
+                    try:
+                        buy_update()
+                    except:
+                        pass
+
                 elements[i].click()
                 time.sleep(self.page_wait_delay())
                 if self.driver.title in SHOPING_CART_TITLES:
