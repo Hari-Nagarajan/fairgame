@@ -10,8 +10,14 @@ from stores.bestbuy import BestBuyHandler
 from utils import selenium_utils
 from utils.discord_presence import start_presence
 from utils.logger import log
+from utils import version
 
 notification_handler = NotificationHandler()
+
+try:
+    check_version(version)
+except:
+    pass
 
 
 def handler(signal, frame):

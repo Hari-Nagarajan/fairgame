@@ -20,6 +20,7 @@ from utils.discord_presence import searching_update, buy_update
 from utils.encryption import create_encrypted_config, load_encrypted_config
 from utils.logger import log
 from utils.selenium_utils import options, enable_headless
+from utils.version import version
 
 AMAZON_URLS = {
     "BASE_URL": "https://{domain}/",
@@ -138,6 +139,7 @@ BUTTON_XPATHS = [
 # '//input[@name="placeYourOrder1"]',
 # '//*[@id="hlb-ptc-btn-native"]',
 # '//*[@id="sc-buy-box-ptc-button"]/span/input',
+# '//*[@id="buy-now-button"]',
 
 
 DEFAULT_MAX_CHECKOUT_LOOPS = 20
@@ -410,11 +412,13 @@ class Amazon:
         try:
             while True:
                 try:
+
                     if not self.disable_presence:
                         try:
                             searching_update()
                         except:
                             pass
+
                     self.driver.get(f.url)
                     break
                 except Exception:
@@ -457,11 +461,13 @@ class Amazon:
             ):
                 log.info("Item in stock and in reserve range!")
                 log.info("clicking add to cart")
+
                 if not self.disable_presence:
                     try:
                         buy_update()
                     except:
                         pass
+
                 elements[i].click()
                 time.sleep(self.page_wait_delay())
                 if self.driver.title in SHOPING_CART_TITLES:
