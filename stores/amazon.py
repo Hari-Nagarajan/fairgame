@@ -271,7 +271,12 @@ class Amazon:
                 self.driver.get(AMAZON_URLS["BASE_URL"])
                 break
             except Exception:
-                log.error("We didnt break out of the run() loop, in the exception now.")
+                log.error(
+                    "Couldn't talk to "
+                    + AMAZON_URLS["BASE_URL"]
+                    + ", if the address is right, there might be a network outage..."
+                )
+                time.sleep(3)
                 pass
         self.handle_startup()
         if not self.is_logged_in():
