@@ -1,19 +1,16 @@
-from pypresence import Presence
 import time
 import random
 from utils.logger import log
+from pypresence import Presence
 
 start_time = time.time()
-version = "0.4.2"
-
-log.info(f"FairGame version {version}")
 
 client_id = "783592971903696907"
 RPC = Presence(client_id=client_id)
 RPC.connect()
 
 
-def start_presence(status):
+def start_presence(status, version):
     RPC.update(
         large_image="fairgame",
         state=f"{status}",
@@ -22,7 +19,7 @@ def start_presence(status):
     )
 
 
-def buy_update():
+def buy_update(version):
     RPC.update(
         large_image="fairgame",
         state="Going through checkout",
@@ -31,7 +28,7 @@ def buy_update():
     )
 
 
-def searching_update():
+def searching_update(version):
     RPC.update(
         large_image="fairgame",
         state="Looking for stock",
