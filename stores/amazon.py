@@ -131,6 +131,8 @@ TWOFA_TITLES = ["Two-Step Verification"]
 
 PRIME_TITLES = ["Complete your Amazon Prime sign up"]
 
+OUT_OF_STOCK = ["Out of Stock - AmazonSmile Checkout"]
+
 # OFFER_PAGE_TITLES = ["Amazon.com: Buying Choices:"]
 
 BUTTON_XPATHS = [
@@ -540,6 +542,8 @@ class Amazon:
             self.handle_home_page()
         elif title in DOGGO_TITLES:
             self.handle_doggos()
+        elif title in OUT_OF_STOCK:
+            self.handle_out_of_stock()
         else:
             log.error(
                 f"{title} is not a known title, please create issue indicating the title with a screenshot of page"
@@ -702,6 +706,13 @@ class Amazon:
     def handle_doggos(self):
         self.notification_handler.send_notification(
             "You got dogs, bot may not work correctly. Ending Checkout"
+        )
+        self.try_to_checkout = False
+
+    @debug
+    def handle_out_of_stock(self):
+        self.notification_handler.send_notification(
+            "Carted it, but went out of stock, better luck next time."
         )
         self.try_to_checkout = False
 
