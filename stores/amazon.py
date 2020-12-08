@@ -189,11 +189,16 @@ class Amazon:
 
         if not self.disable_presence:
             try:
-                from utils.discord_presence import searching_update, buy_update
+                from utils.discord_presence import (
+                    start_presence,
+                    searching_update,
+                    buy_update,
+                )
 
                 status = "Spinning up"
-                start_presence(status)
-            except:
+                start_presence(status, version)
+            except Exception as e:
+                log.error(e)
                 pass
 
         # Create necessary sub-directories if they don't exist
@@ -550,19 +555,23 @@ class Amazon:
         button = None
         try:
             button = self.driver.find_element_by_xpath(
-                '//*[@class="a-button a-button-base no-thanks-button"]'
+                #'//*[@class="a-button a-button-base no-thanks-button"]'
+                '//*[contains(@class, "no-thanks-button") or contains(@class, "prime-nothanks-button") or contains(@class, "prime-no-button")]'
             )
         except exceptions.NoSuchElementException:
+            log.debug("Missed the catch-all")
             try:
                 button = self.driver.find_element_by_xpath(
                     '//*[@class="prime-nothanks-button prime-checkout-continue-link primeEvent checkout-continue-link a-button-text"]'
                 )
             except exceptions.NoSuchElementException:
+                log.debug("Missed the second")
                 try:
                     button = self.driver.find_element_by_xpath(
                         '//*[@class="a-button a-button-base prime-no-button"]'
                     )
                 except exceptions.NoSuchElementException:
+                    log.debug("Missed the third")
                     try:
                         button = self.driver.find_element_by_partial_link_text(
                             "No Thanks"

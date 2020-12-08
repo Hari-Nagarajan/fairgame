@@ -9,14 +9,14 @@ from stores.amazon import Amazon
 from stores.bestbuy import BestBuyHandler
 from utils import selenium_utils
 from utils.logger import log
-from utils import version
-from utils.version import check_version
+from utils.version import check_version, version
 
 notification_handler = NotificationHandler()
 
 try:
     check_version(version)
-except:
+except Exception as e:
+    log.error(e)
     pass
 
 
