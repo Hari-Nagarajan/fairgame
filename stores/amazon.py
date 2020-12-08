@@ -16,7 +16,6 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 
 from utils.debugger import debug
-from utils.discord_presence import searching_update, buy_update
 from utils.encryption import create_encrypted_config, load_encrypted_config
 from utils.logger import log
 from utils.selenium_utils import options, enable_headless
@@ -182,6 +181,8 @@ class Amazon:
 
         if not self.disable_presence:
             try:
+                from utils.discord_presence import searching_update, buy_update
+
                 status = "Spinning up"
                 start_presence(status)
             except:
