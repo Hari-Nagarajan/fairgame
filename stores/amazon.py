@@ -109,6 +109,7 @@ ORDER_COMPLETE_TITLES = [
     "Amazon.fr vous remercie.",
     "Grazie da Amazon.it",
     "Hartelijk dank",
+    "Thank You",
 ]
 ADD_TO_CART_TITLES = [
     "Amazon.com: Please Confirm Your Action",
