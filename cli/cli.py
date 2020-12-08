@@ -85,7 +85,7 @@ def main():
 @click.option(
     "--delay-range",
     type=(float, float),
-    default=(None, None),
+    default=(None, None),   # will use `delay` unless delay-range is specified
     help="Time to wait between checks for item[s]. Random value between specified range. eg. for `--delay-range 3.5 4.2` the delay would be between 3.5 and 4.2 seconds.",
 )
 @click.option(
