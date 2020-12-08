@@ -391,7 +391,7 @@ class Amazon:
         while not found_asin:
             if delay_range[0] != delay_range[1]:
                 delay = random.uniform(delay_range[0], delay_range[1])
-                log.debug(f"New between {delay_range[0]} and {delay_range[1]} is {delay}")
+                log.debug(f"New delay between {delay_range[0]} and {delay_range[1]} is {delay}")
             else:
                 delay = delay_range[0]
 
