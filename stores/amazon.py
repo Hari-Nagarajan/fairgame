@@ -73,6 +73,7 @@ SHOPING_CART_TITLES = [
     "Amazon.fr Panier",
     "Carrello Amazon.it",
     "AmazonSmile Shopping Cart",
+    "AmazonSmile Shopping Basket",
     "Amazon.nl-winkelwagen",
 ]
 CHECKOUT_TITLES = [
