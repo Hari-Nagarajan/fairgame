@@ -12,6 +12,7 @@ APPRISE_CONFIG_PATH = "config/apprise.conf"
 
 
 class NotificationHandler:
+    enabled_handlers = []
     def __init__(self):
         if path.exists(APPRISE_CONFIG_PATH):
             log.info(f"Initializing Apprise handler using: {APPRISE_CONFIG_PATH}")
@@ -21,6 +22,7 @@ class NotificationHandler:
             # Get the service names from the config, not the Apprise instance when reading from config file
             for server in config.servers():
                 log.info(f"Found {server.service_name} configuration")
+                self.enabled_handlers.append(server.service_name)
             self.apb.add(config)
             self.queue = queue.Queue()
             self.start_worker()
@@ -46,3 +48,4 @@ class NotificationHandler:
 
     def start_worker(self):
         threading.Thread(target=self.message_sender, daemon=True).start()
+
