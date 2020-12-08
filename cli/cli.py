@@ -9,13 +9,12 @@ from stores.amazon import Amazon
 from stores.bestbuy import BestBuyHandler
 from utils import selenium_utils
 from utils.logger import log
-from utils import version
 from utils.version import check_version
 
 notification_handler = NotificationHandler()
 
 try:
-    check_version(version)
+    check_version()
 except:
     pass
 
@@ -155,10 +154,10 @@ def bestbuy(sku, headless):
 
 @click.command()
 def test_notifications():
-    enabled_handlers = ", ".join(notification_handler.get_enabled_handlers())
+    enabled_handlers = ", ".join(notification_handler.enabled_handlers)
     time = datetime.now().strftime(TIME_FORMAT)
     notification_handler.send_notification(
-        f"Beep boop. This is a test notification from Nvidia bot. Sent {time}."
+        f"Beep boop. This is a test notification from FairGame. Sent {time}."
     )
     log.info(f"A notification was sent to the following handlers: {enabled_handlers}")
 

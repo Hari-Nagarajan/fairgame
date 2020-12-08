@@ -16,10 +16,10 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 
 from utils.debugger import debug
+from utils.discord_presence import buy_update, start_presence, searching_update
 from utils.encryption import create_encrypted_config, load_encrypted_config
 from utils.logger import log
 from utils.selenium_utils import options, enable_headless
-from utils.version import version
 
 AMAZON_URLS = {
     "BASE_URL": "https://{domain}/",
@@ -234,7 +234,7 @@ class Amazon:
                         self.reserve_max.append(float(config[f"reserve_max_{x + 1}"]))
                     # assert isinstance(self.asin_list, list)
                 except Exception as e:
-                    log.error(e + " is missing")
+                    log.error(f"{e} is missing")
                     log.error(
                         "amazon_config.json file not formatted properly: https://github.com/Hari-Nagarajan/fairgame/wiki/Usage#json-configuration"
                     )
