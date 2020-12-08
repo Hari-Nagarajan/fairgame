@@ -264,7 +264,7 @@ class Amazon:
             "password": password,
         }
 
-    def run(self, delay=3, test=False):
+    def run(self, delay_range=(3.0, 3.0), test=False):
         log.info("Waiting for home page.")
         while True:
             try:
@@ -290,7 +290,7 @@ class Amazon:
         log.info("Checking stock for items.")
 
         while keep_going:
-            asin = self.run_asins(delay)
+            asin = self.run_asins(delay_range)
             # found something in stock and under reserve
             # initialize loop limiter variables
             self.try_to_checkout = True
@@ -386,9 +386,15 @@ class Amazon:
         log.info(f"Logged in as {self.username}")
 
     @debug
-    def run_asins(self, delay):
+    def run_asins(self, delay_range):
         found_asin = False
         while not found_asin:
+            if delay_range[0] != delay_range[1]:
+                delay = random.uniform(delay_range[0], delay_range[1])
+                log.debug(f"New between {delay_range[0]} and {delay_range[1]} is {delay}")
+            else:
+                delay = delay_range[0]
+
             for i in range(len(self.asin_list)):
                 for asin in self.asin_list[i]:
                     if self.check_stock(asin, self.reserve_min[i], self.reserve_max[i]):
