@@ -577,23 +577,28 @@ class Amazon:
                 except exceptions.NoSuchElementException:
                     log.debug("Missed the third")
                     try:
-                        button = self.driver.find_element_by_partial_link_text(
-                            "No Thanks"
+                        button = self.driver.find_element_by_xpath(
+                            '//*[@class="a-button a-button-base no-thanks-button"]'
                         )
                     except exceptions.NoSuchElementException:
-                        log.error("could not find button")
-                        log.info("check if PYO button hidden")
                         try:
-                            button = self.driver.find_element_by_xpath(
-                                '//*[@id="placeYourOrder"]/span/input'
+                            button = self.driver.find_element_by_partial_link_text(
+                                "No Thanks"
                             )
                         except exceptions.NoSuchElementException:
-                            self.save_page_source("prime-signup-error")
-                            self.send_notification(
-                                "Prime Sign-up Error occurred",
-                                "prime-signup-error",
-                                self.take_screenshots,
-                            )
+                            log.error("could not find button")
+                            log.info("check if PYO button hidden")
+                            try:
+                                button = self.driver.find_element_by_xpath(
+                                    '//*[@id="placeYourOrder"]/span/input'
+                                )
+                            except exceptions.NoSuchElementException:
+                                self.save_page_source("prime-signup-error")
+                                self.send_notification(
+                                    "Prime Sign-up Error occurred",
+                                    "prime-signup-error",
+                                    self.take_screenshots,
+                                )
         if button:
             button.click()
         else:
