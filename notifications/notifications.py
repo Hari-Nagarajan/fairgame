@@ -13,6 +13,7 @@ APPRISE_CONFIG_PATH = "config/apprise.conf"
 
 class NotificationHandler:
     enabled_handlers = []
+
     def __init__(self):
         if path.exists(APPRISE_CONFIG_PATH):
             log.info(f"Initializing Apprise handler using: {APPRISE_CONFIG_PATH}")
@@ -48,4 +49,3 @@ class NotificationHandler:
 
     def start_worker(self):
         threading.Thread(target=self.message_sender, daemon=True).start()
-
