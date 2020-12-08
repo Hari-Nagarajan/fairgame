@@ -96,6 +96,7 @@ CHECKOUT_TITLES = [
     "Plaats je bestelling - Amazon.nl-kassa",
     "Place Your Order - AmazonSmile Checkout",
     "Preparing your order",
+    "Ihre Bestellung wird vorbereitet",
 ]
 ORDER_COMPLETE_TITLES = [
     "Amazon.com Thanks You",
