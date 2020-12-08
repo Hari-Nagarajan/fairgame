@@ -143,6 +143,9 @@ BUTTON_XPATHS = [
 # '//*[@id="hlb-ptc-btn-native"]',
 # '//*[@id="sc-buy-box-ptc-button"]/span/input',
 # '//*[@id="buy-now-button"]',
+# Prime popup
+# //*[@id="primeAutomaticPopoverAdContent"]/div/div/div[1]/a
+# //*[@id="primeAutomaticPopoverAdContent"]/div/div/div[1]/a
 
 
 DEFAULT_MAX_CHECKOUT_LOOPS = 20
@@ -551,25 +554,32 @@ class Amazon:
         except exceptions.NoSuchElementException:
             try:
                 button = self.driver.find_element_by_xpath(
-                    '//*[@class="a-button a-button-base prime-no-button"]'
+                    '//*[@class="prime-nothanks-button prime-checkout-continue-link primeEvent checkout-continue-link a-button-text"]'
                 )
             except exceptions.NoSuchElementException:
                 try:
-                    button = self.driver.find_element_by_partial_link_text("No Thanks")
+                    button = self.driver.find_element_by_xpath(
+                        '//*[@class="a-button a-button-base prime-no-button"]'
+                    )
                 except exceptions.NoSuchElementException:
-                    log.error("could not find button")
-                    log.info("check if PYO button hidden")
                     try:
-                        button = self.driver.find_element_by_xpath(
-                            '//*[@id="placeYourOrder"]/span/input'
+                        button = self.driver.find_element_by_partial_link_text(
+                            "No Thanks"
                         )
                     except exceptions.NoSuchElementException:
-                        self.save_page_source("prime-signup-error")
-                        self.send_notification(
-                            "Prime Sign-up Error occurred",
-                            "prime-signup-error",
-                            self.take_screenshots,
-                        )
+                        log.error("could not find button")
+                        log.info("check if PYO button hidden")
+                        try:
+                            button = self.driver.find_element_by_xpath(
+                                '//*[@id="placeYourOrder"]/span/input'
+                            )
+                        except exceptions.NoSuchElementException:
+                            self.save_page_source("prime-signup-error")
+                            self.send_notification(
+                                "Prime Sign-up Error occurred",
+                                "prime-signup-error",
+                                self.take_screenshots,
+                            )
         if button:
             button.click()
         else:
