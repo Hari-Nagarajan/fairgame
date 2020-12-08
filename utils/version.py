@@ -4,16 +4,17 @@ from utils.logger import log
 
 LATEST_URL = "https://api.github.com/repos/Hari-Nagarajan/fairgame/releases/latest"
 
-version = "0.4.2"
+version = "0.4.4"
 
 
 def check_version():
     try:
         r = requests.get(LATEST_URL)
         data = r.json()
-        remote_version = str(data["tag_name"])
+        # remote_version = str(data["tag_name"])
+        remote_version = "0.4.5"
 
-        if version != remote_version:
+        if version < remote_version:
             log.warning(
                 f"You are running FairGame v{version}, but the most recent version is v{remote_version}... Consider upgrading"
             )
