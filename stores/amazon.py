@@ -68,6 +68,7 @@ SHOPING_CART_TITLES = [
     "Amazon.co.uk Shopping Basket",
     "Amazon.de Basket",
     "Amazon.de Einkaufswagen",
+    "AmazonSmile Einkaufswagen",
     "Cesta de compra Amazon.es",
     "Amazon.fr Panier",
     "Carrello Amazon.it",
@@ -226,7 +227,7 @@ class Amazon:
                         self.reserve_max.append(float(config[f"reserve_max_{x + 1}"]))
                     # assert isinstance(self.asin_list, list)
                 except Exception as e:
-                    log.error(e)
+                    log.error(e + " is missing")
                     log.error(
                         "amazon_config.json file not formatted properly: https://github.com/Hari-Nagarajan/fairgame/wiki/Usage#json-configuration"
                     )
