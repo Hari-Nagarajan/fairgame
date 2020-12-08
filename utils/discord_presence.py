@@ -11,7 +11,7 @@ RPC = Presence(client_id=client_id)
 RPC.connect()
 
 
-def start_presence(status):
+def start_presence(status, version):
     RPC.update(
         large_image="fairgame",
         state=f"{status}",

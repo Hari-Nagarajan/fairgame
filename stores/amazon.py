@@ -19,6 +19,7 @@ from utils.debugger import debug
 from utils.encryption import create_encrypted_config, load_encrypted_config
 from utils.logger import log
 from utils.selenium_utils import options, enable_headless
+from utils.version import version
 
 AMAZON_URLS = {
     "BASE_URL": "https://{domain}/",
