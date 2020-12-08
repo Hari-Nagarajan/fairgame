@@ -16,6 +16,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 
 from utils.debugger import debug
+from utils.discord_presence import searching_update, buy_update, start_presence
 from utils.encryption import create_encrypted_config, load_encrypted_config
 from utils.logger import log
 from utils.selenium_utils import options, enable_headless
@@ -190,18 +191,7 @@ class Amazon:
         self.start_time_atc = 0
 
         if not self.disable_presence:
-            try:
-                from utils.discord_presence import (
-                    start_presence,
-                    searching_update,
-                    buy_update,
-                )
-
-                status = "Spinning up"
-                start_presence(status, version)
-            except Exception as e:
-                log.error(e)
-                pass
+            start_presence("Spinning up")
 
         # Create necessary sub-directories if they don't exist
         if not os.path.exists("screenshots"):
@@ -435,10 +425,7 @@ class Amazon:
                 try:
 
                     if not self.disable_presence:
-                        try:
-                            searching_update()
-                        except:
-                            pass
+                        searching_update()
 
                     self.driver.get(f.url)
                     break
@@ -484,10 +471,7 @@ class Amazon:
                 log.info("clicking add to cart")
 
                 if not self.disable_presence:
-                    try:
-                        buy_update()
-                    except:
-                        pass
+                    buy_update()
 
                 elements[i].click()
                 time.sleep(self.page_wait_delay())
@@ -559,7 +543,7 @@ class Amazon:
         button = None
         try:
             button = self.driver.find_element_by_xpath(
-                #'//*[@class="a-button a-button-base no-thanks-button"]'
+                # '//*[@class="a-button a-button-base no-thanks-button"]'
                 '//*[contains(@class, "no-thanks-button") or contains(@class, "prime-nothanks-button") or contains(@class, "prime-no-button")]'
             )
         except exceptions.NoSuchElementException:
@@ -705,7 +689,7 @@ class Amazon:
         if self.single_shot:
             self.asin_list = []
         self.try_to_checkout = False
-        log.info(f"checkout completed in {time.time()-self.start_time_atc} seconds")
+        log.info(f"checkout completed in {time.time() - self.start_time_atc} seconds")
 
     @debug
     def handle_doggos(self):
