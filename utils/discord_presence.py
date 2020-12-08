@@ -1,16 +1,17 @@
 import time
-import random
-from utils.logger import log
+
 from pypresence import Presence
 
-start_time = time.time()
+from utils.version import version
+
+start_time = int(time.time())
 
 client_id = "783592971903696907"
 RPC = Presence(client_id=client_id)
 RPC.connect()
 
 
-def start_presence(status, version):
+def start_presence(status):
     RPC.update(
         large_image="fairgame",
         state=f"{status}",
@@ -19,7 +20,7 @@ def start_presence(status, version):
     )
 
 
-def buy_update(version):
+def buy_update():
     RPC.update(
         large_image="fairgame",
         state="Going through checkout",
@@ -28,7 +29,7 @@ def buy_update(version):
     )
 
 
-def searching_update(version):
+def searching_update():
     RPC.update(
         large_image="fairgame",
         state="Looking for stock",
