@@ -8,7 +8,6 @@ from notifications.notifications import NotificationHandler, TIME_FORMAT
 from stores.amazon import Amazon
 from stores.bestbuy import BestBuyHandler
 from utils import selenium_utils
-from utils.discord_presence import start_presence
 from utils.logger import log
 from utils import version
 
