@@ -430,13 +430,16 @@ class Amazon:
                     + asin
                     + "/ref=olp_f_new&f_new=true&f_freeShipping=on"
                 )
+
+        if not self.disable_presence:
+            try:
+                searching_update()
+            except:
+                pass
+
         try:
             while True:
                 try:
-
-                    if not self.disable_presence:
-                        searching_update()
-
                     self.driver.get(f.url)
                     break
                 except Exception:
@@ -481,7 +484,10 @@ class Amazon:
                 log.info("clicking add to cart")
 
                 if not self.disable_presence:
-                    buy_update()
+                    try:
+                        buy_update()
+                    except:
+                        pass
 
                 elements[i].click()
                 time.sleep(self.page_wait_delay())
