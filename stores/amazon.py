@@ -303,10 +303,15 @@ class Amazon:
             self.checkout_retry = 0
             self.order_retry = 0
             loop_iterations = 0
+            self.great_success = False
             while self.try_to_checkout:
                 self.navigate_pages(test)
                 # if successful after running navigate pages, remove the asin_list from the list
-                if not self.try_to_checkout and not self.single_shot:
+                if (
+                    not self.try_to_checkout
+                    and not self.single_shot
+                    and self.great_success
+                ):
                     self.remove_asin_list(asin)
                 # checkout loop limiters
                 elif self.checkout_retry > DEFAULT_MAX_PTC_TRIES:
@@ -686,6 +691,7 @@ class Amazon:
     def handle_order_complete(self):
         log.info("Order Placed.")
         self.send_notification("Order placed.", "order-placed", self.take_screenshots)
+        self.great_success = True
         if self.single_shot:
             self.asin_list = []
         self.try_to_checkout = False
