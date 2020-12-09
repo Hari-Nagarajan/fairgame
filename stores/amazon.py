@@ -1,10 +1,12 @@
 import json
 import math
 import os
+import platform
 import random
 import time
 from datetime import datetime
 
+import psutil
 import stdiomask
 from amazoncaptcha import AmazonCaptcha
 from chromedriver_py import binary_path  # this will get you the path variable
@@ -20,7 +22,6 @@ from utils.discord_presence import searching_update, buy_update, start_presence
 from utils.encryption import create_encrypted_config, load_encrypted_config
 from utils.logger import log
 from utils.selenium_utils import options, enable_headless
-from utils.version import version
 
 AMAZON_URLS = {
     "BASE_URL": "https://{domain}/",
@@ -189,6 +190,8 @@ class Amazon:
         self.take_screenshots = not no_screenshots
         self.start_time = time.time()
         self.start_time_atc = 0
+        self.webdriver_child_pids = []
+        self.driver = None
 
         if not self.disable_presence:
             start_presence("Spinning up")
@@ -254,6 +257,7 @@ class Amazon:
         try:
             self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
             self.wait = WebDriverWait(self.driver, 10)
+            self.get_webdriver_pids()
         except Exception as e:
             log.info("you probably have chrome open, you should close it")
             log.error(e)
@@ -777,6 +781,33 @@ class Amazon:
             self.notification_handler.send_notification(message, file_name)
         else:
             self.notification_handler.send_notification(message)
+
+    def get_webdriver_pids(self):
+        pid = self.driver.service.process.pid
+        driver_process = psutil.Process(pid)
+        children = driver_process.children(recursive=True)
+        for child in children:
+            self.webdriver_child_pids.append(child.pid)
+
+    def __del__(self):
+        try:
+            if platform.system() == "Windows" and self.driver:
+                log.info("Cleaning up after web driver...")
+                # brute force kill child Chrome pids with fire
+                for pid in self.webdriver_child_pids:
+                    try:
+                        log.debug(f"Killing {pid}...")
+                        process = psutil.Process(pid)
+                        process.kill()
+                    except psutil.NoSuchProcess:
+                        log.debug(f"{pid} not found. Continuing...")
+                        pass
+
+        except Exception as e:
+            log.info(e)
+            log.info(
+                "Failed to clean up after web driver.  Please manually close browser."
+            )
 
 
 def get_timestamp_filename(name, extension):
