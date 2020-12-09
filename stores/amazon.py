@@ -617,6 +617,10 @@ class Amazon:
         self.start_time_atc = time.time()
         log.info("clicking checkout.")
         try:
+            self.save_screenshot("ptc-page")
+        except:
+            pass
+        try:
             self.driver.find_element_by_xpath('//*[@id="hlb-ptc-btn-native"]').click()
         except exceptions.NoSuchElementException:
             try:

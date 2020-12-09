@@ -79,7 +79,7 @@ Make a copy of `amazon_config.template_json` and rename to `amazon_config.json`:
   "reserve_min_1": 800,
   "reserve_max_1": 1000,
   "asin_list_2": ["B07JH53M4T","B08HR7SV3M"],
-  "reserve_min_1": 700,
+  "reserve_min_2": 700,
   "reserve_max_2": 750,
   "amazon_website": "smile.amazon.com"
 }
@@ -123,11 +123,6 @@ INFO Enabled Handlers: ['Audio']
 Reading credentials from: amazon_credentials.json
 Credential file password: <enter the previously created password>
 ```
-
-At run time, the bot will automatically prune ASINs that cause errors.
-
-=======
-
 Example usage:
 
 ```
