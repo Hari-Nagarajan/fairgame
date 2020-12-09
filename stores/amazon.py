@@ -305,7 +305,11 @@ class Amazon:
             loop_iterations = 0
             self.great_success = False
             while self.try_to_checkout:
-                self.navigate_pages(test)
+                try:
+                    self.navigate_pages(test)
+                # if for some reason page transitions in the middle of checking elements, don't break the program
+                except exceptions.StaleElementReferenceException:
+                    pass
                 # if successful after running navigate pages, remove the asin_list from the list
                 if (
                     not self.try_to_checkout
@@ -552,49 +556,30 @@ class Amazon:
                 '//*[contains(@class, "no-thanks-button") or contains(@class, "prime-nothanks-button") or contains(@class, "prime-no-button")]'
             )
         except exceptions.NoSuchElementException:
-            log.debug("Missed the catch-all")
-            try:
-                button = self.driver.find_element_by_xpath(
-                    '//*[@class="prime-nothanks-button prime-checkout-continue-link primeEvent checkout-continue-link a-button-text"]'
-                )
-            except exceptions.NoSuchElementException:
-                log.debug("Missed the second")
-                try:
-                    button = self.driver.find_element_by_xpath(
-                        '//*[@class="a-button a-button-base prime-no-button"]'
-                    )
-                except exceptions.NoSuchElementException:
-                    log.debug("Missed the third")
-                    try:
-                        button = self.driver.find_element_by_xpath(
-                            '//*[@class="a-button a-button-base no-thanks-button"]'
-                        )
-                    except exceptions.NoSuchElementException:
-                        try:
-                            button = self.driver.find_element_by_partial_link_text(
-                                "No Thanks"
-                            )
-                        except exceptions.NoSuchElementException:
-                            log.error("could not find button")
-                            log.info("check if PYO button hidden")
-                            try:
-                                button = self.driver.find_element_by_xpath(
-                                    '//*[@id="placeYourOrder"]/span/input'
-                                )
-                            except exceptions.NoSuchElementException:
-                                self.save_page_source("prime-signup-error")
-                                self.send_notification(
-                                    "Prime Sign-up Error occurred",
-                                    "prime-signup-error",
-                                    self.take_screenshots,
-                                )
+            log.error("could not find button")
+            # log.info("check if PYO button hidden")
+            # try:
+            #     button = self.driver.find_element_by_xpath(
+            #         '//*[@id="placeYourOrder"]/span/input'
+            #     )
+            # except exceptions.NoSuchElementException:
+            #     log.error("couldn't find PYO button")
+            log.info("sign up for Prime and this won't happen anymore")
+            self.save_page_source("prime-signup-error")
+            self.send_notification(
+                "Prime Sign-up Error occurred",
+                "prime-signup-error",
+                self.take_screenshots,
+            )
         if button:
             button.click()
         else:
+            log.error("Prime offer page popped up, user intervention required")
             self.notification_handler.send_notification(
                 "Prime offer page popped up, user intervention required"
             )
             time.sleep(DEFAULT_MAX_WEIRD_PAGE_DELAY)
+            self.driver.refresh()
 
     @debug
     def handle_home_page(self):
