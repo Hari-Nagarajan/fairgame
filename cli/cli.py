@@ -4,16 +4,19 @@ from signal import signal, SIGINT
 
 import click
 
-from cli.utils import QuestionaryOption
 from notifications.notifications import NotificationHandler, TIME_FORMAT
 from stores.amazon import Amazon
 from stores.bestbuy import BestBuyHandler
-from stores.nvidia import NvidiaBuyer, GPU_DISPLAY_NAMES, CURRENCY_LOCALE_MAP
 from utils import selenium_utils
 from utils.logger import log
-from utils.discord_presence import start_presence
+from utils.version import check_version
 
 notification_handler = NotificationHandler()
+
+try:
+    check_version()
+except Exception as e:
+    log.error(e)
 
 
 def handler(signal, frame):
@@ -100,6 +103,11 @@ def main():
     is_flag=True,
     help="Take NO screenshots, do not bother asking for help if you use this... Screenshots are the best tool we have for troubleshooting",
 )
+@click.option(
+    "--disable-presence",
+    is_flag=True,
+    help="Disable Discord Rich Presence functionallity",
+)
 @notify_on_crash
 def amazon(
     no_image,
@@ -112,6 +120,7 @@ def amazon(
     random_delay,
     single_shot,
     no_screenshots,
+    disable_presence,
 ):
     if no_image:
         selenium_utils.no_amazon_image()
@@ -127,6 +136,7 @@ def amazon(
         used=used,
         single_shot=single_shot,
         no_screenshots=no_screenshots,
+        disable_presence=disable_presence,
     )
     amzn_obj.run(delay=delay, test=test)
 
@@ -144,23 +154,16 @@ def bestbuy(sku, headless):
 
 @click.command()
 def test_notifications():
-    enabled_handlers = ", ".join(notification_handler.get_enabled_handlers())
+    enabled_handlers = ", ".join(notification_handler.enabled_handlers)
     time = datetime.now().strftime(TIME_FORMAT)
     notification_handler.send_notification(
-        f"Beep boop. This is a test notification from Nvidia bot. Sent {time}."
+        f"Beep boop. This is a test notification from FairGame. Sent {time}."
     )
     log.info(f"A notification was sent to the following handlers: {enabled_handlers}")
 
 
 signal(SIGINT, handler)
 
-try:
-    status = "Spinning up"
-    start_presence(status)
-except:
-    pass
-
-# main.add_command(nvidia)
 main.add_command(amazon)
 main.add_command(bestbuy)
 main.add_command(test_notifications)
