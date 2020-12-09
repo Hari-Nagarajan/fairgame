@@ -1,6 +1,5 @@
 *.code-workspace
 *.html
-*.log*
 *.pkl
 *.png
 *.py[cod]
@@ -21,3 +20,4 @@ dist/
 geckodriver.log
 html_saves/*.html
 screenshots/*.png
+logs/*.log*
