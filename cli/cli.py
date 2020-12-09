@@ -17,7 +17,6 @@ try:
     check_version()
 except Exception as e:
     log.error(e)
-    pass
 
 
 def handler(signal, frame):
