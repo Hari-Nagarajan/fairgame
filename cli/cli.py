@@ -82,6 +82,12 @@ def main():
     "--delay", type=float, default=3.0, help="Time to wait between checks for item[s]"
 )
 @click.option(
+    "--delay-range",
+    type=(float, float),
+    default=(None, None),
+    help="Time to wait between checks for item[s]. Random value between specified range. eg. for `--delay-range 3.5 4.2` the delay would be between 3.5 and 4.2 seconds.",
+)
+@click.option(
     "--checkshipping",
     is_flag=True,
     help="Factor shipping costs into reserve price and look for items with a shipping price",
@@ -114,6 +120,7 @@ def amazon(
     headless,
     test,
     delay,
+    delay_range,
     checkshipping,
     detailed,
     used,
@@ -127,6 +134,9 @@ def amazon(
     else:
         selenium_utils.yes_amazon_image()
 
+    if delay_range == (None, None):
+        delay_range = (delay, delay)
+
     amzn_obj = Amazon(
         headless=headless,
         notification_handler=notification_handler,
@@ -138,7 +148,7 @@ def amazon(
         no_screenshots=no_screenshots,
         disable_presence=disable_presence,
     )
-    amzn_obj.run(delay=delay, test=test)
+    amzn_obj.run(delay_range, test=test)
 
 
 @click.command()
