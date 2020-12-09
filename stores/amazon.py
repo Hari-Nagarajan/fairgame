@@ -15,12 +15,11 @@ from selenium.common import exceptions
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 
+from utils import discord_presence as presence
 from utils.debugger import debug
-from utils.discord_presence import searching_update, buy_update, start_presence
 from utils.encryption import create_encrypted_config, load_encrypted_config
 from utils.logger import log
 from utils.selenium_utils import options, enable_headless
-from utils.version import version
 
 AMAZON_URLS = {
     "BASE_URL": "https://{domain}/",
@@ -185,13 +184,12 @@ class Amazon:
         self.detailed = detailed
         self.used = used
         self.single_shot = single_shot
-        self.disable_presence = disable_presence
         self.take_screenshots = not no_screenshots
         self.start_time = time.time()
         self.start_time_atc = 0
 
-        if not self.disable_presence:
-            start_presence("Spinning up")
+        presence.enabled = not disable_presence
+        presence.start_presence()
 
         # Create necessary sub-directories if they don't exist
         if not os.path.exists("screenshots"):
@@ -431,11 +429,7 @@ class Amazon:
                     + "/ref=olp_f_new&f_new=true&f_freeShipping=on"
                 )
 
-        if not self.disable_presence:
-            try:
-                searching_update()
-            except:
-                pass
+        presence.searching_update()
 
         try:
             while True:
@@ -483,11 +477,7 @@ class Amazon:
                 log.info("Item in stock and in reserve range!")
                 log.info("clicking add to cart")
 
-                if not self.disable_presence:
-                    try:
-                        buy_update()
-                    except:
-                        pass
+                presence.buy_update()
 
                 elements[i].click()
                 time.sleep(self.page_wait_delay())

@@ -23,8 +23,8 @@ except:
     pass
 
 
-def start_presence(status):
-    send_update(status)
+def start_presence():
+    send_update("Spinning up")
 
 
 def buy_update():
