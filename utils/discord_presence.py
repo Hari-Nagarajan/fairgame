@@ -16,6 +16,7 @@ try:
 except:
     pass
 
+
 def start_presence(status):
     if available:
         RPC.update(
