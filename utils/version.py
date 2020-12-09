@@ -11,8 +11,7 @@ def check_version():
     try:
         r = requests.get(LATEST_URL)
         data = r.json()
-        # remote_version = str(data["tag_name"])
-        remote_version = "0.4.5"
+        remote_version = str(data["tag_name"])
 
         if version < remote_version:
             log.warning(
