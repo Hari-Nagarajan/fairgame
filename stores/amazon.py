@@ -662,6 +662,9 @@ class Amazon:
                     log.info(f"Found button {button.text}, but this is a test")
                     log.info("will not try to complete order")
                     self.try_to_checkout = False
+                    self.great_success = True
+                    if self.single_shot:
+                        self.asin_list = []
                     break
             self.button_xpaths.append(self.button_xpaths.pop(0))
         if not test and self.driver.title == previous_title:
