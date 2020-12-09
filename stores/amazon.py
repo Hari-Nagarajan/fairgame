@@ -255,6 +255,7 @@ class Amazon:
             self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
             self.wait = WebDriverWait(self.driver, 10)
         except Exception as e:
+            log.info("you probably chrome open, you should close it")
             log.error(e)
             exit(1)
 
