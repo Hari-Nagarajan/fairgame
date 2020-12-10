@@ -159,6 +159,7 @@ DEFAULT_MAX_WEIRD_PAGE_DELAY = 5
 DEFAULT_PAGE_WAIT_DELAY = 0.5  # also serves as minimum wait for randomized delays
 DEFAULT_MAX_PAGE_WAIT_DELAY = 1.0  # used for random page wait delay
 MAX_CHECKOUT_BUTTON_WAIT = 3  # integers only
+DEFAULT_REFRESH_DELAY = 3
 
 
 class Amazon:
@@ -187,6 +188,8 @@ class Amazon:
         self.take_screenshots = not no_screenshots
         self.start_time = time.time()
         self.start_time_atc = 0
+        self.refresh_delay = DEFAULT_REFRESH_DELAY
+        self.testing = False
 
         presence.enabled = not disable_presence
         presence.start_presence()
@@ -253,8 +256,10 @@ class Amazon:
             self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
             self.wait = WebDriverWait(self.driver, 10)
         except Exception as e:
-            log.info("you probably have chrome open, you should close it")
             log.error(e)
+            log.warning(
+                "You probably have a previous Chrome window open. You should close it"
+            )
             exit(1)
 
         for key in AMAZON_URLS.keys():
@@ -269,7 +274,11 @@ class Amazon:
             "password": password,
         }
 
-    def run(self, delay=3, test=False):
+    def run(self, delay=DEFAULT_REFRESH_DELAY, test=False):
+        self.testing = test
+        self.refresh_delay = delay
+        self.show_config()
+
         log.info("Waiting for home page.")
         while True:
             try:
@@ -437,7 +446,7 @@ class Amazon:
                     self.driver.get(f.url)
                     break
                 except Exception:
-                    log.error("Failed to get the URL, were in the exception now.")
+                    log.error("Failed to load the offer URL.  Retrying...")
                     time.sleep(3)
                     pass
             elements = self.driver.find_elements_by_xpath(
@@ -767,6 +776,33 @@ class Amazon:
             self.notification_handler.send_notification(message, file_name)
         else:
             self.notification_handler.send_notification(message)
+
+    def show_config(self):
+        log.info(f"{'='*50}")
+        log.info(f"Starting Amazon ASIN Hunt for {len(self.asin_list)} Products with:")
+        log.info(f"--Delay of {self.refresh_delay} seconds")
+        if self.used:
+            log.info(f"--Used items are considered for purchase")
+        if self.checkshipping:
+            log.info(f"--Shipping costs are included in price calculations")
+        else:
+            log.info(f"--Free Shipping items only")
+        if self.single_shot:
+            log.info("\tSingle Shot purchase enabled")
+        if not self.take_screenshots:
+            log.info(f"--Screenshotting is Disabled")
+        if self.detailed:
+            log.info(f"--Detailed screenshots is enabled")
+        if self.random_delay:
+            log.info(f"--Page wait time in checkout will be randomized.")
+        if self.testing:
+            log.warning(f"--Testing Mode.  NO Purchases will be made.")
+
+        for idx, asins in enumerate(self.asin_list):
+            log.info(
+                f"--Looking for {len(asins)} ASINs between {self.reserve_min[idx]:.2f} and {self.reserve_max[idx]:.2f}"
+            )
+        log.info(f"{'='*50}")
 
 
 def get_timestamp_filename(name, extension):
