@@ -1,10 +1,12 @@
 import json
 import math
 import os
+import platform
 import random
 import time
 from datetime import datetime
 
+import psutil
 import stdiomask
 from amazoncaptcha import AmazonCaptcha
 from chromedriver_py import binary_path  # this will get you the path variable
@@ -188,8 +190,11 @@ class Amazon:
         self.take_screenshots = not no_screenshots
         self.start_time = time.time()
         self.start_time_atc = 0
+        self.webdriver_child_pids = []
+        self.driver = None
         self.refresh_delay = DEFAULT_REFRESH_DELAY
         self.testing = False
+
 
         presence.enabled = not disable_presence
         presence.start_presence()
@@ -255,6 +260,7 @@ class Amazon:
         try:
             self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
             self.wait = WebDriverWait(self.driver, 10)
+            self.get_webdriver_pids()
         except Exception as e:
             log.error(e)
             log.warning(
@@ -777,6 +783,35 @@ class Amazon:
         else:
             self.notification_handler.send_notification(message)
 
+    def get_webdriver_pids(self):
+        pid = self.driver.service.process.pid
+        driver_process = psutil.Process(pid)
+        children = driver_process.children(recursive=True)
+        for child in children:
+            self.webdriver_child_pids.append(child.pid)
+
+    def __del__(self):
+        try:
+            if platform.system() == "Windows" and self.driver:
+                log.info("Cleaning up after web driver...")
+                # brute force kill child Chrome pids with fire
+                for pid in self.webdriver_child_pids:
+                    try:
+                        log.debug(f"Killing {pid}...")
+                        process = psutil.Process(pid)
+                        process.kill()
+                    except psutil.NoSuchProcess:
+                        log.debug(f"{pid} not found. Continuing...")
+                        pass
+            elif self.driver:
+                driver.quit()           
+
+        except Exception as e:
+            log.info(e)
+            log.info(
+                "Failed to clean up after web driver.  Please manually close browser."
+            )
+
     def show_config(self):
         log.info(f"{'='*50}")
         log.info(f"Starting Amazon ASIN Hunt for {len(self.asin_list)} Products with:")
@@ -803,7 +838,7 @@ class Amazon:
                 f"--Looking for {len(asins)} ASINs between {self.reserve_min[idx]:.2f} and {self.reserve_max[idx]:.2f}"
             )
         log.info(f"{'='*50}")
-
+                 
 
 def get_timestamp_filename(name, extension):
     """Utility method to create a filename with a timestamp appended to the root and before
