@@ -802,6 +802,8 @@ class Amazon:
                     except psutil.NoSuchProcess:
                         log.debug(f"{pid} not found. Continuing...")
                         pass
+            elif self.driver:
+                driver.quit()           
 
         except Exception as e:
             log.info(e)
