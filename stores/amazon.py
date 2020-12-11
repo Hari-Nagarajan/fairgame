@@ -195,7 +195,6 @@ class Amazon:
         self.refresh_delay = DEFAULT_REFRESH_DELAY
         self.testing = False
 
-
         presence.enabled = not disable_presence
         presence.start_presence()
 
@@ -804,7 +803,7 @@ class Amazon:
                         log.debug(f"{pid} not found. Continuing...")
                         pass
             elif self.driver:
-                driver.quit()           
+                self.driver.quit()
 
         except Exception as e:
             log.info(e)
@@ -838,7 +837,7 @@ class Amazon:
                 f"--Looking for {len(asins)} ASINs between {self.reserve_min[idx]:.2f} and {self.reserve_max[idx]:.2f}"
             )
         log.info(f"{'='*50}")
-                 
+
 
 def get_timestamp_filename(name, extension):
     """Utility method to create a filename with a timestamp appended to the root and before
