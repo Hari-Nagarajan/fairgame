@@ -17,8 +17,8 @@ from selenium.common import exceptions
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 
+from utils import discord_presence as presence
 from utils.debugger import debug
-from utils.discord_presence import searching_update, buy_update, start_presence
 from utils.encryption import create_encrypted_config, load_encrypted_config
 from utils.logger import log
 from utils.selenium_utils import options, enable_headless
@@ -161,6 +161,7 @@ DEFAULT_MAX_WEIRD_PAGE_DELAY = 5
 DEFAULT_PAGE_WAIT_DELAY = 0.5  # also serves as minimum wait for randomized delays
 DEFAULT_MAX_PAGE_WAIT_DELAY = 1.0  # used for random page wait delay
 MAX_CHECKOUT_BUTTON_WAIT = 3  # integers only
+DEFAULT_REFRESH_DELAY = 3
 
 
 class Amazon:
@@ -186,15 +187,17 @@ class Amazon:
         self.detailed = detailed
         self.used = used
         self.single_shot = single_shot
-        self.disable_presence = disable_presence
         self.take_screenshots = not no_screenshots
         self.start_time = time.time()
         self.start_time_atc = 0
         self.webdriver_child_pids = []
         self.driver = None
+        self.refresh_delay = DEFAULT_REFRESH_DELAY
+        self.testing = False
 
-        if not self.disable_presence:
-            start_presence("Spinning up")
+
+        presence.enabled = not disable_presence
+        presence.start_presence()
 
         # Create necessary sub-directories if they don't exist
         if not os.path.exists("screenshots"):
@@ -259,8 +262,10 @@ class Amazon:
             self.wait = WebDriverWait(self.driver, 10)
             self.get_webdriver_pids()
         except Exception as e:
-            log.info("you probably have chrome open, you should close it")
             log.error(e)
+            log.warning(
+                "You probably have a previous Chrome window open. You should close it"
+            )
             exit(1)
 
         for key in AMAZON_URLS.keys():
@@ -275,7 +280,11 @@ class Amazon:
             "password": password,
         }
 
-    def run(self, delay=3, test=False):
+    def run(self, delay=DEFAULT_REFRESH_DELAY, test=False):
+        self.testing = test
+        self.refresh_delay = delay
+        self.show_config()
+
         log.info("Waiting for home page.")
         while True:
             try:
@@ -435,11 +444,7 @@ class Amazon:
                     + "/ref=olp_f_new&f_new=true&f_freeShipping=on"
                 )
 
-        if not self.disable_presence:
-            try:
-                searching_update()
-            except:
-                pass
+        presence.searching_update()
 
         try:
             while True:
@@ -447,7 +452,7 @@ class Amazon:
                     self.driver.get(f.url)
                     break
                 except Exception:
-                    log.error("Failed to get the URL, were in the exception now.")
+                    log.error("Failed to load the offer URL.  Retrying...")
                     time.sleep(3)
                     pass
             elements = self.driver.find_elements_by_xpath(
@@ -487,11 +492,7 @@ class Amazon:
                 log.info("Item in stock and in reserve range!")
                 log.info("clicking add to cart")
 
-                if not self.disable_presence:
-                    try:
-                        buy_update()
-                    except:
-                        pass
+                presence.buy_update()
 
                 elements[i].click()
                 time.sleep(self.page_wait_delay())
@@ -811,6 +812,33 @@ class Amazon:
                 "Failed to clean up after web driver.  Please manually close browser."
             )
 
+    def show_config(self):
+        log.info(f"{'='*50}")
+        log.info(f"Starting Amazon ASIN Hunt for {len(self.asin_list)} Products with:")
+        log.info(f"--Delay of {self.refresh_delay} seconds")
+        if self.used:
+            log.info(f"--Used items are considered for purchase")
+        if self.checkshipping:
+            log.info(f"--Shipping costs are included in price calculations")
+        else:
+            log.info(f"--Free Shipping items only")
+        if self.single_shot:
+            log.info("\tSingle Shot purchase enabled")
+        if not self.take_screenshots:
+            log.info(f"--Screenshotting is Disabled")
+        if self.detailed:
+            log.info(f"--Detailed screenshots is enabled")
+        if self.random_delay:
+            log.info(f"--Page wait time in checkout will be randomized.")
+        if self.testing:
+            log.warning(f"--Testing Mode.  NO Purchases will be made.")
+
+        for idx, asins in enumerate(self.asin_list):
+            log.info(
+                f"--Looking for {len(asins)} ASINs between {self.reserve_min[idx]:.2f} and {self.reserve_max[idx]:.2f}"
+            )
+        log.info(f"{'='*50}")
+                 
 
 def get_timestamp_filename(name, extension):
     """Utility method to create a filename with a timestamp appended to the root and before
