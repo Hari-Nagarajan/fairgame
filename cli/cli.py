@@ -3,6 +3,7 @@ from functools import wraps
 from signal import signal, SIGINT
 
 import click
+import time
 
 from notifications.notifications import NotificationHandler, TIME_FORMAT
 from stores.amazon import Amazon
@@ -155,11 +156,13 @@ def bestbuy(sku, headless):
 @click.command()
 def test_notifications():
     enabled_handlers = ", ".join(notification_handler.enabled_handlers)
-    time = datetime.now().strftime(TIME_FORMAT)
+    message_time = datetime.now().strftime(TIME_FORMAT)
     notification_handler.send_notification(
-        f"Beep boop. This is a test notification from FairGame. Sent {time}."
+        f"Beep boop. This is a test notification from FairGame. Sent {message_time}."
     )
     log.info(f"A notification was sent to the following handlers: {enabled_handlers}")
+    # Give the notifications a chance to get out before we quit
+    time.sleep(5)
 
 
 signal(SIGINT, handler)
