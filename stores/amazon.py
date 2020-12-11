@@ -804,7 +804,7 @@ class Amazon:
                         log.debug(f"{pid} not found. Continuing...")
                         pass
             elif self.driver:
-                driver.quit()           
+                self.driver.quit()
 
         except Exception as e:
             log.info(e)
