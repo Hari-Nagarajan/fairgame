@@ -222,6 +222,7 @@ class Amazon:
             self.password = credential["password"]
         else:
             log.info("No credential file found, let's make one")
+            log.info("NOTE: DO NOT SAVE YOUR CREDENTIALS IN CHROME, CLICK NEVER!")
             credential = self.await_credential_input()
             create_encrypted_config(credential, CREDENTIAL_FILE)
             self.username = credential["username"]
