@@ -388,12 +388,12 @@ class Amazon:
             self.driver.find_element_by_xpath('//*[@id="ap_email"]').send_keys(
                 self.username + Keys.RETURN
             )
-        except exceptions.NoSuchElementException:
+        except exceptions.NoSuchElementException or exceptions.ElementNotInteractableException:
             log.info("Email not needed.")
             pass
 
         if self.driver.find_elements_by_xpath('//*[@id="auth-error-message-box"]'):
-            log.error("Login failed, check your username in amazon_config.json")
+            log.error("Login failed, delete your credentials file")
             time.sleep(240)
             exit(1)
 
