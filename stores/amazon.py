@@ -26,6 +26,7 @@ from utils.selenium_utils import options, enable_headless
 AMAZON_URLS = {
     "BASE_URL": "https://{domain}/",
     "OFFER_URL": "https://{domain}/gp/offer-listing/",
+    "CART_URL": "https://{domain}/gp/cart/view.html",
 }
 CHECKOUT_URL = "https://{domain}/gp/cart/desktop/go-to-checkout.html/ref=ox_sc_proceed?partialCheckoutCart=1&isToBeGiftWrappedBefore=0&proceedToRetailCheckout=Proceed+to+checkout&proceedToCheckout=1&cartInitiateId={cart_id}"
 
@@ -124,6 +125,10 @@ ADD_TO_CART_TITLES = [
     "AmazonSmile: Please Confirm Your Action",
     "",  # Amazon.nl has en empty title, sigh.
 ]
+BUSINESS_PO_TITLES = [
+    "Business order information",
+]
+
 DOGGO_TITLES = ["Sorry! Something went wrong!"]
 
 # this is not non-US friendly
@@ -548,6 +553,8 @@ class Amazon:
             self.handle_doggos()
         elif title in OUT_OF_STOCK:
             self.handle_out_of_stock()
+        elif title in BUSINESS_PO_TITLES:
+            self.handle_business_po()
         else:
             log.error(
                 f"{title} is not a known title, please create issue indicating the title with a screenshot of page"
@@ -556,6 +563,25 @@ class Amazon:
                 "Encountered Unknown Page Title", "unknown-title", self.take_screenshots
             )
             self.save_page_source("unknown-title")
+            log.info("going to try and redirect to cart page")
+            try:
+                self.driver.get(AMAZON_URLS["CART_URL"])
+            except:
+                log.error(
+                    "failed to load cart URL, refreshing and returning to handler"
+                )
+                self.driver.refresh()
+                return
+            log.info("trying to block proceed to checkout")
+            try:
+                self.driver.find_element_by_xpath(
+                    '//*[@id="sc-buy-box-ptc-button"]'
+                ).click()
+            except exceptions.NoSuchElementException:
+                log.error(
+                    "could not find and click button, refreshing and returning to handler"
+                )
+                self.driver.refresh()
 
     @debug
     def handle_prime_signup(self):
@@ -747,6 +773,24 @@ class Amazon:
             log.error("captcha page does not contain captcha element")
             log.error("refreshing")
             self.driver.refresh()
+
+    @debug
+    def handle_business_po(self):
+        log.info("On Business PO Page, Trying to move on to checkout")
+        button = None
+        try:
+            button = self.driver.find_element_by_xpath(
+                '//*[@id="a-autoid-0"]/span/input'
+            )
+        except exceptions.NoSuchElementException:
+            log.info("Could not find the continue button")
+        if button:
+            button.click()
+        else:
+            self.notification_handler.send_notification(
+                "Could not click continue button, user intervention required"
+            )
+            time.sleep(DEFAULT_MAX_WEIRD_PAGE_DELAY)
 
     def save_screenshot(self, page):
         file_name = get_timestamp_filename("screenshots/screenshot-" + page, ".png")
