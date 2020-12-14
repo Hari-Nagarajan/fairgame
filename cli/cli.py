@@ -109,6 +109,12 @@ def main():
     is_flag=True,
     help="Disable Discord Rich Presence functionallity",
 )
+@click.option(
+    "--disable-sound",
+    is_flag=True,
+    default=False,
+    help="Disable local sounds.  Does not affect Apprise notification " "sounds.",
+)
 @notify_on_crash
 def amazon(
     no_image,
@@ -122,11 +128,16 @@ def amazon(
     single_shot,
     no_screenshots,
     disable_presence,
+    disable_sound,
 ):
     if no_image:
         selenium_utils.no_amazon_image()
     else:
         selenium_utils.yes_amazon_image()
+
+    notification_handler.sound_enabled = not disable_sound
+    if not notification_handler.sound_enabled:
+        log.info("Local sounds have been disabled.")
 
     amzn_obj = Amazon(
         headless=headless,
@@ -153,14 +164,30 @@ def bestbuy(sku, headless):
     bb.run_item()
 
 
+@click.option(
+    "--disable-sound",
+    is_flag=True,
+    default=False,
+    help="Disable local sounds.  Does not affect Apprise notification " "sounds.",
+)
 @click.command()
-def test_notifications():
+def test_notifications(disable_sound):
     enabled_handlers = ", ".join(notification_handler.enabled_handlers)
     message_time = datetime.now().strftime(TIME_FORMAT)
     notification_handler.send_notification(
         f"Beep boop. This is a test notification from FairGame. Sent {message_time}."
     )
     log.info(f"A notification was sent to the following handlers: {enabled_handlers}")
+    if not disable_sound:
+        log.info("Testing notification sound...")
+        notification_handler.play_notify_sound()
+        log.info("Testing alert sound...")
+        notification_handler.play_alarm_sound()
+        log.info("Testing purchase sound...")
+        notification_handler.play_purchase_sound()
+    else:
+        log.info("Local sounds disabled for this test.")
+
     # Give the notifications a chance to get out before we quit
     time.sleep(5)
 
