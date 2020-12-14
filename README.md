@@ -56,34 +56,49 @@ Commands:
 ## Usage
 
 ### Amazon 
+The following flags are specific to the Amazon scripts.  They the `[OPTIONS]` to be passed on the command-line to control
+the behavior of Amazon scanning and purchasing.  These can be added at the command line or added to a batch file/shell
+ script (see `_Amazon.bat` in the root folder of the project).
 
 **Amazon flags**
+
 ```
---no-image : prevents images from loading on amazon webdriver
---test : This will not finish the checkout
---delay : modify default delay between page refreshes (3 seconds), use --delay=x, where is is time in seconds (accepts decimals)
---checkshipping : Bot will consider shipping + sales price in reserve check. Without this flag, only free shipping items will be considered
---detailed : Take more screenshots. 
---used : Show used items in search listings
---random-delay : Set delay to a random interval
---single-shot : Quit after 1 successful purchase
---disable-presence : Disable Discord Rich Presence functionallity
---no-screenshots : Disable screenshots from being taken
+python app.py amazon --help
+
+Usage: app.py amazon [OPTIONS]
+
+Options:
+  --no-image          Do not load images
+  --headless          Unsupported headless mode. GLHF
+  --test              Run the checkout flow, but do not actually purchase the
+                      item[s]
+
+  --delay FLOAT       Time to wait between checks for item[s]
+  --checkshipping     Factor shipping costs into reserve price and look for
+                      items with a shipping price
+
+  --detailed          Take more screenshots. !!!!!! This could cause you to
+                      miss checkouts !!!!!!
+
+  --used              Show used items in search listings.
+  --random-delay      Set delay to a random interval
+  --single-shot       Quit after 1 successful purchase
+  --no-screenshots    Take NO screenshots, do not bother asking for help if
+                      you use this... Screenshots are the best tool we have
+                      for troubleshooting
+
+  --disable-presence  Disable Discord Rich Presence functionallity
+  --disable-sound     Disable local sounds.  Does not affect Apprise
+                      notification sounds.
+
+  --help              Show this message and exit.
 ```
 
-Make a copy of `amazon_config.template_json` and rename to `amazon_config.json`:
-```json
-{
-  "asin_groups": 2,
-  "asin_list_1": ["B07JH53M4T","B08HR7SV3M"],
-  "reserve_min_1": 800,
-  "reserve_max_1": 1000,
-  "asin_list_2": ["B07JH53M4T","B08HR7SV3M"],
-  "reserve_min_2": 700,
-  "reserve_max_2": 750,
-  "amazon_website": "smile.amazon.com"
-}
-```
+**Configuration**
+
+Make a copy of `amazon_config.template_json` and rename to `amazon_config.json`.  Edit it according to the ASINs  you 
+are interested in purchasing.  [*What's an ASIN?*](https://www.datafeedwatch.com/blog/amazon-asin-number-what-is-it-and-how-do-you-get-it#how-to-find-asin)  
+
 * `asin_groups` indicates the number of ASIN groups you want to use.
 * `asin_list_x` list of ASINs for products you want to purchase. You must locate these (see Discord or lookup the ASIN on product pages). 
     * The first time an item from list "x" is in stock and under its associated reserve, it will purchase it. 
@@ -93,6 +108,55 @@ Make a copy of `amazon_config.template_json` and rename to `amazon_config.json`:
 * `reserve_max_x` is the most amount you want to spend for a single item (i.e., ASIN) in `asin_list_x`. Does not include tax. If --checkshipping flag is active, this includes shipping listed on offer page.
 * `amazon_website` amazon domain you want to use. smile subdomain appears to work better, if available in your country.
 
+**Examples**
+
+One unique product with one ASIN (e.g., Segway Ninebot S and GoKart Drift Kit Bundle) :
+
+```json
+{
+	"asin_groups": 1,
+	"asin_list_1": ["B07K7NLDGT"],
+	"reserve_min_1": 450,
+	"reserve_max_1": 500,
+	"amazon_website": "smile.amazon.com"
+}
+```
+
+One general product with multiple ASINS (e.g 16 GB USB drive 2 pack)
+
+```json
+{
+	"asin_groups": 1,
+	"asin_list_1": ["B07JH53M4T", "B085M1SQ9S", "B00E9W1ULS"],
+	"reserve_min_1": 15,
+	"reserve_max_1": 20,
+	"amazon_website": "smile.amazon.com"
+}
+```
+
+Two general products with multiple ASINS and different price points (e.g. 16 GB USB drive 2 pack and a statue of The Thinker)
+
+```json
+{
+	"asin_groups": 2,
+	"asin_list_1": ["B07JH53M4T", "B085M1SQ9S", "B00E9W1ULS"],
+	"reserve_min_1": 15,
+	"reserve_max_1": 20,
+	"asin_list_2": ["B006HPI2A2", "B00N54S1WW"],
+	"reserve_min_2": 50,
+	"reserve_max_2": 75,
+	"amazon_website": "smile.amazon.com"
+}
+```
+
+If you wanted to watch another product, you'd add a third list (e.g. `asin_list_3`) and associated min/max pricing and
+increase the `asin_groups` to 3.  Add as many lists as are needed, keeping in mind that the main distinction between lists
+is the min/max price boundaries.  Once any ASIN is purchased from an ASIN list, that list is remove from the hunt
+until FairGame is restarted.
+
+To verify that your JSON is well formatted, paste and validate it at https://jsonlint.com/
+
+**Start Up**
 
 Previously your username and password were entered into the config file, this is no longer the case. On first launch the bot will prompt
 you for your credentials. You will then be asked for a password to encrypt them. Once done, your encrypted credentials will be stored in
@@ -161,7 +225,16 @@ python app.py bestbuy --sku 6429440
 ```
 
 
-### Notifications
+## Notifications
+
+### Sounds
+Local sounds are provided as a means to give you audible cues to what is happening.  The notification sound
+plays for notable events (e.g., start up, product found for purchase) during the scans.  An alarm notification
+will play when user interaction is necessary.  This is typically when all automated options have been exhausted.
+Lastly, a purchase notification sound will play if the bot if successful.  These local sounds can be disabled
+via the command-line and [tested](#testing-notifications) along with other notification methods
+
+### Apprise
 Notifications are now handled by Apprise. Apprise lets you send notifications to a large number of supported notification services.
 Check https://github.com/caronc/apprise/wiki for a detailed list. 
 
@@ -169,7 +242,7 @@ To enable Apprise notifications, make a copy of `apprise.conf_template` in the `
 `apprise.conf`. Then add apprise formatted urls for your desired notification services as simple text entries 
 in the config file.  Any recognized notification services will be reported on app start.   
 
-Apprise Example Config:
+**Apprise Example Config:**
 ```
 # Hash Tags denote comment lines and blank lines are allowed
 # Discord (https://github.com/caronc/apprise/wiki/Notify_discord)
@@ -203,7 +276,9 @@ Once you have setup your `apprise_config.json ` you can test it by running `pyth
 
 ## Troubleshooting
 
-I suggest joining the #tech-support channel in [Discord](https://discord.gg/qDY2QBtAW6) for personal assistance if these common fixes don't help.
+Re-read this documentation.  Verify your JSON.
+
+I suggest joining the #tech-support channel in [Discord](https://discord.gg/qDY2QBtAW6) for help from the community if these common fixes don't help.
 
 **Error: ```selenium.common.exceptions.WebDriverException: Message: unknown error: cannot find Chrome binary```** 
 The issue is that chrome is not installed in the expected location. See [Selenium Wiki](https://github.com/SeleniumHQ/selenium/wiki/ChromeDriver#requirements) and the section on [overriding the Chrome binary location .](https://sites.google.com/a/chromium.org/chromedriver/capabilities#TOC-Using-a-Chrome-executable-in-a-non-standard-location)

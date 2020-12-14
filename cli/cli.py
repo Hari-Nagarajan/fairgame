@@ -72,8 +72,8 @@ def main():
 
 
 @click.command()
-@click.option("--no-image", is_flag=True, help="Do no load images")
-@click.option("--headless", is_flag=True)
+@click.option("--no-image", is_flag=True, help="Do not load images")
+@click.option("--headless", is_flag=True, help="Unsupported headless mode. GLHF")
 @click.option(
     "--test",
     is_flag=True,
