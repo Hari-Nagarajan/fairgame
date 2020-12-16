@@ -117,18 +117,18 @@ def main():
 )
 @notify_on_crash
 def amazon(
-        no_image,
-        headless,
-        test,
-        delay,
-        checkshipping,
-        detailed,
-        used,
-        random_delay,
-        single_shot,
-        no_screenshots,
-        disable_presence,
-        disable_sound,
+    no_image,
+    headless,
+    test,
+    delay,
+    checkshipping,
+    detailed,
+    used,
+    random_delay,
+    single_shot,
+    no_screenshots,
+    disable_presence,
+    disable_sound,
 ):
     if no_image:
         selenium_utils.no_amazon_image()
