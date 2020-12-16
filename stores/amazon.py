@@ -306,6 +306,7 @@ class Amazon:
         self.handle_startup()
         if not self.is_logged_in():
             self.login()
+        self.notification_handler.play_notify_sound()
         self.send_notification(
             "Bot Logged in and Starting up", "Start-Up", self.take_screenshots
         )
@@ -496,6 +497,7 @@ class Amazon:
             ):
                 log.info("Item in stock and in reserve range!")
                 log.info("clicking add to cart")
+                self.notification_handler.play_notify_sound()
 
                 presence.buy_update()
 
@@ -613,6 +615,7 @@ class Amazon:
             button.click()
         else:
             log.error("Prime offer page popped up, user intervention required")
+            self.notification_handler.play_alarm_sound()
             self.notification_handler.send_notification(
                 "Prime offer page popped up, user intervention required"
             )
@@ -857,7 +860,7 @@ class Amazon:
             )
 
     def show_config(self):
-        log.info(f"{'='*50}")
+        log.info(f"{'=' * 50}")
         log.info(f"Starting Amazon ASIN Hunt for {len(self.asin_list)} Products with:")
         log.info(f"--Delay of {self.refresh_delay} seconds")
         if self.used:
@@ -881,7 +884,7 @@ class Amazon:
             log.info(
                 f"--Looking for {len(asins)} ASINs between {self.reserve_min[idx]:.2f} and {self.reserve_max[idx]:.2f}"
             )
-        log.info(f"{'='*50}")
+        log.info(f"{'=' * 50}")
 
 
 def get_timestamp_filename(name, extension):
