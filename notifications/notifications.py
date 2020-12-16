@@ -67,7 +67,7 @@ class NotificationHandler:
         if self.sound_enabled:
             try:
                 # See https://github.com/TaylorSMarks/playsound
-                playsound(audio_file if audio_file else NOTIFICATION_SOUND_PATH, True)
+                playsound(audio_file if audio_file else NOTIFICATION_SOUND_PATH, False)
             except Exception as e:
                 log.error(e)
                 log.warn(

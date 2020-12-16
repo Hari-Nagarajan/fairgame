@@ -117,18 +117,18 @@ def main():
 )
 @notify_on_crash
 def amazon(
-    no_image,
-    headless,
-    test,
-    delay,
-    checkshipping,
-    detailed,
-    used,
-    random_delay,
-    single_shot,
-    no_screenshots,
-    disable_presence,
-    disable_sound,
+        no_image,
+        headless,
+        test,
+        delay,
+        checkshipping,
+        detailed,
+        used,
+        random_delay,
+        single_shot,
+        no_screenshots,
+        disable_presence,
+        disable_sound,
 ):
     if no_image:
         selenium_utils.no_amazon_image()
@@ -181,8 +181,10 @@ def test_notifications(disable_sound):
     if not disable_sound:
         log.info("Testing notification sound...")
         notification_handler.play_notify_sound()
+        time.sleep(2)  # Prevent audio overlap
         log.info("Testing alert sound...")
         notification_handler.play_alarm_sound()
+        time.sleep(2)  # Prevent audio overlap
         log.info("Testing purchase sound...")
         notification_handler.play_purchase_sound()
     else:
