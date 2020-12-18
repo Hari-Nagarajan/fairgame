@@ -120,6 +120,12 @@ def main():
     default=False,
     help="Uses normal page load strategy for selenium. Default is none",
 )
+@click.option(
+    "--encryption-pass",
+    type=str,
+    default=None,
+    help="Pass in encryption file password as argument",
+)
 @notify_on_crash
 def amazon(
     no_image,
@@ -134,6 +140,7 @@ def amazon(
     disable_presence,
     disable_sound,
     slow_mode,
+    encryption_pass,
 ):
     if no_image:
         selenium_utils.no_amazon_image()
@@ -154,6 +161,7 @@ def amazon(
         no_screenshots=no_screenshots,
         disable_presence=disable_presence,
         slow_mode=slow_mode,
+        encryption_pass=encryption_pass,
     )
     amzn_obj.run(delay=delay, test=test)
 
