@@ -1,1 +1,1 @@
-pipenv run python app.py amazon
+pipenv run python app.py amazon --no-image

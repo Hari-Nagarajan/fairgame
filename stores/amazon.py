@@ -455,13 +455,24 @@ class Amazon:
             shipping = self.driver.find_elements_by_xpath(
                 '//*[@class="a-color-secondary"]'
             )
+            product_title = self.driver.find_elements_by_xpath(
+                '//*[@id="olpProductDetails"]/h1'
+            )
+
         except Exception as e:
             log.error(e)
             return None
 
         in_stock = False
+        log.info("*********************************")
+        if not prices:
+            log.error("ASIN: " + asin + " - Out of Stock")
+        else:
+            log.info("Prices for " + asin + ":")
+
         for i in range(len(elements)):
             price = parse_price(prices[i].text)
+            log.info(" Price: $" + str(price.amount))
             if SHIPPING_ONLY_IF in shipping[i].text:
                 ship_price = parse_price("0")
             else:
