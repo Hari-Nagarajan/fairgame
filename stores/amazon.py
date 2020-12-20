@@ -21,7 +21,7 @@ from utils import discord_presence as presence
 from utils.debugger import debug
 from utils.encryption import create_encrypted_config, load_encrypted_config
 from utils.logger import log
-from utils.selenium_utils import options, enable_headless
+from utils.selenium_utils import options, enable_headless, caps
 
 AMAZON_URLS = {
     "BASE_URL": "https://{domain}/",
@@ -140,6 +140,11 @@ PRIME_TITLES = ["Complete your Amazon Prime sign up"]
 
 OUT_OF_STOCK = ["Out of Stock - AmazonSmile Checkout"]
 
+NO_SELLERS = [
+    "Currently, there are no sellers that can deliver this item to your location.",
+    "There are currently no listings for this search. Try a different refinement.",
+]
+
 # OFFER_PAGE_TITLES = ["Amazon.com: Buying Choices:"]
 
 BUTTON_XPATHS = [
@@ -167,6 +172,7 @@ DEFAULT_PAGE_WAIT_DELAY = 0.5  # also serves as minimum wait for randomized dela
 DEFAULT_MAX_PAGE_WAIT_DELAY = 1.0  # used for random page wait delay
 MAX_CHECKOUT_BUTTON_WAIT = 3  # integers only
 DEFAULT_REFRESH_DELAY = 3
+DEFAULT_MAX_TIMEOUT = 10
 
 
 class Amazon:
@@ -263,7 +269,9 @@ class Amazon:
         options.add_argument(f"user-data-dir=.profile-amz")
 
         try:
-            self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
+            self.driver = webdriver.Chrome(
+                executable_path=binary_path, options=options, desired_capabilities=caps
+            )
             self.wait = WebDriverWait(self.driver, 10)
             self.get_webdriver_pids()
         except Exception as e:
@@ -426,8 +434,10 @@ class Amazon:
         while not found_asin:
             for i in range(len(self.asin_list)):
                 for asin in self.asin_list[i]:
+                    start_time = time.time()
                     if self.check_stock(asin, self.reserve_min[i], self.reserve_max[i]):
                         return asin
+                    log.info(f"check time took {time.time()-start_time} seconds")
                     time.sleep(delay)
 
     @debug
@@ -452,35 +462,77 @@ class Amazon:
 
         presence.searching_update()
 
-        try:
-            while True:
-                try:
-                    self.driver.get(f.url)
-                    break
-                except Exception:
-                    log.error("Failed to load the offer URL.  Retrying...")
-                    time.sleep(3)
-                    pass
+        while True:
+            try:
+                self.driver.get(f.url)
+                break
+            except Exception:
+                log.error("Failed to load the offer URL.  Retrying...")
+                time.sleep(3)
+                pass
+
+        timeout = time.time() + DEFAULT_MAX_TIMEOUT
+        while True:
             elements = self.driver.find_elements_by_xpath(
                 '//*[@name="submit.addToCart"]'
             )
+            test = []
+            try:
+                test = self.driver.find_element_by_xpath(
+                    '//*[@id="olpOfferList"]/div/p'
+                )
+            except exceptions.NoSuchElementException:
+                pass
+            if elements:
+                break
+            if test:
+                if test.text in NO_SELLERS:
+                    return False
+            if time.time() > timeout:
+                log.info(f"failed to load page for {asin}, going to next ASIN")
+                return False
+
+        timeout = time.time() + DEFAULT_MAX_TIMEOUT
+        while True:
             prices = self.driver.find_elements_by_xpath(
                 '//*[@class="a-size-large a-color-price olpOfferPrice a-text-bold"]'
             )
-            shipping = self.driver.find_elements_by_xpath(
-                '//*[@class="a-color-secondary"]'
-            )
-        except Exception as e:
-            log.error(e)
-            return None
+            if prices:
+                break
+            if time.time() > timeout:
+                log.info(f"failed to load prices for {asin}, going to next ASIN")
+                return False
+
+        if self.checkshipping:
+            timeout = time.time() + DEFAULT_MAX_TIMEOUT
+            while True:
+                shipping = self.driver.find_elements_by_xpath(
+                    '//*[@class="a-color-secondary"]'
+                )
+                if shipping:
+                    break
+                if time.time() > timeout:
+                    log.info(f"failed to load shipping for {asin}, going to next ASIN")
+                    return False
 
         in_stock = False
         for i in range(len(elements)):
-            price = parse_price(prices[i].text)
-            if SHIPPING_ONLY_IF in shipping[i].text:
-                ship_price = parse_price("0")
-            else:
-                ship_price = parse_price(shipping[i].text)
+            try:
+                price = parse_price(prices[i].text)
+            except IndexError:
+                log.debug("Price index error")
+                return False
+            try:
+                if self.checkshipping:
+                    if SHIPPING_ONLY_IF in shipping[i].text:
+                        ship_price = parse_price("0")
+                    else:
+                        ship_price = parse_price(shipping[i].text)
+                else:
+                    ship_price = parse_price("0")
+            except IndexError:
+                log.debug("shipping index error")
+                return False
             ship_float = ship_price.amount
             price_float = price.amount
             if price_float is None:
@@ -500,9 +552,15 @@ class Amazon:
                 self.notification_handler.play_notify_sound()
 
                 presence.buy_update()
-
-                elements[i].click()
-                time.sleep(self.page_wait_delay())
+                current_title = self.driver.title
+                # log.info(f"current page title is {current_title}")
+                try:
+                    elements[i].click()
+                except IndexError:
+                    log.debug("Index Error")
+                    return False
+                self.wait_for_page_change(current_title)
+                # log.info(f"page title is {self.driver.title}")
                 if self.driver.title in SHOPING_CART_TITLES:
                     return True
                 else:
@@ -534,7 +592,7 @@ class Amazon:
     @debug
     def navigate_pages(self, test):
         # delay to wait for page load
-        time.sleep(self.page_wait_delay())
+        # time.sleep(self.page_wait_delay())
 
         title = self.driver.title
         if title in SIGN_IN_TITLES:
@@ -575,16 +633,27 @@ class Amazon:
                 )
                 self.driver.refresh()
                 return
-            log.info("trying to block proceed to checkout")
-            try:
-                self.driver.find_element_by_xpath(
-                    '//*[@id="sc-buy-box-ptc-button"]'
-                ).click()
-            except exceptions.NoSuchElementException:
-                log.error(
-                    "could not find and click button, refreshing and returning to handler"
-                )
-                self.driver.refresh()
+            log.info("trying to click proceed to checkout")
+            self.wait_for_page_change(page_title=title)
+            timeout = time.time() + DEFAULT_MAX_TIMEOUT
+            button = []
+            while True:
+                try:
+                    button = self.driver.find_element_by_xpath(
+                        '//*[@id="sc-buy-box-ptc-button"]'
+                    )
+                except exceptions.NoSuchElementException:
+                    pass
+                if button:
+                    break
+                if time.time() > timeout:
+                    log.error(
+                        "could not find and click button, refreshing and returning to handler"
+                    )
+                    title = self.driver.title
+                    self.driver.refresh()
+                    self.wait_for_page_change(page_title=title)
+                    break
 
     @debug
     def handle_prime_signup(self):
@@ -646,13 +715,20 @@ class Amazon:
             self.save_screenshot("ptc-page")
         except:
             pass
-        try:
-            self.driver.find_element_by_xpath('//*[@id="hlb-ptc-btn-native"]').click()
-        except exceptions.NoSuchElementException:
+        timeout = time.time() + DEFAULT_MAX_TIMEOUT
+        button = []
+        while True:
             try:
-                self.driver.find_element_by_xpath('//*[@id="hlb-ptc-btn"]').click()
+                button = self.driver.find_element_by_xpath('//*[@id="hlb-ptc-btn-native"]')
             except exceptions.NoSuchElementException:
-                log.error("couldn't find buttons to proceed to checkout")
+                try:
+                    button = self.driver.find_element_by_xpath('//*[@id="hlb-ptc-btn"]')
+                except exceptions.NoSuchElementException:
+                    pass
+            if button:
+                break
+            if time.time() > timeout:
+                log.info("couldn't find buttons to proceed to checkout")
                 self.save_page_source("ptc-error")
                 self.send_notification(
                     "Proceed to Checkout Error Occurred",
@@ -662,63 +738,125 @@ class Amazon:
                 log.info("Refreshing page to try again")
                 self.driver.refresh()
                 self.checkout_retry += 1
+                return
+        current_page = self.driver.title
+        # log.info(f"time before click {time.time() - self.start_time_atc}")
+        button.click()
+        # log.info(f"time after click {time.time() - self.start_time_atc}")
+        self.wait_for_page_change(page_title=current_page)
+        #
+        # try:
+        #     self.driver.find_element_by_xpath('//*[@id="hlb-ptc-btn-native"]').click()
+        # except exceptions.NoSuchElementException:
+        #     try:
+        #         self.driver.find_element_by_xpath('//*[@id="hlb-ptc-btn"]').click()
+        #     except exceptions.NoSuchElementException:
+        #         log.error("couldn't find buttons to proceed to checkout")
+        #         self.save_page_source("ptc-error")
+        #         self.send_notification(
+        #             "Proceed to Checkout Error Occurred",
+        #             "ptc-error",
+        #             self.take_screenshots,
+        #         )
+        #         log.info("Refreshing page to try again")
+        #         self.driver.refresh()
+        #         self.checkout_retry += 1
 
     @debug
     def handle_checkout(self, test):
         previous_title = self.driver.title
         button = None
         i = 0
-        for i in range(len(self.button_xpaths)):
+
+        # test for single button, if timeout is reached, check the other buttons
+        timeout = time.time() + DEFAULT_MAX_TIMEOUT
+        while True:
             try:
-                if (
-                    self.driver.find_element_by_xpath(
-                        self.button_xpaths[0]
-                    ).is_displayed()
-                    and self.driver.find_element_by_xpath(
-                        self.button_xpaths[0]
-                    ).is_enabled()
-                ):
-                    button = self.driver.find_element_by_xpath(self.button_xpaths[0])
+                button = self.driver.find_element_by_xpath(self.button_xpaths[0])
             except exceptions.NoSuchElementException:
-                log.debug(f"{self.button_xpaths[0]}, lets try a different one.")
-            if button:
-                if not test:
-                    log.info(f"Clicking Button: {button.text}")
-                    button.click()
-                    j = 0
-                    while (
-                        self.driver.title == previous_title
-                        and j < MAX_CHECKOUT_BUTTON_WAIT
-                    ):
-                        time.sleep(self.page_wait_delay())
-                        j += 1
-                    if self.driver.title != previous_title:
-                        break
-                    else:
-                        log.info(
-                            f"Button {self.button_xpaths[0]} didn't work, trying another one"
-                        )
-                else:
-                    log.info(f"Found button {button.text}, but this is a test")
-                    log.info("will not try to complete order")
-                    self.try_to_checkout = False
-                    self.great_success = True
-                    if self.single_shot:
-                        self.asin_list = []
-                    break
+                pass
             self.button_xpaths.append(self.button_xpaths.pop(0))
-        if not test and self.driver.title == previous_title:
-            # Could not click button, refresh page and try again
-            log.error("couldn't find buttons to proceed to checkout")
-            self.save_page_source("ptc-error")
-            self.send_notification(
-                "Error in checkout.  Please check browser window.",
-                "ptc-error",
-                self.take_screenshots,
-            )
-            log.info("Refreshing page to try again")
-            self.driver.refresh()
-            self.order_retry += 1
+            if button:
+                if button.is_enabled() and button.is_displayed():
+                    break
+            if time.time() > timeout:
+                log.error("couldn't find buttons to proceed to checkout")
+                self.save_page_source("ptc-error")
+                self.send_notification(
+                    "Error in checkout.  Please check browser window.",
+                    "ptc-error",
+                    self.take_screenshots,
+                )
+                log.info("Refreshing page to try again")
+                self.driver.refresh()
+                time.sleep(DEFAULT_PAGE_WAIT_DELAY)
+                self.order_retry += 1
+                return
+        if test:
+            log.info(f"Found button {button.text}, but this is a test")
+            log.info("will not try to complete order")
+            log.info(f"test time took {time.time() - self.start_time_atc} to check out")
+            self.try_to_checkout = False
+            self.great_success = True
+            if self.single_shot:
+                self.asin_list = []
+            return
+        else:
+            log.info(f"Clicking Button {button.text} to place order")
+            button.click()
+            self.wait_for_page_change(page_title=previous_title)
+        # for i in range(len(self.button_xpaths)):
+        #     try:
+        #         if (
+        #             self.driver.find_element_by_xpath(
+        #                 self.button_xpaths[0]
+        #             ).is_displayed()
+        #             and self.driver.find_element_by_xpath(
+        #                 self.button_xpaths[0]
+        #             ).is_enabled()
+        #         ):
+        #             button = self.driver.find_element_by_xpath(self.button_xpaths[0])
+        #     except exceptions.NoSuchElementException:
+        #         log.debug(f"{self.button_xpaths[0]}, lets try a different one.")
+        #     if button:
+        #         if not test:
+        #             log.info(f"Clicking Button: {button.text}")
+        #             button.click()
+        #             j = 0
+        #             while (
+        #                 self.driver.title == previous_title
+        #                 and j < MAX_CHECKOUT_BUTTON_WAIT
+        #             ):
+        #                 time.sleep(self.page_wait_delay())
+        #                 j += 1
+        #             if self.driver.title != previous_title:
+        #                 break
+        #             else:
+        #                 log.info(
+        #                     f"Button {self.button_xpaths[0]} didn't work, trying another one"
+        #                 )
+        #         else:
+        #             log.info(f"Found button {button.text}, but this is a test")
+        #             log.info("will not try to complete order")
+        #             log.info(f"test time took {time.time() - self.start_time_atc} to check out")
+        #             self.try_to_checkout = False
+        #             self.great_success = True
+        #             if self.single_shot:
+        #                 self.asin_list = []
+        #             break
+        #     self.button_xpaths.append(self.button_xpaths.pop(0))
+        # if not test and self.driver.title == previous_title:
+        #     # Could not click button, refresh page and try again
+        #     log.error("couldn't find buttons to proceed to checkout")
+        #     self.save_page_source("ptc-error")
+        #     self.send_notification(
+        #         "Error in checkout.  Please check browser window.",
+        #         "ptc-error",
+        #         self.take_screenshots,
+        #     )
+        #     log.info("Refreshing page to try again")
+        #     self.driver.refresh()
+        #     self.order_retry += 1
 
     @debug
     def handle_order_complete(self):
@@ -816,6 +954,15 @@ class Amazon:
         page_source = self.driver.page_source
         with open(file_name, "w", encoding="utf-8") as f:
             f.write(page_source)
+
+    def wait_for_page_change(self, page_title, timeout=3):
+        time_to_end = time.time() + timeout
+        while time.time() < time_to_end and (self.driver.title == page_title or not self.driver.title):
+            pass
+        if self.driver.title != page_title:
+            return True
+        else:
+            return False
 
     def page_wait_delay(self):
         if self.random_delay:
