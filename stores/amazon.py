@@ -21,7 +21,7 @@ from utils import discord_presence as presence
 from utils.debugger import debug
 from utils.encryption import create_encrypted_config, load_encrypted_config
 from utils.logger import log
-from utils.selenium_utils import options, enable_headless, caps
+from utils.selenium_utils import options, enable_headless
 
 AMAZON_URLS = {
     "BASE_URL": "https://{domain}/",
@@ -269,9 +269,7 @@ class Amazon:
         options.add_argument(f"user-data-dir=.profile-amz")
 
         try:
-            self.driver = webdriver.Chrome(
-                executable_path=binary_path, options=options, desired_capabilities=caps
-            )
+            self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
             self.wait = WebDriverWait(self.driver, 10)
             self.get_webdriver_pids()
         except Exception as e:
@@ -393,8 +391,8 @@ class Amazon:
     @debug
     def login(self):
         log.info("Email")
-        email_field = []
-        password_field = []
+        email_field = None
+        password_field = None
         timeout = self.get_timeout()
         while True:
             try:
@@ -433,7 +431,7 @@ class Amazon:
             log.error("Remember me checkbox did not exist")
 
         log.info("Password")
-        password_field = []
+        password_field = None
         timeout = self.get_timeout()
         current_page = self.driver.title
         while True:
@@ -533,21 +531,23 @@ class Amazon:
 
         timeout = self.get_timeout()
         while True:
-            elements = self.driver.find_elements_by_xpath(
+            atc_buttons = self.driver.find_elements_by_xpath(
                 '//*[@name="submit.addToCart"]'
             )
-            test = []
+            if atc_buttons:
+                # Early out if we found buttons
+                break
+
+            test = None
             try:
                 test = self.driver.find_element_by_xpath(
                     '//*[@id="olpOfferList"]/div/p'
                 )
             except exceptions.NoSuchElementException:
                 pass
-            if elements:
-                break
-            if test:
-                if test.text in NO_SELLERS:
-                    return False
+
+            if test and test.text in NO_SELLERS:
+                return False
             if time.time() > timeout:
                 log.info(f"failed to load page for {asin}, going to next ASIN")
                 return False
@@ -562,7 +562,7 @@ class Amazon:
             if time.time() > timeout:
                 log.info(f"failed to load prices for {asin}, going to next ASIN")
                 return False
-
+        shipping = []
         if self.checkshipping:
             timeout = self.get_timeout()
             while True:
@@ -576,18 +576,19 @@ class Amazon:
                     return False
 
         in_stock = False
-        for i in range(len(elements)):
+
+        for idx, atc_button in enumerate(atc_buttons):
             try:
-                price = parse_price(prices[i].text)
+                price = parse_price(prices[idx].text)
             except IndexError:
                 log.debug("Price index error")
                 return False
             try:
                 if self.checkshipping:
-                    if SHIPPING_ONLY_IF in shipping[i].text:
+                    if SHIPPING_ONLY_IF in shipping[idx].text:
                         ship_price = parse_price("0")
                     else:
-                        ship_price = parse_price(shipping[i].text)
+                        ship_price = parse_price(shipping[idx].text)
                 else:
                     ship_price = parse_price("0")
             except IndexError:
@@ -615,7 +616,7 @@ class Amazon:
                 current_title = self.driver.title
                 # log.info(f"current page title is {current_title}")
                 try:
-                    elements[i].click()
+                    atc_button.click()
                 except IndexError:
                     log.debug("Index Error")
                     return False
@@ -775,7 +776,7 @@ class Amazon:
         except:
             pass
         timeout = self.get_timeout()
-        button = []
+        button = None
         while True:
             try:
                 button = self.driver.find_element_by_xpath(
