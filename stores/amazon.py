@@ -394,13 +394,21 @@ class Amazon:
     def login(self):
         log.info("Email")
         email_field = []
+        password_field = []
         timeout = self.get_timeout()
         while True:
             try:
                 email_field = self.driver.find_element_by_xpath('//*[@id="ap_email"]')
                 break
             except exceptions.NoSuchElementException:
-                pass
+                try:
+                    password_field = self.driver.find_element_by_xpath(
+                        '//*[@id="ap_password"]'
+                    )
+                    break
+                except exceptions.NoSuchElementException:
+                    pass
+
             except exceptions.ElementNotInteractableException:
                 break
             if time.time() > timeout:
