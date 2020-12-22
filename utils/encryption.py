@@ -1,13 +1,17 @@
-import getpass as getpass
-import stdiomask
+import getpass
 import json
-import os
 from base64 import b64encode, b64decode
+
+import keyring
+import stdiomask
 from Crypto.Cipher import ChaCha20_Poly1305
-from Crypto.Random import get_random_bytes
 from Crypto.Protocol.KDF import scrypt
+from Crypto.Random import get_random_bytes
+from keyring.errors import PasswordDeleteError
 
 from utils.logger import log
+
+KEYRING_SERVICE_NAME = "fairgame"
 
 
 def encrypt(pt, password):
@@ -52,6 +56,14 @@ def create_encrypted_config(data, file_path):
     cpass = stdiomask.getpass(prompt="Credential file password: ", mask="*")
     vpass = stdiomask.getpass(prompt="Verify credential file password: ", mask="*")
     if cpass == vpass:
+        # Clear any previous key:
+        try:
+            keyring.delete_password(KEYRING_SERVICE_NAME, getpass.getuser())
+        except PasswordDeleteError:
+            # Assume the password didn't exist?
+            pass
+        # Store the password in the system keyring service
+        keyring.set_password(KEYRING_SERVICE_NAME, getpass.getuser(), cpass)
         result = encrypt(payload, cpass)
         with open(file_path, "w") as f:
             f.write(result)
@@ -69,7 +81,13 @@ def load_encrypted_config(config_path):
         data = json_file.read()
     try:
         if "nonce" in data:
-            password = stdiomask.getpass(prompt="Credential file password: ", mask="*")
+            # Retrieve the password from the system keyring service
+            password = keyring.get_password(KEYRING_SERVICE_NAME, getpass.getuser())
+            if not password:
+                # legacy mode for people who upgrade without recreating the file
+                password = stdiomask.getpass(
+                    prompt="Credential file password: ", mask="*"
+                )
             decrypted = decrypt(data, password)
             return json.loads(decrypted)
         else:
