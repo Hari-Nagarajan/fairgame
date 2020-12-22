@@ -121,7 +121,7 @@ def main():
     help="Uses normal page load strategy for selenium. Default is none",
 )
 @click.option(
-    "--encryption-pass",
+    "--p",
     type=str,
     default=None,
     help="Pass in encryption file password as argument",
