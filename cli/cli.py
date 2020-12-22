@@ -97,7 +97,6 @@ def main():
     is_flag=True,
     help="Show used items in search listings.",
 )
-@click.option("--random-delay", is_flag=True, help="Set delay to a random interval")
 @click.option("--single-shot", is_flag=True, help="Quit after 1 successful purchase")
 @click.option(
     "--no-screenshots",
@@ -115,6 +114,12 @@ def main():
     default=False,
     help="Disable local sounds.  Does not affect Apprise notification " "sounds.",
 )
+@click.option(
+    "--slow-mode",
+    is_flag=True,
+    default=False,
+    help="Uses normal page load strategy for selenium. Default is none",
+)
 @notify_on_crash
 def amazon(
     no_image,
@@ -124,11 +129,11 @@ def amazon(
     checkshipping,
     detailed,
     used,
-    random_delay,
     single_shot,
     no_screenshots,
     disable_presence,
     disable_sound,
+    slow_mode,
 ):
     if no_image:
         selenium_utils.no_amazon_image()
@@ -143,12 +148,12 @@ def amazon(
         headless=headless,
         notification_handler=notification_handler,
         checkshipping=checkshipping,
-        random_delay=random_delay,
         detailed=detailed,
         used=used,
         single_shot=single_shot,
         no_screenshots=no_screenshots,
         disable_presence=disable_presence,
+        slow_mode=slow_mode,
     )
     amzn_obj.run(delay=delay, test=test)
 
