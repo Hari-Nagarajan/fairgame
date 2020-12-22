@@ -143,6 +143,7 @@ OUT_OF_STOCK = ["Out of Stock - AmazonSmile Checkout"]
 NO_SELLERS = [
     "Currently, there are no sellers that can deliver this item to your location.",
     "There are currently no listings for this search. Try a different refinement.",
+    "There are currently no listings for this search. Try a different refinement.",
 ]
 
 # OFFER_PAGE_TITLES = ["Amazon.com: Buying Choices:"]
@@ -181,12 +182,12 @@ class Amazon:
         notification_handler,
         headless=False,
         checkshipping=False,
-        random_delay=False,
         detailed=False,
         used=False,
         single_shot=False,
         no_screenshots=False,
         disable_presence=False,
+        slow_mode=False,
     ):
         self.notification_handler = notification_handler
         self.asin_list = []
@@ -194,7 +195,6 @@ class Amazon:
         self.reserve_max = []
         self.checkshipping = checkshipping
         self.button_xpaths = BUTTON_XPATHS
-        self.random_delay = random_delay
         self.detailed = detailed
         self.used = used
         self.single_shot = single_shot
@@ -205,6 +205,7 @@ class Amazon:
         self.driver = None
         self.refresh_delay = DEFAULT_REFRESH_DELAY
         self.testing = False
+        self.slow_mode = slow_mode
 
         presence.enabled = not disable_presence
         presence.start_presence()
@@ -267,7 +268,8 @@ class Amazon:
         # if os.path.isdir(profile_amz):
         #     os.remove(profile_amz)
         options.add_argument(f"user-data-dir=.profile-amz")
-
+        if not self.slow_mode:
+            options.set_capability("pageLoadStrategy", "none")
         try:
             self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
             self.wait = WebDriverWait(self.driver, 10)
@@ -299,7 +301,8 @@ class Amazon:
         log.info("Waiting for home page.")
         while True:
             try:
-                self.driver.get(AMAZON_URLS["BASE_URL"])
+                self.get_page(url=AMAZON_URLS["BASE_URL"])
+                # self.driver.get(AMAZON_URLS["BASE_URL"])
                 break
             except Exception:
                 log.error(
@@ -358,6 +361,7 @@ class Amazon:
                 keep_going = False
         runtime = time.time() - self.start_time
         log.info(f"FairGame bot ran for {runtime} seconds.")
+        time.sleep(10)  # add a delya to shut stuff done
 
     @debug
     def handle_startup(self):
@@ -373,6 +377,7 @@ class Amazon:
                 if is_smile
                 else '//*[@id="nav-link-accountList"]/div/span'
             )
+
             try:
                 self.driver.find_element_by_xpath(xpath).click()
             except exceptions.NoSuchElementException:
@@ -406,14 +411,14 @@ class Amazon:
                     break
                 except exceptions.NoSuchElementException:
                     pass
-
-            except exceptions.ElementNotInteractableException:
-                break
             if time.time() > timeout:
                 break
 
         if email_field:
-            email_field.send_keys(self.username + Keys.RETURN)
+            try:
+                email_field.send_keys(self.username + Keys.RETURN)
+            except exceptions.ElementNotInteractableException:
+                log.info("Email not needed.")
         else:
             log.info("Email not needed.")
 
@@ -492,10 +497,10 @@ class Amazon:
         while not found_asin:
             for i in range(len(self.asin_list)):
                 for asin in self.asin_list[i]:
-                    start_time = time.time()
+                    # start_time = time.time()
                     if self.check_stock(asin, self.reserve_min[i], self.reserve_max[i]):
                         return asin
-                    log.info(f"check time took {time.time()-start_time} seconds")
+                    # log.info(f"check time took {time.time()-start_time} seconds")
                     time.sleep(delay)
 
     @debug
@@ -519,10 +524,9 @@ class Amazon:
                 )
 
         presence.searching_update()
-
         while True:
             try:
-                self.driver.get(f.url)
+                self.get_page(f.url)
                 break
             except Exception:
                 log.error("Failed to load the offer URL.  Retrying...")
@@ -546,7 +550,7 @@ class Amazon:
             except exceptions.NoSuchElementException:
                 pass
 
-            if test and test.text in NO_SELLERS:
+            if test and (test.text in NO_SELLERS):
                 return False
             if time.time() > timeout:
                 log.info(f"failed to load page for {asin}, going to next ASIN")
@@ -611,6 +615,12 @@ class Amazon:
                 log.info("Item in stock and in reserve range!")
                 log.info("clicking add to cart")
                 self.notification_handler.play_notify_sound()
+                if self.detailed:
+                    self.send_notification(
+                        message=f"Found Stock ASIN:{asin}",
+                        page_name="Stock Alert",
+                        take_screenshot=self.take_screenshots,
+                    )
 
                 presence.buy_update()
                 current_title = self.driver.title
@@ -704,10 +714,9 @@ class Amazon:
                     button = self.driver.find_element_by_xpath(
                         '//*[@id="sc-buy-box-ptc-button"]'
                     )
+                    break
                 except exceptions.NoSuchElementException:
                     pass
-                if button:
-                    break
                 if time.time() > timeout:
                     log.error(
                         "could not find and click button, refreshing and returning to handler"
@@ -801,6 +810,12 @@ class Amazon:
                 self.driver.refresh()
                 self.checkout_retry += 1
                 return
+        if self.detailed:
+            self.send_notification(
+                message="Attempting to Proceed to Checkout",
+                page_name="ptc",
+                take_screenshot=self.take_screenshots,
+            )
         current_page = self.driver.title
         # log.info(f"time before click {time.time() - self.start_time_atc}")
         button.click()
@@ -974,10 +989,7 @@ class Amazon:
             return False
 
     def page_wait_delay(self):
-        if self.random_delay:
-            return random.uniform(DEFAULT_PAGE_WAIT_DELAY, DEFAULT_MAX_PAGE_WAIT_DELAY)
-        else:
-            return DEFAULT_PAGE_WAIT_DELAY
+        return DEFAULT_PAGE_WAIT_DELAY
 
     def send_notification(self, message, page_name, take_screenshot=True):
         if take_screenshot:
@@ -995,6 +1007,19 @@ class Amazon:
         children = driver_process.children(recursive=True)
         for child in children:
             self.webdriver_child_pids.append(child.pid)
+
+    def get_page(self, url):
+        current_page = self.driver.title
+        try:
+            self.driver.get(url=url)
+        except exceptions.WebDriverException or exceptions.TimeoutException:
+            log.error(f"failed to load page at url: {url}")
+            return False
+        if self.wait_for_page_change(current_page):
+            return True
+        else:
+            log.error("page did not change")
+            return False
 
     def __del__(self):
         try:
@@ -1031,13 +1056,15 @@ class Amazon:
         if self.single_shot:
             log.info("\tSingle Shot purchase enabled")
         if not self.take_screenshots:
-            log.info(f"--Screenshotting is Disabled")
+            log.info(
+                f"--Screenshotting is Disabled, DO NOT ASK FOR HELP IN TECH SUPPORT IF YOU HAVE NO SCREENSHOTS!"
+            )
         if self.detailed:
-            log.info(f"--Detailed screenshots is enabled")
-        if self.random_delay:
-            log.info(f"--Page wait time in checkout will be randomized.")
+            log.info(f"--Detailed screenshots/notifications is enabled")
         if self.testing:
             log.warning(f"--Testing Mode.  NO Purchases will be made.")
+        if self.slow_mode:
+            log.warning(f"--Slow-mode enabled. Pages will fully load before execution")
 
         for idx, asins in enumerate(self.asin_list):
             log.info(
