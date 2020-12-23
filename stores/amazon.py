@@ -5,6 +5,7 @@ import platform
 import random
 import time
 from datetime import datetime
+import fileinput
 
 import psutil
 import stdiomask
@@ -1080,11 +1081,25 @@ class Amazon:
             # # keep profile bloat in check
             # if os.path.isdir(profile_amz):
             #     os.remove(profile_amz)
+            prefs = {
+                "profile.password_manager_enabled": False,
+                "credentials_enable_service": False,
+            }
+            options.add_experimental_option("prefs", prefs)
             options.add_argument(f"user-data-dir=.profile-amz")
             if not self.slow_mode:
                 options.set_capability("pageLoadStrategy", "none")
+
             self.setup_driver = False
 
+        # Delete crashed, so restore pop-up doesn't happen
+        path_to_prefs = (
+            os.path.dirname(os.path.abspath("__file__"))
+            + "\\.profile-amz\\Default\\Preferences"
+        )
+        with fileinput.FileInput(path_to_prefs, inplace=True) as file:
+            for line in file:
+                print(line.replace("Crashed", "none"), end="")
         try:
             self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
             self.wait = WebDriverWait(self.driver, 10)
