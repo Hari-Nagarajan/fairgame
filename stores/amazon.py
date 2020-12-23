@@ -547,7 +547,7 @@ class Amazon:
                         raise RuntimeError("Failed to restart bot")
                     else:  # deleted driver and recreated it succesfully
                         log.info(
-                            "WebDriver recrated successfully. Returning back to stock check"
+                            "WebDriver recreated successfully. Returning back to stock check"
                         )
                         return False
 
