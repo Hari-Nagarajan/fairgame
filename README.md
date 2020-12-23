@@ -81,7 +81,6 @@ Options:
                       miss checkouts !!!!!!
 
   --used              Show used items in search listings.
-  --random-delay      Set delay to a random interval
   --single-shot       Quit after 1 successful purchase
   --no-screenshots    Take NO screenshots, do not bother asking for help if
                       you use this... Screenshots are the best tool we have
@@ -91,6 +90,10 @@ Options:
   --disable-sound     Disable local sounds.  Does not affect Apprise
                       notification sounds.
 
+  --slow-mode         Uses normal page load strategy for selenium. Default is
+                      none
+
+  --p TEXT            Pass in encryption file password as argument
   --help              Show this message and exit.
 ```
 
@@ -212,14 +215,23 @@ INFO: "2020-09-25 14:41:04,617 - Order Placed.
 ```
 
 
-## Best Buy
-This is fairly basic right now. Just login to the best buy website in your default browser and then run the command as follows:
+## ~~Best Buy~~
+
+Best Buy is currently deprecated because we don't yet have an effective way to determine item availability 
+without scraping and processing the product pages individually.  Future updates may see this functionality 
+return, but the current code isn't reliable for high demand items and checkout automation has become 
+increasingly hard due to anti-bot measures taken by Best Buy.
+
+Original code still exists, but provides very little utility.  A 3rd party stock notification service would 
+probably serve as a better solution at Best Buy.
+
+~~This is fairly basic right now. Just login to the best buy website in your default browser and then run the command as follows:~~
 
 ```
 python app.py bestbuy --sku [SKU]
 ```
 
-Example:
+~~Example:~~
 ```python
 python app.py bestbuy --sku 6429440
 ```
