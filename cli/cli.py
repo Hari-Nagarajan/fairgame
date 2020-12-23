@@ -140,7 +140,7 @@ def amazon(
     disable_presence,
     disable_sound,
     slow_mode,
-    encryption_pass,
+    p,
 ):
     if no_image:
         selenium_utils.no_amazon_image()
@@ -161,7 +161,7 @@ def amazon(
         no_screenshots=no_screenshots,
         disable_presence=disable_presence,
         slow_mode=slow_mode,
-        encryption_pass=encryption_pass,
+        encryption_pass=p,
     )
     amzn_obj.run(delay=delay, test=test)
 
