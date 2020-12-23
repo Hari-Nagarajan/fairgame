@@ -145,6 +145,7 @@ NO_SELLERS = [
     "Currently, there are no sellers that can deliver this item to your location.",
     "There are currently no listings for this search. Try a different refinement.",
     "There are currently no listings for this search. Try a different refinement.",
+    "There are currently no listings for this product in . Try changing the condition type.",
 ]
 
 # OFFER_PAGE_TITLES = ["Amazon.com: Buying Choices:"]
@@ -191,6 +192,7 @@ class Amazon:
         disable_presence=False,
         slow_mode=False,
         encryption_pass=None,
+        no_image=False,
     ):
         self.notification_handler = notification_handler
         self.asin_list = []
@@ -211,6 +213,7 @@ class Amazon:
         self.slow_mode = slow_mode
         self.setup_driver = True
         self.headless = headless
+        self.no_image = no_image
 
         presence.enabled = not disable_presence
         presence.start_presence()
@@ -522,6 +525,10 @@ class Amazon:
                 )
         fail_counter = 0
         presence.searching_update()
+
+        #
+        # self.driver = webdriver.Chrome()
+        #
         while True:
             try:
                 self.get_page(f.url)
@@ -1013,7 +1020,7 @@ class Amazon:
             f.write(page_source)
 
     def wait_for_page_change(self, page_title, timeout=3):
-        time_to_end = time.time() + timeout
+        time_to_end = self.get_timeout(timeout=timeout)
         while time.time() < time_to_end and (
             self.driver.title == page_title or not self.driver.title
         ):
@@ -1044,13 +1051,30 @@ class Amazon:
             self.webdriver_child_pids.append(child.pid)
 
     def get_page(self, url):
-        current_page = self.driver.title
+        check_cart_element = []
+        current_page = []
+        try:
+            check_cart_element = self.driver.find_element_by_xpath(
+                '//*[@id="nav-cart"]'
+            )
+        except exceptions.NoSuchElementException:
+            current_page = self.driver.title
         try:
             self.driver.get(url=url)
         except exceptions.WebDriverException or exceptions.TimeoutException:
             log.error(f"failed to load page at url: {url}")
             return False
-        if self.wait_for_page_change(current_page):
+        if check_cart_element:
+            timeout = self.get_timeout()
+            while True:
+                try:
+                    check_cart_element.is_displayed()
+                except exceptions.StaleElementReferenceException:
+                    break
+                if time.time() > timeout:
+                    return False
+            return True
+        elif self.wait_for_page_change(current_page):
             return True
         else:
             log.error("page did not change")
@@ -1102,6 +1126,10 @@ class Amazon:
                 "profile.password_manager_enabled": False,
                 "credentials_enable_service": False,
             }
+            if self.no_image:
+                prefs["profile.managed_default_content_settings.images"] = 2
+            else:
+                prefs["profile.managed_default_content_settings.images"] = 0
             options.add_experimental_option("prefs", prefs)
             options.add_argument(f"user-data-dir=.profile-amz")
             if not self.slow_mode:

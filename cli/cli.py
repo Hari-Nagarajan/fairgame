@@ -142,10 +142,10 @@ def amazon(
     slow_mode,
     p,
 ):
-    if no_image:
-        selenium_utils.no_amazon_image()
-    else:
-        selenium_utils.yes_amazon_image()
+    # if no_image:
+    #     selenium_utils.no_amazon_image()
+    # else:
+    #     selenium_utils.yes_amazon_image()
 
     notification_handler.sound_enabled = not disable_sound
     if not notification_handler.sound_enabled:
@@ -162,6 +162,7 @@ def amazon(
         disable_presence=disable_presence,
         slow_mode=slow_mode,
         encryption_pass=p,
+        no_image=no_image,
     )
     try:
         amzn_obj.run(delay=delay, test=test)

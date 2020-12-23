@@ -31,14 +31,15 @@ class AnyEc:
                 pass
 
 
-def no_amazon_image():
-    prefs = {"profile.managed_default_content_settings.images": 2}
-    options.add_experimental_option("prefs", prefs)
-
-
-def yes_amazon_image():
-    prefs = {"profile.managed_default_content_settings.images": 0}
-    options.add_experimental_option("prefs", prefs)
+# now in amazon create_driver
+# def no_amazon_image():
+#     prefs = {"profile.managed_default_content_settings.images": 2}
+#     options.add_experimental_option("prefs", prefs)
+#
+#
+# def yes_amazon_image():
+#     prefs = {"profile.managed_default_content_settings.images": 0}
+#     options.add_experimental_option("prefs", prefs)
 
 
 def wait_for_element(d, e_id, time=30):
