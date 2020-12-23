@@ -163,7 +163,12 @@ def amazon(
         slow_mode=slow_mode,
         encryption_pass=p,
     )
-    amzn_obj.run(delay=delay, test=test)
+    try:
+        amzn_obj.run(delay=delay, test=test)
+    except RuntimeError:
+        del amzn_obj
+        log.error("Exiting Program...")
+        time.sleep(5)
 
 
 @click.command()

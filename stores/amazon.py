@@ -174,6 +174,7 @@ DEFAULT_MAX_PAGE_WAIT_DELAY = 1.0  # used for random page wait delay
 MAX_CHECKOUT_BUTTON_WAIT = 3  # integers only
 DEFAULT_REFRESH_DELAY = 3
 DEFAULT_MAX_TIMEOUT = 10
+DEFAULT_MAX_URL_FAIL = 5
 
 
 class Amazon:
@@ -207,6 +208,8 @@ class Amazon:
         self.refresh_delay = DEFAULT_REFRESH_DELAY
         self.testing = False
         self.slow_mode = slow_mode
+        self.setup_driver = True
+        self.headless = headless
 
         presence.enabled = not disable_presence
         presence.start_presence()
@@ -261,25 +264,7 @@ class Amazon:
             )
             exit(0)
 
-        if headless:
-            enable_headless()
-
-        # profile_amz = ".profile-amz"
-        # # keep profile bloat in check
-        # if os.path.isdir(profile_amz):
-        #     os.remove(profile_amz)
-        options.add_argument(f"user-data-dir=.profile-amz")
-        if not self.slow_mode:
-            options.set_capability("pageLoadStrategy", "none")
-        try:
-            self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
-            self.wait = WebDriverWait(self.driver, 10)
-            self.get_webdriver_pids()
-        except Exception as e:
-            log.error(e)
-            log.warning(
-                "You probably have a previous Chrome window open. You should close it"
-            )
+        if not self.create_driver():
             exit(1)
 
         for key in AMAZON_URLS.keys():
@@ -362,7 +347,7 @@ class Amazon:
                 keep_going = False
         runtime = time.time() - self.start_time
         log.info(f"FairGame bot ran for {runtime} seconds.")
-        time.sleep(10)  # add a delya to shut stuff done
+        time.sleep(10)  # add a delay to shut stuff done
 
     @debug
     def handle_startup(self):
@@ -489,7 +474,7 @@ class Amazon:
         if self.driver.title in TWOFA_TITLES:
             log.info("enter in your two-step verification code in browser")
             while self.driver.title in TWOFA_TITLES:
-                pass
+                time.sleep(0.2)
         log.info(f"Logged in as {self.username}")
 
     @debug
@@ -523,16 +508,47 @@ class Amazon:
                     + asin
                     + "/ref=olp_f_new&f_new=true&f_freeShipping=on"
                 )
-
+        fail_counter = 0
         presence.searching_update()
         while True:
             try:
                 self.get_page(f.url)
                 break
             except Exception:
-                log.error("Failed to load the offer URL.  Retrying...")
-                time.sleep(3)
-                pass
+                fail_counter += 1
+                log.error(f"Failed to load the offer URL {fail_counter} times.")
+                if fail_counter < DEFAULT_MAX_URL_FAIL:
+                    log.error(
+                        f"WebDriver will restart if it fails {DEFAULT_MAX_URL_FAIL} times. Retrying now..."
+                    )
+                    time.sleep(3)
+                else:
+                    log.info(
+                        "Attempting to delete and recreate current chrome instance"
+                    )
+                    if not self.delete_driver():
+                        log.error("Failed to delete chrome processes")
+                        log.error("Please restart bot")
+                        self.send_notification(
+                            message="Bot Failed, please restart bot",
+                            page_name="Bot Failed",
+                            take_screenshot=False,
+                        )
+                        raise RuntimeError("Failed to restart bot")
+                    elif not self.create_driver():
+                        log.error("Failed to recreate webdriver processes")
+                        log.error("Please restart bot")
+                        self.send_notification(
+                            message="Bot Failed, please restart bot",
+                            page_name="Bot Failed",
+                            take_screenshot=False,
+                        )
+                        raise RuntimeError("Failed to restart bot")
+                    else:  # deleted driver and recreated it succesfully
+                        log.info(
+                            "WebDriver recrated successfully. Returning back to stock check"
+                        )
+                        return False
 
         timeout = self.get_timeout()
         while True:
@@ -1023,26 +1039,7 @@ class Amazon:
             return False
 
     def __del__(self):
-        try:
-            if platform.system() == "Windows" and self.driver:
-                log.info("Cleaning up after web driver...")
-                # brute force kill child Chrome pids with fire
-                for pid in self.webdriver_child_pids:
-                    try:
-                        log.debug(f"Killing {pid}...")
-                        process = psutil.Process(pid)
-                        process.kill()
-                    except psutil.NoSuchProcess:
-                        log.debug(f"{pid} not found. Continuing...")
-                        pass
-            elif self.driver:
-                self.driver.quit()
-
-        except Exception as e:
-            log.info(e)
-            log.info(
-                "Failed to clean up after web driver.  Please manually close browser."
-            )
+        self.delete_driver()
 
     def show_config(self):
         log.info(f"{'=' * 50}")
@@ -1072,6 +1069,58 @@ class Amazon:
                 f"--Looking for {len(asins)} ASINs between {self.reserve_min[idx]:.2f} and {self.reserve_max[idx]:.2f}"
             )
         log.info(f"{'=' * 50}")
+
+    def create_driver(self):
+        if self.setup_driver:
+
+            if self.headless:
+                enable_headless()
+
+            # profile_amz = ".profile-amz"
+            # # keep profile bloat in check
+            # if os.path.isdir(profile_amz):
+            #     os.remove(profile_amz)
+            options.add_argument(f"user-data-dir=.profile-amz")
+            if not self.slow_mode:
+                options.set_capability("pageLoadStrategy", "none")
+            self.setup_driver = False
+
+        try:
+            self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
+            self.wait = WebDriverWait(self.driver, 10)
+            self.get_webdriver_pids()
+        except Exception as e:
+            log.error(e)
+            log.warning(
+                "You probably have a previous Chrome window open. You should close it"
+            )
+            return False
+
+        return True
+
+    def delete_driver(self):
+        try:
+            if platform.system() == "Windows" and self.driver:
+                log.info("Cleaning up after web driver...")
+                # brute force kill child Chrome pids with fire
+                for pid in self.webdriver_child_pids:
+                    try:
+                        log.debug(f"Killing {pid}...")
+                        process = psutil.Process(pid)
+                        process.kill()
+                    except psutil.NoSuchProcess:
+                        log.debug(f"{pid} not found. Continuing...")
+                        pass
+            elif self.driver:
+                self.driver.quit()
+
+        except Exception as e:
+            log.info(e)
+            log.info(
+                "Failed to clean up after web driver.  Please manually close browser."
+            )
+            return False
+        return True
 
 
 def get_timestamp_filename(name, extension):
