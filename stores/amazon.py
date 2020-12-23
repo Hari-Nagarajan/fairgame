@@ -188,6 +188,7 @@ class Amazon:
         no_screenshots=False,
         disable_presence=False,
         slow_mode=False,
+        encryption_pass=None,
     ):
         self.notification_handler = notification_handler
         self.asin_list = []
@@ -224,7 +225,7 @@ class Amazon:
                 raise
 
         if os.path.exists(CREDENTIAL_FILE):
-            credential = load_encrypted_config(CREDENTIAL_FILE)
+            credential = load_encrypted_config(CREDENTIAL_FILE, encryption_pass)
             self.username = credential["username"]
             self.password = credential["password"]
         else:
