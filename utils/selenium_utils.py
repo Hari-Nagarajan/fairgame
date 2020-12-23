@@ -5,13 +5,13 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.wait import WebDriverWait
 
-
 options = Options()
-options.page_load_strategy = "eager"
 options.add_experimental_option(
     "excludeSwitches", ["enable-automation", "enable-logging"]
 )
 options.add_experimental_option("useAutomationExtension", False)
+# CHROME ONLY option to prevent Restore Session popup
+options.add_argument("--disable-session-crashed-bubble")
 
 
 class AnyEc:

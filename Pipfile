@@ -10,7 +10,7 @@ pyinstaller = "*"
 requests = "==2.24.0"
 click = "*"
 selenium = "*"
-chromedriver-py = "==87.0.4280.20"
+chromedriver-py = "==87.0.4280.88"
 furl = "*"
 twilio = "*"
 discord-webhook = "*"
@@ -30,7 +30,7 @@ apprise = "*"
 price-parser = "*"
 pypresence = "==4.0.0"
 pywin32 = {version = "*", sys_platform = "== 'win32'"}
-
+psutil = "*"
 stdiomask = "*"
 
 [requires]
