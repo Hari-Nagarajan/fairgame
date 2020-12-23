@@ -336,12 +336,13 @@ class Amazon:
                 # checkout loop limiters
                 elif self.checkout_retry > DEFAULT_MAX_PTC_TRIES:
                     self.try_to_checkout = False
+                    self.fail_to_checkout_note()
                 elif self.order_retry > DEFAULT_MAX_PYO_TRIES:
-                    if test:
-                        self.remove_asin_list(asin)
                     self.try_to_checkout = False
+                    self.fail_to_checkout_note()
                 loop_iterations += 1
                 if loop_iterations > DEFAULT_MAX_CHECKOUT_LOOPS:
+                    self.fail_to_checkout_note()
                     self.try_to_checkout = False
             # if no items left it list, let loop end
             if not self.asin_list:
@@ -349,6 +350,16 @@ class Amazon:
         runtime = time.time() - self.start_time
         log.info(f"FairGame bot ran for {runtime} seconds.")
         time.sleep(10)  # add a delay to shut stuff done
+
+    def fail_to_checkout_note(self):
+        log.info(
+            "It's likely that the product went out of stock before FairGame could checkout."
+        )
+        log.info(
+            "Also verify that your default shipping and payment options are selected and work correctly."
+        )
+        log.info("FairGame WILL NOT select shipping and payment options for you.")
+        log.info("Better luck next time.")
 
     @debug
     def handle_startup(self):
@@ -774,9 +785,15 @@ class Amazon:
             self.notification_handler.send_notification(
                 "Prime offer page popped up, user intervention required"
             )
-            time.sleep(DEFAULT_MAX_WEIRD_PAGE_DELAY)
-            self.driver.refresh()
-            time.sleep(DEFAULT_MAX_WEIRD_PAGE_DELAY)
+            timeout = self.get_timeout(timeout=60)
+            while self.driver.title in PRIME_TITLES:
+                if time.time() > timeout:
+                    log.info(
+                        "user did not intervene in time, will try and refresh page"
+                    )
+                    self.driver.refresh()
+                    time.sleep(DEFAULT_MAX_WEIRD_PAGE_DELAY)
+                    break
 
     @debug
     def handle_home_page(self):
