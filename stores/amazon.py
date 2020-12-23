@@ -526,9 +526,6 @@ class Amazon:
         fail_counter = 0
         presence.searching_update()
 
-        #
-        # self.driver = webdriver.Chrome()
-        #
         while True:
             try:
                 self.get_page(f.url)
