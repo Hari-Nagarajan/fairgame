@@ -42,7 +42,6 @@ Options:
 
 Commands:
   amazon
-  bestbuy
 ```
 
 ## Current Functionality
@@ -50,8 +49,8 @@ Commands:
 | **Website** | **Auto Checkout** | **Open Cart Link** | **Test flag** |
 |:---:|:---:|:---:|:---:|
 | amazon.com |`✔`| | |
-| bestbuy.com | |`✔`| |
-
+| ~~bestbuy.com~~ | |`✔`| |
+Best Buy has been deprecated, see details below.
 
 ## Usage
 
@@ -195,23 +194,34 @@ Example usage:
 ```
 python app.py amazon --test
 ...
-INFO: "2020-09-25 14:40:49,987 - Initializing notification handlers
-INFO: "2020-09-25 14:40:49,988 - Enabled Handlers: ['Audio', 'Twilio', 'Pavlok']
-INFO: "2020-09-25 14:40:54,141 - Already logged in
-INFO: "2020-09-25 14:40:54,141 - Checking stock for items.
-INFO: "2020-09-25 14:40:54,614 - One or more items in stock!
-INFO: "2020-09-25 14:40:54,718 - Pavlok zaped
-INFO: "2020-09-25 14:40:54,848 - SMS Sent: SM68afc07b580f45d1b2527ec4b668f2d8
-INFO: "2020-09-25 14:40:58,771 - Clicking continue.
-INFO: "2020-09-25 14:41:03,816 - Waiting for Cart Page
-INFO: "2020-09-25 14:41:03,826 - On cart page.
-INFO: "2020-09-25 14:41:03,826 - clicking checkout.
-INFO: "2020-09-25 14:41:04,287 - Waiting for Place Your Order Page
-INFO: "2020-09-25 14:41:04,332 - Finishing checkout
-INFO: "2020-09-25 14:41:04,616 - Clicking Button: <selenium.webdriver.remote.webelement.WebElement (session="89f5bfa2d22cf963433ed241494d68c1", element="b3fb2797-383c-413d-8d79-1ddd63013394")>
-INFO: "2020-09-25 14:41:04,617 - Waiting for Order completed page.
-INFO: "2020-09-25 14:41:04,617 - This is a test, so we don't need to wait for the order completed page.
-INFO: "2020-09-25 14:41:04,617 - Order Placed.
+2020-12-23 13:07:38 INFO Initializing Apprise handler using: config/apprise.conf
+2020-12-23 13:07:38 INFO Found Discord configuration
+2020-12-23 13:07:38 INFO FairGame v0.5.0
+2020-12-23 13:07:38 INFO Reading credentials from: config/amazon_credentials.json
+2020-12-23 13:07:43 INFO ==================================================
+2020-12-23 13:07:43 INFO Starting Amazon ASIN Hunt for 2 Products with:
+2020-12-23 13:07:43 INFO --Delay of 3.0 seconds
+2020-12-23 13:07:43 INFO --Free Shipping items only
+2020-12-23 13:07:43 WARNING --Testing Mode.  NO Purchases will be made.
+2020-12-23 13:07:43 INFO --Looking for 1 ASINs between 5.00 and 30.00
+2020-12-23 13:07:43 INFO --Looking for 2 ASINs between 650.00 and 850.00
+2020-12-23 13:07:43 INFO ==================================================
+2020-12-23 13:07:43 INFO Waiting for home page.
+2020-12-23 13:07:44 INFO Already logged in
+2020-12-23 13:07:45 INFO Checking stock for items.
+2020-12-23 13:07:46 INFO Item in stock and in reserve range!
+2020-12-23 13:07:46 INFO clicking add to cart
+2020-12-23 13:07:47 INFO clicking checkout.
+2020-12-23 13:07:47 INFO Email
+2020-12-23 13:07:48 INFO Email not needed.
+2020-12-23 13:07:48 INFO Remember me checkbox
+2020-12-23 13:07:48 INFO Password
+2020-12-23 13:07:49 INFO enter in your two-step verification code in browser
+2020-12-23 13:08:05 INFO Logged in as alan.m.levy@gmail.com
+2020-12-23 13:08:06 INFO Found button , but this is a test
+2020-12-23 13:08:06 INFO will not try to complete order
+2020-12-23 13:08:06 INFO test time took 19.061731576919556 to check out
+
 ```
 
 
