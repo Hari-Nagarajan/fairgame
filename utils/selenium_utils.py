@@ -31,16 +31,6 @@ class AnyEc:
                 pass
 
 
-def no_amazon_image():
-    prefs = {"profile.managed_default_content_settings.images": 2}
-    options.add_experimental_option("prefs", prefs)
-
-
-def yes_amazon_image():
-    prefs = {"profile.managed_default_content_settings.images": 0}
-    options.add_experimental_option("prefs", prefs)
-
-
 def wait_for_element(d, e_id, time=30):
     """
     Uses webdriver(d) to wait for page title(title) to become visible
