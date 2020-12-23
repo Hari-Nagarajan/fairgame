@@ -24,6 +24,8 @@ from utils.encryption import create_encrypted_config, load_encrypted_config
 from utils.logger import log
 from utils.selenium_utils import options, enable_headless
 
+from pypresence import exceptions as pyexceptions
+
 AMAZON_URLS = {
     "BASE_URL": "https://{domain}/",
     "OFFER_URL": "https://{domain}/gp/offer-listing/",
@@ -216,7 +218,11 @@ class Amazon:
         self.no_image = no_image
 
         presence.enabled = not disable_presence
-        presence.start_presence()
+        try:
+            presence.start_presence()
+        except Exception in pyexceptions:
+            log.error("Discord presence failed to load")
+            presence.enabled = False
 
         # Create necessary sub-directories if they don't exist
         if not os.path.exists("screenshots"):
