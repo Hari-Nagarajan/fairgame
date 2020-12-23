@@ -1116,9 +1116,12 @@ class Amazon:
             "Default",
             "Preferences",
         )
-        with fileinput.FileInput(path_to_prefs, inplace=True) as file:
-            for line in file:
-                print(line.replace("Crashed", "none"), end="")
+        try:
+            with fileinput.FileInput(path_to_prefs, inplace=True) as file:
+                for line in file:
+                    print(line.replace("Crashed", "none"), end="")
+        except FileNotFoundError:
+            pass
         try:
             self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
             self.wait = WebDriverWait(self.driver, 10)
