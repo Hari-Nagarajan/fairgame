@@ -193,6 +193,7 @@ class Amazon:
         slow_mode=False,
         encryption_pass=None,
         no_image=False,
+        price_logging=False
     ):
         self.notification_handler = notification_handler
         self.asin_list = []
@@ -214,6 +215,7 @@ class Amazon:
         self.setup_driver = True
         self.headless = headless
         self.no_image = no_image
+        self.price_logging = price_logging
 
         presence.enabled = not disable_presence
         presence.start_presence()
@@ -584,6 +586,7 @@ class Amazon:
                 pass
 
             if test and (test.text in NO_SELLERS):
+                self.log_asin_status(asin, '')
                 return False
             if time.time() > timeout:
                 log.info(f"failed to load page for {asin}, going to next ASIN")
@@ -613,6 +616,9 @@ class Amazon:
                     return False
 
         in_stock = False
+        
+        lowest_price = str(parse_price(prices[0].text).amount)
+        self.log_asin_status(asin, lowest_price)
 
         for idx, atc_button in enumerate(atc_buttons):
             try:
@@ -1102,6 +1108,8 @@ class Amazon:
             log.warning(f"--Testing Mode.  NO Purchases will be made.")
         if self.slow_mode:
             log.warning(f"--Slow-mode enabled. Pages will fully load before execution")
+        if self.price_logging:
+            log.info("--Price-logging enabled. Log will display lowest price found for each ASIN")
 
         for idx, asins in enumerate(self.asin_list):
             log.info(
@@ -1183,6 +1191,13 @@ class Amazon:
             )
             return False
         return True
+
+    def log_asin_status(self, asin, price):
+        if self.price_logging:
+            if not price:
+                log.info(asin + " - Out of Stock")
+            else:
+                log.info(asin + " - Lowest Price: $" + price)
 
 
 def get_timestamp_filename(name, extension):
