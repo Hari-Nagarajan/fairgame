@@ -64,7 +64,8 @@ HOME_PAGE_TITLES = [
     "Amazon.de: Günstige Preise für Elektronik & Foto, Filme, Musik, Bücher, Games, Spielzeug & mehr",
     "Amazon.fr : livres, DVD, jeux vidéo, musique, high-tech, informatique, jouets, vêtements, chaussures, sport, bricolage, maison, beauté, puériculture, épicerie et plus encore !",
     "Amazon.it: elettronica, libri, musica, fashion, videogiochi, DVD e tanto altro",
-    "Amazon.nl: Groot aanbod, kleine prijzen in o.a. Elektronica, boeken, sport en meer",
+    "Amazon.nl: Groot aanbod, kleine prijzen in o.a. Elektronica, boeken, sport en meer",  # this site doesn't work anymore
+    "Amazon.se: Låga priser på Elektronik, Böcker, Sportutrustning & mer",  # this site doesn't work anymore
 ]
 SHOPING_CART_TITLES = [
     "Amazon.com Shopping Cart",
@@ -458,42 +459,45 @@ class Amazon:
                 pass
             if time.time() > timeout:
                 break
+
+        captcha_entry = []
         if password_field:
-            password_field.send_keys(self.password + Keys.RETURN)
-            self.wait_for_page_change(current_page)
+            password_field.send_keys(self.password)
+            # check for captcha
+            try:
+                captcha_entry = self.driver.find_element_by_xpath(
+                    '//*[@id="auth-captcha-guess"]'
+                )
+            except exceptions.NoSuchElementException:
+                password_field.send_keys(Keys.RETURN)
+                self.wait_for_page_change(current_page)
         else:
             log.error("Password entry box did not exist")
 
-        # check for captcha
-        try:
-            if self.driver.find_element_by_xpath(
-                '//form[@action="/errors/validateCaptcha"]'
-            ):
-                try:
-                    log.info("Stuck on a captcha... Lets try to solve it.")
-                    captcha = AmazonCaptcha.fromdriver(self.driver)
-                    solution = captcha.solve()
-                    log.info(f"The solution is: {solution}")
-                    if solution == "Not solved":
-                        log.info(
-                            f"Failed to solve {captcha.image_link}, lets reload and get a new captcha."
-                        )
-                        self.driver.refresh()
-                    else:
-                        self.send_notification(
-                            "Solving catpcha", "captcha", self.take_screenshots
-                        )
-                        self.driver.find_element_by_xpath(
-                            '//*[@id="captchacharacters"]'
-                        ).send_keys(solution + Keys.RETURN)
-                except Exception as e:
-                    log.debug(e)
-                    log.info("Error trying to solve captcha. Refresh and retry.")
+        if captcha_entry:
+            try:
+                log.info("Stuck on a captcha... Lets try to solve it.")
+                captcha = AmazonCaptcha.fromdriver(self.driver)
+                solution = captcha.solve()
+                log.info(f"The solution is: {solution}")
+                if solution == "Not solved":
+                    log.info(
+                        f"Failed to solve {captcha.image_link}, lets reload and get a new captcha."
+                    )
                     self.driver.refresh()
-        except exceptions.NoSuchElementException:
-            log.debug("login page did not have captcha element")
+                else:
+                    self.send_notification(
+                        "Solving catpcha", "captcha", self.take_screenshots
+                    )
+                    captcha_entry.send_keys(solution + Keys.RETURN)
+                    self.wait_for_page_change(current_page)
 
-        # time.sleep(self.page_wait_delay())
+            except Exception as e:
+                log.debug(e)
+                log.info("Error trying to solve captcha. Refresh and retry.")
+                self.driver.refresh()
+                time.sleep(5)
+
         if self.driver.title in TWOFA_TITLES:
             log.info("enter in your two-step verification code in browser")
             while self.driver.title in TWOFA_TITLES:
