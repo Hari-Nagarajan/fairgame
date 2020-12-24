@@ -144,8 +144,16 @@ OUT_OF_STOCK = ["Out of Stock - AmazonSmile Checkout"]
 NO_SELLERS = [
     "Currently, there are no sellers that can deliver this item to your location.",
     "There are currently no listings for this search. Try a different refinement.",
-    "There are currently no listings for this search. Try a different refinement.",
     "There are currently no listings for this product in . Try changing the condition type.",
+    "Actualmente, no hay listas para este producto en . Intenta cambiar el tipo de condición.",
+    "Derzeit gibt es keine Verkäufer, die diesen Artikel an Ihren Standort liefern können.",
+    "Actualmente, no hay vendedores que puedan entregar este producto en tu ubicación.",
+    "Il n’y a actuellement aucun vendeur en mesure de livrer ce produit sur votre zone géographique.",
+    "Il n'y a actuellement pas de produits répondant à ces critères. Essayez de changer les filtres.",
+    "No existen listados para esta búsqueda. Probar con otro filtro.",
+    "In gibt es derzeit keine Listungen für dieses Produkt. Versuchen Sie, den Zustandstyp zu ändern.",
+    "Al momento, non ci sono seller in grado di spedire questo articolo alla tua sede.",
+    "Al momento non ci sono offerte per questo prodotto in . Prova a modificare il tipo di condizione.",
 ]
 
 # OFFER_PAGE_TITLES = ["Amazon.com: Buying Choices:"]
