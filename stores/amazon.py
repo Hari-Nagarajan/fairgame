@@ -1,18 +1,17 @@
+import fileinput
 import json
 import math
 import os
 import platform
-import random
 import time
 from datetime import datetime
-import fileinput
 
 import psutil
-import stdiomask
 from amazoncaptcha import AmazonCaptcha
 from chromedriver_py import binary_path  # this will get you the path variable
 from furl import furl
 from price_parser import parse_price
+from pypresence import exceptions as pyexceptions
 from selenium import webdriver
 from selenium.common import exceptions
 from selenium.webdriver.common.keys import Keys
@@ -20,11 +19,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from utils import discord_presence as presence
 from utils.debugger import debug
-from utils.encryption import create_encrypted_config, load_encrypted_config
 from utils.logger import log
 from utils.selenium_utils import options, enable_headless
-
-from pypresence import exceptions as pyexceptions
 
 AMAZON_URLS = {
     "BASE_URL": "https://{domain}/",
@@ -34,123 +30,6 @@ AMAZON_URLS = {
 CHECKOUT_URL = "https://{domain}/gp/cart/desktop/go-to-checkout.html/ref=ox_sc_proceed?partialCheckoutCart=1&isToBeGiftWrappedBefore=0&proceedToRetailCheckout=Proceed+to+checkout&proceedToCheckout=1&cartInitiateId={cart_id}"
 
 AUTOBUY_CONFIG_PATH = "config/amazon_config.json"
-CREDENTIAL_FILE = "config/amazon_credentials.json"
-
-SIGN_IN_TEXT = [
-    "Hello, Sign in",
-    "Sign in",
-    "Hola, Identifícate",
-    "Bonjour, Identifiez-vous",
-    "Ciao, Accedi",
-    "Hallo, Anmelden",
-    "Hallo, Inloggen",
-]
-SIGN_IN_TITLES = [
-    "Amazon Sign In",
-    "Amazon Sign-In",
-    "Amazon Anmelden",
-    "Iniciar sesión en Amazon",
-    "Connexion Amazon",
-    "Amazon Accedi",
-    "Inloggen bij Amazon",
-]
-CAPTCHA_PAGE_TITLES = ["Robot Check"]
-HOME_PAGE_TITLES = [
-    "Amazon.com: Online Shopping for Electronics, Apparel, Computers, Books, DVDs & more",
-    "AmazonSmile: You shop. Amazon gives.",
-    "Amazon.ca: Low Prices – Fast Shipping – Millions of Items",
-    "Amazon.co.uk: Low Prices in Electronics, Books, Sports Equipment & more",
-    "Amazon.de: Low Prices in Electronics, Books, Sports Equipment & more",
-    "Amazon.de: Günstige Preise für Elektronik & Foto, Filme, Musik, Bücher, Games, Spielzeug & mehr",
-    "Amazon.es: compra online de electrónica, libros, deporte, hogar, moda y mucho más.",
-    "Amazon.de: Günstige Preise für Elektronik & Foto, Filme, Musik, Bücher, Games, Spielzeug & mehr",
-    "Amazon.fr : livres, DVD, jeux vidéo, musique, high-tech, informatique, jouets, vêtements, chaussures, sport, bricolage, maison, beauté, puériculture, épicerie et plus encore !",
-    "Amazon.it: elettronica, libri, musica, fashion, videogiochi, DVD e tanto altro",
-    "Amazon.nl: Groot aanbod, kleine prijzen in o.a. Elektronica, boeken, sport en meer",
-]
-SHOPING_CART_TITLES = [
-    "Amazon.com Shopping Cart",
-    "Amazon.ca Shopping Cart",
-    "Amazon.co.uk Shopping Basket",
-    "Amazon.de Basket",
-    "Amazon.de Einkaufswagen",
-    "AmazonSmile Einkaufswagen",
-    "Cesta de compra Amazon.es",
-    "Amazon.fr Panier",
-    "Carrello Amazon.it",
-    "AmazonSmile Shopping Cart",
-    "AmazonSmile Shopping Basket",
-    "Amazon.nl-winkelwagen",
-]
-CHECKOUT_TITLES = [
-    "Amazon.com Checkout",
-    "Amazon.co.uk Checkout",
-    "Place Your Order - Amazon.ca Checkout",
-    "Place Your Order - Amazon.co.uk Checkout",
-    "Amazon.de Checkout",
-    "Place Your Order - Amazon.de Checkout",
-    "Amazon.de - Bezahlvorgang",
-    "Bestellung aufgeben - Amazon.de-Bezahlvorgang",
-    "Place Your Order - Amazon.com Checkout",
-    "Place Your Order - Amazon.com",
-    "Tramitar pedido en Amazon.es",
-    "Processus de paiement Amazon.com",
-    "Confirmar pedido - Compra Amazon.es",
-    "Passez votre commande - Processus de paiement Amazon.fr",
-    "Ordina - Cassa Amazon.it",
-    "AmazonSmile Checkout",
-    "Plaats je bestelling - Amazon.nl-kassa",
-    "Place Your Order - AmazonSmile Checkout",
-    "Preparing your order",
-    "Ihre Bestellung wird vorbereitet",
-]
-ORDER_COMPLETE_TITLES = [
-    "Amazon.com Thanks You",
-    "Amazon.ca Thanks You",
-    "AmazonSmile Thanks You",
-    "Thank you",
-    "Amazon.fr Merci",
-    "Merci",
-    "Amazon.es te da las gracias",
-    "Amazon.fr vous remercie.",
-    "Grazie da Amazon.it",
-    "Hartelijk dank",
-    "Thank You",
-    "Amazon.de Vielen Dank",
-]
-ADD_TO_CART_TITLES = [
-    "Amazon.com: Please Confirm Your Action",
-    "Amazon.de: Bitte bestätigen Sie Ihre Aktion",
-    "Amazon.de: Please Confirm Your Action",
-    "Amazon.es: confirma tu acción",
-    "Amazon.com : Veuillez confirmer votre action",  # Careful, required non-breaking space after .com (&nbsp)
-    "Amazon.it: confermare l'operazione",
-    "AmazonSmile: Please Confirm Your Action",
-    "",  # Amazon.nl has en empty title, sigh.
-]
-BUSINESS_PO_TITLES = [
-    "Business order information",
-]
-
-DOGGO_TITLES = ["Sorry! Something went wrong!"]
-
-# this is not non-US friendly
-SHIPPING_ONLY_IF = "FREE Shipping on orders over"
-
-TWOFA_TITLES = ["Two-Step Verification"]
-
-PRIME_TITLES = ["Complete your Amazon Prime sign up"]
-
-OUT_OF_STOCK = ["Out of Stock - AmazonSmile Checkout"]
-
-NO_SELLERS = [
-    "Currently, there are no sellers that can deliver this item to your location.",
-    "There are currently no listings for this search. Try a different refinement.",
-    "There are currently no listings for this search. Try a different refinement.",
-    "There are currently no listings for this product in . Try changing the condition type.",
-]
-
-# OFFER_PAGE_TITLES = ["Amazon.com: Buying Choices:"]
 
 BUTTON_XPATHS = [
     '//*[@id="submitOrderButtonId"]/span/input',
@@ -180,6 +59,8 @@ DEFAULT_REFRESH_DELAY = 3
 DEFAULT_MAX_TIMEOUT = 10
 DEFAULT_MAX_URL_FAIL = 5
 
+amazon_config = None
+
 
 class Amazon:
     def __init__(
@@ -193,8 +74,8 @@ class Amazon:
         no_screenshots=False,
         disable_presence=False,
         slow_mode=False,
-        encryption_pass=None,
         no_image=False,
+        encryption_pass=None,
     ):
         self.notification_handler = notification_handler
         self.asin_list = []
@@ -216,8 +97,13 @@ class Amazon:
         self.setup_driver = True
         self.headless = headless
         self.no_image = no_image
-
         presence.enabled = not disable_presence
+
+        global amazon_config
+        from cli.cli import global_config
+
+        amazon_config = global_config.get_amazon_config(encryption_pass)
+
         try:
             presence.start_presence()
         except Exception in pyexceptions:
@@ -236,18 +122,6 @@ class Amazon:
                 os.makedirs("html_saves")
             except:
                 raise
-
-        if os.path.exists(CREDENTIAL_FILE):
-            credential = load_encrypted_config(CREDENTIAL_FILE, encryption_pass)
-            self.username = credential["username"]
-            self.password = credential["password"]
-        else:
-            log.info("No credential file found, let's make one")
-            log.info("NOTE: DO NOT SAVE YOUR CREDENTIALS IN CHROME, CLICK NEVER!")
-            credential = self.await_credential_input()
-            create_encrypted_config(credential, CREDENTIAL_FILE)
-            self.username = credential["username"]
-            self.password = credential["password"]
 
         if os.path.exists(AUTOBUY_CONFIG_PATH):
             with open(AUTOBUY_CONFIG_PATH) as json_file:
@@ -279,15 +153,6 @@ class Amazon:
 
         for key in AMAZON_URLS.keys():
             AMAZON_URLS[key] = AMAZON_URLS[key].format(domain=self.amazon_website)
-
-    @staticmethod
-    def await_credential_input():
-        username = input("Amazon login ID: ")
-        password = stdiomask.getpass(prompt="Amazon Password: ")
-        return {
-            "username": username,
-            "password": password,
-        }
 
     def run(self, delay=DEFAULT_REFRESH_DELAY, test=False):
         self.testing = test
@@ -396,7 +261,7 @@ class Amazon:
     def is_logged_in(self):
         try:
             text = self.driver.find_element_by_id("nav-link-accountList").text
-            return not any(sign_in in text for sign_in in SIGN_IN_TEXT)
+            return not any(sign_in in text for sign_in in amazon_config["SIGN_IN_TEXT"])
         except exceptions.NoSuchElementException:
             return False
 
@@ -423,7 +288,7 @@ class Amazon:
 
         if email_field:
             try:
-                email_field.send_keys(self.username + Keys.RETURN)
+                email_field.send_keys(amazon_config["username"] + Keys.RETURN)
             except exceptions.ElementNotInteractableException:
                 log.info("Email not needed.")
         else:
@@ -457,7 +322,7 @@ class Amazon:
             if time.time() > timeout:
                 break
         if password_field:
-            password_field.send_keys(self.password + Keys.RETURN)
+            password_field.send_keys(amazon_config["password"] + Keys.RETURN)
             self.wait_for_page_change(current_page)
         else:
             log.error("Password entry box did not exist")
@@ -492,11 +357,11 @@ class Amazon:
             log.debug("login page did not have captcha element")
 
         # time.sleep(self.page_wait_delay())
-        if self.driver.title in TWOFA_TITLES:
+        if self.driver.title in amazon_config["TWOFA_TITLES"]:
             log.info("enter in your two-step verification code in browser")
-            while self.driver.title in TWOFA_TITLES:
+            while self.driver.title in amazon_config["WOFA_TITLES"]:
                 time.sleep(0.2)
-        log.info(f"Logged in as {self.username}")
+        log.info(f'Logged in as {amazon_config["username"]}')
 
     @debug
     def run_asins(self, delay):
@@ -589,7 +454,7 @@ class Amazon:
             except exceptions.NoSuchElementException:
                 pass
 
-            if test and (test.text in NO_SELLERS):
+            if test and (test.text in amazon_config["NO_SELLERS"]):
                 return False
             if time.time() > timeout:
                 log.info(f"failed to load page for {asin}, going to next ASIN")
@@ -628,7 +493,7 @@ class Amazon:
                 return False
             try:
                 if self.checkshipping:
-                    if SHIPPING_ONLY_IF in shipping[idx].text:
+                    if amazon_config["SHIPPING_ONLY_IF"] in shipping[idx].text:
                         ship_price = parse_price("0")
                     else:
                         ship_price = parse_price(shipping[idx].text)
@@ -671,7 +536,7 @@ class Amazon:
                     return False
                 self.wait_for_page_change(current_title)
                 # log.info(f"page title is {self.driver.title}")
-                if self.driver.title in SHOPING_CART_TITLES:
+                if self.driver.title in amazon_config["SHOPPING_CART_TITLES"]:
                     return True
                 else:
                     log.info("did not add to cart, trying again")
@@ -705,26 +570,26 @@ class Amazon:
         # time.sleep(self.page_wait_delay())
 
         title = self.driver.title
-        if title in SIGN_IN_TITLES:
+        if title in amazon_config["SIGN_IN_TITLES"]:
             self.login()
-        elif title in CAPTCHA_PAGE_TITLES:
+        elif title in amazon_config["CAPTCHA_PAGE_TITLES"]:
             self.handle_captcha()
-        elif title in SHOPING_CART_TITLES:
+        elif title in amazon_config["SHOPPING_CART_TITLES"]:
             self.handle_cart()
-        elif title in CHECKOUT_TITLES:
+        elif title in amazon_config["CHECKOUT_TITLES"]:
             self.handle_checkout(test)
-        elif title in ORDER_COMPLETE_TITLES:
+        elif title in amazon_config["ORDER_COMPLETE_TITLES"]:
             self.handle_order_complete()
-        elif title in PRIME_TITLES:
+        elif title in amazon_config["PRIME_TITLES"]:
             self.handle_prime_signup()
-        elif title in HOME_PAGE_TITLES:
+        elif title in amazon_config["HOME_PAGE_TITLES"]:
             # if home page, something went wrong
             self.handle_home_page()
-        elif title in DOGGO_TITLES:
+        elif title in amazon_config["DOGGO_TITLES"]:
             self.handle_doggos()
-        elif title in OUT_OF_STOCK:
+        elif title in amazon_config["OUT_OF_STOCK"]:
             self.handle_out_of_stock()
-        elif title in BUSINESS_PO_TITLES:
+        elif title in amazon_config["BUSINESS_PO_TITLES"]:
             self.handle_business_po()
         else:
             log.error(
@@ -796,7 +661,7 @@ class Amazon:
                 "Prime offer page popped up, user intervention required"
             )
             timeout = self.get_timeout(timeout=60)
-            while self.driver.title in PRIME_TITLES:
+            while self.driver.title in amazon_config["PRIME_TITLES"]:
                 if time.time() > timeout:
                     log.info(
                         "user did not intervene in time, will try and refresh page"
@@ -1054,7 +919,7 @@ class Amazon:
             self.webdriver_child_pids.append(child.pid)
 
     def get_page(self, url):
-        check_cart_element = []
+        check_cart_element = None
         current_page = []
         try:
             check_cart_element = self.driver.find_element_by_xpath(
@@ -1088,7 +953,9 @@ class Amazon:
 
     def show_config(self):
         log.info(f"{'=' * 50}")
-        log.info(f"Starting Amazon ASIN Hunt for {len(self.asin_list)} Products with:")
+        log.info(
+            f"Starting Amazon ASIN Hunt on {AMAZON_URLS['BASE_URL']} for {len(self.asin_list)} Products with:"
+        )
         log.info(f"--Delay of {self.refresh_delay} seconds")
         if self.used:
             log.info(f"--Used items are considered for purchase")
