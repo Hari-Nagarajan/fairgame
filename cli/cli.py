@@ -1,23 +1,17 @@
+import time
+import click
 from datetime import datetime
 from functools import wraps
 from signal import signal, SIGINT
-
-import click
-import time
-
 from notifications.notifications import NotificationHandler, TIME_FORMAT
+from utils.logger import log
+from common.config import Config
+from utils.version import check_version
 from stores.amazon import Amazon
 from stores.bestbuy import BestBuyHandler
-from utils import selenium_utils
-from utils.logger import log
-from utils.version import check_version
 
-notification_handler = NotificationHandler()
-
-try:
-    check_version()
-except Exception as e:
-    log.error(e)
+global_config = None
+notification_handler = None
 
 
 def handler(signal, frame):
@@ -41,6 +35,12 @@ def notify_on_crash(func):
 
 @click.group()
 def main():
+    global global_config
+    global notification_handler
+    # Global scope stuff here
+    check_version()
+    global_config = Config()
+    notification_handler = NotificationHandler()
     pass
 
 
@@ -142,7 +142,6 @@ def amazon(
     slow_mode,
     p,
 ):
-
     notification_handler.sound_enabled = not disable_sound
     if not notification_handler.sound_enabled:
         log.info("Local sounds have been disabled.")
@@ -157,8 +156,8 @@ def amazon(
         no_screenshots=no_screenshots,
         disable_presence=disable_presence,
         slow_mode=slow_mode,
-        encryption_pass=p,
         no_image=no_image,
+        encryption_pass=p,
     )
     try:
         amzn_obj.run(delay=delay, test=test)
