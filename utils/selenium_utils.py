@@ -4,6 +4,9 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.remote.remote_connection import LOGGER as selenium_logger
+from urllib3.connectionpool import log as urllib_logger
+from logging import WARNING as logging_WARNING
 
 options = Options()
 options.add_experimental_option(
@@ -12,6 +15,8 @@ options.add_experimental_option(
 options.add_experimental_option("useAutomationExtension", False)
 # CHROME ONLY option to prevent Restore Session popup
 options.add_argument("--disable-session-crashed-bubble")
+selenium_logger.setLevel(logging_WARNING)
+urllib_logger.setLevel(logging_WARNING)
 
 
 class AnyEc:
