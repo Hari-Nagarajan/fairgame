@@ -2,7 +2,16 @@ from datetime import datetime
 from functools import wraps
 from signal import signal, SIGINT
 
-import click
+try:
+    import click
+except ModuleNotFoundError:
+    print(
+        "You should try running pipenv shell and pipenv install per the install instructions"
+    )
+    print("Or you should only use Python 3.8.X per the instructions.")
+    print("If you are attempting to run multiple bots, this is not supported.")
+    print("You are on your own to figure this out.")
+    exit(0)
 import time
 
 from notifications.notifications import NotificationHandler, TIME_FORMAT
