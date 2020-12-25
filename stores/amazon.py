@@ -819,13 +819,25 @@ class Amazon:
             button = self.driver.find_element_by_xpath('//*[@id="nav-cart"]')
         except exceptions.NoSuchElementException:
             log.info("Could not find cart button")
+        current_page = self.driver.title
         if button:
             button.click()
+            self.wait_for_page_change(current_page)
         else:
-            self.notification_handler.send_notification(
-                "Could not click cart button, user intervention required"
+            self.send_notification(
+                "Could not click cart button, user intervention required",
+                "home-page-error",
+                self.take_screenshots,
             )
-            time.sleep(DEFAULT_MAX_WEIRD_PAGE_DELAY)
+            timeout = self.get_timeout(timeout=300)
+            while self.driver.title == current_page:
+                time.sleep(0.25)
+                if time.time() > timeout:
+                    log.info(
+                        "user failed to intervene in time, returning to stock check"
+                    )
+                    self.try_to_checkout = False
+                    break
 
     @debug
     def handle_cart(self):
@@ -877,9 +889,6 @@ class Amazon:
     def handle_checkout(self, test):
         previous_title = self.driver.title
         button = None
-        i = 0
-
-        # test for single button, if timeout is reached, check the other buttons
         timeout = self.get_timeout()
         while True:
             try:
