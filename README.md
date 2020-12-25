@@ -93,6 +93,13 @@ Options:
                       none
 
   --p TEXT            Pass in encryption file password as argument
+  --log-stock-check   Will log each stock check to terminal and log file
+  --shipping-bypass   Bot will attempt to click "Ship to this Address" button,
+                      if it pops up during checkout. 
+                      USE THIS OPTION AT YOUR OWN RISK!!!
+                      NOTE: There is no functionality to choose payment
+                      option, so bot may still fail during checkout
+                      
   --help              Show this message and exit.
 ```
 

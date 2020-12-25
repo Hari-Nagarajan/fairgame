@@ -4,7 +4,7 @@ from utils.logger import log
 
 LATEST_URL = "https://api.github.com/repos/Hari-Nagarajan/fairgame/releases/latest"
 
-version = "0.5.3"
+version = "0.5.4"
 
 
 def check_version():
