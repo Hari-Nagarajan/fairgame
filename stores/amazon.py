@@ -964,15 +964,13 @@ class Amazon:
         else:
             log.info(f"--Free Shipping items only")
         if self.single_shot:
-            log.info("\tSingle Shot purchase enabled")
+            log.info("--Single Shot purchase enabled")
         if not self.take_screenshots:
             log.info(
                 f"--Screenshotting is Disabled, DO NOT ASK FOR HELP IN TECH SUPPORT IF YOU HAVE NO SCREENSHOTS!"
             )
         if self.detailed:
             log.info(f"--Detailed screenshots/notifications is enabled")
-        if self.testing:
-            log.warning(f"--Testing Mode.  NO Purchases will be made.")
         if self.slow_mode:
             log.warning(f"--Slow-mode enabled. Pages will fully load before execution")
 
@@ -980,6 +978,14 @@ class Amazon:
             log.info(
                 f"--Looking for {len(asins)} ASINs between {self.reserve_min[idx]:.2f} and {self.reserve_max[idx]:.2f}"
             )
+        if self.no_image:
+            log.info(f"--No images will be requested")
+        if not self.notification_handler.sound_enabled:
+            log.info(f"--Notification sounds are disabled.")
+        if self.headless:
+            log.warning(f"--Running headless is unsupported.  If you get it to work, please let us know on Discord.")
+        if self.testing:
+            log.warning(f"--Testing Mode.  NO Purchases will be made.")
         log.info(f"{'=' * 50}")
 
     def create_driver(self):
