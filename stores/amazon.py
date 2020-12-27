@@ -983,7 +983,9 @@ class Amazon:
         if not self.notification_handler.sound_enabled:
             log.info(f"--Notification sounds are disabled.")
         if self.headless:
-            log.warning(f"--Running headless is unsupported.  If you get it to work, please let us know on Discord.")
+            log.warning(
+                f"--Running headless is unsupported.  If you get it to work, please let us know on Discord."
+            )
         if self.testing:
             log.warning(f"--Testing Mode.  NO Purchases will be made.")
         log.info(f"{'=' * 50}")
