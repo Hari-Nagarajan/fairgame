@@ -251,6 +251,8 @@ class Amazon:
         else:
             log.info("No credential file found, let's make one")
             log.info("NOTE: DO NOT SAVE YOUR CREDENTIALS IN CHROME, CLICK NEVER!")
+            log.info("NOTE: MAKE SURE YOU HAVE ONE-CLICK ORDERING CONFIGURED WITH DEFAULT PAYMENT & ADDRESS")
+            log.info("NOTE: MAKE SURE YOU ARE ZOOMED AT 100% IN YOUR BROWSER")
             credential = self.await_credential_input()
             create_encrypted_config(credential, CREDENTIAL_FILE)
             self.username = credential["username"]
@@ -644,6 +646,8 @@ class Amazon:
 
         in_stock = False
 
+        best_total, best_idx = None, None
+
         for idx, atc_button in enumerate(atc_buttons):
             try:
                 price = parse_price(prices[idx].text)
@@ -668,15 +672,15 @@ class Amazon:
             if ship_float is None or not self.checkshipping:
                 ship_float = 0
 
-            if (
-                (ship_float + price_float) <= reserve_max
-                or math.isclose((price_float + ship_float), reserve_max, abs_tol=0.01)
-            ) and (
-                (ship_float + price_float) >= reserve_min
-                or math.isclose((price_float + ship_float), reserve_min, abs_tol=0.01)
-            ):
-                log.info("Item in stock and in reserve range!")
-                log.info("clicking add to cart")
+            total = price_float + ship_float
+            if best_total is None or best_total > total:
+                best_total = total
+                best_idx = idx
+
+        if best_total:
+            if ( best_total <= reserve_max or math.isclose(best_total, reserve_max, abs_tol=0.01)) \
+           and ( best_total >= reserve_min or math.isclose(best_total, reserve_min, abs_tol=0.01)):
+                log.info("Item IN STOCK and ${best_total} IN RESERVE RANGE {reserve_min} - {reserve_max}! - {self.driver.title} - ADDING TO CART")
                 self.notification_handler.play_notify_sound()
                 if self.detailed:
                     self.send_notification(
@@ -689,7 +693,7 @@ class Amazon:
                 current_title = self.driver.title
                 # log.info(f"current page title is {current_title}")
                 try:
-                    atc_button.click()
+                    atc_buttons[best_idx].click()
                 except IndexError:
                     log.debug("Index Error")
                     return False
