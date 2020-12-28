@@ -6,7 +6,7 @@ from signal import signal, SIGINT
 from notifications.notifications import NotificationHandler, TIME_FORMAT
 from utils.logger import log
 from common.config import Config
-from utils.version import check_version
+from utils.version import is_latest, version
 from stores.amazon import Amazon
 from stores.bestbuy import BestBuyHandler
 
@@ -38,7 +38,16 @@ def main():
     global global_config
     global notification_handler
     # Global scope stuff here
-    check_version()
+    if is_latest():
+        log.info(f"FairGame v{version}")
+    elif version.is_prerelease:
+        log.warning(f"FairGame PRE-RELEASE v{version}")
+    else:
+        log.warning(
+            f"You are running FairGame v{version.release}, but the most recent version is v{remote_version.release}. "
+            f"Consider upgrading "
+        )
+
     global_config = Config()
     notification_handler = NotificationHandler()
     pass
