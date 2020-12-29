@@ -5,7 +5,7 @@ from functools import wraps
 from signal import signal, SIGINT
 from notifications.notifications import NotificationHandler, TIME_FORMAT
 from utils.logger import log
-from common.config import Config
+from common.globalconfig import GlobalConfig
 from utils.version import is_latest, version
 from stores.amazon import Amazon
 from stores.bestbuy import BestBuyHandler
@@ -48,7 +48,7 @@ def main():
             f"Consider upgrading "
         )
 
-    global_config = Config()
+    global_config = GlobalConfig()
     notification_handler = NotificationHandler()
     pass
 
