@@ -1,8 +1,10 @@
 import coloredlogs
 import logging
 import os
-
+from utils.version import version
 from logging import handlers
+
+FORMAT = "%(asctime)s|{}|%(levelname)s|%(message)s".format(version)
 
 LOG_DIR = "logs"
 LOG_FILE_NAME = "fairgame.log"
@@ -20,7 +22,9 @@ LOG_FILE_PATH = os.path.join(LOG_DIR, LOG_FILE_NAME)
 if os.path.isfile(LOG_FILE_PATH):
     # Create a transient handler to do the rollover for us on startup.  This won't
     # be added to the logger as a handler... just used to roll the log on startup.
-    rollover_handler = handlers.RotatingFileHandler(LOG_FILE_PATH, backupCount=10)
+    rollover_handler = handlers.RotatingFileHandler(
+        LOG_FILE_PATH, backupCount=10, maxBytes=100 * 1024 * 1024
+    )
     # Prior log file exists, so roll it to get a clean log for this run
     try:
         rollover_handler.doRollover()
@@ -31,7 +35,7 @@ if os.path.isfile(LOG_FILE_PATH):
 logging.basicConfig(
     filename=LOG_FILE_PATH,
     level=logging.DEBUG,
-    format='%(levelname)s: "%(asctime)s - %(message)s',
+    format=FORMAT,
 )
 
 log = logging.getLogger("fairgame")
@@ -39,10 +43,8 @@ log.setLevel(logging.DEBUG)
 
 LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
 stream_handler = logging.StreamHandler()
-stream_handler.setFormatter(
-    logging.Formatter('%(levelname)s: "%(asctime)s - %(message)s')
-)
+stream_handler.setFormatter(logging.Formatter(FORMAT))
 
 log.addHandler(stream_handler)
 
-coloredlogs.install(LOGLEVEL, logger=log, fmt="%(asctime)s %(levelname)s %(message)s")
+coloredlogs.install(LOGLEVEL, logger=log, fmt=FORMAT)

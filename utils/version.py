@@ -1,8 +1,6 @@
 import requests
 from packaging.version import Version, parse, InvalidVersion
 
-from utils.logger import log
-
 _LATEST_URL = "https://api.github.com/repos/Hari-Nagarajan/fairgame/releases/latest"
 
 # Use a Version object to gain additional version identification capabilities
@@ -14,18 +12,15 @@ __VERSION = "0.6.0.dev1"
 version = Version(__VERSION)
 
 
-def check_version():
+def is_latest():
     remote_version = get_latest_version()
 
     if version < remote_version:
-        log.warning(
-            f"You are running FairGame v{version.release}, but the most recent version is v{remote_version.release}. "
-            f"Consider upgrading "
-        )
+        return False
     elif version.is_prerelease:
-        log.warning(f"FairGame PRE-RELEASE v{version}")
+        return False
     else:
-        log.info(f"FairGame v{version}")
+        return True
 
 
 def get_latest_version():
@@ -34,9 +29,6 @@ def get_latest_version():
         data = r.json()
         latest_version = parse(str(data["tag_name"]))
     except InvalidVersion:
-        # Return a safe, but wrong version1
+        # Return a safe, but wrong version
         latest_version = parse("0.0")
-        log.error(
-            f"Failed complete check for latest version.  Assuming v{latest_version}"
-        )
     return latest_version

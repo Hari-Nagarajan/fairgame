@@ -121,7 +121,7 @@ are interested in purchasing.  [*What's an ASIN?*](https://www.datafeedwatch.com
     * Use sequential numbers for x, starting from 1. x can be any integer from 1 to 18,446,744,073,709,551,616
 * `reserve_min_x` set a minimum limit to consider for purchasing an item. If a seller has a listing for a 700 dollar item a 1 dollar, it's likely fake.
 * `reserve_max_x` is the most amount you want to spend for a single item (i.e., ASIN) in `asin_list_x`. Does not include tax. If --checkshipping flag is active, this includes shipping listed on offer page.
-* `amazon_website` amazon domain you want to use. smile subdomain appears to work better, if available in your country.
+* `amazon_website` amazon domain you want to use. smile subdomain appears to work better, if available in your country. [*What is Smile?*](https://org.amazon.com/)
 
 **Examples**
 

@@ -1,5 +1,5 @@
 import os
-import config
+from config import Config as Cfg
 import stdiomask
 
 from utils.encryption import load_encrypted_config, create_encrypted_config
@@ -30,13 +30,13 @@ def get_credentials(credentials_file, encrypted_pass=None):
         return credential["username"], credential["password"]
 
 
-class Config:
+class GlobalConfig:
     def __init__(self) -> None:
         super().__init__()
         log.info("Initializing Global configuration...")
         # Load up the global configuration
         # See http://docs.red-dove.com/cfg/python.html#getting-started-with-cfg-in-python for how to use Config
-        self.global_config = config.Config(GLOBAL_CONFIG_FILE)
+        self.global_config = Cfg(GLOBAL_CONFIG_FILE)
 
     def get_amazon_config(self, encryption_pass=None):
         log.info("Initializing Amazon configuration...")
