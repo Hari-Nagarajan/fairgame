@@ -10,9 +10,6 @@ from utils.version import is_latest, version
 from stores.amazon import Amazon
 from stores.bestbuy import BestBuyHandler
 
-global_config = None
-notification_handler = None
-
 
 def handler(signal, frame):
     log.info("Caught the stop, exiting.")
@@ -35,21 +32,6 @@ def notify_on_crash(func):
 
 @click.group()
 def main():
-    global global_config
-    global notification_handler
-    # Global scope stuff here
-    if is_latest():
-        log.info(f"FairGame v{version}")
-    elif version.is_prerelease:
-        log.warning(f"FairGame PRE-RELEASE v{version}")
-    else:
-        log.warning(
-            f"You are running FairGame v{version.release}, but the most recent version is v{remote_version.release}. "
-            f"Consider upgrading "
-        )
-
-    global_config = GlobalConfig()
-    notification_handler = NotificationHandler()
     pass
 
 
@@ -222,3 +204,17 @@ signal(SIGINT, handler)
 main.add_command(amazon)
 main.add_command(bestbuy)
 main.add_command(test_notifications)
+
+# Global scope stuff here
+if is_latest():
+    log.info(f"FairGame v{version}")
+elif version.is_prerelease:
+    log.warning(f"FairGame PRE-RELEASE v{version}")
+else:
+    log.warning(
+        f"You are running FairGame v{version.release}, but the most recent version is v{remote_version.release}. "
+        f"Consider upgrading "
+    )
+
+global_config = GlobalConfig()
+notification_handler = NotificationHandler()
