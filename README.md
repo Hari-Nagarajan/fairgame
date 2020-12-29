@@ -6,7 +6,7 @@
 
 We built this in response to the severe tech scalping situation that's happening right now. Almost every tech product that's coming
 out right now is being instantly brought out by scalping groups and then resold at at insane prices. $699 GPUs are being listed
-for $1700 on eBay, and these scalpers are buying 40 carts while normal consumers can't get a single one. Preorders for the PS5 are
+for $1700 on eBay, and these scalpers are buying 40 cards while normal consumers can't get a single one. Preorders for the PS5 are
 being resold for nearly $1000. Our take on this is that if we release a bot that anyone can use, for free, then the number of items 
 that scalpers can buy goes down and normal consumers can buy items for MSRP. 
 
@@ -19,6 +19,8 @@ Read through this document and the cheat sheet linked in the next sections. See 
 ## Installation
 
 Easy_XII has created a great cheat sheet for getting started, [please follow this guide](https://docs.google.com/document/d/1grN282tPodM9N57bPq4bbNyKZC01t_4A-sLpzzu_7lM/).
+**Note:** that we do not control the contents of this document, so use some common sense when configuring the bot. Do not ask us
+why the bot does not purchase an $8.49 item when the minimum purchase price is set to $10 in the configuration file that YOU are supposed to update  
 
 This project uses [Pipenv](https://pypi.org/project/pipenv/) to manage dependencies. Hop in my [Discord](https://discord.gg/qDY2QBtAW6) if you have ideas, need help or just want to tell us about how you got your new toys. 
 
@@ -30,6 +32,8 @@ pip install pipenv
 pipenv shell 
 pipenv install
 ```
+
+NOTE: YOU SHOULD RUN `pipenv shell` and `pipenv install` ANY TIME YOU UPDATE, IN CASE THE DEPENDENCIES HAVE CHANGED!
 
 Run it
 ```
@@ -57,7 +61,9 @@ Best Buy has been deprecated, see details below.
 ### Amazon 
 The following flags are specific to the Amazon scripts.  They the `[OPTIONS]` to be passed on the command-line to control
 the behavior of Amazon scanning and purchasing.  These can be added at the command line or added to a batch file/shell
- script (see `_Amazon.bat` in the root folder of the project).
+ script (see `_Amazon.bat` in the root folder of the project). **NOTE:** `--test` flag has been added to `_Amazon.bat` file by
+default. This should be deleted after you've verified that the bot works correctly for you. If you don't want your `_Amazon.bat`
+to be deleted when you update, you should rename it to something else.
 
 **Amazon flags**
 
@@ -93,6 +99,13 @@ Options:
                       none
 
   --p TEXT            Pass in encryption file password as argument
+  --log-stock-check   Will log each stock check to terminal and log file
+  --shipping-bypass   Bot will attempt to click "Ship to this Address" button,
+                      if it pops up during checkout. 
+                      USE THIS OPTION AT YOUR OWN RISK!!!
+                      NOTE: There is no functionality to choose payment
+                      option, so bot may still fail during checkout
+                      
   --help              Show this message and exit.
 ```
 

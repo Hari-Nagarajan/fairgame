@@ -28,7 +28,6 @@ if os.path.isfile(LOG_FILE_PATH):
         # Eat it since it's *probably* non-fatal and since we're *probably* still able to log to the prior file
         pass
 
-
 logging.basicConfig(
     filename=LOG_FILE_PATH,
     level=logging.DEBUG,

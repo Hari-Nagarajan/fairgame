@@ -3,6 +3,21 @@ import click
 from datetime import datetime
 from functools import wraps
 from signal import signal, SIGINT
+
+try:
+    import click
+except ModuleNotFoundError as e:
+    print(e)
+    print(
+        "You should try running pipenv shell and pipenv install per the install instructions"
+    )
+    print("Or you should only use Python 3.8.X per the instructions.")
+    print(
+        "If you are attempting to run multiple bots, this is not supported, so you are on your own to figure out that one."
+    )
+    exit(0)
+import time
+
 from notifications.notifications import NotificationHandler, TIME_FORMAT
 from utils.logger import log
 from common.config import Config
@@ -126,6 +141,18 @@ def main():
     default=None,
     help="Pass in encryption file password as argument",
 )
+@click.option(
+    "--log-stock-check",
+    is_flag=True,
+    default=False,
+    help="writes stock check information to terminal and log",
+)
+@click.option(
+    "--shipping-bypass",
+    is_flag=True,
+    default=False,
+    help="Will attempt to click ship to address button. USE AT YOUR OWN RISK!",
+)
 @notify_on_crash
 def amazon(
     no_image,
@@ -141,6 +168,8 @@ def amazon(
     disable_sound,
     slow_mode,
     p,
+    log_stock_check,
+    shipping_bypass,
 ):
     notification_handler.sound_enabled = not disable_sound
     if not notification_handler.sound_enabled:
@@ -158,6 +187,8 @@ def amazon(
         slow_mode=slow_mode,
         no_image=no_image,
         encryption_pass=p,
+        log_stock_check=log_stock_check,
+        shipping_bypass=shipping_bypass,
     )
     try:
         amzn_obj.run(delay=delay, test=test)
