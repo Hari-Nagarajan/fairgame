@@ -24,6 +24,7 @@ from common.globalconfig import GlobalConfig
 from utils.version import is_latest, version
 from stores.amazon import Amazon
 from stores.bestbuy import BestBuyHandler
+from stores.amazon_ajax import AmazonStoreHandler
 
 
 def handler(signal, frame):
@@ -166,23 +167,26 @@ def amazon(
     if not notification_handler.sound_enabled:
         log.info("Local sounds have been disabled.")
 
-    amzn_obj = Amazon(
-        headless=headless,
-        notification_handler=notification_handler,
-        checkshipping=checkshipping,
-        detailed=detailed,
-        used=used,
-        single_shot=single_shot,
-        no_screenshots=no_screenshots,
-        disable_presence=disable_presence,
-        slow_mode=slow_mode,
-        no_image=no_image,
-        encryption_pass=p,
-        log_stock_check=log_stock_check,
-        shipping_bypass=shipping_bypass,
-    )
+    # amzn_obj = Amazon(
+    #     headless=headless,
+    #     notification_handler=notification_handler,
+    #     checkshipping=checkshipping,
+    #     detailed=detailed,
+    #     used=used,
+    #     single_shot=single_shot,
+    #     no_screenshots=no_screenshots,
+    #     disable_presence=disable_presence,
+    #     slow_mode=slow_mode,
+    #     no_image=no_image,
+    #     encryption_pass=p,
+    #     log_stock_check=log_stock_check,
+    #     shipping_bypass=shipping_bypass,
+    # )
+    amzn_obj = AmazonStoreHandler(notification_handler)
+
     try:
-        amzn_obj.run(delay=delay, test=test)
+        #amzn_obj.run(delay=delay, test=test)
+        amzn_obj.run(delay=delay)
     except RuntimeError:
         del amzn_obj
         log.error("Exiting Program...")

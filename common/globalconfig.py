@@ -37,12 +37,19 @@ class GlobalConfig:
         # Load up the global configuration
         # See http://docs.red-dove.com/cfg/python.html#getting-started-with-cfg-in-python for how to use Config
         self.global_config = Cfg(GLOBAL_CONFIG_FILE)
+        self.amazon_config = None
 
-    def get_amazon_config(self, encryption_pass=None):
+    def get_amazon_config(self):
         log.info("Initializing Amazon configuration...")
         # Load up all things Amazon
-        amazon_config = self.global_config["AMAZON"]
-        amazon_config["username"], amazon_config["password"] = get_credentials(
-            AMAZON_CREDENTIAL_FILE, encryption_pass
-        )
-        return amazon_config
+        self.amazon_config = self.global_config["AMAZON"]
+        return self.amazon_config
+
+    def get_amazon_credentials(self, encryption_pass=None):
+        if self.amazon_config is None:
+            self.amazon_config = self.get_amazon_config()
+
+        (
+            self.amazon_config["username"],
+            self.amazon_config["password"],
+        ) = get_credentials(AMAZON_CREDENTIAL_FILE, encryption_pass)
