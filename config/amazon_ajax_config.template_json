@@ -1,0 +1,30 @@
+{
+  "items": [
+    {
+      "asin": "B07MFBLN7K"
+    },
+    {
+      "asin": "B07MBQPQ62"
+    },
+    {
+      "asin": "B0088PUEPK"
+    }
+  ],
+  "testing_items": [
+    {
+      "asin": "B07TXBRRGT"
+    },
+    {
+      "asin": "B011F7W3LU"
+    },
+    {
+      "asin": "B08J6F174Z"
+    },
+    {
+      "asin": "B002CQU14A"
+    },
+    {
+      "asin": "B0795DP124"
+    }
+  ]
+}

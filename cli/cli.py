@@ -21,7 +21,7 @@ import time
 from notifications.notifications import NotificationHandler, TIME_FORMAT
 from utils.logger import log
 from common.globalconfig import GlobalConfig
-from utils.version import is_latest, version
+from utils.version import is_latest, version, get_latest_version
 from stores.amazon import Amazon
 from stores.bestbuy import BestBuyHandler
 from stores.amazon_ajax import AmazonStoreHandler
@@ -167,28 +167,45 @@ def amazon(
     if not notification_handler.sound_enabled:
         log.info("Local sounds have been disabled.")
 
-    # amzn_obj = Amazon(
-    #     headless=headless,
-    #     notification_handler=notification_handler,
-    #     checkshipping=checkshipping,
-    #     detailed=detailed,
-    #     used=used,
-    #     single_shot=single_shot,
-    #     no_screenshots=no_screenshots,
-    #     disable_presence=disable_presence,
-    #     slow_mode=slow_mode,
-    #     no_image=no_image,
-    #     encryption_pass=p,
-    #     log_stock_check=log_stock_check,
-    #     shipping_bypass=shipping_bypass,
-    # )
-    amzn_obj = AmazonStoreHandler(notification_handler)
+    amzn_obj = Amazon(
+        headless=headless,
+        notification_handler=notification_handler,
+        checkshipping=checkshipping,
+        detailed=detailed,
+        used=used,
+        single_shot=single_shot,
+        no_screenshots=no_screenshots,
+        disable_presence=disable_presence,
+        slow_mode=slow_mode,
+        no_image=no_image,
+        encryption_pass=p,
+        log_stock_check=log_stock_check,
+        shipping_bypass=shipping_bypass,
+    )
 
     try:
-        #amzn_obj.run(delay=delay, test=test)
-        amzn_obj.run(delay=delay)
+        amzn_obj.run(delay=delay, test=test)
     except RuntimeError:
         del amzn_obj
+        log.error("Exiting Program...")
+        time.sleep(5)
+
+
+@click.option(
+    "--delay", type=float, default=3.0, help="Time to wait between checks for item[s]"
+)
+@click.command()
+def amazonajax(delay):
+    log.warning(
+        "Experimental test balloon.  Do not attempt to use.  Your computer could catch fire."
+    )
+    amazon_ajax_obj = AmazonStoreHandler(notification_handler)
+
+    try:
+
+        amazon_ajax_obj.run(delay=delay)
+    except RuntimeError:
+        del amazon_ajax_obj
         log.error("Exiting Program...")
         time.sleep(5)
 
@@ -237,6 +254,7 @@ def test_notifications(disable_sound):
 signal(SIGINT, handler)
 
 main.add_command(amazon)
+main.add_command(amazonajax)
 main.add_command(bestbuy)
 main.add_command(test_notifications)
 
@@ -247,7 +265,7 @@ elif version.is_prerelease:
     log.warning(f"FairGame PRE-RELEASE v{version}")
 else:
     log.warning(
-        f"You are running FairGame v{version.release}, but the most recent version is v{remote_version.release}. "
+        f"You are running FairGame v{version}, but the most recent version is v{get_latest_version}. "
         f"Consider upgrading "
     )
 

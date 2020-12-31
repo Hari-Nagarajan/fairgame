@@ -10,28 +10,28 @@ from price_parser import parse_price
 from stores.basestore import BaseStoreHandler
 from utils.logger import log
 
-#PDP_URL = "https://smile.amazon.com/gp/product/"
-AMAZON_DOMAIN = "https://www.amazon.com.au/"
-AMAZON_DOMAIN = "https://www.amazon.com.br/"
-AMAZON_DOMAIN = "https://www.amazon.ca/"
-# AMAZON_DOMAIN = "https://www.amazon.cn/"
-AMAZON_DOMAIN = "https://www.amazon.fr/"
-AMAZON_DOMAIN = "https://www.amazon.de/"
-# AMAZON_DOMAIN = "https://www.amazon.in/"
+# PDP_URL = "https://smile.amazon.com/gp/product/"
+# AMAZON_DOMAIN = "https://www.amazon.com.au/"
+# AMAZON_DOMAIN = "https://www.amazon.com.br/"
+# AMAZON_DOMAIN = "https://www.amazon.ca/"
+# NOT SUPPORTED AMAZON_DOMAIN = "https://www.amazon.cn/"
+# AMAZON_DOMAIN = "https://www.amazon.fr/"
+# AMAZON_DOMAIN = "https://www.amazon.de/"
+# NOT SUPPORTED AMAZON_DOMAIN = "https://www.amazon.in/"
 # AMAZON_DOMAIN = "https://www.amazon.it/"
 # AMAZON_DOMAIN = "https://www.amazon.co.jp/"
 # AMAZON_DOMAIN = "https://www.amazon.com.mx/"
-# AMAZON_DOMAIN = "https://www.amazon.nl"
-# AMAZON_DOMAIN = "https://www.amazon.es"
+# AMAZON_DOMAIN = "https://www.amazon.nl/"
+# AMAZON_DOMAIN = "https://www.amazon.es/"
 # AMAZON_DOMAIN = "https://www.amazon.co.uk/"
-# AMAZON_DOMAIN = "https://www.amazon.com"
+AMAZON_DOMAIN = "https://www.amazon.com/"
 # AMAZON_DOMAIN = "https://www.amazon.se/"
 
 PDP_URL = f"{AMAZON_DOMAIN}dp/"
-REALTIME_INVENTORY_URL = f"{AMAZON_DOMAIN}gp/aod/ajax/ref=aod_f_new?asin="
-# REALTIME_INVENTORY_URL = "https://www.amazon.nl/gp/aod/ajax/ref=aod_f_new?asin="
-# REALTIME_INVENTORY_URL = "https://www.amazon.es/gp/aod/ajax/ref=aod_f_new?asin="
-# REALTIME_INVENTORY_URL = "https://www.amazon.de/gp/aod/ajax/ref=aod_f_new?asin="
+# REALTIME_INVENTORY_URL = f"{AMAZON_DOMAIN}gp/aod/ajax/ref=aod_f_new?asin="
+REALTIME_INVENTORY_URL = (
+    f"{AMAZON_DOMAIN}gp/aod/ajax/ref=aod_f_new?isonlyrenderofferlist=true&asin="
+)
 # REALTIME_INVENTORY_URL = "https://www.amazon.com/gp/aod/ajax/ref=dp_aod_NEW_mbc?asin="
 CONFIG_FILE_PATH = "config/amazon_ajax_config.json"
 STORE_NAME = "Amazon"
@@ -52,10 +52,10 @@ def get_prices(tree):
     price_nodes = tree.xpath(
         "//div[@id='aod-offer']//div[contains(@id, 'aod-price-')]//span[contains(@class,'a-offscreen')]"
     )
-    log.info(f"Found {len(price_nodes)} price nodes.")
+    log.debug(f"Found {len(price_nodes)} price nodes.")
     prices = []
     for idx, price_node in enumerate(price_nodes):
-        log.info(f"Found price {idx+1}: {price_node.text}")
+        log.debug(f"Found price {idx+1}: {price_node.text}")
         prices.append(parse_price(price_node.text))
     return prices
 
@@ -64,20 +64,24 @@ def get_shipping_costs(tree):
     # Shipping collection xpath:
     # //div[@id='aod-offer-list']//div[starts-with(@id, 'aod-bottlingDepositFee-')]/following-sibling::span
     shipping_nodes = tree.xpath(
-        "//div[@id='aod-offer-list']//div[starts-with(@id, 'aod-bottlingDepositFee-')]/following-sibling::*[1]"
+        "//div[@id='aod-offer']//div[starts-with(@id, 'aod-bottlingDepositFee-')]/following-sibling::*[1]"
     )
-    log.info(f"Found {len(shipping_nodes)} shipping nodes.")
+    log.debug(f"Found {len(shipping_nodes)} shipping nodes.")
     shipping_costs = []
     for idx, shipping_node in enumerate(shipping_nodes):
+        # Shipping information is found within either a DIV or a SPAN following the bottleDepositFee DIV
+        # What follows is logic to parse out the various pricing formats within the HTML.  Not ideal, but
+        # it's what we have to work with.
         if shipping_node.tag == "div":
             if shipping_node.text.strip() == "":
                 # Assume zero shipping for an empty div
                 shipping_costs.append(parse_price("0.00"))
             else:
-                log.info(
-                    f"div found after bottle deposits.  Stripped Value: '{shipping_node.text.strip()}'"
+                log.warning(
+                    f"Non-Empty div found after bottle deposits.  Stripped Value: '{shipping_node.text.strip()}'"
                 )
         elif shipping_node.tag == "span":
+            # Shipping values in the span are contained in either another SPAN or hanging out alone in a B tag
             shipping_spans = shipping_node.findall("span")
             shipping_bs = shipping_node.findall("b")
             if len(shipping_spans) > 0:
@@ -85,24 +89,24 @@ def get_shipping_costs(tree):
                 if shipping_spans[0].text.strip() == "&":
                     # & Free Shipping message
                     shipping_costs.append("0.00")
-                    # log.info(f"Free Shipping!? {shipping_spans[0].text.strip()}")
                 elif shipping_spans[0].text.startswith("+"):
-                    shipping_price = parse_price(shipping_spans[0].text.strip())
-                    shipping_costs.append(shipping_price)
-                    # log.info(f"Shipping: {shipping_price} from {shipping_spans[0].text.strip()}")
+                    shipping_costs.append(parse_price(shipping_spans[0].text.strip()))
             elif len(shipping_bs) > 0:
                 for message_node in shipping_bs:
-                    # log.info(f"<B> node found: {message_node.text}")
                     if message_node.text.upper() in amazon_config["FREE_SHIPPING"]:
                         shipping_costs.append(parse_price("0.00"))
-                        # log.info("B Message says FREE! ")
                     else:
                         log.error(
-                            f"Couldn't parse price from <B>.  Do we need to add: {message_node.text.upper()}"
+                            f"Couldn't parse price from <B>. Assuming 0. Do we need to add: '{message_node.text.upper()}'"
                         )
+                        shipping_costs.append(parse_price("0.00"))
             else:
-                log.info(f"Otherwise: {shipping_node.text.strip()}")
-        log.info(f"Shipping cost {idx+1}: {shipping_costs[idx]}")
+                log.error(
+                    f"Unable to locate price.  Assuming 0.  Found this: '{shipping_node.text.strip()}'"
+                )
+                shipping_costs.append(parse_price("0.00"))
+
+        log.debug(f"Shipping cost {idx+1}: {shipping_costs[idx]}")
     return shipping_costs
 
 
@@ -112,21 +116,30 @@ def get_form_actions(tree):
     form_action_nodes = tree.xpath(
         "//div[@id='aod-offer']//form[contains(@action,'add-to-cart')]"
     )
-    log.info(f"Found {len(form_action_nodes)} form action nodes.")
+    log.debug(f"Found {len(form_action_nodes)} form action nodes.")
     form_actions = []
     for idx, form_action in enumerate(form_action_nodes):
-        if "new" in form_action.action:
-            log.info(f"Item {idx+1} is new")
-        elif "used" in form_action.action:
-            log.info(f"Item {idx+1} is used")
-        else:
-            log.info(f"Item {idx+1} is unknown: {form_action.action}")
         form_actions.append(form_action.action)
     return form_actions
 
 
+def get_item_condition(form_actions):
+    item_conditions = []
+    for idx, form_action in enumerate(form_actions):
+        if "new" in form_action:
+            log.debug(f"Item {idx + 1} is new")
+            item_conditions.append("new")
+        elif "used" in form_action:
+            log.debug(f"Item {idx + 1} is used")
+            item_conditions.append("used")
+        else:
+            log.debug(f"Item {idx + 1} is unknown: {form_action.action}")
+            item_conditions.append("unknown")
+    return item_conditions
+
+
 class AmazonStoreHandler(BaseStoreHandler):
-    def __init__(self, notification_handler, encryption_pass=None) -> None:
+    def __init__(self, notification_handler) -> None:
         super().__init__()
         self.notification_handler = notification_handler
         self.item_list = []
@@ -195,6 +208,7 @@ class AmazonStoreHandler(BaseStoreHandler):
 
     def verify(self):
         log.info("Verifying item list...")
+        items_to_purge = []
         for item in self.item_list:
             # Verify that the ASIN hits and that we have a valid inventory URL
             pdp_url = PDP_URL + item["asin"]
@@ -215,7 +229,11 @@ class AmazonStoreHandler(BaseStoreHandler):
                 log.error(
                     f"Unable to locate details for {item['asin']} at {pdp_url}.  Removing from hunt."
                 )
-                self.item_list.remove(item)
+                items_to_purge.append(item)
+
+        # Purge any items we didn't find while verifying
+        for item in items_to_purge:
+            self.item_list.remove(item)
 
         # for sm_id, sm_details in sm_status_list.items():
         #     if sm_details["not_found"]:
@@ -243,12 +261,19 @@ class AmazonStoreHandler(BaseStoreHandler):
         prices = get_prices(tree)
         shipping_costs = get_shipping_costs(tree)
         form_actions = get_form_actions(tree)
+        item_conditions = get_item_condition(form_actions)
 
         log.info(f"Prices found {len(prices)}")
         log.info(f"Shipping found {len(shipping_costs)}")
         log.info(f"Forms found {len(form_actions)}")
+        log.info(f"Item conditions found {len(item_conditions)}")
+        if len(prices) != len(shipping_costs) or len(shipping_costs) != len(
+            form_actions
+        ):
+            log.error("We have failed everyone.")
+            exit(5)
 
-        return ItemDetail(0.00, 0.00)
+        # TODO: build seller detail objects to compare and determine if we should buy
 
     def get_real_time_data(self, item):
         log.info(f"Calling {STORE_NAME} for {item['short_name']} using {item['url']}")
