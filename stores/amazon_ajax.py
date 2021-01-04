@@ -278,12 +278,8 @@ class AmazonStoreHandler(BaseStoreHandler):
     def get_real_time_data(self, item):
         log.info(f"Calling {STORE_NAME} for {item['short_name']} using {item['url']}")
         url = item["url"]
-        try:
-            response = self.session.get(url, headers=HEADERS)
-            return response.text
-        except JSONDecodeError:
-            log.error("Failed to receive valid response.  Skipping")
-        return json.loads("{}")
+        response = self.session.get(url, headers=HEADERS)
+        return response.text
 
     def check_stock(self, item):
         price = item["market_info"]["price"]["final_price"]["price"]
