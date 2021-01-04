@@ -73,4 +73,4 @@ class NotificationHandler:
                 log.warn(
                     "Error playing notification sound. Disabling local audio notifications."
                 )
-                self.enabled = False
+                self.sound_enabled = False
