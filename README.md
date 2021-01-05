@@ -139,7 +139,7 @@ Edit the newly created files with your settings based on your [configuration](#c
 
 ### Installation Raspberry Pi 4 (2 GB+)
 
-This is an abridged version of the community created document
+This is an abridged version of the community created document by UnidentifiedWarlock and Judarius.  It can be 
 found [here](https://docs.google.com/document/d/1VUxXhATZ8sZOJxdh3AIY6OGqwLRmrAcPikKZAwphIE8/edit). If the steps here
 don't work on your Pi 4, look there for additional options. This hasn't been tested on a Pi 3, but given enough RAM to
 run Chrome, it may very well work. Let us know.
@@ -173,8 +173,6 @@ to
 Then save and close the file.
 
 Additional steps outside of the readme:
-
-uncomment requires 3.8 Piplock, as default pi python 2.7.16 works fine
 
 If you get a compiler error when doing pipenv install run:
 
