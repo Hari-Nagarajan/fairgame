@@ -205,7 +205,7 @@ Usage: app.py amazon option
 
 Options:
   --no-image          Do not load images
-  --headless          Unsupported headless mode. GLHF
+  --headless          Runs Chrome in headless mode.
   --test              Run the checkout flow but do not actually purchase the
                       item[s]
 
@@ -469,80 +469,53 @@ within your pipenv shell. This will send a test notification to all configured n
 
 ## Troubleshooting
 
-Re-read this documentation. Verify your JSON.
++ Re-read this documentation.
 
-Consider joining the #tech-support channel in [Discord](https://discord.gg/5tw6UY7g44) for help from the community if
-these common fixes don't help.
++ Verify your JSON.
 
-**Error: ```selenium.common.exceptions.WebDriverException: Message: unknown error: cannot find Chrome binary```**
-The issue is that chrome is not installed in the expected location.
-See [Selenium Wiki](https://github.com/SeleniumHQ/selenium/wiki/ChromeDriver#requirements) and the section
-on [overriding the Chrome binary location .](https://sites.google.com/a/chromium.org/chromedriver/capabilities#TOC-Using-a-Chrome-executable-in-a-non-standard-location)
++ Consider joining the #tech-support channel in [Discord](https://discord.gg/5tw6UY7g44) for help from the community if
+  these common fixes don't help.
 
-The easy fix for this is to add an option where selenium is used (`selenium_utils.py`)
++ **Error: ```selenium.common.exceptions.WebDriverException: Message: unknown error: cannot find Chrome binary```**
+  The issue is that chrome is not installed in the expected location.
+  See [Selenium Wiki](https://github.com/SeleniumHQ/selenium/wiki/ChromeDriver#requirements) and the section
+  on [overriding the Chrome binary location .](https://sites.google.com/a/chromium.org/chromedriver/capabilities#TOC-Using-a-Chrome-executable-in-a-non-standard-location)
 
-```
-python chrome_options.binary_location = "C:\Users\%USERNAME%\AppData\Local\Google\Chrome\Application\chrome.exe"
-```
+  The easy fix for this is to add an option where selenium is used (`selenium_utils.py`)
 
-**
-Error: ```selenium.common.exceptions.SessionNotCreatedException: Message: session not created: This version of ChromeDriver only supports Chrome version 87```**
+  ```
+  python chrome_options.binary_location = "C:\Users\%USERNAME%\AppData\Local\Google\Chrome\Application\chrome.exe"
+  ```
 
-You are not running the proper version of Chrome this requires. As of this update, the current version is Chrome 87.
-Check your version by going to ```chrome://version/``` in your browser. We are going to be targeting the current stable
-build of chrome. If you are behind, please update, if you are on a beta or canary branch, you'll have to build your own
-version of chromedriver-py.
++ **Error: ```selenium.common.exceptions.SessionNotCreatedException: Message: session not created: This version of ChromeDriver only supports Chrome version 87```**
 
-## Raspberry-Pi-Setup
-
-Maybe this works?
-
-1. Prereqs and Setup
-
-```shell
-sudo apt update
-sudo apt upgrade
-sudo apt install chromium-chromedriver
-git clone https://github.com/Hari-Nagarajan/fairgame
-cd fairgame/
-pip3 install pipenv
-export PATH=$PATH:/home/<YOURUSERNAME>/.local/bin
-pipenv shell 
-pipenv install
-```
-
-2. Leave this Terminal window open.
-
-3. Open the following file in a text editor:
-
-```
-/home/<YOURUSERNAME>/.local/share/virtualenvs/fairgame-<RANDOMCHARS>/lib/python3.7/site-packages/selenium/webdriver/common/service.py
-```
-
-4. Edit line 38 from `self.path = executable` to `self.path = "chromedriver"`, then save and close the file.
-
-
-5. Back in Terminal...
-
-```shell
-python app.py
-```
-
-6. Follow [Usage](#Usage) to configure the bot as needed.
+  You are not running the proper version of Chrome this requires. As of this update, the current version is Chrome 87.
+  Check your version by going to ```chrome://version/``` in your browser. We are going to be targeting the current stable
+  build of chrome. If you are behind, please update, if you are on a beta or canary branch, you'll have to build your own
+  version of chromedriver-py.
 
 ## Frequently Asked Questions
 
 To keep up with questions, the Discord channel [#FAQ](https://discord.gg/GEsarYKMAw) is where you'll find the latest
 answers. If you don't find it there, ask in #tech-support.
 
-### 1. Can I run multiple instances of the bot?
+1. **Can I run multiple instances of the bot?**
 
-Yes. For example you can run one instance to check stock on Best Buy and a separate instance to check stock on Amazon.
-Bear in mind that if you do this you may end up with multiple purchases going through at the same time.
+   Yes. For example you can run one instance to check stock on Best Buy and a separate instance to check stock on
+   Amazon. Bear in mind that if you do this you may end up with multiple purchases going through at the same time.
 
-### 2. Does Fairgame automatically bypass CAPTCHA's on the store sites?
+2. **Does Fairgame automatically bypass CAPTCHA's on the store sites?**
+   For Amazon, yes. The bot will try and auto-solve CAPTCHA's during the checkout process.
 
-* For Amazon, yes. The bot will try and auto-solve CAPTCHA's during the checkout process.
+3. **Does `--headless` work?**
+   Yes!  A community user identified the issue with the headless option while running on a Raspberry Pi. This allowed
+   the developers to update the codebase to consistently work correctly on headless server environments. Give it a try
+   and let us know if you have any issues.
+
+4. **Does Fairgame run on a Raspberry Pi?**
+   Yes, with caveats. Most people seem to have success with Raspberry Pi 4. The 2 GB model may need to run the headless
+   option due to the smaller memory footprint. Still awaiting community feedback on running on a Pi 3. CPU and memory
+   capacity seem to be the limiting factor for older Pi models.
 
 ## Attribution
 
