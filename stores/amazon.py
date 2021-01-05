@@ -1161,7 +1161,7 @@ class Amazon:
         )
         log.info(f"--Delay of {self.refresh_delay} seconds")
         if self.headless:
-            log.info(f"--Headless doesn't work!")
+            log.info(f"--Browser running in headless mode")
         if self.used:
             log.info(f"--Used items are considered for purchase")
         if self.checkshipping:
@@ -1178,8 +1178,6 @@ class Amazon:
             log.info(f"--Detailed screenshots/notifications is enabled")
         if self.log_stock_check:
             log.info(f"--Additional stock check logging enabled")
-        if self.testing:
-            log.warning(f"--Testing Mode.  NO Purchases will be made.")
         if self.slow_mode:
             log.warning(f"--Slow-mode enabled. Pages will fully load before execution.")
         if self.shipping_bypass:
@@ -1202,10 +1200,6 @@ class Amazon:
             log.info(f"--No images will be requested")
         if not self.notification_handler.sound_enabled:
             log.info(f"--Notification sounds are disabled.")
-        if self.headless:
-            log.warning(
-                f"--Running headless is unsupported.  If you get it to work, please let us know on Discord."
-            )
         if self.testing:
             log.warning(f"--Testing Mode.  NO Purchases will be made.")
         log.info(f"{'=' * 50}")
