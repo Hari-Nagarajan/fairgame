@@ -21,7 +21,7 @@ slackclient = "*"
 playsound = "*"
 prompt_toolkit = "*"
 aiohttp = "*"
-pyobjc = {version = "*", sys_platform = "== 'darwin'"}
+pyobjc = { version = "*", sys_platform = "== 'darwin'" }
 async-timeout = "*"
 amazoncaptcha = "==0.4.4"
 browser-cookie3 = "*"
@@ -29,9 +29,12 @@ coloredlogs = "*"
 apprise = "*"
 price-parser = "*"
 pypresence = "==4.0.0"
-pywin32 = {version = "*", sys_platform = "== 'win32'"}
+pywin32 = { version = "*", sys_platform = "== 'win32'" }
 psutil = "*"
 stdiomask = "*"
+packaging = "*"
+config = "*"
+lxml = "*"
 
 [requires]
 python_version = "3.8"
