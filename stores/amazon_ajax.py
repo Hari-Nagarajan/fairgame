@@ -1,9 +1,8 @@
+import http.client
 import json
 import random
 import time
-from json.decoder import JSONDecodeError
 
-import requests
 from lxml import html
 from price_parser import parse_price
 
@@ -11,27 +10,25 @@ from stores.basestore import BaseStoreHandler
 from utils.logger import log
 
 # PDP_URL = "https://smile.amazon.com/gp/product/"
-# AMAZON_DOMAIN = "https://www.amazon.com.au/"
-# AMAZON_DOMAIN = "https://www.amazon.com.br/"
-# AMAZON_DOMAIN = "https://www.amazon.ca/"
-# NOT SUPPORTED AMAZON_DOMAIN = "https://www.amazon.cn/"
-# AMAZON_DOMAIN = "https://www.amazon.fr/"
-# AMAZON_DOMAIN = "https://www.amazon.de/"
-# NOT SUPPORTED AMAZON_DOMAIN = "https://www.amazon.in/"
-# AMAZON_DOMAIN = "https://www.amazon.it/"
-# AMAZON_DOMAIN = "https://www.amazon.co.jp/"
-# AMAZON_DOMAIN = "https://www.amazon.com.mx/"
-# AMAZON_DOMAIN = "https://www.amazon.nl/"
-# AMAZON_DOMAIN = "https://www.amazon.es/"
-# AMAZON_DOMAIN = "https://www.amazon.co.uk/"
-AMAZON_DOMAIN = "https://www.amazon.com/"
-# AMAZON_DOMAIN = "https://www.amazon.se/"
+# AMAZON_DOMAIN = "www.amazon.com.au"
+# AMAZON_DOMAIN = "www.amazon.com.br"
+# AMAZON_DOMAIN = "www.amazon.ca"
+# NOT SUPPORTED AMAZON_DOMAIN = "www.amazon.cn"
+# AMAZON_DOMAIN = "www.amazon.fr"
+# AMAZON_DOMAIN = "www.amazon.de"
+# NOT SUPPORTED AMAZON_DOMAIN = "www.amazon.in"
+# AMAZON_DOMAIN = "www.amazon.it"
+# AMAZON_DOMAIN = "www.amazon.co.jp"
+# AMAZON_DOMAIN = "www.amazon.com.mx"
+# AMAZON_DOMAIN = "www.amazon.nl"
+# AMAZON_DOMAIN = "www.amazon.es"
+# AMAZON_DOMAIN = "www.amazon.co.uk"
+AMAZON_DOMAIN = "www.amazon.com"
+# AMAZON_DOMAIN = "www.amazon.se"
 
-PDP_URL = f"{AMAZON_DOMAIN}dp/"
+PDP_PATH = f"/dp/"
 # REALTIME_INVENTORY_URL = f"{AMAZON_DOMAIN}gp/aod/ajax/ref=aod_f_new?asin="
-REALTIME_INVENTORY_URL = (
-    f"{AMAZON_DOMAIN}gp/aod/ajax/ref=aod_f_new?isonlyrenderofferlist=true&asin="
-)
+REALTIME_INVENTORY_PATH = f"/gp/aod/ajax/ref=aod_f_new?isonlyrenderofferlist=true&asin="
 # REALTIME_INVENTORY_URL = "https://www.amazon.com/gp/aod/ajax/ref=dp_aod_NEW_mbc?asin="
 CONFIG_FILE_PATH = "config/amazon_ajax_config.json"
 STORE_NAME = "Amazon"
@@ -43,6 +40,22 @@ HEADERS = {
     "Accept-Language": "en-US,en;q=0.8",
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36",
 }
+HEADERS = {
+    "authority": "www.amazon.ca",
+    "cache-control": "max-age=0",
+    "upgrade-insecure-requests": "1",
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Safari/537.36",
+    "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+    "service-worker-navigation-preload": "true",
+    "sec-gpc": "1",
+    "sec-fetch-site": "none",
+    "sec-fetch-mode": "navigate",
+    "sec-fetch-user": "?1",
+    "sec-fetch-dest": "document",
+    "accept-language": "en-US,en;q=0.9",
+}
+
+
 amazon_config = None
 
 
@@ -55,7 +68,7 @@ def get_prices(tree):
     log.debug(f"Found {len(price_nodes)} price nodes.")
     prices = []
     for idx, price_node in enumerate(price_nodes):
-        log.debug(f"Found price {idx+1}: {price_node.text}")
+        log.debug(f"Found price {idx + 1}: {price_node.text}")
         prices.append(parse_price(price_node.text))
     return prices
 
@@ -106,7 +119,7 @@ def get_shipping_costs(tree):
                 )
                 shipping_costs.append(parse_price("0.00"))
 
-        log.debug(f"Shipping cost {idx+1}: {shipping_costs[idx]}")
+        log.debug(f"Shipping cost {idx + 1}: {shipping_costs[idx]}")
     return shipping_costs
 
 
@@ -126,14 +139,16 @@ def get_form_actions(tree):
 def get_item_condition(form_actions):
     item_conditions = []
     for idx, form_action in enumerate(form_actions):
-        if "new" in form_action:
+        if "_new_" in form_action:
             log.debug(f"Item {idx + 1} is new")
             item_conditions.append("new")
-        elif "used" in form_action:
+        elif "_used_" in form_action:
             log.debug(f"Item {idx + 1} is used")
             item_conditions.append("used")
+        elif "_col_" in form_action:
+            log.debug(f"Item {idx+1} is collectible")
         else:
-            log.debug(f"Item {idx + 1} is unknown: {form_action.action}")
+            log.debug(f"Item {idx + 1} is unknown: {form_action}")
             item_conditions.append("unknown")
     return item_conditions
 
@@ -155,7 +170,8 @@ class AmazonStoreHandler(BaseStoreHandler):
         self.parse_config()
 
         # Initialize the Session we'll use for this run
-        self.session = requests.Session()
+        # self.session = requests.Session()
+        self.conn = http.client.HTTPSConnection(AMAZON_DOMAIN)
 
     def __del__(self):
         message = f"Shutting down {STORE_NAME} Store Handler."
@@ -211,11 +227,13 @@ class AmazonStoreHandler(BaseStoreHandler):
         items_to_purge = []
         for item in self.item_list:
             # Verify that the ASIN hits and that we have a valid inventory URL
-            pdp_url = PDP_URL + item["asin"]
-            response = self.session.get(pdp_url, headers=HEADERS)
-            if response.status_code == 200:
-                item["url"] = REALTIME_INVENTORY_URL + item["asin"]
-                tree = html.fromstring(response.text)
+            pdp_url = PDP_PATH + item["asin"]
+            self.conn.request("GET", pdp_url, "", HEADERS)
+            response = self.conn.getresponse()
+            if response.status == 200:
+                item["url"] = REALTIME_INVENTORY_PATH + item["asin"]
+                data = response.read()
+                tree = html.fromstring(data.decode("utf-8"))
                 title = tree.xpath('//*[@id="productTitle"]')
                 if len(title) > 0:
                     item["name"] = title[0].text.strip()
@@ -278,8 +296,10 @@ class AmazonStoreHandler(BaseStoreHandler):
     def get_real_time_data(self, item):
         log.info(f"Calling {STORE_NAME} for {item['short_name']} using {item['url']}")
         url = item["url"]
-        response = self.session.get(url, headers=HEADERS)
-        return response.text
+        self.conn.request("GET", url, "", HEADERS)
+        response = self.conn.getresponse()
+        data = response.read()
+        return data.decode("utf-8")
 
     def check_stock(self, item):
         price = item["market_info"]["price"]["final_price"]["price"]
