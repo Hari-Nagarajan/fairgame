@@ -1140,7 +1140,7 @@ class Amazon:
             self.webdriver_child_pids.append(child.pid)
 
     def get_page(self, url):
-        check_cart_element = []
+        check_cart_element = None
         current_page = []
         try:
             check_cart_element = self.driver.find_element_by_xpath(
