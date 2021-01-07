@@ -4,7 +4,7 @@ import os
 from utils.version import version
 from logging import handlers
 
-FORMAT = "%(asctime)s|{}|%(levelname)s|%(message)s".format(version)
+FORMAT = "%(asctime)s|{}|%(levelname)s| %(message)s".format(version)
 
 LOG_DIR = "logs"
 LOG_FILE_NAME = "fairgame.log"
