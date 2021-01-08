@@ -1,16 +1,17 @@
 import fileinput
+import http.client
 import json
 import os
 import pathlib
 import random
 import time
 import typing
-from datetime import datetime
 from decimal import Decimal
-from amazoncaptcha import AmazonCaptcha
 
 import attr
 import psutil
+import requests
+from amazoncaptcha import AmazonCaptcha
 from chromedriver_py import binary_path
 from furl import furl
 from hyper import HTTP20Connection
@@ -223,7 +224,7 @@ def get_item_condition(form_action) -> int:
         return CONDITION_UNKNOWN
 
 
-def solve_captcha(conn, form_element):
+def solve_captcha(session, form_element, pdp_url):
     log.warning("Encountered CAPTCHA. Attempting to solve.")
     # Starting from the form, get the inputs and image
     captcha_images = form_element.xpath('//img[contains(@src, "amazon.com/captcha/")]')
@@ -237,46 +238,44 @@ def solve_captcha(conn, form_element):
             form_inputs = form_element.xpath(".//input")
             input_dict = {}
             for form_input in form_inputs:
-                if form_input.type == 'text':
+                if form_input.type == "text":
                     input_dict[form_input.name] = solution
                 else:
                     input_dict[form_input.name] = form_input.value
+            f = furl(pdp_url) # Use the original URL to get the schema and host
+            f = f.set(path=form_element.attrib["action"])
+            f.add(args=input_dict)
+            payload = ""
 
-            f = furl(form_element.attrib["action"])
-            f.args = input_dict
+            # conn.request("GET", f.url, payload, HEADERS)
+            # response = conn.get_response()
+            response = session.get(f.url)
+            log.debug(f"Captcha response was {response.status_code}")
+            return response.text, response.status_code
 
-        payload = ""
-
-        conn.request("GET", f.url, payload, HEADERS)
-        response = conn.get_response()
-        if response.status == 302:
-            # Got the redirect, so let's retry grabbing the data
-            response.read()
-            redirect_url = furl(response.headers["location"][0].decode("utf-8"))
-
-            conn.request("GET", str(redirect_url.path), payload, response.headers)
-            response = conn.get_response()
-            data = response.read()
-            return html.fromstring(data.decode("utf-8"))
-    return html.fromString("")
+    return html.fromstring(""), 404
 
 
 class AmazonStoreHandler(BaseStoreHandler):
+    http_client = False
+    http_20_client = False
+    http_session = True
+
     def __init__(
-            self,
-            notification_handler: NotificationHandler,
-            headless=False,
-            checkshipping=False,
-            detailed=False,
-            used=False,
-            single_shot=False,
-            no_screenshots=False,
-            disable_presence=False,
-            slow_mode=False,
-            no_image=False,
-            encryption_pass=None,
-            log_stock_check=False,
-            shipping_bypass=False,
+        self,
+        notification_handler: NotificationHandler,
+        headless=False,
+        checkshipping=False,
+        detailed=False,
+        used=False,
+        single_shot=False,
+        no_screenshots=False,
+        disable_presence=False,
+        slow_mode=False,
+        no_image=False,
+        encryption_pass=None,
+        log_stock_check=False,
+        shipping_bypass=False,
     ) -> None:
         super().__init__()
 
@@ -303,9 +302,10 @@ class AmazonStoreHandler(BaseStoreHandler):
         modify_browser_profile()
 
         # Initialize the Session we'll use for this run
-        # self.session = requests.Session()
-        # self.conn = http.client.HTTPSConnection(self.amazon_domain)
-        self.conn = HTTP20Connection(self.amazon_domain)
+        self.session = requests.Session()
+        self.session.headers.update(HEADERS)
+        self.conn = http.client.HTTPSConnection(self.amazon_domain)
+        self.conn20 = HTTP20Connection(self.amazon_domain)
 
     def __del__(self):
         message = f"Shutting down {STORE_NAME} Store Handler."
@@ -345,9 +345,9 @@ class AmazonStoreHandler(BaseStoreHandler):
                 )
                 for seller in item_sellers:
                     if (
-                            item.max_price.amount
-                            > seller.selling_price
-                            > item.min_price.amount
+                        item.max_price.amount
+                        > seller.selling_price
+                        > item.min_price.amount
                     ):
                         log.info("BUY THIS ITEM!!!!")
                         return seller, item
@@ -376,9 +376,9 @@ class AmazonStoreHandler(BaseStoreHandler):
     def parse_items(self, json_items):
         for json_item in json_items:
             if (
-                    "max-price" in json_item
-                    and "asins" in json_item
-                    and "min-price" in json_item
+                "max-price" in json_item
+                and "asins" in json_item
+                and "min-price" in json_item
             ):
                 max_price = json_item["max-price"]
                 min_price = json_item["min-price"]
@@ -424,21 +424,30 @@ class AmazonStoreHandler(BaseStoreHandler):
         verified = 0
         for item in self.item_list:
             # Verify that the ASIN hits and that we have a valid inventory URL
-            pdp_url = PDP_PATH + item.id
-            HEADERS["Date"] = f"{datetime.utcnow()}"
-            self.conn.request("GET", pdp_url, "", HEADERS)
-            log.debug(f"Verifying at {self.amazon_domain}{pdp_url} ...")
+            pdp_url = f"https://{self.amazon_domain}{PDP_PATH}{item.id}"
+            log.debug(f"Verifying at {pdp_url} ...")
+            # self.conn20.request("GET", pdp_url, "", HEADERS)
             # response = self.conn.getresponse()
-            response = self.conn.get_response()
-            if response.status == 200:
-                item.url = REALTIME_INVENTORY_PATH + item.id
-                data = response.read()
-                tree = html.fromstring(data.decode("utf-8"))
+            # response = self.conn.get_response()
+            data, status = self.get_html(pdp_url)
+            if status == 503:
+                # Check for CAPTCHA
+                tree = html.fromstring(data)
                 captcha_form_element = tree.xpath(
                     "//form[contains(@action,'validateCaptcha')]"
                 )
                 if captcha_form_element:
-                    tree = solve_captcha(self.conn, captcha_form_element[0])
+                    # Solving captcha and resetting data
+                    data, status = solve_captcha(self.session, captcha_form_element[0], pdp_url)
+
+            if status == 200:
+                item.url = f"{self.amazon_domain}{REALTIME_INVENTORY_PATH}{item.id}"
+                tree = html.fromstring(data)
+                captcha_form_element = tree.xpath(
+                    "//form[contains(@action,'validateCaptcha')]"
+                )
+                if captcha_form_element:
+                    tree = solve_captcha(self.session, captcha_form_element[0])
 
                 title = tree.xpath('//*[@id="productTitle"]')
                 if len(title) > 0:
@@ -455,9 +464,8 @@ class AmazonStoreHandler(BaseStoreHandler):
                         f"Unable to verify ASIN {item.id}.  Continuing without verification."
                     )
             else:
-                response.read()  # Flush the buffer
                 log.error(
-                    f"Unable to locate details for {item.id} at {self.amazon_domain}{pdp_url}.  Removing from hunt."
+                    f"Unable to locate details for {item.id} at {pdp_url}.  Removing from hunt."
                 )
                 items_to_purge.append(item)
 
@@ -524,23 +532,44 @@ class AmazonStoreHandler(BaseStoreHandler):
 
     def get_real_time_data(self, item):
         log.debug(f"Calling {STORE_NAME} for {item.short_name} using {item.url}")
-        self.conn.request("GET", item.url, "", HEADERS)
+        # self.conn20.request("GET", item.url, "", HEADERS)
         # response = self.conn.getresponse()
-        response = self.conn.get_response()
-        if item.status_code != response.status:
+        # response = self.conn20.get_response()
+        data, status = self.get_html(item.url)
+        if item.status_code != status:
             # Track when we flip-flop between status codes.  200 -> 204 may be intelligent caching at Amazon.
             # We need to know if it ever goes back to a 200
             log.warning(
-                f"{item.short_name} started responding with Status Code {response.status} instead of {item.status_code}"
+                f"{item.short_name} started responding with Status Code {status} instead of {item.status_code}"
             )
-            item.status_code = response.status
-        data = response.read()
-        return data.decode("utf-8")
+            item.status_code = status
+        return data
 
     def attempt_purchase(self, item, qualified_seller):
         # Open the item URL in Selenium
 
         pass
+
+    def get_html(self, url):
+        """Unified mechanism to get content to make changing connection clients easier"""
+        f = furl(url)
+
+        if self.http_client:
+            # http.client method
+            self.conn.request("GET", str(f.path), "", HEADERS)
+            response = self.conn.getresponse()
+            data = response.read()
+            return data.decode("utf-8"), response.status
+        elif self.http_20_client:
+            # hyper HTTP20Connection method
+            self.conn20.request("GET", str(f.path), "", HEADERS)
+            response = self.conn20.get_response()
+            data = response.read()
+            return data.decode("utf-8"), response.status
+        else:
+            response = self.session.get(f.url, headers=HEADERS)
+            return response.text, response.status_code
+
 
 
 def parse_condition(condition: str) -> int:
