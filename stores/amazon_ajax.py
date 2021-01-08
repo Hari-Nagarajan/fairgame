@@ -1,18 +1,28 @@
-import http.client
+import fileinput
 import json
+import os
+import pathlib
 import random
 import time
+import typing
+from datetime import datetime
 from decimal import Decimal
+from amazoncaptcha import AmazonCaptcha
 
 import attr
-import typing
-
+import psutil
+from chromedriver_py import binary_path
+from furl import furl
+from hyper import HTTP20Connection
 from lxml import html
 from price_parser import parse_price, Price
+from selenium import webdriver
+from selenium.webdriver.support.wait import WebDriverWait
 
 from notifications.notifications import NotificationHandler
 from stores.basestore import BaseStoreHandler
 from utils.logger import log
+from utils.selenium_utils import enable_headless, options
 
 # PDP_URL = "https://smile.amazon.com/gp/product/"
 # AMAZON_DOMAIN = "www.amazon.com.au"
@@ -65,6 +75,33 @@ HEADERS = {
     "sec-fetch-dest": "document",
     "accept-language": "en-US,en;q=0.9",
 }
+
+
+@attr.s(auto_attribs=True)
+class SellerDetail:
+    name: str
+    price: Price
+    shipping_cost: Price
+    condition: int = CONDITION_NEW
+    atc_url: str = None
+    offering_id: str = None
+    xpath = f"//form[@action='{atc_url}'//input[@name='submit.addToCart']"
+
+    @property
+    def selling_price(self) -> Decimal:
+        return self.price.amount + self.shipping_cost.amount
+
+
+@attr.s(auto_attribs=True)
+class FGItem:
+    id: str
+    min_price: Price
+    max_price: Price
+    name: str = None
+    short_name: str = None
+    url: str = None
+    condition: int = CONDITION_NEW
+    status_code: int = 200
 
 
 def get_merchant_names(tree):
@@ -149,8 +186,8 @@ def get_shipping_costs(tree, free_shipping_string):
                     )
         elif len(shipping_is) > 0:
             # If it has prime icon class, assume free Prime shipping
-            if shipping_is[0].attrib["aria-label"].contains == 'Free':
-                log.debug("Found Free Prime Shipping")
+            if "Free" in shipping_is[0].attrib["aria-label"]:
+                log.debug("Found Free shipping with Prime")
         else:
             log.error(
                 f"Unable to locate price.  Assuming 0.  Found this: '{shipping_node.text.strip()}'"
@@ -186,14 +223,70 @@ def get_item_condition(form_action) -> int:
         return CONDITION_UNKNOWN
 
 
+def solve_captcha(conn, form_element):
+    log.warning("Encountered CAPTCHA. Attempting to solve.")
+    # Starting from the form, get the inputs and image
+    captcha_images = form_element.xpath('//img[contains(@src, "amazon.com/captcha/")]')
+    if captcha_images:
+        link = captcha_images[0].attrib["src"]
+        # link = 'https://images-na.ssl-images-amazon.com/captcha/usvmgloq/Captcha_kwrrnqwkph.jpg'
+        captcha = AmazonCaptcha.fromlink(link)
+        solution = captcha.solve()
+
+        if solution:
+            form_inputs = form_element.xpath(".//input")
+            input_dict = {}
+            for form_input in form_inputs:
+                if form_input.type == 'text':
+                    input_dict[form_input.name] = solution
+                else:
+                    input_dict[form_input.name] = form_input.value
+
+            f = furl(form_element.attrib["action"])
+            f.args = input_dict
+
+        payload = ""
+
+        conn.request("GET", f.url, payload, HEADERS)
+        response = conn.get_response()
+        if response.status == 302:
+            # Got the redirect, so let's retry grabbing the data
+            response.read()
+            redirect_url = furl(response.headers["location"][0].decode("utf-8"))
+
+            conn.request("GET", str(redirect_url.path), payload, response.headers)
+            response = conn.get_response()
+            data = response.read()
+            return html.fromstring(data.decode("utf-8"))
+    return html.fromString("")
+
+
 class AmazonStoreHandler(BaseStoreHandler):
-    def __init__(self, notification_handler: NotificationHandler) -> None:
+    def __init__(
+            self,
+            notification_handler: NotificationHandler,
+            headless=False,
+            checkshipping=False,
+            detailed=False,
+            used=False,
+            single_shot=False,
+            no_screenshots=False,
+            disable_presence=False,
+            slow_mode=False,
+            no_image=False,
+            encryption_pass=None,
+            log_stock_check=False,
+            shipping_bypass=False,
+    ) -> None:
         super().__init__()
+
         self.notification_handler = notification_handler
-        self.item_list: typing.List[PreyItem] = []
+        self.item_list: typing.List[FGItem] = []
         self.stock_checks = 0
         self.start_time = int(time.time())
-
+        self.amazon_domain = "smile.amazon.com"
+        self.driver = None
+        self.webdriver_child_pids = []
         from cli.cli import global_config
 
         self.amazon_config = global_config.get_amazon_config()
@@ -201,9 +294,18 @@ class AmazonStoreHandler(BaseStoreHandler):
         # Load up our configuration
         self.parse_config()
 
+        # Set up the Chrome options based on user flags
+        if headless:
+            enable_headless()
+
+        prefs = get_prefs(no_image)
+        set_options(prefs, slow_mode)
+        modify_browser_profile()
+
         # Initialize the Session we'll use for this run
         # self.session = requests.Session()
-        self.conn = http.client.HTTPSConnection(AMAZON_DOMAIN)
+        # self.conn = http.client.HTTPSConnection(self.amazon_domain)
+        self.conn = HTTP20Connection(self.amazon_domain)
 
     def __del__(self):
         message = f"Shutting down {STORE_NAME} Store Handler."
@@ -211,65 +313,47 @@ class AmazonStoreHandler(BaseStoreHandler):
         self.notification_handler.send_notification(message)
 
     def run(self, delay=45):
-        # Load real-time inventory for the provided SM list and clean it up as we go
-        self.verify()
+        # Verify the configuration file
+        if not self.verify():
+            # try one more time
+            log.info("Failed to verify... trying more more time")
+            self.verify()
+
+        # To keep the user busy https://github.com/jakesgordon/javascript-tetris
+        ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+        uri = pathlib.Path(f"{ROOT_DIR}/../tetris/index.html").as_uri()
+        log.debug(f"Tetris URL: {uri}")
+
+        # Spawn the web browser
+        self.driver = create_driver(options)
+        self.webdriver_child_pids = get_webdriver_pids(self.driver)
+        self.driver.get(uri)
+
         message = f"Starting to hunt items at {STORE_NAME}"
         log.info(message)
         self.notification_handler.send_notification(message)
 
+        while self.item_list:
+            qualified_seller, item = self.find_qualified_seller(delay)
+            self.attempt_purchase(item, qualified_seller)
+
+    def find_qualified_seller(self, delay) -> (SellerDetail, FGItem):
         while True:
             for item in self.item_list:
-                item_sellers = self.get_item_sellers(item)
-
+                item_sellers = self.get_item_sellers(
+                    item, self.amazon_config["FREE_SHIPPING"]
+                )
                 for seller in item_sellers:
                     if (
-                        item.max_price.amount
-                        > seller.selling_price
-                        > item.min_price.amount
+                            item.max_price.amount
+                            > seller.selling_price
+                            > item.min_price.amount
                     ):
                         log.info("BUY THIS ITEM!!!!")
+                        return seller, item
                     else:
                         log.info("No dice.")
-
-                # log.info(f"Default order")
-                # for seller in item_sellers:
-                #     log.info(
-                #         f"{seller.name} selling for a total of {seller.selling_price}"
-                #     )
-                #
-                # log.info(f"Price order")
-                # item_sellers.sort(key=min_total_price)
-                # for seller in item_sellers:
-                #     log.info(
-                #         f"{seller.name} selling for a total of {seller.selling_price}"
-                #     )
-                #
-                # log.info(f"Condition order")
-                # item_sellers.sort(key=new_first)
-                # for seller in item_sellers:
-                #     log.info(
-                #         f"{seller.name} selling for a total of {seller.selling_price}"
-                #     )
-
-                # if self.check_stock(item_info):
-                #     url = f"https://store.asus.com/us/item/{sm_id}"
-                #     log.debug(f"Spawning browser to URL {url}")
-                #     webbrowser.open_new(url)
-                #     log.debug(f"Removing {sm_id} from hunt list.")
-                #     self.item_list.remove(sm_id)
-                #     self.notification_handler.send_notification(
-                #         f"Found in-stock item at ASUS: {url}"
-                #     )
-                # if self.stock_checks > 0 and self.stock_checks % 1000 == 0:
-                #     checks_per_second = self.stock_checks / self.get_elapsed_time(
-                #         self.start_time
-                #     )
-                #     log.info(
-                #         f"Performed {self.stock_checks} stock checks so far ({checks_per_second} cps). Continuing to "
-                #         f"scan... "
-                #     )
             time.sleep(delay + random.randint(1, 3))
-            break
 
     def parse_config(self):
         log.info(f"Processing config file from {CONFIG_FILE_PATH}")
@@ -277,6 +361,8 @@ class AmazonStoreHandler(BaseStoreHandler):
         try:
             with open(CONFIG_FILE_PATH) as json_file:
                 config = json.load(json_file)
+                self.amazon_domain = config.get("amazon_domain", "smile.amazon.com")
+
                 json_items = config.get("items")
                 self.parse_items(json_items)
 
@@ -290,9 +376,9 @@ class AmazonStoreHandler(BaseStoreHandler):
     def parse_items(self, json_items):
         for json_item in json_items:
             if (
-                "max-price" in json_item
-                and "asins" in json_item
-                and "min-price" in json_item
+                    "max-price" in json_item
+                    and "asins" in json_item
+                    and "min-price" in json_item
             ):
                 max_price = json_item["max-price"]
                 min_price = json_item["min-price"]
@@ -320,7 +406,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                     asins_collection = asins_collection.split(",")
                 for asin in asins_collection:
                     self.item_list.append(
-                        PreyItem(
+                        FGItem(
                             asin,
                             min_price,
                             max_price,
@@ -339,13 +425,21 @@ class AmazonStoreHandler(BaseStoreHandler):
         for item in self.item_list:
             # Verify that the ASIN hits and that we have a valid inventory URL
             pdp_url = PDP_PATH + item.id
+            HEADERS["Date"] = f"{datetime.utcnow()}"
             self.conn.request("GET", pdp_url, "", HEADERS)
-            log.debug(f"Verifying at {AMAZON_DOMAIN}{pdp_url} ...")
-            response = self.conn.getresponse()
+            log.debug(f"Verifying at {self.amazon_domain}{pdp_url} ...")
+            # response = self.conn.getresponse()
+            response = self.conn.get_response()
             if response.status == 200:
                 item.url = REALTIME_INVENTORY_PATH + item.id
                 data = response.read()
                 tree = html.fromstring(data.decode("utf-8"))
+                captcha_form_element = tree.xpath(
+                    "//form[contains(@action,'validateCaptcha')]"
+                )
+                if captcha_form_element:
+                    tree = solve_captcha(self.conn, captcha_form_element[0])
+
                 title = tree.xpath('//*[@id="productTitle"]')
                 if len(title) > 0:
                     item.name = title[0].text.strip()
@@ -363,7 +457,7 @@ class AmazonStoreHandler(BaseStoreHandler):
             else:
                 response.read()  # Flush the buffer
                 log.error(
-                    f"Unable to locate details for {item.id} at {AMAZON_DOMAIN}{pdp_url}.  Removing from hunt."
+                    f"Unable to locate details for {item.id} at {self.amazon_domain}{pdp_url}.  Removing from hunt."
                 )
                 items_to_purge.append(item)
 
@@ -374,88 +468,79 @@ class AmazonStoreHandler(BaseStoreHandler):
         log.info(
             f"Verified {verified} out of {len(self.item_list)} items on {STORE_NAME}"
         )
+        return True
 
-    def get_item_sellers(self, item):
+    def get_item_sellers(self, item, free_shipping_strings):
         """Parse out information to from the aod-offer nodes populate ItemDetail instances for each item """
         payload = self.get_real_time_data(item)
+        sellers = []
         # This is where the parsing magic goes
         log.debug(f"payload is {len(payload)} bytes")
+        if len(payload) == 0:
+            log.error("Empty Response.  Skipping...")
+            return sellers
+
         tree = html.fromstring(payload)
 
         offers = tree.xpath("//div[@id='aod-offer']")
-        sellers = []
         if not offers:
             log.debug(f"No offers found for {item.id} = {item.short_name}")
-        else:
-            for idx, offer in enumerate(offers):
-                # This is preferred, but Amazon itself has unique URL parameters that I haven't identified yet
-                # merchant_name = offer.xpath(
-                #     ".//a[@target='_blank' and contains(@href, 'merch_name')]"
-                # )[0].text.strip()
-                merchant_name = offer.xpath(".//a[@target='_blank']")[0].text.strip()
-                price_text = offer.xpath(
-                    ".//div[contains(@id, 'aod-price-')]//span[contains(@class,'a-offscreen')]"
-                )[0].text
-                price = parse_price(price_text)
-                shipping_cost = get_shipping_costs(
-                    offer, self.amazon_config["FREE_SHIPPING"]
-                )
-                form_action = offer.xpath(".//form[contains(@action,'add-to-cart')]")[
-                    0
-                ].action
-                condition = get_item_condition(form_action)
-                offers = offer.xpath(f".//input[@name='offeringID.1']")
-                offer_id = None
-                if len(offers) > 0:
-                    offer_id = offers[0].value
-                else:
-                    log.error("No offer ID found!")
+            return sellers
+        for idx, offer in enumerate(offers):
+            # This is preferred, but Amazon itself has unique URL parameters that I haven't identified yet
+            # merchant_name = offer.xpath(
+            #     ".//a[@target='_blank' and contains(@href, 'merch_name')]"
+            # )[0].text.strip()
+            merchant_name = offer.xpath(".//a[@target='_blank']")[0].text.strip()
+            price_text = offer.xpath(
+                ".//div[contains(@id, 'aod-price-')]//span[contains(@class,'a-offscreen')]"
+            )[0].text
+            price = parse_price(price_text)
 
-                seller = SellerDetail(
-                    merchant_name,
-                    price,
-                    shipping_cost,
-                    condition,
-                    form_action,
-                    offer_id,
-                )
-                sellers.append(seller)
-                log.debug(f"{merchant_name} {price.amount} {shipping_cost.amount}")
+            shipping_cost = get_shipping_costs(offer, free_shipping_strings)
+            form_action = offer.xpath(".//form[contains(@action,'add-to-cart')]")[
+                0
+            ].action
+            condition = get_item_condition(form_action)
+            offers = offer.xpath(f".//input[@name='offeringID.1']")
+            offer_id = None
+            if len(offers) > 0:
+                offer_id = offers[0].value
+            else:
+                log.error("No offer ID found!")
+
+            seller = SellerDetail(
+                merchant_name,
+                price,
+                shipping_cost,
+                condition,
+                form_action,
+                offer_id,
+            )
+            sellers.append(seller)
+            log.debug(f"{merchant_name} {price.amount} {shipping_cost.amount}")
 
         return sellers
 
     def get_real_time_data(self, item):
         log.debug(f"Calling {STORE_NAME} for {item.short_name} using {item.url}")
         self.conn.request("GET", item.url, "", HEADERS)
-        response = self.conn.getresponse()
+        # response = self.conn.getresponse()
+        response = self.conn.get_response()
+        if item.status_code != response.status:
+            # Track when we flip-flop between status codes.  200 -> 204 may be intelligent caching at Amazon.
+            # We need to know if it ever goes back to a 200
+            log.warning(
+                f"{item.short_name} started responding with Status Code {response.status} instead of {item.status_code}"
+            )
+            item.status_code = response.status
         data = response.read()
         return data.decode("utf-8")
 
+    def attempt_purchase(self, item, qualified_seller):
+        # Open the item URL in Selenium
 
-@attr.s(auto_attribs=True)
-class SellerDetail:
-    name: str
-    price: Price
-    shipping_cost: Price
-    condition: int = CONDITION_NEW
-    atc_url: str = None
-    offering_id: str = None
-    xpath = f"//form[@action='{atc_url}'//input[@name='submit.addToCart']"
-
-    @property
-    def selling_price(self) -> Decimal:
-        return self.price.amount + self.shipping_cost.amount
-
-
-@attr.s(auto_attribs=True)
-class PreyItem:
-    id: str
-    min_price: Price
-    max_price: Price
-    name: str = None
-    short_name: str = None
-    url: str = None
-    condition: int = CONDITION_NEW
+        pass
 
 
 def parse_condition(condition: str) -> int:
@@ -479,3 +564,65 @@ def min_total_price(seller: SellerDetail):
 
 def new_first(seller: SellerDetail):
     return seller.condition
+
+
+def create_driver(options):
+    try:
+        return webdriver.Chrome(executable_path=binary_path, options=options)
+    except Exception as e:
+        log.error(e)
+        log.error(
+            "If you have a JSON warning above, try deleting your .profile-amz folder"
+        )
+        log.error(
+            "If that's not it, you probably have a previous Chrome window open. You should close it."
+        )
+
+
+def modify_browser_profile():
+    # Delete crashed, so restore pop-up doesn't happen
+    path_to_prefs = os.path.join(
+        os.path.dirname(os.path.abspath("__file__")),
+        ".profile-amz",
+        "Default",
+        "Preferences",
+    )
+    try:
+        with fileinput.FileInput(path_to_prefs, inplace=True) as file:
+            for line in file:
+                print(line.replace("Crashed", "none"), end="")
+    except FileNotFoundError:
+        pass
+
+
+def set_options(prefs, slow_mode):
+    options.add_experimental_option("prefs", prefs)
+    options.add_argument(f"user-data-dir=.profile-amz")
+    if not slow_mode:
+        options.set_capability("pageLoadStrategy", "none")
+
+
+def get_prefs(no_image):
+    prefs = {
+        "profile.password_manager_enabled": False,
+        "credentials_enable_service": False,
+    }
+    if no_image:
+        prefs["profile.managed_default_content_settings.images"] = 2
+    else:
+        prefs["profile.managed_default_content_settings.images"] = 0
+    return prefs
+
+
+def create_webdriver_wait(driver, wait_time=10):
+    return WebDriverWait(driver, wait_time)
+
+
+def get_webdriver_pids(driver):
+    pid = driver.service.process.pid
+    driver_process = psutil.Process(pid)
+    children = driver_process.children(recursive=True)
+    webdriver_child_pids = []
+    for child in children:
+        webdriver_child_pids.append(child.pid)
+    return webdriver_child_pids
