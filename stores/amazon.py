@@ -45,7 +45,7 @@ BUTTON_XPATHS = [
 # Prime popup
 # //*[@id="primeAutomaticPopoverAdContent"]/div/div/div[1]/a
 # //*[@id="primeAutomaticPopoverAdContent"]/div/div/div[1]/a
-
+FREE_SHIPPING_PRICE = parse_price("0.00")
 
 DEFAULT_MAX_CHECKOUT_LOOPS = 20
 DEFAULT_MAX_PTC_TRIES = 3
@@ -488,12 +488,18 @@ class Amazon:
             prices = self.driver.find_elements_by_xpath(
                 '//*[@class="a-size-large a-color-price olpOfferPrice a-text-bold"]'
             )
+            if not prices:
+                # Try the flyout x-paths
+                prices = self.driver.find_elements_by_xpath(
+                    "//div[@id='aod-offer']//div[@id='aod-offer-price']//span[@class='a-offscreen']"
+                )
             if prices:
                 break
             if time.time() > timeout:
                 log.info(f"failed to load prices for {asin}, going to next ASIN")
                 return False
         shipping = []
+        shipping_prices = []
         if self.checkshipping:
             timeout = self.get_timeout()
             while True:
@@ -501,7 +507,22 @@ class Amazon:
                     '//*[@class="a-color-secondary"]'
                 )
                 if shipping:
+                    # Convert to prices just in case
+                    for shipping_node in shipping:
+                        if self.checkshipping:
+                            if amazon_config["SHIPPING_ONLY_IF"] in shipping_node.text:
+                                shipping_prices.append(parse_price("0"))
+                            else:
+                                shipping_prices.append(parse_price(shipping_node.text))
+                        else:
+                            shipping_prices.append(parse_price("0"))
                     break
+                else:
+                    # Check for offers
+                    offers = self.driver.find_elements_by_xpath.xpath("//div[@id='aod-offer']")
+                    for idx, offer in enumerate(offers):
+                        shipping_prices.append(get_shipping_costs(offer, amazon_config["FREE_SHIPPING"]))
+
                 if time.time() > timeout:
                     log.info(f"failed to load shipping for {asin}, going to next ASIN")
                     return False
@@ -516,10 +537,7 @@ class Amazon:
                 return False
             try:
                 if self.checkshipping:
-                    if amazon_config["SHIPPING_ONLY_IF"] in shipping[idx].text:
-                        ship_price = parse_price("0")
-                    else:
-                        ship_price = parse_price(shipping[idx].text)
+                    ship_price = shipping_prices[idx]
                 else:
                     ship_price = parse_price("0")
             except IndexError:
@@ -1302,3 +1320,66 @@ def get_timestamp_filename(name, extension):
         return name + "_" + date + extension
     else:
         return name + "_" + date + "." + extension
+
+
+def get_shipping_costs(tree, free_shipping_string):
+    # Assume Free Shipping and change otherwise
+
+    # Shipping collection xpath:
+    # .//div[starts-with(@id, 'aod-bottlingDepositFee-')]/following-sibling::span
+    shipping_nodes = tree.xpath(
+        ".//div[starts-with(@id, 'aod-bottlingDepositFee-')]/following-sibling::*[1]"
+    )
+    count = len(shipping_nodes)
+    log.debug(f"Found {count} shipping nodes.")
+    if count == 0:
+        log.warning("No shipping nodes found.  Assuming zero.")
+        return FREE_SHIPPING_PRICE
+    elif count > 1:
+        log.warning("Found multiple shipping nodes.  Using the first.")
+
+    shipping_node = shipping_nodes[0]
+    # Shipping information is found within either a DIV or a SPAN following the bottleDepositFee DIV
+    # What follows is logic to parse out the various pricing formats within the HTML.  Not ideal, but
+    # it's what we have to work with.
+    if shipping_node.tag == "div":
+        if shipping_node.text.strip() == "":
+            # Assume zero shipping for an empty div
+            log.debug(
+                "Empty div found after bottleDepositFee.  Assuming zero shipping."
+            )
+        else:
+            # Assume zero shipping for unknown values in
+            log.warning(
+                f"Non-Empty div found after bottleDepositFee.  Assuming zero. Stripped Value: '{shipping_node.text.strip()}'"
+            )
+    elif shipping_node.tag == "span":
+        # Shipping values in the span are contained in either another SPAN or hanging out alone in a B tag
+        shipping_spans = shipping_node.findall("span")
+        shipping_bs = shipping_node.findall("b")
+        shipping_is = shipping_node.findall("i")
+        if len(shipping_spans) > 0:
+            # If the span starts with a "& " it's free shipping (right?)
+            if shipping_spans[0].text.strip() == "&":
+                # & Free Shipping message
+                log.debug("Found '& Free', assuming zero.")
+            elif shipping_spans[0].text.startswith("+"):
+                return parse_price(shipping_spans[0].text.strip())
+        elif len(shipping_bs) > 0:
+            for message_node in shipping_bs:
+
+                if message_node.text.upper() in free_shipping_string:
+                    log.debug("Found free shipping string.")
+                else:
+                    log.error(
+                        f"Couldn't parse price from <B>. Assuming 0. Do we need to add: '{message_node.text.upper()}'"
+                    )
+        elif len(shipping_is) > 0:
+            # If it has prime icon class, assume free Prime shipping
+            if "Free" in shipping_is[0].attrib["aria-label"]:
+                log.debug("Found Free shipping with Prime")
+        else:
+            log.error(
+                f"Unable to locate price.  Assuming 0.  Found this: '{shipping_node.text.strip()}'"
+            )
+    return FREE_SHIPPING_PRICE
