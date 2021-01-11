@@ -10,6 +10,7 @@ import psutil
 from amazoncaptcha import AmazonCaptcha
 from chromedriver_py import binary_path  # this will get you the path variable
 from furl import furl
+from lxml import html
 from price_parser import parse_price
 from pypresence import exceptions as pyexceptions
 from selenium import webdriver
@@ -462,9 +463,43 @@ class Amazon:
 
         timeout = self.get_timeout()
         while True:
+            # Sanity check to see if we have any offers
+            try:
+                offers_exist = WebDriverWait(self.driver, timeout=5).until(lambda d: d.find_element_by_xpath(
+                    "//div[@id='aod-offer-list'] | //div[@id='olpOfferList']"
+                ))
+                offer_count = []
+                if offers_exist.get_attribute("id") == "olpOfferList":
+                    # Offers Page ... count the 'a-row' classes to know how many offers we 'see'
+                    offer_count = self.driver.find_elements_by_xpath("//div[contains(@class, 'a-row')]")
+                elif offers_exist.get_attribute("id") == "aod-offer-list":
+                    # Offer Flyout or Ajax call ... count the 'aod-offer' divs that we 'see'
+                    offer_count = self.driver.find_elements_by_xpath("//div[@id='aod-offer']")
+                log.info(f"Found {len(offer_count)} offers in the HTML.")
+
+            except sel_exceptions.TimeoutException:
+                log.error("Timed out waiting for offers to render.  Skipping...")
+                return False
+            except sel_exceptions.NoSuchElementException:
+                log.error("Unable to find any offers listing.  Skipping...")
+                return False
+
+
             atc_buttons = self.driver.find_elements_by_xpath(
                 '//*[@name="submit.addToCart"]'
             )
+            if not atc_buttons:
+                # Sanity check to see if we have a valid page, but no offers:
+                offer_count = WebDriverWait(self.driver, timeout=5).until(lambda d: d.find_element_by_xpath(
+                    "//div[@id='aod-offer-list']//input[@id='aod-total-offer-count']"
+                ))
+
+                # offer_count = self.driver.find_element_by_xpath(
+                #     "//div[@id='aod-offer-list']//input[@id='aod-total-offer-count']"
+                # )
+                if offer_count.get_attribute("value") == "0":
+                    log.info("Found zero offers explicitly.  Moving to next ASIN.")
+                    return False
             if atc_buttons:
                 # Early out if we found buttons
                 break
@@ -484,6 +519,7 @@ class Amazon:
                 return False
 
         timeout = self.get_timeout()
+        flyout_mode = False
         while True:
             prices = self.driver.find_elements_by_xpath(
                 '//*[@class="a-size-large a-color-price olpOfferPrice a-text-bold"]'
@@ -491,8 +527,11 @@ class Amazon:
             if not prices:
                 # Try the flyout x-paths
                 prices = self.driver.find_elements_by_xpath(
-                    "//div[@id='aod-offer']//div[@id='aod-offer-price']//span[@class='a-offscreen']"
+                    "//div[@id='aod-offer']//div[@id='aod-offer-price']//span[@class='a-price']//span[@class='a-offscreen']"
                 )
+                if prices:
+                    flyout_mode = True
+                    break
             if prices:
                 break
             if time.time() > timeout:
@@ -503,9 +542,10 @@ class Amazon:
         if self.checkshipping:
             timeout = self.get_timeout()
             while True:
-                shipping = self.driver.find_elements_by_xpath(
-                    '//*[@class="a-color-secondary"]'
-                )
+                if not flyout_mode:
+                    shipping = self.driver.find_elements_by_xpath(
+                        '//*[@class="a-color-secondary"]'
+                    )
                 if shipping:
                     # Convert to prices just in case
                     for shipping_node in shipping:
@@ -516,12 +556,14 @@ class Amazon:
                                 shipping_prices.append(parse_price(shipping_node.text))
                         else:
                             shipping_prices.append(parse_price("0"))
-                    break
                 else:
                     # Check for offers
-                    offers = self.driver.find_elements_by_xpath.xpath("//div[@id='aod-offer']")
+                    offers = self.driver.find_elements_by_xpath("//div[@id='aod-offer']")
                     for idx, offer in enumerate(offers):
-                        shipping_prices.append(get_shipping_costs(offer, amazon_config["FREE_SHIPPING"]))
+                        tree = html.fromstring(offer.get_attribute('innerHTML'))
+                        shipping_prices.append(get_shipping_costs(tree, amazon_config["FREE_SHIPPING"]))
+                if shipping_prices:
+                    break
 
                 if time.time() > timeout:
                     log.info(f"failed to load shipping for {asin}, going to next ASIN")
@@ -1179,7 +1221,7 @@ class Amazon:
         )
         log.info(f"--Delay of {self.refresh_delay} seconds")
         if self.headless:
-            log.info(f"--Headless doesn't work!")
+            log.info(f"--Chrome is running in Headless mode")
         if self.used:
             log.info(f"--Used items are considered for purchase")
         if self.checkshipping:
@@ -1196,8 +1238,6 @@ class Amazon:
             log.info(f"--Detailed screenshots/notifications is enabled")
         if self.log_stock_check:
             log.info(f"--Additional stock check logging enabled")
-        if self.testing:
-            log.warning(f"--Testing Mode.  NO Purchases will be made.")
         if self.slow_mode:
             log.warning(f"--Slow-mode enabled. Pages will fully load before execution.")
         if self.shipping_bypass:
