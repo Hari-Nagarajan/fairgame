@@ -25,7 +25,7 @@ from utils.selenium_utils import options, enable_headless
 
 AMAZON_URLS = {
     "BASE_URL": "https://{domain}/",
-    "OFFER_URL": "https://{domain}/gp/offer-listing/",
+    "OFFER_URL": "https://{domain}//gp/product/",
     "CART_URL": "https://{domain}/gp/cart/view.html",
 }
 CHECKOUT_URL = "https://{domain}/gp/cart/desktop/go-to-checkout.html/ref=ox_sc_proceed?partialCheckoutCart=1&isToBeGiftWrappedBefore=0&proceedToRetailCheckout=Proceed+to+checkout&proceedToCheckout=1&cartInitiateId={cart_id}"
@@ -65,20 +65,20 @@ amazon_config = None
 
 class Amazon:
     def __init__(
-        self,
-        notification_handler,
-        headless=False,
-        checkshipping=False,
-        detailed=False,
-        used=False,
-        single_shot=False,
-        no_screenshots=False,
-        disable_presence=False,
-        slow_mode=False,
-        no_image=False,
-        encryption_pass=None,
-        log_stock_check=False,
-        shipping_bypass=False,
+            self,
+            notification_handler,
+            headless=False,
+            checkshipping=False,
+            detailed=False,
+            used=False,
+            single_shot=False,
+            no_screenshots=False,
+            disable_presence=False,
+            slow_mode=False,
+            no_image=False,
+            encryption_pass=None,
+            log_stock_check=False,
+            shipping_bypass=False,
     ):
         self.notification_handler = notification_handler
         self.asin_list = []
@@ -220,9 +220,9 @@ class Amazon:
                     pass
                 # if successful after running navigate pages, remove the asin_list from the list
                 if (
-                    not self.try_to_checkout
-                    and not self.single_shot
-                    and self.great_success
+                        not self.try_to_checkout
+                        and not self.single_shot
+                        and self.great_success
                 ):
                     self.remove_asin_list(asin)
                 # checkout loop limiters
@@ -466,7 +466,7 @@ class Amazon:
             # Sanity check to see if we have any offers
             try:
                 offers_exist = WebDriverWait(self.driver, timeout=5).until(lambda d: d.find_element_by_xpath(
-                    "//div[@id='aod-offer-list'] | //div[@id='olpOfferList']"
+                    "//div[@id='aod-offer-list'] | //div[@id='olpOfferList'] | //span[@data-action='show-all-offers-display']"
                 ))
                 offer_count = []
                 if offers_exist.get_attribute("id") == "olpOfferList":
@@ -475,7 +475,17 @@ class Amazon:
                 elif offers_exist.get_attribute("id") == "aod-offer-list":
                     # Offer Flyout or Ajax call ... count the 'aod-offer' divs that we 'see'
                     offer_count = self.driver.find_elements_by_xpath("//div[@id='aod-offer']")
-                log.info(f"Found {len(offer_count)} offers in the HTML.")
+                else:
+                    # No offers to parse... look for a link to the offers
+                    log.info("Attempting to click the open offers link...")
+                    self.driver.find_element_by_xpath(
+                        "//span[@data-action='show-all-offers-display']//a").click()
+                    # Now wait for the flyout to load
+                    log.info("Waiting for flyout... probably")
+                    WebDriverWait(self.driver, timeout=5).until(lambda d: d.find_element_by_xpath("//div[@id='aod-container']"))
+                    log.info("It flew out?!")
+                    continue
+                log.info(f"Found {len(offer_count)} offers in the HTML.  Attempting to parse...")
 
             except sel_exceptions.TimeoutException:
                 log.error("Timed out waiting for offers to render.  Skipping...")
@@ -483,7 +493,6 @@ class Amazon:
             except sel_exceptions.NoSuchElementException:
                 log.error("Unable to find any offers listing.  Skipping...")
                 return False
-
 
             atc_buttons = self.driver.find_elements_by_xpath(
                 '//*[@name="submit.addToCart"]'
@@ -570,6 +579,8 @@ class Amazon:
                     return False
 
         in_stock = False
+        for shipping_price in shipping_prices:
+            log.info(f"\tShipping Price: {shipping_price}")
 
         for idx, atc_button in enumerate(atc_buttons):
             try:
@@ -593,11 +604,11 @@ class Amazon:
                 ship_float = 0
 
             if (
-                (ship_float + price_float) <= reserve_max
-                or math.isclose((price_float + ship_float), reserve_max, abs_tol=0.01)
+                    (ship_float + price_float) <= reserve_max
+                    or math.isclose((price_float + ship_float), reserve_max, abs_tol=0.01)
             ) and (
-                (ship_float + price_float) >= reserve_min
-                or math.isclose((price_float + ship_float), reserve_min, abs_tol=0.01)
+                    (ship_float + price_float) >= reserve_min
+                    or math.isclose((price_float + ship_float), reserve_min, abs_tol=0.01)
             ):
                 log.info("Item in stock and in reserve range!")
                 log.info("clicking add to cart")
@@ -1069,7 +1080,7 @@ class Amazon:
         current_page = self.driver.title
         try:
             if self.driver.find_element_by_xpath(
-                '//form[@action="/errors/validateCaptcha"]'
+                    '//form[@action="/errors/validateCaptcha"]'
             ):
                 try:
                     log.info("Stuck on a captcha... Lets try to solve it.")
@@ -1153,7 +1164,7 @@ class Amazon:
     def wait_for_page_change(self, page_title, timeout=3):
         time_to_end = self.get_timeout(timeout=timeout)
         while time.time() < time_to_end and (
-            self.driver.title == page_title or not self.driver.title
+                self.driver.title == page_title or not self.driver.title
         ):
             pass
         if self.driver.title != page_title:
