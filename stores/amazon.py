@@ -25,7 +25,7 @@ from utils.selenium_utils import options, enable_headless
 
 AMAZON_URLS = {
     "BASE_URL": "https://{domain}/",
-    "OFFER_URL": "https://{domain}//gp/product/",
+    "OFFER_URL": "https://{domain}/gp/offer-listing/",
     "CART_URL": "https://{domain}/gp/cart/view.html",
 }
 CHECKOUT_URL = "https://{domain}/gp/cart/desktop/go-to-checkout.html/ref=ox_sc_proceed?partialCheckoutCart=1&isToBeGiftWrappedBefore=0&proceedToRetailCheckout=Proceed+to+checkout&proceedToCheckout=1&cartInitiateId={cart_id}"
@@ -482,7 +482,8 @@ class Amazon:
                         "//span[@data-action='show-all-offers-display']//a").click()
                     # Now wait for the flyout to load
                     log.info("Waiting for flyout... probably")
-                    WebDriverWait(self.driver, timeout=5).until(lambda d: d.find_element_by_xpath("//div[@id='aod-container']"))
+                    WebDriverWait(self.driver, timeout=5).until(
+                        lambda d: d.find_element_by_xpath("//div[@id='aod-container']"))
                     log.info("It flew out?!")
                     continue
                 log.info(f"Found {len(offer_count)} offers in the HTML.  Attempting to parse...")
