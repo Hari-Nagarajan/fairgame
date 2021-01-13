@@ -23,6 +23,7 @@ from utils.debugger import debug
 from utils.logger import log
 from utils.selenium_utils import options, enable_headless
 
+# Optional OFFER_URL is:     "OFFER_URL": "https://{domain}/dp/",
 AMAZON_URLS = {
     "BASE_URL": "https://{domain}/",
     "OFFER_URL": "https://{domain}/gp/offer-listing/",
@@ -65,20 +66,20 @@ amazon_config = None
 
 class Amazon:
     def __init__(
-            self,
-            notification_handler,
-            headless=False,
-            checkshipping=False,
-            detailed=False,
-            used=False,
-            single_shot=False,
-            no_screenshots=False,
-            disable_presence=False,
-            slow_mode=False,
-            no_image=False,
-            encryption_pass=None,
-            log_stock_check=False,
-            shipping_bypass=False,
+        self,
+        notification_handler,
+        headless=False,
+        checkshipping=False,
+        detailed=False,
+        used=False,
+        single_shot=False,
+        no_screenshots=False,
+        disable_presence=False,
+        slow_mode=False,
+        no_image=False,
+        encryption_pass=None,
+        log_stock_check=False,
+        shipping_bypass=False,
     ):
         self.notification_handler = notification_handler
         self.asin_list = []
@@ -220,9 +221,9 @@ class Amazon:
                     pass
                 # if successful after running navigate pages, remove the asin_list from the list
                 if (
-                        not self.try_to_checkout
-                        and not self.single_shot
-                        and self.great_success
+                    not self.try_to_checkout
+                    and not self.single_shot
+                    and self.great_success
                 ):
                     self.remove_asin_list(asin)
                 # checkout loop limiters
@@ -465,28 +466,50 @@ class Amazon:
         while True:
             # Sanity check to see if we have any offers
             try:
-                offers_exist = WebDriverWait(self.driver, timeout=5).until(lambda d: d.find_element_by_xpath(
-                    "//div[@id='aod-offer-list'] | //div[@id='olpOfferList'] | //span[@data-action='show-all-offers-display']"
-                ))
+                offers_exist = WebDriverWait(self.driver, timeout=5).until(
+                    lambda d: d.find_element_by_xpath(
+                        "//div[@id='aod-offer-list'] | "
+                        "//div[@id='olpOfferList'] | "
+                        "//span[@data-action='show-all-offers-display'] |"
+                        "//input[@name='submit.add-to-cart' and not(//span[@data-action='show-all-offers-display'])]"
+                    )
+                )
                 offer_count = []
                 if offers_exist.get_attribute("id") == "olpOfferList":
                     # Offers Page ... count the 'a-row' classes to know how many offers we 'see'
-                    offer_count = self.driver.find_elements_by_xpath("//div[contains(@class, 'a-row')]")
+                    offer_count = self.driver.find_elements_by_xpath(
+                        "//div[contains(@class, 'a-row')]"
+                    )
                 elif offers_exist.get_attribute("id") == "aod-offer-list":
                     # Offer Flyout or Ajax call ... count the 'aod-offer' divs that we 'see'
-                    offer_count = self.driver.find_elements_by_xpath("//div[@id='aod-offer']")
-                else:
+                    offer_count = self.driver.find_elements_by_xpath(
+                        "//div[@id='aod-offer']"
+                    )
+                elif (
+                    offers_exist.get_attribute("data-action")
+                    == "show-all-offers-display"
+                ):
                     # No offers to parse... look for a link to the offers
                     log.info("Attempting to click the open offers link...")
                     self.driver.find_element_by_xpath(
-                        "//span[@data-action='show-all-offers-display']//a").click()
+                        "//span[@data-action='show-all-offers-display']//a"
+                    ).click()
                     # Now wait for the flyout to load
                     log.info("Waiting for flyout... probably")
                     WebDriverWait(self.driver, timeout=5).until(
-                        lambda d: d.find_element_by_xpath("//div[@id='aod-container']"))
+                        lambda d: d.find_element_by_xpath("//div[@id='aod-container']")
+                    )
                     log.info("It flew out?!")
                     continue
-                log.info(f"Found {len(offer_count)} offers in the HTML.  Attempting to parse...")
+                else:
+                    # This assumes we're on a PDP with only an add to cart button... no offers
+                    log.warning(
+                        "NOT YET IMPLEMENTED: PDP represents only item worth considering.  Parse pricing and Add To Cart from PDP if item qualifies."
+                    )
+                    return False
+                log.info(
+                    f"Found {len(offer_count)} offers in the HTML.  Attempting to parse..."
+                )
 
             except sel_exceptions.TimeoutException:
                 log.error("Timed out waiting for offers to render.  Skipping...")
@@ -500,9 +523,11 @@ class Amazon:
             )
             if not atc_buttons:
                 # Sanity check to see if we have a valid page, but no offers:
-                offer_count = WebDriverWait(self.driver, timeout=5).until(lambda d: d.find_element_by_xpath(
-                    "//div[@id='aod-offer-list']//input[@id='aod-total-offer-count']"
-                ))
+                offer_count = WebDriverWait(self.driver, timeout=5).until(
+                    lambda d: d.find_element_by_xpath(
+                        "//div[@id='aod-offer-list']//input[@id='aod-total-offer-count']"
+                    )
+                )
 
                 # offer_count = self.driver.find_element_by_xpath(
                 #     "//div[@id='aod-offer-list']//input[@id='aod-total-offer-count']"
@@ -558,7 +583,8 @@ class Amazon:
                     )
                 if shipping:
                     # Convert to prices just in case
-                    for shipping_node in shipping:
+                    for idx, shipping_node in enumerate(shipping):
+                        log.debug(f"Processing shipping node {idx}")
                         if self.checkshipping:
                             if amazon_config["SHIPPING_ONLY_IF"] in shipping_node.text:
                                 shipping_prices.append(parse_price("0"))
@@ -568,10 +594,14 @@ class Amazon:
                             shipping_prices.append(parse_price("0"))
                 else:
                     # Check for offers
-                    offers = self.driver.find_elements_by_xpath("//div[@id='aod-offer']")
+                    offers = self.driver.find_elements_by_xpath(
+                        "//div[@id='aod-offer']"
+                    )
                     for idx, offer in enumerate(offers):
-                        tree = html.fromstring(offer.get_attribute('innerHTML'))
-                        shipping_prices.append(get_shipping_costs(tree, amazon_config["FREE_SHIPPING"]))
+                        tree = html.fromstring(offer.get_attribute("innerHTML"))
+                        shipping_prices.append(
+                            get_shipping_costs(tree, amazon_config["FREE_SHIPPING"])
+                        )
                 if shipping_prices:
                     break
 
@@ -581,7 +611,7 @@ class Amazon:
 
         in_stock = False
         for shipping_price in shipping_prices:
-            log.info(f"\tShipping Price: {shipping_price}")
+            log.debug(f"\tShipping Price: {shipping_price}")
 
         for idx, atc_button in enumerate(atc_buttons):
             try:
@@ -605,11 +635,11 @@ class Amazon:
                 ship_float = 0
 
             if (
-                    (ship_float + price_float) <= reserve_max
-                    or math.isclose((price_float + ship_float), reserve_max, abs_tol=0.01)
+                (ship_float + price_float) <= reserve_max
+                or math.isclose((price_float + ship_float), reserve_max, abs_tol=0.01)
             ) and (
-                    (ship_float + price_float) >= reserve_min
-                    or math.isclose((price_float + ship_float), reserve_min, abs_tol=0.01)
+                (ship_float + price_float) >= reserve_min
+                or math.isclose((price_float + ship_float), reserve_min, abs_tol=0.01)
             ):
                 log.info("Item in stock and in reserve range!")
                 log.info("clicking add to cart")
@@ -1081,7 +1111,7 @@ class Amazon:
         current_page = self.driver.title
         try:
             if self.driver.find_element_by_xpath(
-                    '//form[@action="/errors/validateCaptcha"]'
+                '//form[@action="/errors/validateCaptcha"]'
             ):
                 try:
                     log.info("Stuck on a captcha... Lets try to solve it.")
@@ -1165,7 +1195,7 @@ class Amazon:
     def wait_for_page_change(self, page_title, timeout=3):
         time_to_end = self.get_timeout(timeout=timeout)
         while time.time() < time_to_end and (
-                self.driver.title == page_title or not self.driver.title
+            self.driver.title == page_title or not self.driver.title
         ):
             pass
         if self.driver.title != page_title:
@@ -1394,8 +1424,9 @@ def get_shipping_costs(tree, free_shipping_string):
     # Shipping information is found within either a DIV or a SPAN following the bottleDepositFee DIV
     # What follows is logic to parse out the various pricing formats within the HTML.  Not ideal, but
     # it's what we have to work with.
+    shipping_span_text = shipping_node.text.strip()
     if shipping_node.tag == "div":
-        if shipping_node.text.strip() == "":
+        if shipping_span_text == "":
             # Assume zero shipping for an empty div
             log.debug(
                 "Empty div found after bottleDepositFee.  Assuming zero shipping."
@@ -1403,13 +1434,20 @@ def get_shipping_costs(tree, free_shipping_string):
         else:
             # Assume zero shipping for unknown values in
             log.warning(
-                f"Non-Empty div found after bottleDepositFee.  Assuming zero. Stripped Value: '{shipping_node.text.strip()}'"
+                f"Non-Empty div found after bottleDepositFee.  Assuming zero. Stripped Value: '{shipping_span_text}'"
             )
     elif shipping_node.tag == "span":
-        # Shipping values in the span are contained in either another SPAN or hanging out alone in a B tag
+        # Shipping values in the span are contained in:
+        # - another SPAN
+        # - hanging out alone in a B tag
+        # - Hanging out alone in an I tag
+        # - Nested in two I tags <i><i></i></i>
+        # - "Prime FREE Delivery" in this node
+
         shipping_spans = shipping_node.findall("span")
         shipping_bs = shipping_node.findall("b")
-        shipping_is = shipping_node.findall("i")
+        # shipping_is = shipping_node.findall("i")
+        shipping_is = shipping_node.xpath("//i[@aria-label]")
         if len(shipping_spans) > 0:
             # If the span starts with a "& " it's free shipping (right?)
             if shipping_spans[0].text.strip() == "&":
@@ -1428,10 +1466,13 @@ def get_shipping_costs(tree, free_shipping_string):
                     )
         elif len(shipping_is) > 0:
             # If it has prime icon class, assume free Prime shipping
-            if "Free" in shipping_is[0].attrib["aria-label"]:
+            if "FREE" in shipping_is[0].attrib["aria-label"].upper():
                 log.debug("Found Free shipping with Prime")
+        elif any(shipping_span_text.upper() in free_message for free_message in amazon_config["FREE_SHIPPING"]):
+            # We found some version of "free" inside the span.. but this relies on a match
+            log.warning(f"Assuming free shipping based on this message: '{shipping_span_text}'")
         else:
             log.error(
-                f"Unable to locate price.  Assuming 0.  Found this: '{shipping_node.text.strip()}'"
+                f"Unable to locate price.  Assuming 0.  Found this: '{shipping_span_text}'  Consider reporting to #tech-support Discord."
             )
     return FREE_SHIPPING_PRICE
