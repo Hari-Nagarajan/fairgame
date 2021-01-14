@@ -314,6 +314,21 @@ class Amazon:
         else:
             log.info("Email not needed.")
 
+        if "reverification" in self.driver.current_url:
+            log.warning(
+                "Beta code for allowing user to solve OTP.  Please report success/failures "
+                "to #feature-testing on Discord"
+            )
+            # Maybe/Probably/Likely a One Time Password prompt?  Let's wait until the user takes action
+            self.notification_handler.play_alarm_sound()
+            log.error("One Time Password input required... pausing for user input")
+            try:
+                WebDriverWait(self.driver, timeout=300).until(
+                    lambda d: "/ap/" not in d.driver.current_url
+                )
+            except sel_exceptions.TimeoutException:
+                log.error("User did not solve One Time Password prompt in time.")
+
         if self.driver.find_elements_by_xpath('//*[@id="auth-error-message-box"]'):
             log.error("Login failed, delete your credentials file")
             time.sleep(240)
@@ -470,17 +485,24 @@ class Amazon:
                     lambda d: d.find_element_by_xpath(
                         "//div[@id='aod-offer-list'] | "
                         "//div[@id='olpOfferList'] | "
-                        "//span[@data-action='show-all-offers-display'] |"
+                        "//span[@data-action='show-all-offers-display'] | "
+                        "//div[@id='backInStock' or @id='outOfStock'] |"
                         "//input[@name='submit.add-to-cart' and not(//span[@data-action='show-all-offers-display'])]"
                     )
                 )
                 offer_count = []
-                if offers_exist.get_attribute("id") == "olpOfferList":
+                offer_id = offers_exist.get_attribute("id")
+                if offer_id == "outOfStock" or offer_id == "backInStock":
+                    # No dice... Early out and move on
+                    log.info("Item is currently unavailable.  Moving on...")
+                    return False
+
+                if offer_id == "olpOfferList":
                     # Offers Page ... count the 'a-row' classes to know how many offers we 'see'
                     offer_count = self.driver.find_elements_by_xpath(
-                        "//div[contains(@class, 'a-row')]"
+                        "//div[@id='olpOfferList']//div[contains(@class, 'olpOffer')]"
                     )
-                elif offers_exist.get_attribute("id") == "aod-offer-list":
+                elif offer_id == "aod-offer-list":
                     # Offer Flyout or Ajax call ... count the 'aod-offer' divs that we 'see'
                     offer_count = self.driver.find_elements_by_xpath(
                         "//div[@id='aod-offer']"
@@ -497,7 +519,9 @@ class Amazon:
                     # Now wait for the flyout to load
                     log.info("Waiting for flyout... probably")
                     WebDriverWait(self.driver, timeout=5).until(
-                        lambda d: d.find_element_by_xpath("//div[@id='aod-container']")
+                        lambda d: d.find_element_by_xpath(
+                            "//div[@id='aod-offer-list'] | //div[@id='olpOfferList']"
+                        )
                     )
                     log.info("It flew out?!")
                     continue
@@ -507,12 +531,16 @@ class Amazon:
                         "NOT YET IMPLEMENTED: PDP represents only item worth considering.  Parse pricing and Add To Cart from PDP if item qualifies."
                     )
                     return False
+                if len(offer_count) == 0:
+                    log.info("No offers found.  Moving on.")
+                    return False
                 log.info(
                     f"Found {len(offer_count)} offers in the HTML.  Attempting to parse..."
                 )
 
             except sel_exceptions.TimeoutException:
                 log.error("Timed out waiting for offers to render.  Skipping...")
+                log.error(f"URL: {self.driver.current_url}")
                 return False
             except sel_exceptions.NoSuchElementException:
                 log.error("Unable to find any offers listing.  Skipping...")
@@ -521,20 +549,20 @@ class Amazon:
             atc_buttons = self.driver.find_elements_by_xpath(
                 '//*[@name="submit.addToCart"]'
             )
-            if not atc_buttons:
-                # Sanity check to see if we have a valid page, but no offers:
-                offer_count = WebDriverWait(self.driver, timeout=5).until(
-                    lambda d: d.find_element_by_xpath(
-                        "//div[@id='aod-offer-list']//input[@id='aod-total-offer-count']"
-                    )
-                )
-
-                # offer_count = self.driver.find_element_by_xpath(
-                #     "//div[@id='aod-offer-list']//input[@id='aod-total-offer-count']"
-                # )
-                if offer_count.get_attribute("value") == "0":
-                    log.info("Found zero offers explicitly.  Moving to next ASIN.")
-                    return False
+            # if not atc_buttons:
+            #     # Sanity check to see if we have a valid page, but no offers:
+            #     offer_count = WebDriverWait(self.driver, timeout=25).until(
+            #         lambda d: d.find_element_by_xpath(
+            #             "//div[@id='aod-offer-list']//input[@id='aod-total-offer-count']"
+            #         )
+            #     )
+            #
+            #     # offer_count = self.driver.find_element_by_xpath(
+            #     #     "//div[@id='aod-offer-list']//input[@id='aod-total-offer-count']"
+            #     # )
+            #     if offer_count.get_attribute("value") == "0":
+            #         log.info("Found zero offers explicitly.  Moving to next ASIN.")
+            #         return False
             if atc_buttons:
                 # Early out if we found buttons
                 break
@@ -1468,9 +1496,14 @@ def get_shipping_costs(tree, free_shipping_string):
             # If it has prime icon class, assume free Prime shipping
             if "FREE" in shipping_is[0].attrib["aria-label"].upper():
                 log.debug("Found Free shipping with Prime")
-        elif any(shipping_span_text.upper() in free_message for free_message in amazon_config["FREE_SHIPPING"]):
+        elif any(
+            shipping_span_text.upper() in free_message
+            for free_message in amazon_config["FREE_SHIPPING"]
+        ):
             # We found some version of "free" inside the span.. but this relies on a match
-            log.warning(f"Assuming free shipping based on this message: '{shipping_span_text}'")
+            log.warning(
+                f"Assuming free shipping based on this message: '{shipping_span_text}'"
+            )
         else:
             log.error(
                 f"Unable to locate price.  Assuming 0.  Found this: '{shipping_span_text}'  Consider reporting to #tech-support Discord."
