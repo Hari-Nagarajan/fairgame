@@ -547,7 +547,7 @@ class Amazon:
                 return False
 
             atc_buttons = self.driver.find_elements_by_xpath(
-                '//*[@name="submit.addToCart"]'
+                "//div[@id='aod-offer-list' or @id='olpOfferList']//input[@name='submit.addToCart']"
             )
             # if not atc_buttons:
             #     # Sanity check to see if we have a valid page, but no offers:
@@ -643,7 +643,10 @@ class Amazon:
 
         for idx, atc_button in enumerate(atc_buttons):
             try:
-                price = parse_price(prices[idx].text)
+                if flyout_mode:
+                    price = parse_price(prices[idx].get_attribute("innerHTML"))
+                else:
+                    price = parse_price(prices[idx].text)
             except IndexError:
                 log.debug("Price index error")
                 return False
