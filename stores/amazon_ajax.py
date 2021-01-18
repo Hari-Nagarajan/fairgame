@@ -1,25 +1,40 @@
 import fileinput
-import http.client
 import json
 import os
-import pathlib
+import platform
 import random
 import time
 import typing
-from decimal import Decimal
+from contextlib import contextmanager
 
-import attr
 import psutil
 import requests
 from amazoncaptcha import AmazonCaptcha
 from chromedriver_py import binary_path
 from furl import furl
-from hyper import HTTP20Connection
 from lxml import html
 from price_parser import parse_price, Price
 from selenium import webdriver
-from selenium.webdriver.support.wait import WebDriverWait
+from selenium.common.exceptions import (
+    NoSuchElementException,
+    TimeoutException,
+)
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.support import expected_conditions as EC, wait
+from selenium.webdriver.support.expected_conditions import staleness_of
+from selenium.webdriver.support.ui import WebDriverWait
 
+from common.amazon_support import (
+    AmazonItemCondition,
+    FGItem,
+    SellerDetail,
+    condition_check,
+    price_check,
+    solve_captcha,
+    get_shipping_costs,
+)
 from notifications.notifications import NotificationHandler
 from stores.basestore import BaseStoreHandler
 from utils.logger import log
@@ -48,212 +63,29 @@ REALTIME_INVENTORY_PATH = f"/gp/aod/ajax/ref=aod_f_new?isonlyrenderofferlist=tru
 # REALTIME_INVENTORY_URL = "https://www.amazon.com/gp/aod/ajax/ref=dp_aod_NEW_mbc?asin="
 CONFIG_FILE_PATH = "config/amazon_ajax_config.json"
 STORE_NAME = "Amazon"
-FREE_SHIPPING_PRICE = parse_price("0.00")
+
 
 CONDITION_NEW = 1
 CONDITION_USED = 10
 CONDITION_COLLECTIBLE = 20
 CONDITION_UNKNOWN = 100
 
+DEFAULT_MAX_TIMEOUT = 10
+
 # Request
-# HEADERS = {
-#     "authority": "www.amazon.ca",
-#     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-#     "Accept-Encoding": "gzip, deflate, sdch, br",
-#     "Accept-Language": "en-US,en;q=0.8",
-#     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36",
-# }
 HEADERS = {
-    "cache-control": "max-age=0",
-    "upgrade-insecure-requests": "1",
-    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Safari/537.36",
-    "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-    "service-worker-navigation-preload": "true",
-    "sec-gpc": "1",
-    "sec-fetch-site": "none",
-    "sec-fetch-mode": "navigate",
-    "sec-fetch-user": "?1",
-    "sec-fetch-dest": "document",
-    "accept-language": "en-US,en;q=0.9",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+    "Accept-Encoding": "gzip, deflate, sdch, br",
+    "Accept-Language": "en-US,en;q=0.8",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36",
 }
 
 
-@attr.s(auto_attribs=True)
-class SellerDetail:
-    name: str
-    price: Price
-    shipping_cost: Price
-    condition: int = CONDITION_NEW
-    atc_url: str = None
-    offering_id: str = None
-    xpath = f"//form[@action='{atc_url}'//input[@name='submit.addToCart']"
-
-    @property
-    def selling_price(self) -> Decimal:
-        return self.price.amount + self.shipping_cost.amount
-
-
-@attr.s(auto_attribs=True)
-class FGItem:
-    id: str
-    min_price: Price
-    max_price: Price
-    name: str = None
-    short_name: str = None
-    url: str = None
-    condition: int = CONDITION_NEW
-    status_code: int = 200
-
-
-def get_merchant_names(tree):
-    # Merchant Link XPath:
-    # //a[@target='_blank' and contains(@href, "merch_name")]
-    merchant_nodes = tree.xpath(
-        "//a[@target='_blank' and contains(@href, 'merch_name')]"
-    )
-    log.debug(f"found {len(merchant_nodes)} merchant nodes.")
-    merchants = []
-    for idx, merchant_node in enumerate(merchant_nodes):
-        log.debug(f"Found merchant {idx + 1}: {merchant_node.text.strip()}")
-        merchants.append(merchant_node.text.strip())
-    return merchants
-
-
-def get_prices(tree):
-    # Price collection xpath:
-    # //div[@id='aod-offer']//div[contains(@id, "aod-price-")]//span[contains(@class,'a-offscreen')]
-    price_nodes = tree.xpath(
-        "//div[@id='aod-offer']//div[contains(@id, 'aod-price-')]//span[contains(@class,'a-offscreen')]"
-    )
-    log.debug(f"Found {len(price_nodes)} price nodes.")
-    prices = []
-    for idx, price_node in enumerate(price_nodes):
-        log.debug(f"Found price {idx + 1}: {price_node.text}")
-        prices.append(parse_price(price_node.text))
-    return prices
-
-
-def get_shipping_costs(tree, free_shipping_string):
-    # Assume Free Shipping and change otherwise
-
-    # Shipping collection xpath:
-    # .//div[starts-with(@id, 'aod-bottlingDepositFee-')]/following-sibling::span
-    shipping_nodes = tree.xpath(
-        ".//div[starts-with(@id, 'aod-bottlingDepositFee-')]/following-sibling::*[1]"
-    )
-    count = len(shipping_nodes)
-    log.debug(f"Found {count} shipping nodes.")
-    if count == 0:
-        log.warning("No shipping nodes found.  Assuming zero.")
-        return FREE_SHIPPING_PRICE
-    elif count > 1:
-        log.warning("Found multiple shipping nodes.  Using the first.")
-
-    shipping_node = shipping_nodes[0]
-    # Shipping information is found within either a DIV or a SPAN following the bottleDepositFee DIV
-    # What follows is logic to parse out the various pricing formats within the HTML.  Not ideal, but
-    # it's what we have to work with.
-    if shipping_node.tag == "div":
-        if shipping_node.text.strip() == "":
-            # Assume zero shipping for an empty div
-            log.debug(
-                "Empty div found after bottleDepositFee.  Assuming zero shipping."
-            )
-        else:
-            # Assume zero shipping for unknown values in
-            log.warning(
-                f"Non-Empty div found after bottleDepositFee.  Assuming zero. Stripped Value: '{shipping_node.text.strip()}'"
-            )
-    elif shipping_node.tag == "span":
-        # Shipping values in the span are contained in either another SPAN or hanging out alone in a B tag
-        shipping_spans = shipping_node.findall("span")
-        shipping_bs = shipping_node.findall("b")
-        shipping_is = shipping_node.findall("i")
-        if len(shipping_spans) > 0:
-            # If the span starts with a "& " it's free shipping (right?)
-            if shipping_spans[0].text.strip() == "&":
-                # & Free Shipping message
-                log.debug("Found '& Free', assuming zero.")
-            elif shipping_spans[0].text.startswith("+"):
-                return parse_price(shipping_spans[0].text.strip())
-        elif len(shipping_bs) > 0:
-            for message_node in shipping_bs:
-
-                if message_node.text.upper() in free_shipping_string:
-                    log.debug("Found free shipping string.")
-                else:
-                    log.error(
-                        f"Couldn't parse price from <B>. Assuming 0. Do we need to add: '{message_node.text.upper()}'"
-                    )
-        elif len(shipping_is) > 0:
-            # If it has prime icon class, assume free Prime shipping
-            if "Free" in shipping_is[0].attrib["aria-label"]:
-                log.debug("Found Free shipping with Prime")
-        else:
-            log.error(
-                f"Unable to locate price.  Assuming 0.  Found this: '{shipping_node.text.strip()}'"
-            )
-    return FREE_SHIPPING_PRICE
-
-
-def get_form_actions(tree):
-    # ATC form actions
-    # //div[@id='aod-offer']//form[contains(@action,'add-to-cart')]
-    form_action_nodes = tree.xpath(
-        "//div[@id='aod-offer']//form[contains(@action,'add-to-cart')]"
-    )
-    log.debug(f"Found {len(form_action_nodes)} form action nodes.")
-    form_actions = []
-    for idx, form_action in enumerate(form_action_nodes):
-        form_actions.append(form_action.action)
-    return form_actions
-
-
-def get_item_condition(form_action) -> int:
-    if "_new_" in form_action:
-        log.debug(f"Item condition is new")
-        return CONDITION_NEW
-    elif "_used_" in form_action:
-        log.debug(f"Item condition is used")
-        return CONDITION_USED
-    elif "_col_" in form_action:
-        log.debug(f"Item condition is collectible")
-        return CONDITION_COLLECTIBLE
+def free_shipping_check(seller):
+    if seller.shipping_cost.amount > 0:
+        return False
     else:
-        log.debug(f"Item condition is unknown: {form_action}")
-        return CONDITION_UNKNOWN
-
-
-def solve_captcha(session, form_element, pdp_url):
-    log.warning("Encountered CAPTCHA. Attempting to solve.")
-    # Starting from the form, get the inputs and image
-    captcha_images = form_element.xpath('//img[contains(@src, "amazon.com/captcha/")]')
-    if captcha_images:
-        link = captcha_images[0].attrib["src"]
-        # link = 'https://images-na.ssl-images-amazon.com/captcha/usvmgloq/Captcha_kwrrnqwkph.jpg'
-        captcha = AmazonCaptcha.fromlink(link)
-        solution = captcha.solve()
-
-        if solution:
-            form_inputs = form_element.xpath(".//input")
-            input_dict = {}
-            for form_input in form_inputs:
-                if form_input.type == "text":
-                    input_dict[form_input.name] = solution
-                else:
-                    input_dict[form_input.name] = form_input.value
-            f = furl(pdp_url) # Use the original URL to get the schema and host
-            f = f.set(path=form_element.attrib["action"])
-            f.add(args=input_dict)
-            payload = ""
-
-            # conn.request("GET", f.url, payload, HEADERS)
-            # response = conn.get_response()
-            response = session.get(f.url)
-            log.debug(f"Captcha response was {response.status_code}")
-            return response.text, response.status_code
-
-    return html.fromstring(""), 404
+        return True
 
 
 class AmazonStoreHandler(BaseStoreHandler):
@@ -279,16 +111,20 @@ class AmazonStoreHandler(BaseStoreHandler):
     ) -> None:
         super().__init__()
 
+        self.shuffle = True
+
         self.notification_handler = notification_handler
+        self.check_shipping = checkshipping
         self.item_list: typing.List[FGItem] = []
         self.stock_checks = 0
         self.start_time = int(time.time())
         self.amazon_domain = "smile.amazon.com"
-        self.driver = None
         self.webdriver_child_pids = []
+        self.take_screenshots = not no_screenshots
         from cli.cli import global_config
 
         self.amazon_config = global_config.get_amazon_config()
+        global_config.get_amazon_credentials()
 
         # Load up our configuration
         self.parse_config()
@@ -298,21 +134,184 @@ class AmazonStoreHandler(BaseStoreHandler):
             enable_headless()
 
         prefs = get_prefs(no_image)
-        set_options(prefs, slow_mode)
+        set_options(prefs, slow_mode=True)
         modify_browser_profile()
 
         # Initialize the Session we'll use for this run
         self.session = requests.Session()
         self.session.headers.update(HEADERS)
-        self.conn = http.client.HTTPSConnection(self.amazon_domain)
-        self.conn20 = HTTP20Connection(self.amazon_domain)
+        # self.conn = http.client.HTTPSConnection(self.amazon_domain)
+        # self.conn20 = HTTP20Connection(self.amazon_domain)
+
+        # Spawn the web browser
+        self.driver = create_driver(options)
+        self.webdriver_child_pids = get_webdriver_pids(self.driver)
 
     def __del__(self):
         message = f"Shutting down {STORE_NAME} Store Handler."
         log.info(message)
         self.notification_handler.send_notification(message)
+        self.delete_driver()
+
+    def delete_driver(self):
+        try:
+            if platform.system() == "Windows" and self.driver:
+                log.info("Cleaning up after web driver...")
+                # brute force kill child Chrome pids with fire
+                for pid in self.webdriver_child_pids:
+                    try:
+                        log.debug(f"Killing {pid}...")
+                        process = psutil.Process(pid)
+                        process.kill()
+                    except psutil.NoSuchProcess:
+                        log.debug(f"{pid} not found. Continuing...")
+                        pass
+            elif self.driver:
+                self.driver.quit()
+
+        except Exception as e:
+            log.info(e)
+            log.info(
+                "Failed to clean up after web driver.  Please manually close browser."
+            )
+            return False
+        return True
+
+    def is_logged_in(self):
+        try:
+            text = self.driver.find_element_by_id("nav-link-accountList").text
+            return not any(
+                sign_in in text for sign_in in self.amazon_config["SIGN_IN_TEXT"]
+            )
+        except NoSuchElementException:
+
+            return False
+
+    def login(self):
+        log.info(f"Logging in to {self.amazon_domain}...")
+
+        email_field: WebElement
+        remember_me: WebElement
+        password_field: WebElement
+
+        # Look for a sign in link
+        try:
+            skip_link: WebElement = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located(
+                    (By.XPATH, "//a[contains(@href, '/ap/signin/')]")
+                )
+            )
+            skip_link.click()
+        except TimeoutException as e:
+            log.error(
+                "Timed out waiting for signin link.  Unable to find matching "
+                "xpath for '//a[@data-nav-role='signin']'"
+            )
+            log.exception(e)
+            exit(1)
+
+        log.info("Inputting email...")
+        try:
+            email_field: WebElement = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, '//*[@id="ap_email"]'))
+            )
+            email_field.send_keys(self.amazon_config["username"] + Keys.RETURN)
+            if self.driver.find_elements_by_xpath('//*[@id="auth-error-message-box"]'):
+                log.error("Login failed, delete your credentials file")
+                time.sleep(240)
+                exit(1)
+        except wait.TimeoutException as e:
+            log.error("Timed out waiting for email login box.")
+            log.exception(e)
+            exit(1)
+
+        log.info("Checking 'rememberMe' checkbox...")
+        try:
+            remember_me = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, '//*[@name="rememberMe"]'))
+            )
+            remember_me.click()
+        except NoSuchElementException:
+            log.error("Remember me checkbox did not exist")
+
+        log.info("Inputting Password")
+        captcha_entry: WebElement = None
+        try:
+            password_field = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, '//*[@id="ap_password"]'))
+            )
+            password_field.send_keys(self.amazon_config["password"])
+            # check for captcha
+            try:
+                captcha_entry = self.driver.find_element_by_xpath(
+                    '//*[@id="auth-captcha-guess"]'
+                )
+            except NoSuchElementException:
+                with self.wait_for_page_change(timeout=10):
+                    password_field.send_keys(Keys.RETURN)
+
+        except NoSuchElementException:
+            log.error("Unable to find password input box.  Unable to log in.")
+        except wait.TimeoutException:
+            log.error("Timeout expired waiting for password input box.")
+
+        if captcha_entry:
+            try:
+                log.info("Stuck on a captcha... Lets try to solve it.")
+                captcha = AmazonCaptcha.fromdriver(self.driver)
+                solution = captcha.solve()
+                log.info(f"The solution is: {solution}")
+                if solution == "Not solved":
+                    log.info(
+                        f"Failed to solve {captcha.image_link}, lets reload and get a new captcha."
+                    )
+                    self.driver.refresh()
+                else:
+                    self.send_notification(
+                        "Solving catpcha", "captcha", self.take_screenshots
+                    )
+                    with self.wait_for_page_change(timeout=10):
+                        captcha_entry.send_keys(solution + Keys.RETURN)
+
+            except Exception as e:
+                log.debug(e)
+                log.info("Error trying to solve captcha. Refresh and retry.")
+                self.driver.refresh()
+                time.sleep(5)
+
+        # Deal with 2FA
+        if self.driver.title in self.amazon_config["TWOFA_TITLES"]:
+            log.info("enter in your two-step verification code in browser")
+            while self.driver.title in self.amazon_config["TWOFA_TITLES"]:
+                time.sleep(0.2)
+
+        # Deal with Account Fix Up prompt
+        if "accountfixup" in self.driver.current_url:
+            # Click the skip link
+            try:
+                skip_link: WebElement = WebDriverWait(self.driver, 10).until(
+                    EC.presence_of_element_located(
+                        (By.XPATH, "//a[contains(@id, 'skip-link')]")
+                    )
+                )
+                skip_link.click()
+            except TimeoutException as e:
+                log.error(
+                    "Timed out waiting for the skip link.  Unable to find matching "
+                    "xpath for '//a[contains(@id, 'skip-link')]'"
+                )
+                log.exception(e)
+
+        log.info(f'Logged in as {self.amazon_config["username"]}')
 
     def run(self, delay=45):
+        # Load up the homepage
+        self.driver.get(f"https://{self.amazon_domain}")
+
+        # Get a valid amazon session for our requests
+        if not self.is_logged_in():
+            self.login()
+
         # Verify the configuration file
         if not self.verify():
             # try one more time
@@ -320,40 +319,48 @@ class AmazonStoreHandler(BaseStoreHandler):
             self.verify()
 
         # To keep the user busy https://github.com/jakesgordon/javascript-tetris
-        ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-        uri = pathlib.Path(f"{ROOT_DIR}/../tetris/index.html").as_uri()
-        log.debug(f"Tetris URL: {uri}")
-
-        # Spawn the web browser
-        self.driver = create_driver(options)
-        self.webdriver_child_pids = get_webdriver_pids(self.driver)
-        self.driver.get(uri)
+        # ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+        # uri = pathlib.Path(f"{ROOT_DIR}/../tetris/index.html").as_uri()
+        # log.debug(f"Tetris URL: {uri}")
+        # self.driver.get(uri)
 
         message = f"Starting to hunt items at {STORE_NAME}"
         log.info(message)
         self.notification_handler.send_notification(message)
 
         while self.item_list:
-            qualified_seller, item = self.find_qualified_seller(delay)
-            self.attempt_purchase(item, qualified_seller)
 
-    def find_qualified_seller(self, delay) -> (SellerDetail, FGItem):
-        while True:
             for item in self.item_list:
-                item_sellers = self.get_item_sellers(
-                    item, self.amazon_config["FREE_SHIPPING"]
-                )
-                for seller in item_sellers:
-                    if (
-                        item.max_price.amount
-                        > seller.selling_price
-                        > item.min_price.amount
-                    ):
-                        log.info("BUY THIS ITEM!!!!")
-                        return seller, item
-                    else:
-                        log.info("No dice.")
-            time.sleep(delay + random.randint(1, 3))
+                qualified_seller = self.find_qualified_seller(item)
+                if qualified_seller:
+                    self.attempt_purchase(item, qualified_seller)
+            time.sleep(delay + random.randint(0, 3))
+            if self.shuffle:
+                random.shuffle(self.item_list)
+    @contextmanager
+    def wait_for_page_change(self, timeout=30):
+        """Utility to help manage selenium waiting for a page to load after an action, like a click"""
+        old_page = self.driver.find_element_by_tag_name("html")
+        yield
+        WebDriverWait(self.driver, timeout).until(staleness_of(old_page))
+
+    def find_qualified_seller(self, item) -> SellerDetail or None:
+        item_sellers = self.get_item_sellers(item, self.amazon_config["FREE_SHIPPING"])
+        for seller in item_sellers:
+            if not self.check_shipping and not free_shipping_check(seller):
+                log.debug("Failed shipping hurdle.")
+                return
+            log.debug("Passed shipping hurdle.")
+            if not condition_check(item, seller):
+                log.debug("Failed item condition hurdle.")
+                return
+            log.debug("Passed item condition hurdle.")
+            if not price_check(item, seller):
+                log.debug("Failed price condition hurdle.")
+                return
+            log.debug("Pass price condition hurdle.")
+
+            return seller
 
     def parse_config(self):
         log.info(f"Processing config file from {CONFIG_FILE_PATH}")
@@ -438,16 +445,20 @@ class AmazonStoreHandler(BaseStoreHandler):
                 )
                 if captcha_form_element:
                     # Solving captcha and resetting data
-                    data, status = solve_captcha(self.session, captcha_form_element[0], pdp_url)
+                    data, status = solve_captcha(
+                        self.session, captcha_form_element[0], pdp_url
+                    )
 
             if status == 200:
-                item.url = f"{self.amazon_domain}{REALTIME_INVENTORY_PATH}{item.id}"
+                item.furl = furl(
+                    f"https://{self.amazon_domain}/{REALTIME_INVENTORY_PATH}{item.id}"
+                )
                 tree = html.fromstring(data)
                 captcha_form_element = tree.xpath(
                     "//form[contains(@action,'validateCaptcha')]"
                 )
                 if captcha_form_element:
-                    tree = solve_captcha(self.session, captcha_form_element[0])
+                    tree = solve_captcha(self.session, captcha_form_element[0], pdp_url)
 
                 title = tree.xpath('//*[@id="productTitle"]')
                 if len(title) > 0:
@@ -509,7 +520,13 @@ class AmazonStoreHandler(BaseStoreHandler):
             form_action = offer.xpath(".//form[contains(@action,'add-to-cart')]")[
                 0
             ].action
-            condition = get_item_condition(form_action)
+            condition_heading = offer.xpath(".//div[@id='aod-offer-heading']/h5")
+            if condition_heading:
+                condition = AmazonItemCondition.from_str(
+                    condition_heading[0].text.strip()
+                )
+            else:
+                condition = AmazonItemCondition.Unknown
             offers = offer.xpath(f".//input[@name='offeringID.1']")
             offer_id = None
             if len(offers) > 0:
@@ -526,16 +543,14 @@ class AmazonStoreHandler(BaseStoreHandler):
                 offer_id,
             )
             sellers.append(seller)
-            log.debug(f"{merchant_name} {price.amount} {shipping_cost.amount}")
-
         return sellers
 
     def get_real_time_data(self, item):
-        log.debug(f"Calling {STORE_NAME} for {item.short_name} using {item.url}")
+        log.info(f"Calling {STORE_NAME} for {item.short_name} using {item.furl.url}")
         # self.conn20.request("GET", item.url, "", HEADERS)
         # response = self.conn.getresponse()
         # response = self.conn20.get_response()
-        data, status = self.get_html(item.url)
+        data, status = self.get_html(item.furl.url)
         if item.status_code != status:
             # Track when we flip-flop between status codes.  200 -> 204 may be intelligent caching at Amazon.
             # We need to know if it ever goes back to a 200
@@ -547,44 +562,41 @@ class AmazonStoreHandler(BaseStoreHandler):
 
     def attempt_purchase(self, item, qualified_seller):
         # Open the item URL in Selenium
-
-        pass
+        log.info("Try to ATC and Buy from HERE!")
+        exit(0)
 
     def get_html(self, url):
         """Unified mechanism to get content to make changing connection clients easier"""
         f = furl(url)
+        if not f.scheme:
+            f.set(scheme="https")
 
-        if self.http_client:
-            # http.client method
-            self.conn.request("GET", str(f.path), "", HEADERS)
-            response = self.conn.getresponse()
-            data = response.read()
-            return data.decode("utf-8"), response.status
-        elif self.http_20_client:
-            # hyper HTTP20Connection method
-            self.conn20.request("GET", str(f.path), "", HEADERS)
-            response = self.conn20.get_response()
-            data = response.read()
-            return data.decode("utf-8"), response.status
-        else:
-            response = self.session.get(f.url, headers=HEADERS)
-            return response.text, response.status_code
+        # if self.http_client:
+        #     # http.client method
+        #     self.conn.request("GET", str(f.path), "", HEADERS)
+        #     response = self.conn.getresponse()
+        #     data = response.read()
+        #     return data.decode("utf-8"), response.status
+        # elif self.http_20_client:
+        #     # hyper HTTP20Connection method
+        #     self.conn20.request("GET", str(f.path), "", HEADERS)
+        #     response = self.conn20.get_response()
+        #     data = response.read()
+        #     return data.decode("utf-8"), response.status
+        # else:
+        #     response = self.session.get(f.url, headers=HEADERS)
+        #     return response.text, response.status_code
+        # else:
+
+        # Selenium
+        self.driver.get(url)
+        data = self.driver.page_source
+        # Hard-code response for Selenium requests?
+        return data, 200
 
 
-
-def parse_condition(condition: str) -> int:
-    if "new" in condition:
-        log.debug(f"Item condition is new")
-        return CONDITION_NEW
-    elif "used" in condition:
-        log.debug(f"Item condition is used")
-        return CONDITION_USED
-    elif "col" in condition:
-        log.debug(f"Item condition is collectible")
-        return CONDITION_COLLECTIBLE
-    else:
-        log.debug(f"Item condition is unknown: {condition}")
-        return CONDITION_UNKNOWN
+def parse_condition(condition: str) -> AmazonItemCondition:
+    return AmazonItemCondition[condition]
 
 
 def min_total_price(seller: SellerDetail):
@@ -606,6 +618,7 @@ def create_driver(options):
         log.error(
             "If that's not it, you probably have a previous Chrome window open. You should close it."
         )
+        exit(1)
 
 
 def modify_browser_profile():
@@ -628,7 +641,7 @@ def set_options(prefs, slow_mode):
     options.add_experimental_option("prefs", prefs)
     options.add_argument(f"user-data-dir=.profile-amz")
     if not slow_mode:
-        options.set_capability("pageLoadStrategy", "none")
+        options.set_capability("pageLoadStrategy", "normal")
 
 
 def get_prefs(no_image):
@@ -655,3 +668,7 @@ def get_webdriver_pids(driver):
     for child in children:
         webdriver_child_pids.append(child.pid)
     return webdriver_child_pids
+
+
+def get_timeout(timeout=DEFAULT_MAX_TIMEOUT):
+    return time.time() + timeout
