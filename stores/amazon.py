@@ -183,8 +183,8 @@ class Amazon:
         if cart_quantity > 0:
             log.warning(f"Found {cart_quantity} item(s) in your cart.")
             log.info("Delete all item(s) in cart before starting bot.")
-            log.info("Exiting now...")
-            time.sleep(5)
+            log.info("Exiting in 30 seconds...")
+            time.sleep(30)
             return
         self.handle_startup()
         if not self.is_logged_in():
