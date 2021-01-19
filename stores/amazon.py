@@ -103,7 +103,7 @@ class Amazon:
         self.no_image = no_image
         self.log_stock_check = log_stock_check
         self.shipping_bypass = shipping_bypass
-
+        self.unknown_title_notification_sent = False
         presence.enabled = not disable_presence
 
         global amazon_config
@@ -481,9 +481,11 @@ class Amazon:
         while True:
             # Sanity check to see if we have any offers
             try:
-                offers_exist = WebDriverWait(self.driver, timeout=5).until(
+                offers_exist = WebDriverWait(
+                    self.driver, timeout=DEFAULT_MAX_TIMEOUT
+                ).until(
                     lambda d: d.find_element_by_xpath(
-                        "//div[@id='aod-offer-list'] | "
+                        "//div[@id='aod-container'] | "
                         "//div[@id='olpOfferList'] | "
                         "//span[@data-action='show-all-offers-display'] | "
                         "//div[@id='backInStock' or @id='outOfStock'] |"
@@ -502,10 +504,10 @@ class Amazon:
                     offer_count = self.driver.find_elements_by_xpath(
                         "//div[@id='olpOfferList']//div[contains(@class, 'olpOffer')]"
                     )
-                elif offer_id == "aod-offer-list":
+                elif offer_id == "aod-container":
                     # Offer Flyout or Ajax call ... count the 'aod-offer' divs that we 'see'
                     offer_count = self.driver.find_elements_by_xpath(
-                        "//div[@id='aod-offer']"
+                        "//div[@id='aod-pinned-offer' or @id='aod-offer']"
                     )
                 elif (
                     offers_exist.get_attribute("data-action")
@@ -518,9 +520,9 @@ class Amazon:
                     ).click()
                     # Now wait for the flyout to load
                     log.info("Waiting for flyout... probably")
-                    WebDriverWait(self.driver, timeout=5).until(
+                    WebDriverWait(self.driver, timeout=DEFAULT_MAX_TIMEOUT).until(
                         lambda d: d.find_element_by_xpath(
-                            "//div[@id='aod-offer-list'] | //div[@id='olpOfferList']"
+                            "//div[@id='aod-container'] | //div[@id='olpOfferList']"
                         )
                     )
                     log.info("It flew out?!")
@@ -547,7 +549,7 @@ class Amazon:
                 return False
 
             atc_buttons = self.driver.find_elements_by_xpath(
-                "//div[@id='aod-offer-list' or @id='olpOfferList']//input[@name='submit.addToCart']"
+                "//div[@id='aod-pinned-offer' or @id='aod-offer' or @id='olpOfferList']//input[@name='submit.addToCart']"
             )
             # if not atc_buttons:
             #     # Sanity check to see if we have a valid page, but no offers:
@@ -590,7 +592,7 @@ class Amazon:
             if not prices:
                 # Try the flyout x-paths
                 prices = self.driver.find_elements_by_xpath(
-                    "//div[@id='aod-offer']//div[@id='aod-offer-price']//span[@class='a-price']//span[@class='a-offscreen']"
+                    "//div[@id='aod-pinned-offer' or @id='aod-offer']//div[contains(@id, 'aod-price')]//span[@class='a-price']//span[@class='a-offscreen']"
                 )
                 if prices:
                     flyout_mode = True
@@ -623,7 +625,7 @@ class Amazon:
                 else:
                     # Check for offers
                     offers = self.driver.find_elements_by_xpath(
-                        "//div[@id='aod-offer']"
+                        "//div[@id='aod-pinned-offer' or @id='aod-offer']"
                     )
                     for idx, offer in enumerate(offers):
                         tree = html.fromstring(offer.get_attribute("innerHTML"))
@@ -762,6 +764,24 @@ class Amazon:
             self.handle_out_of_stock()
         elif title in amazon_config["BUSINESS_PO_TITLES"]:
             self.handle_business_po()
+        elif title in amazon_config["ADDRESS_SELECT"]:
+            if not self.unknown_title_notification_sent:
+                self.notification_handler.play_alarm_sound()
+                self.send_notification(
+                    "User interaction required for checkout!",
+                    title,
+                    self.take_screenshots,
+                )
+                self.unknown_title_notification_sent = True
+            log.warning(
+                "Landed on address selection screen.  Fairgame will NOT select an address for you.  "
+                "Please select necessary options to arrive at the Review Order Page before the next "
+                "refresh, or complete checkout manually.  You have 30 seconds."
+            )
+            for i in range(30, 0, -1):
+                log.warning(f"{i}...")
+                time.sleep(1)
+            return
         else:
             log.debug(f"title is: [{title}]")
             # see if we can handle blank titles here
@@ -863,10 +883,10 @@ class Amazon:
 
             # try to handle an unknown title
             log.error(
-                f"{title} is not a known title, please create issue indicating the title with a screenshot of page"
+                f"'{title}' is not a known page title. Please create issue indicating the title with a screenshot of page"
             )
             self.send_notification(
-                "Encountered Unknown Page Title",
+                f"Encountered Unknown Page Title: `{title}",
                 "unknown-title",
                 self.take_screenshots,
             )
