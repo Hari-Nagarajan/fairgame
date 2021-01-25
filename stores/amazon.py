@@ -397,8 +397,9 @@ class Amazon:
 
         if self.driver.title in amazon_config["TWOFA_TITLES"]:
             log.info("enter in your two-step verification code in browser")
-            while self.driver.title in amazon_config["WOFA_TITLES"]:
-                time.sleep(0.2)
+            while self.driver.title in amazon_config["TWOFA_TITLES"]:
+                # Wait for the user to enter 2FA
+                time.sleep(2)
         log.info(f'Logged in as {amazon_config["username"]}')
 
     @debug
