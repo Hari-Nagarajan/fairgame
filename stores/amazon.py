@@ -104,12 +104,14 @@ class Amazon:
         self.log_stock_check = log_stock_check
         self.shipping_bypass = shipping_bypass
         self.unknown_title_notification_sent = False
+
         presence.enabled = not disable_presence
 
         global amazon_config
         from cli.cli import global_config
 
         amazon_config = global_config.get_amazon_config(encryption_pass)
+        self.profile_path = global_config.get_browser_profile_path()
 
         try:
             presence.start_presence()
@@ -155,7 +157,7 @@ class Amazon:
             )
             exit(0)
 
-        if not self.create_driver():
+        if not self.create_driver(self.profile_path):
             exit(1)
 
         for key in AMAZON_URLS.keys():
@@ -463,7 +465,7 @@ class Amazon:
                             take_screenshot=False,
                         )
                         raise RuntimeError("Failed to restart bot")
-                    elif not self.create_driver():
+                    elif not self.create_driver(self.profile_path):
                         log.error("Failed to recreate webdriver processes")
                         log.error("Please restart bot")
                         self.send_notification(
@@ -1362,16 +1364,12 @@ class Amazon:
             log.warning(f"--Testing Mode.  NO Purchases will be made.")
         log.info(f"{'=' * 50}")
 
-    def create_driver(self):
+    def create_driver(self, path_to_profile):
         if self.setup_driver:
 
             if self.headless:
                 enable_headless()
 
-            # profile_amz = ".profile-amz"
-            # # keep profile bloat in check
-            # if os.path.isdir(profile_amz):
-            #     os.remove(profile_amz)
             prefs = {
                 "profile.password_manager_enabled": False,
                 "credentials_enable_service": False,
@@ -1381,9 +1379,6 @@ class Amazon:
             else:
                 prefs["profile.managed_default_content_settings.images"] = 0
             options.add_experimental_option("prefs", prefs)
-            path_to_profile = os.path.join(
-                os.path.dirname(os.path.abspath("__file__")), ".profile-amz"
-            )
             options.add_argument(f"user-data-dir={path_to_profile}")
             if not self.slow_mode:
                 options.set_capability("pageLoadStrategy", "none")
@@ -1392,8 +1387,7 @@ class Amazon:
 
         # Delete crashed, so restore pop-up doesn't happen
         path_to_prefs = os.path.join(
-            os.path.dirname(os.path.abspath("__file__")),
-            ".profile-amz",
+            path_to_profile,
             "Default",
             "Preferences",
         )
@@ -1410,7 +1404,7 @@ class Amazon:
         except Exception as e:
             log.error(e)
             log.error(
-                "If you have a JSON warning above, try deleting your .profile-amz folder"
+                "If you have a JSON warning above, try cleaning your profile (e.g. --clean-profile)"
             )
             log.error(
                 "If that's not it, you probably have a previous Chrome window open. You should close it."

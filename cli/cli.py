@@ -1,8 +1,11 @@
-import time
-import click
+import os
+import shutil
 from datetime import datetime
 from functools import wraps
+from pathlib import Path
 from signal import signal, SIGINT
+
+import click
 
 try:
     import click
@@ -20,10 +23,22 @@ import time
 
 from notifications.notifications import NotificationHandler, TIME_FORMAT
 from utils.logger import log
-from common.globalconfig import GlobalConfig
+from common.globalconfig import GlobalConfig, AMAZON_CREDENTIAL_FILE
 from utils.version import is_latest, version
 from stores.amazon import Amazon
 from stores.bestbuy import BestBuyHandler
+
+
+def get_folder_size(folder):
+    return sizeof_fmt(sum(file.stat().st_size for file in Path(folder).rglob("*")))
+
+
+def sizeof_fmt(num, suffix="B"):
+    for unit in ["", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"]:
+        if abs(num) < 1024.0:
+            return "%3.1f%s%s" % (num, unit, suffix)
+        num /= 1024.0
+    return "%.1f%s%s" % (num, "Yi", suffix)
 
 
 def handler(signal, frame):
@@ -144,6 +159,18 @@ def main():
     default=False,
     help="Will attempt to click ship to address button. USE AT YOUR OWN RISK!",
 )
+@click.option(
+    "--clean-profile",
+    is_flag=True,
+    default=False,
+    help="Purge the user profile that Fairgame uses for browsing",
+)
+@click.option(
+    "--clean-credentials",
+    is_flag=True,
+    default=False,
+    help="Purge Amazon credentials and prompt for new credentials",
+)
 @notify_on_crash
 def amazon(
     no_image,
@@ -161,10 +188,24 @@ def amazon(
     p,
     log_stock_check,
     shipping_bypass,
+    clean_profile,
+    clean_credentials,
 ):
     notification_handler.sound_enabled = not disable_sound
     if not notification_handler.sound_enabled:
         log.info("Local sounds have been disabled.")
+
+    if clean_profile and os.path.exists(global_config.get_browser_profile_path()):
+        log.info(
+            f"Removing existing profile at '{global_config.get_browser_profile_path()}'"
+        )
+        profile_size = get_folder_size(global_config.get_browser_profile_path())
+        shutil.rmtree(global_config.get_browser_profile_path())
+        log.info(f"Freed {profile_size}")
+
+    if clean_credentials and os.path.exists(AMAZON_CREDENTIAL_FILE):
+        log.info(f"Removing existing Amazon credentials from {AMAZON_CREDENTIAL_FILE}")
+        os.remove(AMAZON_CREDENTIAL_FILE)
 
     amzn_obj = Amazon(
         headless=headless,
@@ -243,7 +284,7 @@ elif version.is_prerelease:
     log.warning(f"FairGame PRE-RELEASE v{version}")
 else:
     log.warning(
-        f"You are running FairGame v{version.release}, but the most recent version is v{remote_version.release}. "
+        f"You are running FairGame v{version.release}, but the most recent version is v{version.get_latest_version()}. "
         f"Consider upgrading "
     )
 
