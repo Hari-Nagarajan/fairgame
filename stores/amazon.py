@@ -16,6 +16,7 @@ from pypresence import exceptions as pyexceptions
 from selenium import webdriver
 from selenium.common import exceptions as sel_exceptions
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.ui import WebDriverWait
 
 from utils import discord_presence as presence
@@ -516,19 +517,27 @@ class Amazon:
                     offers_exist.get_attribute("data-action")
                     == "show-all-offers-display"
                 ):
-                    # No offers to parse... look for a link to the offers
-                    log.info("Attempting to click the open offers link...")
-                    self.driver.find_element_by_xpath(
-                        "//span[@data-action='show-all-offers-display']//a"
-                    ).click()
-                    # Now wait for the flyout to load
-                    log.info("Waiting for flyout... probably")
-                    WebDriverWait(self.driver, timeout=DEFAULT_MAX_TIMEOUT).until(
-                        lambda d: d.find_element_by_xpath(
-                            "//div[@id='aod-container'] | //div[@id='olpOfferList']"
-                        )
+                    # Let's double check that the offers display wasn't automatically opened
+                    close_offers_x: WebElement = self.driver.find_element_by_xpath(
+                        "//div[@id='all-offers-display']//i[@aria-label='aod-close']"
                     )
-                    log.info("It flew out?!")
+                    # TODO: invert this check for production... currently for logging/debugging
+                    if close_offers_x:
+                        log.info(f"Fly-out is already out... keep on going'")
+                    else:
+                        # No offers to parse... look for a link to the offers
+                        log.info("Attempting to click the open offers link...")
+                        self.driver.find_element_by_xpath(
+                            "//span[@data-action='show-all-offers-display']//a"
+                        ).click()
+                        # Now wait for the flyout to load
+                        log.info("Waiting for flyout... probably")
+                        WebDriverWait(self.driver, timeout=DEFAULT_MAX_TIMEOUT).until(
+                            lambda d: d.find_element_by_xpath(
+                                "//div[@id='aod-container'] | //div[@id='olpOfferList']"
+                            )
+                        )
+                        log.info("It flew out?!")
                     continue
                 else:
                     # This assumes we're on a PDP with only an add to cart button... no offers
@@ -550,6 +559,21 @@ class Amazon:
             except sel_exceptions.NoSuchElementException:
                 log.error("Unable to find any offers listing.  Skipping...")
                 return False
+            except sel_exceptions.ElementClickInterceptedException as e:
+                log.error(
+                    "Covering element detected... sleeping to let you inspect. CTRL-C to quit."
+                )
+                log.exception(e)
+                close_offers_x: WebElement = self.driver.find_element_by_xpath(
+                    "//div[@id='all-offers-display']"
+                )
+                if close_offers_x:
+                    log.info(
+                        f"Is all-offers-display already open? {close_offers_x.is_displayed()}"
+                    )
+                self.send_notification("User intervention required", "covered_element")
+                time.sleep(300)
+                exit(5)
 
             atc_buttons = self.driver.find_elements_by_xpath(
                 "//div[@id='aod-pinned-offer' or @id='aod-offer' or @id='olpOfferList']//input[@name='submit.addToCart']"
