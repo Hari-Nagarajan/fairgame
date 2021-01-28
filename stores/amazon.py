@@ -485,9 +485,7 @@ class Amazon:
         while True:
             # Sanity check to see if we have any offers
             try:
-                offers_exist = WebDriverWait(
-                    self.driver, timeout=DEFAULT_MAX_TIMEOUT
-                ).until(
+                offers = WebDriverWait(self.driver, timeout=DEFAULT_MAX_TIMEOUT).until(
                     lambda d: d.find_element_by_xpath(
                         "//div[@id='aod-container'] | "
                         "//div[@id='olpOfferList'] | "
@@ -497,7 +495,7 @@ class Amazon:
                     )
                 )
                 offer_count = []
-                offer_id = offers_exist.get_attribute("id")
+                offer_id = offers.get_attribute("id")
                 if offer_id == "outOfStock" or offer_id == "backInStock":
                     # No dice... Early out and move on
                     log.info("Item is currently unavailable.  Moving on...")
@@ -513,67 +511,94 @@ class Amazon:
                     offer_count = self.driver.find_elements_by_xpath(
                         "//div[@id='aod-pinned-offer' or @id='aod-offer']"
                     )
-                elif (
-                    offers_exist.get_attribute("data-action")
-                    == "show-all-offers-display"
-                ):
-                    # Let's double check that the offers display wasn't automatically opened
-                    close_offers_x: WebElement = self.driver.find_element_by_xpath(
-                        "//div[@id='all-offers-display']//i[@aria-label='aod-close']"
+                elif offers.get_attribute("data-action") == "show-all-offers-display":
+                    # PDP Page
+                    # Find the offers link first, just to burn some cycles in case the flyout is loading
+                    open_offers_link: WebElement = self.driver.find_element_by_xpath(
+                        "//span[@data-action='show-all-offers-display']//a"
                     )
-                    # TODO: invert this check for production... currently for logging/debugging
-                    if close_offers_x:
-                        log.info(f"Fly-out is already out... keep on going'")
-                    else:
-                        # No offers to parse... look for a link to the offers
-                        log.info("Attempting to click the open offers link...")
-                        self.driver.find_element_by_xpath(
-                            "//span[@data-action='show-all-offers-display']//a"
-                        ).click()
+
+                    # Now check to see if we're already loading the flyout...
+                    flyout = self.driver.find_elements_by_xpath(
+                        "/html/body/div[@id='all-offers-display']"
+                    )
+                    if flyout:
+                        # This means we have a flyout already loading, as it gets inserted as the first
+                        # div after the body tag of the document.  Wait for the container to load and start
+                        # the loop again to scan for known elements
+                        log.debug(
+                            "Found a loading flyout div.  Waiting for offers to load..."
+                        )
+                        WebDriverWait(self.driver, timeout=DEFAULT_MAX_TIMEOUT).until(
+                            lambda d: d.find_element_by_xpath(
+                                "//div[@id='aod-container']  "
+                            )
+                        )
+                        continue
+
+                    log.info("Attempting to click the open offers link...")
+                    open_offers_link.click()
+                    try:
                         # Now wait for the flyout to load
-                        log.info("Waiting for flyout... probably")
+                        log.debug("Waiting for flyout...")
                         WebDriverWait(self.driver, timeout=DEFAULT_MAX_TIMEOUT).until(
                             lambda d: d.find_element_by_xpath(
                                 "//div[@id='aod-container'] | //div[@id='olpOfferList']"
                             )
                         )
-                        log.info("It flew out?!")
+                        log.debug("Flyout should be open and populated.")
+                    except sel_exceptions.TimeoutException as te:
+                        log.error(
+                            "Timed out waiting for the flyout to open and populate.  Is the "
+                            "connection slow?  Do you see the flyout populate?"
+                        )
                     continue
-                else:
+                elif (
+                    offers.get_attribute("aria-labelledby")
+                    == "submit.add-to-cart-announce"
+                ):
                     # This assumes we're on a PDP with only an add to cart button... no offers
                     log.warning(
-                        "NOT YET IMPLEMENTED: PDP represents only item worth considering.  Parse pricing and Add To Cart from PDP if item qualifies."
+                        "NOT YET IMPLEMENTED: PDP represents only item worth considering.  No other sellers available."
+                        " TODO: Parse pricing and Add To Cart from PDP if item qualifies."
                     )
+                else:
+                    log.warning(
+                        "We found elements, but didn't recognize any of the combinations."
+                    )
+                    log.warning(f"Element found: {offers.tag_name}")
+                    attrs = self.driver.execute_script(
+                        "var items = {}; "
+                        "for (index = 0; index < arguments[0].attributes.length; ++index) "
+                        "{ items[arguments[0].attributes[index].name] = arguments[0].attributes[index].value }; "
+                        "return items;",
+                        offers,
+                    )
+                    log.warning("Dumping element attributes:")
+                    for attr in attrs:
+                        log.warning(f"{attr} = {attrs[attr]}")
+
                     return False
                 if len(offer_count) == 0:
                     log.info("No offers found.  Moving on.")
                     return False
                 log.info(
-                    f"Found {len(offer_count)} offers in the HTML.  Attempting to parse..."
+                    f"Found {len(offer_count)} offers in the HTML.  Comparing offers..."
                 )
 
-            except sel_exceptions.TimeoutException:
+            except sel_exceptions.TimeoutException as te:
                 log.error("Timed out waiting for offers to render.  Skipping...")
                 log.error(f"URL: {self.driver.current_url}")
+                log.exception(te)
                 return False
             except sel_exceptions.NoSuchElementException:
                 log.error("Unable to find any offers listing.  Skipping...")
                 return False
             except sel_exceptions.ElementClickInterceptedException as e:
-                log.error(
-                    "Covering element detected... sleeping to let you inspect. CTRL-C to quit."
+                log.deug(
+                    "Covering element detected... Assuming it's a slow flyout... scanning document again..."
                 )
-                log.exception(e)
-                close_offers_x: WebElement = self.driver.find_element_by_xpath(
-                    "//div[@id='all-offers-display']"
-                )
-                if close_offers_x:
-                    log.info(
-                        f"Is all-offers-display already open? {close_offers_x.is_displayed()}"
-                    )
-                self.send_notification("User intervention required", "covered_element")
-                time.sleep(300)
-                exit(5)
+                continue
 
             atc_buttons = self.driver.find_elements_by_xpath(
                 "//div[@id='aod-pinned-offer' or @id='aod-offer' or @id='olpOfferList']//input[@name='submit.addToCart']"
