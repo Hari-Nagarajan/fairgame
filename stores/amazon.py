@@ -595,7 +595,7 @@ class Amazon:
                 log.error("Unable to find any offers listing.  Skipping...")
                 return False
             except sel_exceptions.ElementClickInterceptedException as e:
-                log.deug(
+                log.debug(
                     "Covering element detected... Assuming it's a slow flyout... scanning document again..."
                 )
                 continue
