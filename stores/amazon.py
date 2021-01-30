@@ -485,6 +485,13 @@ class Amazon:
         while True:
             # Sanity check to see if we have any offers
             try:
+                # Wait for the page to load before determining what's in it by looking for the footer
+                footer = WebDriverWait(self.driver, timeout=DEFAULT_MAX_TIMEOUT).until(
+                    lambda d: d.find_elements_by_xpath(
+                        "//div[@class='nav-footer-line']"
+                    )
+                )
+
                 offers = WebDriverWait(self.driver, timeout=DEFAULT_MAX_TIMEOUT).until(
                     lambda d: d.find_element_by_xpath(
                         "//div[@id='aod-container'] | "
