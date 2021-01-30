@@ -37,6 +37,9 @@ class GlobalConfig:
         # Load up the global configuration
         # See http://docs.red-dove.com/cfg/python.html#getting-started-with-cfg-in-python for how to use Config
         self.global_config = Cfg(GLOBAL_CONFIG_FILE)
+        self.fairgame_config = self.global_config.get("FAIRGAME")
+        self.profile_path = None
+        self.get_browser_profile_path()
 
     def get_amazon_config(self, encryption_pass=None):
         log.info("Initializing Amazon configuration...")
@@ -46,3 +49,11 @@ class GlobalConfig:
             AMAZON_CREDENTIAL_FILE, encryption_pass
         )
         return amazon_config
+
+    def get_browser_profile_path(self):
+        if not self.profile_path:
+            self.profile_path = os.path.join(
+                os.path.dirname(os.path.abspath("__file__")),
+                self.global_config["FAIRGAME"].get("profile_name", ".profile-amz"),
+            )
+        return self.profile_path
