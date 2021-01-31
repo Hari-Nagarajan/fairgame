@@ -29,6 +29,7 @@ from utils.selenium_utils import options, enable_headless
 AMAZON_URLS = {
     "BASE_URL": "https://{domain}/",
     "OFFER_URL": "https://{domain}/gp/offer-listing/",
+    "ALT_OFFER_URL": "https://{domain}/dp/",
     "CART_URL": "https://{domain}/gp/cart/view.html",
 }
 CHECKOUT_URL = "https://{domain}/gp/cart/desktop/go-to-checkout.html/ref=ox_sc_proceed?partialCheckoutCart=1&isToBeGiftWrappedBefore=0&proceedToRetailCheckout=Proceed+to+checkout&proceedToCheckout=1&cartInitiateId={cart_id}"
@@ -82,6 +83,7 @@ class Amazon:
         encryption_pass=None,
         log_stock_check=False,
         shipping_bypass=False,
+        alt_offers=False,
     ):
         self.notification_handler = notification_handler
         self.asin_list = []
@@ -168,6 +170,11 @@ class Amazon:
 
         for key in AMAZON_URLS.keys():
             AMAZON_URLS[key] = AMAZON_URLS[key].format(domain=self.amazon_website)
+        if alt_offers:
+            log.info("Using alternate page for offer parsing.")
+            self.ACTIVE_OFFER_URL = AMAZON_URLS["ALT_OFFER_URL"]
+        else:
+            self.ACTIVE_OFFER_URL = AMAZON_URLS["OFFER_URL"]
 
     def run(self, delay=DEFAULT_REFRESH_DELAY, test=False):
         self.testing = test
@@ -431,15 +438,15 @@ class Amazon:
             return False
         if self.checkshipping:
             if self.used:
-                f = furl(AMAZON_URLS["OFFER_URL"] + asin)
+                f = furl(self.ACTIVE_OFFER_URL + asin)
             else:
-                f = furl(AMAZON_URLS["OFFER_URL"] + asin + "/ref=olp_f_new&f_new=true")
+                f = furl(self.ACTIVE_OFFER_URL + asin + "/ref=olp_f_new&f_new=true")
         else:
             if self.used:
-                f = furl(AMAZON_URLS["OFFER_URL"] + asin + "/f_freeShipping=on")
+                f = furl(self.ACTIVE_OFFER_URL + asin + "/f_freeShipping=on")
             else:
                 f = furl(
-                    AMAZON_URLS["OFFER_URL"]
+                    self.ACTIVE_OFFER_URL
                     + asin
                     + "/ref=olp_f_new&f_new=true&f_freeShipping=on"
                 )
@@ -449,6 +456,8 @@ class Amazon:
         while True:
             try:
                 self.get_page(f.url)
+                log.debug(f"Initial page title {self.driver.title}")
+                log.debug(f"        page url: {self.driver.current_url}")
                 break
             except Exception:
                 fail_counter += 1
@@ -496,6 +505,9 @@ class Amazon:
                         "//div[@class='nav-footer-line']"
                     )
                 )
+
+                log.debug(f"After footer page title {self.driver.title}")
+                log.debug(f"             page url: {self.driver.current_url}")
 
                 offers = WebDriverWait(self.driver, timeout=DEFAULT_MAX_TIMEOUT).until(
                     lambda d: d.find_element_by_xpath(
@@ -1431,14 +1443,14 @@ class Amazon:
             log.info(
                 f"--Looking for {len(asins)} ASINs between {self.reserve_min[idx]:.2f} and {self.reserve_max[idx]:.2f}"
             )
+        if not presence.enabled:
+            log.info(f"--Discord Presence feature is disabled.")
         if self.no_image:
             log.info(f"--No images will be requested")
         if not self.notification_handler.sound_enabled:
             log.info(f"--Notification sounds are disabled.")
-        if self.headless:
-            log.warning(
-                f"--Running headless is unsupported.  If you get it to work, please let us know on Discord."
-            )
+        if self.ACTIVE_OFFER_URL == AMAZON_URLS["ALT_OFFER_URL"]:
+            log.info(f"--Using alternate offers URL")
         if self.testing:
             log.warning(f"--Testing Mode.  NO Purchases will be made.")
         log.info(f"{'=' * 50}")
