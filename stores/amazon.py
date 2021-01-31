@@ -516,7 +516,7 @@ class Amazon:
                 elif offer_id == "aod-container":
                     # Offer Flyout or Ajax call ... count the 'aod-offer' divs that we 'see'
                     offer_count = self.driver.find_elements_by_xpath(
-                        "//div[@id='aod-pinned-offer' or @id='aod-offer']"
+                        "//div[@id='aod-pinned-offer' or @id='aod-offer']//input[@name='submit.addToCart']"
                     )
                 elif offers.get_attribute("data-action") == "show-all-offers-display":
                     # PDP Page
