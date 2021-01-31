@@ -1,3 +1,22 @@
+#      FairGame - Automated Purchasing Program
+#      Copyright (C) 2021  Hari Nagarajan
+#
+#      This program is free software: you can redistribute it and/or modify
+#      it under the terms of the GNU General Public License as published by
+#      the Free Software Foundation, either version 3 of the License, or
+#      (at your option) any later version.
+#
+#      This program is distributed in the hope that it will be useful,
+#      but WITHOUT ANY WARRANTY; without even the implied warranty of
+#      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#      GNU General Public License for more details.
+#
+#      You should have received a copy of the GNU General Public License
+#      along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+#      The author may be contacted through the project's GitHub, at:
+#      https://github.com/Hari-Nagarajan/fairgame
+
 import os
 import shutil
 from datetime import datetime
@@ -7,19 +26,31 @@ from signal import signal, SIGINT
 
 import click
 
+LICENSE_PATH = os.path.join(
+    "cli",
+    "license",
+)
+
+
 try:
     import click
 except ModuleNotFoundError as e:
     print(e)
-    print(
-        "You should try running pipenv shell and pipenv install per the install instructions"
-    )
-    print("Or you should only use Python 3.8.X per the instructions.")
-    print(
-        "If you are attempting to run multiple bots, this is not supported, so you are on your own to figure out that one."
-    )
+    print("Install the missing module noted above.")
     exit(0)
 import time
+
+if os.path.exists(LICENSE_PATH):
+
+    with open(os.path.join(LICENSE_PATH, "start.txt")) as file:
+        try:
+            print(file.read())
+        except Exception as e:
+            log.error("License File Missing. Quitting Program")
+            exit(0)
+else:
+    log.error("License File Missing. Quitting Program.")
+    exit(0)
 
 from notifications.notifications import NotificationHandler, TIME_FORMAT
 from utils.logger import log
@@ -62,6 +93,7 @@ def notify_on_crash(func):
 
 @click.group()
 def main():
+
     pass
 
 
@@ -271,11 +303,42 @@ def test_notifications(disable_sound):
     time.sleep(5)
 
 
+@click.command()
+@click.option("--w", is_flag=True)
+@click.option("--c", is_flag=True)
+def show(w, c):
+    if w and c:
+        print("Choose one option. Program Quitting")
+        exit(0)
+    elif w:
+        show_file = "show_w.txt"
+    elif c:
+        show_file = "show_c.txt"
+    else:
+        print(
+            "Option missing, you must include w or c with show argument. Program Quitting"
+        )
+        exit(0)
+
+    if os.path.exists(LICENSE_PATH):
+
+        with open(os.path.join(LICENSE_PATH, show_file)) as file:
+            try:
+                print(file.read())
+            except Exception as e:
+                log.error("License File Missing. Quitting Program")
+                exit(0)
+    else:
+        log.error("License File Missing. Quitting Program.")
+        exit(0)
+
+
 signal(SIGINT, handler)
 
 main.add_command(amazon)
 main.add_command(bestbuy)
 main.add_command(test_notifications)
+main.add_command(show)
 
 # Global scope stuff here
 if is_latest():
