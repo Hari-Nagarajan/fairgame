@@ -1,9 +1,0 @@
-
-FairGame Copyright (C) 2021 Hari Nagarajan
-    This program comes with ABSOLUTELY NO WARRANTY; for details
-    start the program with the `show --w' option.
-
-    This is free software, and you are welcome to redistribute it
-    under certain conditions; for details start the program with
-    the `show --c' option.
-

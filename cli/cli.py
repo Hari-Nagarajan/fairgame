@@ -24,8 +24,6 @@ from functools import wraps
 from pathlib import Path
 from signal import signal, SIGINT
 
-import click
-
 LICENSE_PATH = os.path.join(
     "cli",
     "license",
@@ -40,17 +38,6 @@ except ModuleNotFoundError as e:
     exit(0)
 import time
 
-if os.path.exists(LICENSE_PATH):
-
-    with open(os.path.join(LICENSE_PATH, "start.txt")) as file:
-        try:
-            print(file.read())
-        except Exception as e:
-            log.error("License File Missing. Quitting Program")
-            exit(0)
-else:
-    log.error("License File Missing. Quitting Program.")
-    exit(0)
 
 from notifications.notifications import NotificationHandler, TIME_FORMAT
 from utils.logger import log
@@ -325,7 +312,7 @@ def show(w, c):
         with open(os.path.join(LICENSE_PATH, show_file)) as file:
             try:
                 print(file.read())
-            except Exception as e:
+            except FileNotFoundError:
                 log.error("License File Missing. Quitting Program")
                 exit(0)
     else:
