@@ -1,7 +1,6 @@
 # Fairgame
 
-[Installation](#Installation) | [Usage](#Usage) | [Discord](https://discord.gg/4rfbNKrmnC)
-| [Troubleshooting](#Troubleshooting)
+[Installation](#Installation) | [Usage](#Usage) | [Discord](https://discord.gg/4rfbNKrmnC) | [Troubleshooting](#Troubleshooting)
 
 ## Why???
 
@@ -142,12 +141,27 @@ Edit the newly created files with your settings based on your [configuration](#c
 This is an abridged version of the community created document by UnidentifiedWarlock and Judarius.  It can be 
 found [here](https://docs.google.com/document/d/1VUxXhATZ8sZOJxdh3AIY6OGqwLRmrAcPikKZAwphIE8/edit). If the steps here
 don't work on your Pi 4, look there for additional options. This hasn't been tested on a Pi 3, but given enough RAM to
-run Chrome, it may very well work. Let us know.
+run Chrome, it may very well work. Let us know. 
 
 ```shell
 sudo apt update
 sudo apt upgrade
+sudo apt-get install -y build-essential tk-dev libncurses5-dev libncursesw5-dev libreadline6-dev libdb5.3-dev libgdbm-dev libsqlite3-dev libssl-dev libbz2-dev libexpat1-dev liblzma-dev zlib1g-dev libffi-dev libzbar-dev clang 
+
+version=3.8.7
+
+wget https://www.python.org/ftp/python/$version/Python-$version.tgz
+
+tar zxf Python-$version.tgz
+cd Python-$version
+./configure --enable-optimizations
+make -j4
+sudo make altinstall
+
+sudo python3 -m pip install --upgrade pip
+
 sudo apt install chromium-chromedriver
+cp /usr/bin/chromedriver /home/fairgame/.local/share/virtualenvs/fairgame-<RANDOMCHARS>/lib/python3.8/site-packages/chromedriver_py/chromedriver_linux64
 git clone https://github.com/Hari-Nagarajan/fairgame
 cd fairgame/
 pip3 install pipenv
@@ -160,7 +174,7 @@ Leave this Terminal window open.
 
 Open the following file in a text editor:
 
-`/home/$USER/.local/share/virtualenvs/fairgame-<RANDOMCHARS>/lib/python3.7/site-packages/selenium/webdriver/common/service.py`
+`/home/$USER/.local/share/virtualenvs/fairgame-<RANDOMCHARS>/lib/python3.8/site-packages/selenium/webdriver/common/service.py`
 
 Edit line 38 from
 
@@ -171,17 +185,6 @@ to
 `self.path = "chromedriver"`
 
 Then save and close the file.
-
-Additional steps outside of the readme:
-
-If you get a compiler error when doing pipenv install run:
-
-```shell
-sudo python3 -m pip install --upgrade pip
-sudo apt-get install libffi-dev
-sudo apt-get install libzbar-dev
-sudo apt-get install clang -y
-```
 
 ## Usage
 
@@ -359,7 +362,7 @@ python app.py amazon --test
 ...
 2020-12-23 13:07:38 INFO Initializing Apprise handler using: config/apprise.conf
 2020-12-23 13:07:38 INFO Found Discord configuration
-2020-12-23 13:07:38 INFO FairGame v0.5.0
+2020-12-23 13:07:38 INFO FairGame v0.5.4
 2020-12-23 13:07:38 INFO Reading credentials from: config/amazon_credentials.json
 2020-12-23 13:07:43 INFO ==================================================
 2020-12-23 13:07:43 INFO Starting Amazon ASIN Hunt for 2 Products with:
