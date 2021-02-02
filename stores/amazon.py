@@ -47,8 +47,8 @@ from utils.selenium_utils import options, enable_headless
 # Optional OFFER_URL is:     "OFFER_URL": "https://{domain}/dp/",
 AMAZON_URLS = {
     "BASE_URL": "https://{domain}/",
-    "OFFER_URL": "https://{domain}/gp/offer-listing/",
-    "ALT_OFFER_URL": "https://{domain}/dp/",
+    "ALT_OFFER_URL": "https://{domain}/gp/offer-listing/",
+    "OFFER_URL": "https://{domain}/dp/",
     "CART_URL": "https://{domain}/gp/cart/view.html",
 }
 CHECKOUT_URL = "https://{domain}/gp/cart/desktop/go-to-checkout.html/ref=ox_sc_proceed?partialCheckoutCart=1&isToBeGiftWrappedBefore=0&proceedToRetailCheckout=Proceed+to+checkout&proceedToCheckout=1&cartInitiateId={cart_id}"
@@ -131,6 +131,7 @@ class Amazon:
         self.log_stock_check = log_stock_check
         self.shipping_bypass = shipping_bypass
         self.unknown_title_notification_sent = False
+        self.alt_offers = alt_offers
 
         presence.enabled = not disable_presence
 
@@ -189,7 +190,7 @@ class Amazon:
 
         for key in AMAZON_URLS.keys():
             AMAZON_URLS[key] = AMAZON_URLS[key].format(domain=self.amazon_website)
-        if alt_offers:
+        if self.alt_offers:
             log.info("Using alternate page for offer parsing.")
             self.ACTIVE_OFFER_URL = AMAZON_URLS["ALT_OFFER_URL"]
         else:
@@ -455,20 +456,25 @@ class Amazon:
         if retry > DEFAULT_MAX_ATC_TRIES:
             log.info("max add to cart retries hit, returning to asin check")
             return False
-        if self.checkshipping:
-            if self.used:
-                f = furl(self.ACTIVE_OFFER_URL + asin)
+
+        if self.alt_offers:
+            if self.checkshipping:
+                if self.used:
+                    f = furl(self.ACTIVE_OFFER_URL + asin)
+                else:
+                    f = furl(self.ACTIVE_OFFER_URL + asin + "/ref=olp_f_new&f_new=true")
             else:
-                f = furl(self.ACTIVE_OFFER_URL + asin + "/ref=olp_f_new&f_new=true")
+                if self.used:
+                    f = furl(self.ACTIVE_OFFER_URL + asin + "/f_freeShipping=on")
+                else:
+                    f = furl(
+                        self.ACTIVE_OFFER_URL
+                        + asin
+                        + "/ref=olp_f_new&f_new=true&f_freeShipping=on"
+                    )
         else:
-            if self.used:
-                f = furl(self.ACTIVE_OFFER_URL + asin + "/f_freeShipping=on")
-            else:
-                f = furl(
-                    self.ACTIVE_OFFER_URL
-                    + asin
-                    + "/ref=olp_f_new&f_new=true&f_freeShipping=on"
-                )
+            # Force the flyout by default
+            f = furl(self.ACTIVE_OFFER_URL + asin + "/#aod")
         fail_counter = 0
         presence.searching_update()
 
@@ -519,24 +525,27 @@ class Amazon:
             # Sanity check to see if we have any offers
             try:
                 # Wait for the page to load before determining what's in it by looking for the footer
-                footer: WebElement = WebDriverWait(self.driver, timeout=DEFAULT_MAX_TIMEOUT).until(
-                    lambda d: d.find_elements_by_xpath(
-                        "//div[@class='nav-footer-line'] | //img[@alt='Dogs of Amazon']"
+                if self.slow_mode:
+                    footer: WebElement = WebDriverWait(
+                        self.driver, timeout=DEFAULT_MAX_TIMEOUT
+                    ).until(
+                        lambda d: d.find_elements_by_xpath(
+                            "//div[@class='nav-footer-line'] | //img[@alt='Dogs of Amazon']"
+                        )
                     )
-                )
-                if footer and footer[0].tag_name == "img":
-                    log.info(f"Saw dogs for {asin}.  Skipping...")
-                    return False
+                    if footer and footer[0].tag_name == "img":
+                        log.info(f"Saw dogs for {asin}.  Skipping...")
+                        return False
 
-                log.debug(f"After footer page title {self.driver.title}")
-                log.debug(f"             page url: {self.driver.current_url}")
+                    log.debug(f"After footer page title {self.driver.title}")
+                    log.debug(f"             page url: {self.driver.current_url}")
 
                 offers = WebDriverWait(self.driver, timeout=DEFAULT_MAX_TIMEOUT).until(
                     lambda d: d.find_element_by_xpath(
                         "//div[@id='aod-container'] | "
                         "//div[@id='olpOfferList'] | "
-                        "//span[@data-action='show-all-offers-display'] | "
                         "//div[@id='backInStock' or @id='outOfStock'] |"
+                        "//span[@data-action='show-all-offers-display'] | "
                         "//input[@name='submit.add-to-cart' and not(//span[@data-action='show-all-offers-display'])]"
                     )
                 )
@@ -582,7 +591,7 @@ class Amazon:
                         )
                         continue
 
-                    log.info("Attempting to click the open offers link...")
+                    log.debug("Attempting to click the open offers link...")
                     open_offers_link.click()
                     try:
                         # Now wait for the flyout to load
@@ -629,7 +638,7 @@ class Amazon:
                     log.info("No offers found.  Moving on.")
                     return False
                 log.info(
-                    f"Found {len(offer_count)} offers in the HTML.  Comparing offers..."
+                    f"Found {len(offer_count)} offers for {asin}.  Evaluating offers..."
                 )
 
             except sel_exceptions.TimeoutException as te:
@@ -1428,6 +1437,7 @@ class Amazon:
         log.info(
             f"Starting Amazon ASIN Hunt on {AMAZON_URLS['BASE_URL']} for {len(self.asin_list)} Products with:"
         )
+        log.info(f"--Offer URL of: {self.ACTIVE_OFFER_URL}")
         log.info(f"--Delay of {self.refresh_delay} seconds")
         if self.headless:
             log.info(f"--Chrome is running in Headless mode")
