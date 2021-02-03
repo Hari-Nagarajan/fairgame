@@ -41,7 +41,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from utils import discord_presence as presence
 from utils.debugger import debug
 from utils.logger import log
-from utils.selenium_utils import options, enable_headless
+from utils.selenium_utils import options, enable_headless, By, ec
 
 # Optional OFFER_URL is:     "OFFER_URL": "https://{domain}/dp/",
 AMAZON_URLS = {
@@ -505,7 +505,9 @@ class Amazon:
             # Sanity check to see if we have any offers
             try:
                 # Wait for the page to load before determining what's in it by looking for the footer
-                footer: WebElement = WebDriverWait(self.driver, timeout=DEFAULT_MAX_TIMEOUT).until(
+                footer: WebElement = WebDriverWait(
+                    self.driver, timeout=DEFAULT_MAX_TIMEOUT
+                ).until(
                     lambda d: d.find_elements_by_xpath(
                         "//div[@class='nav-footer-line'] | //img[@alt='Dogs of Amazon']"
                     )
@@ -1435,12 +1437,70 @@ class Amazon:
         if not self.notification_handler.sound_enabled:
             log.info(f"--Notification sounds are disabled.")
         if self.headless:
-            log.warning(
-                f"--Running in headless mode."
-            )
+            log.warning(f"--Running in headless mode.")
         if self.testing:
             log.warning(f"--Testing Mode.  NO Purchases will be made.")
         log.info(f"{'=' * 50}")
+
+    def get_chromedriver_info(self):
+        try:
+            chrome_instance_info_url = "chrome://version"
+            self.driver.get(url=chrome_instance_info_url)
+            logo_found = self.wait.until(
+                ec.presence_of_element_located((By.ID, "logo"))
+            )  # Wait for chrome logo to be put on page before parsing html.
+        except Exception as e:
+            log.warning(e)
+            log.warning(f"Couldnt get Chrome information... Continuing on...")
+            return
+        try:
+            version = self.driver.find_element_by_id("version")
+            log.info(f"Google Chrome Version:\t{version.text}")
+        except Exception as e:
+            log.warning(e)
+        try:
+            revision = self.driver.find_element_by_xpath(
+                '//*[@id="inner"]/tbody/tr[2]/td[2]/span'
+            )
+            log.info(f"Revision:\t\t\t{revision.text}")
+        except Exception as e:
+            log.warning(e)
+        try:
+            os_type = self.driver.find_element_by_id("os_type")
+            log.info(f"OS:\t\t\t\t{os_type.text}")
+        except Exception as e:
+            log.warning(e)
+        try:
+            js_engine = self.driver.find_element_by_id("js_engine")
+            log.info(f"JS Engine:\t\t\t{js_engine.text}")
+        except Exception as e:
+            log.warning(e)
+        try:
+            flash_version = self.driver.find_element_by_id("flash_version")
+            log.info(f"Flash Version:\t\t{flash_version.text}")
+        except Exception as e:
+            log.warning(e)
+        try:
+            user_agent = self.driver.find_element_by_id("useragent")
+            log.info(f"User Agent:\t\t\t{user_agent.text}")
+        except Exception as e:
+            log.warning(e)
+        try:
+            command_line = self.driver.find_element_by_id("command_line")
+            log.info(f"Process Command:\t\t{command_line.text}")
+        except Exception as e:
+            log.warning(e)
+        try:
+            executable_path = self.driver.find_element_by_id("executable_path")
+            log.info(f"Executable Path:\t\t{executable_path.text}")
+        except Exception as e:
+            log.warning(e)
+        try:
+            profile_path = self.driver.find_element_by_id("profile_path")
+            log.info(f"Profile Path:\t\t{profile_path.text}")
+        except Exception as e:
+            log.warning(e)
+        return
 
     def create_driver(self, path_to_profile):
         if self.setup_driver:
@@ -1479,6 +1539,7 @@ class Amazon:
             self.driver = webdriver.Chrome(executable_path=binary_path, options=options)
             self.wait = WebDriverWait(self.driver, 10)
             self.get_webdriver_pids()
+            self.get_chromedriver_info()
         except Exception as e:
             log.error(e)
             log.error(
