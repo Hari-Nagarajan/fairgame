@@ -505,7 +505,9 @@ class Amazon:
             # Sanity check to see if we have any offers
             try:
                 # Wait for the page to load before determining what's in it by looking for the footer
-                footer: WebElement = WebDriverWait(self.driver, timeout=DEFAULT_MAX_TIMEOUT).until(
+                footer: WebElement = WebDriverWait(
+                    self.driver, timeout=DEFAULT_MAX_TIMEOUT
+                ).until(
                     lambda d: d.find_elements_by_xpath(
                         "//div[@class='nav-footer-line'] | //img[@alt='Dogs of Amazon']"
                     )
@@ -1435,9 +1437,7 @@ class Amazon:
         if not self.notification_handler.sound_enabled:
             log.info(f"--Notification sounds are disabled.")
         if self.headless:
-            log.warning(
-                f"--Running in headless mode."
-            )
+            log.warning(f"--Running in headless mode.")
         if self.testing:
             log.warning(f"--Testing Mode.  NO Purchases will be made.")
         log.info(f"{'=' * 50}")
@@ -1445,19 +1445,23 @@ class Amazon:
     def get_chromedriver_info(self):
         try:
             chrome_instance_info_url = "chrome://version"
-            self.driver.get(url=chrome_instance_info_url)            
-            logo_found = self.wait.until(ec.presence_of_element_located((By.ID, "logo")))    # Wait for chrome logo to be put on page before parsing html.
+            self.driver.get(url=chrome_instance_info_url)
+            logo_found = self.wait.until(
+                ec.presence_of_element_located((By.ID, "logo"))
+            )  # Wait for chrome logo to be put on page before parsing html.
         except Exception as e:
             log.warning(e)
             log.warning(f"Couldnt get Chrome information... Continuing on...")
             return
-        try:    
+        try:
             version = self.driver.find_element_by_id("version")
             log.info(f"Google Chrome Version:\t{version.text}")
         except Exception as e:
             log.warning(e)
         try:
-            revision = self.driver.find_element_by_xpath('//*[@id="inner"]/tbody/tr[2]/td[2]/span')
+            revision = self.driver.find_element_by_xpath(
+                '//*[@id="inner"]/tbody/tr[2]/td[2]/span'
+            )
             log.info(f"Revision:\t\t\t{revision.text}")
         except Exception as e:
             log.warning(e)
