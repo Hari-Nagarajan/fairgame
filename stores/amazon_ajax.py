@@ -1,6 +1,7 @@
 import fileinput
 import json
 import os
+import pickle
 import platform
 import random
 import time
@@ -65,13 +66,6 @@ REALTIME_INVENTORY_PATH = f"/gp/aod/ajax?asin="
 
 CONFIG_FILE_PATH = "config/amazon_ajax_config.json"
 STORE_NAME = "Amazon"
-
-
-CONDITION_NEW = 1
-CONDITION_USED = 10
-CONDITION_COLLECTIBLE = 20
-CONDITION_UNKNOWN = 100
-
 DEFAULT_MAX_TIMEOUT = 10
 
 # Request
@@ -404,7 +398,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                 if "condition" in json_item:
                     condition = parse_condition(json_item["condition"])
                 else:
-                    condition = CONDITION_NEW
+                    condition = AmazonItemCondition.New
 
                 # Create new instances of an item for each asin specified
                 asins_collection = json_item["asins"]
@@ -432,13 +426,36 @@ class AmazonStoreHandler(BaseStoreHandler):
         log.info("Verifying item list...")
         items_to_purge = []
         verified = 0
-        for item in self.item_list:
+        item_cache_file = os.path.join(
+            os.path.dirname(os.path.abspath("__file__")),
+            "stores",
+            "store_data",
+            "item_cache.p",
+        )
+
+        if os.path.exists(item_cache_file) and os.path.getsize(item_cache_file) > 0:
+            item_cache = pickle.load(open(item_cache_file, "rb"))
+        else:
+            item_cache = {}
+
+        for idx, item in enumerate(self.item_list):
+            # Check the cache first to save the scraping...
+            if item.id in item_cache.keys():
+                cached_item = item_cache[item.id]
+                log.debug(f"Verifying ASIN {cached_item.id} via cache  ...")
+                # Update attributes that may have been changed in the config file
+                cached_item.condition = item.condition
+                cached_item.min_price = item.min_price
+                cached_item.max_price = item.max_price
+                self.item_list[idx] = cached_item
+                log.info(f"Verified ASIN {cached_item.id} as '{cached_item.short_name}'")
+                verified += 1
+                continue
+
             # Verify that the ASIN hits and that we have a valid inventory URL
             pdp_url = f"https://{self.amazon_domain}{PDP_PATH}{item.id}"
             log.debug(f"Verifying at {pdp_url} ...")
-            # self.conn20.request("GET", pdp_url, "", HEADERS)
-            # response = self.conn.getresponse()
-            # response = self.conn.get_response()
+
             data, status = self.get_html(pdp_url)
             if status == 503:
                 # Check for CAPTCHA
@@ -472,11 +489,18 @@ class AmazonStoreHandler(BaseStoreHandler):
                         else item.name
                     )
                     log.info(f"Verified ASIN {item.id} as '{item.short_name}'")
+                    item_cache[item.id] = item
                     verified += 1
                 else:
-                    log.info(
-                        f"Unable to verify ASIN {item.id}.  Continuing without verification."
-                    )
+                    doggo = tree.xpath("//img[@alt='Dogs of Amazon']")
+                    if doggo:
+                        # Bad ASIN or URL... dump it
+                        log.warning(f"Bad ASIN {item.id} for the domain or related failure.  Removing from hunt.")
+                        items_to_purge.append(item)
+                    else:
+                        log.info(
+                            f"Unable to verify ASIN {item.id}.  Continuing without verification."
+                        )
             else:
                 log.error(
                     f"Unable to locate details for {item.id} at {pdp_url}.  Removing from hunt."
@@ -490,6 +514,8 @@ class AmazonStoreHandler(BaseStoreHandler):
         log.info(
             f"Verified {verified} out of {len(self.item_list)} items on {STORE_NAME}"
         )
+        pickle.dump(item_cache, open(item_cache_file, "wb"))
+
         return True
 
     def get_item_sellers(self, item, free_shipping_strings):
@@ -504,9 +530,9 @@ class AmazonStoreHandler(BaseStoreHandler):
 
         tree = html.fromstring(payload)
 
-        """Get the pinned offer, if it exists"""
+        # Get the pinned offer, if it exists, by checking for a pinned offer area and add to cart button
         pinned_offer = tree.xpath("//div[@id='aod-sticky-pinned-offer']")
-        if not pinned_offer:
+        if not pinned_offer or not tree.xpath("//div[@id='aod-sticky-pinned-offer']//input[@name='submit.addToCart']"):
             log.debug(f"No pinned offer for {item.id} = {item.short_name}")
         else:
             for idx, offer in enumerate(pinned_offer):
@@ -588,10 +614,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         return sellers
 
     def get_real_time_data(self, item):
-        log.info(f"Calling {STORE_NAME} for {item.short_name} using {item.furl.url}")
-        # self.conn20.request("GET", item.url, "", HEADERS)
-        # response = self.conn.getresponse()
-        # response = self.conn20.get_response()
+        log.debug(f"Calling {STORE_NAME} for {item.short_name} using {item.furl.url}")
         data, status = self.get_html(item.furl.url)
         if item.status_code != status:
             # Track when we flip-flop between status codes.  200 -> 204 may be intelligent caching at Amazon.
