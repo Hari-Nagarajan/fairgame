@@ -1434,10 +1434,6 @@ class Amazon:
             log.info(f"--No images will be requested")
         if not self.notification_handler.sound_enabled:
             log.info(f"--Notification sounds are disabled.")
-        if self.headless:
-            log.warning(
-                f"--Running in headless mode."
-            )
         if self.testing:
             log.warning(f"--Testing Mode.  NO Purchases will be made.")
         log.info(f"{'=' * 50}")
