@@ -60,20 +60,14 @@ class GlobalConfig:
         self.profile_path = None
         self.get_browser_profile_path()
 
-    def get_amazon_config(self):
+    def get_amazon_config(self, encryption_pass=None):
         log.info("Initializing Amazon configuration...")
         # Load up all things Amazon
-        self.amazon_config = self.global_config["AMAZON"]
-        return self.amazon_config
-
-    def get_amazon_credentials(self, encryption_pass=None):
-        if self.amazon_config is None:
-            self.amazon_config = self.get_amazon_config()
-
-        (
-            self.amazon_config["username"],
-            self.amazon_config["password"],
-        ) = get_credentials(AMAZON_CREDENTIAL_FILE, encryption_pass)
+        amazon_config = self.global_config["AMAZON"]
+        amazon_config["username"], amazon_config["password"] = get_credentials(
+            AMAZON_CREDENTIAL_FILE, encryption_pass
+        )
+        return amazon_config
 
     def get_browser_profile_path(self):
         if not self.profile_path:

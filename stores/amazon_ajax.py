@@ -119,8 +119,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         self.take_screenshots = not no_screenshots
         from cli.cli import global_config
 
-        self.amazon_config = global_config.get_amazon_config()
-        global_config.get_amazon_credentials()
+        self.amazon_config = global_config.get_amazon_config(encryption_pass)
 
         # Load up our configuration
         self.parse_config()
