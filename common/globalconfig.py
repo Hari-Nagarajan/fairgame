@@ -1,3 +1,22 @@
+#      FairGame - Automated Purchasing Program
+#      Copyright (C) 2021  Hari Nagarajan
+#
+#      This program is free software: you can redistribute it and/or modify
+#      it under the terms of the GNU General Public License as published by
+#      the Free Software Foundation, either version 3 of the License, or
+#      (at your option) any later version.
+#
+#      This program is distributed in the hope that it will be useful,
+#      but WITHOUT ANY WARRANTY; without even the implied warranty of
+#      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#      GNU General Public License for more details.
+#
+#      You should have received a copy of the GNU General Public License
+#      along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+#      The author may be contacted through the project's GitHub, at:
+#      https://github.com/Hari-Nagarajan/fairgame
+
 import os
 from config import Config as Cfg
 import stdiomask
@@ -37,7 +56,9 @@ class GlobalConfig:
         # Load up the global configuration
         # See http://docs.red-dove.com/cfg/python.html#getting-started-with-cfg-in-python for how to use Config
         self.global_config = Cfg(GLOBAL_CONFIG_FILE)
-        self.amazon_config = None
+        self.fairgame_config = self.global_config.get("FAIRGAME")
+        self.profile_path = None
+        self.get_browser_profile_path()
 
     def get_amazon_config(self):
         log.info("Initializing Amazon configuration...")
@@ -53,3 +74,11 @@ class GlobalConfig:
             self.amazon_config["username"],
             self.amazon_config["password"],
         ) = get_credentials(AMAZON_CREDENTIAL_FILE, encryption_pass)
+
+    def get_browser_profile_path(self):
+        if not self.profile_path:
+            self.profile_path = os.path.join(
+                os.path.dirname(os.path.abspath("__file__")),
+                self.global_config["FAIRGAME"].get("profile_name", ".profile-amz"),
+            )
+        return self.profile_path

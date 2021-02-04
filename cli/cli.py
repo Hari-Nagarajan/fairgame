@@ -1,30 +1,63 @@
-import time
-import click
+#      FairGame - Automated Purchasing Program
+#      Copyright (C) 2021  Hari Nagarajan
+#
+#      This program is free software: you can redistribute it and/or modify
+#      it under the terms of the GNU General Public License as published by
+#      the Free Software Foundation, either version 3 of the License, or
+#      (at your option) any later version.
+#
+#      This program is distributed in the hope that it will be useful,
+#      but WITHOUT ANY WARRANTY; without even the implied warranty of
+#      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#      GNU General Public License for more details.
+#
+#      You should have received a copy of the GNU General Public License
+#      along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+#      The author may be contacted through the project's GitHub, at:
+#      https://github.com/Hari-Nagarajan/fairgame
+
+import os
+import shutil
 from datetime import datetime
 from functools import wraps
+from pathlib import Path
 from signal import signal, SIGINT
+
+LICENSE_PATH = os.path.join(
+    "cli",
+    "license",
+)
+
 
 try:
     import click
 except ModuleNotFoundError as e:
     print(e)
-    print(
-        "You should try running pipenv shell and pipenv install per the install instructions"
-    )
-    print("Or you should only use Python 3.8.X per the instructions.")
-    print(
-        "If you are attempting to run multiple bots, this is not supported, so you are on your own to figure out that one."
-    )
+    print("Install the missing module noted above.")
     exit(0)
 import time
+
 
 from notifications.notifications import NotificationHandler, TIME_FORMAT
 from utils.logger import log
 from common.globalconfig import GlobalConfig
-from utils.version import is_latest, version, get_latest_version
+from utils.version import is_latest, version
 from stores.amazon import Amazon
 from stores.bestbuy import BestBuyHandler
 from stores.amazon_ajax import AmazonStoreHandler
+
+
+def get_folder_size(folder):
+    return sizeof_fmt(sum(file.stat().st_size for file in Path(folder).rglob("*")))
+
+
+def sizeof_fmt(num, suffix="B"):
+    for unit in ["", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"]:
+        if abs(num) < 1024.0:
+            return "%3.1f%s%s" % (num, unit, suffix)
+        num /= 1024.0
+    return "%.1f%s%s" % (num, "Yi", suffix)
 
 
 def handler(signal, frame):
@@ -48,6 +81,7 @@ def notify_on_crash(func):
 
 @click.group()
 def main():
+
     pass
 
 
@@ -80,7 +114,7 @@ def main():
 
 @click.command()
 @click.option("--no-image", is_flag=True, help="Do not load images")
-@click.option("--headless", is_flag=True, help="Unsupported headless mode. GLHF")
+@click.option("--headless", is_flag=True, help="Headless mode.")
 @click.option(
     "--test",
     is_flag=True,
@@ -145,6 +179,18 @@ def main():
     default=False,
     help="Will attempt to click ship to address button. USE AT YOUR OWN RISK!",
 )
+@click.option(
+    "--clean-profile",
+    is_flag=True,
+    default=False,
+    help="Purge the user profile that Fairgame uses for browsing",
+)
+@click.option(
+    "--clean-credentials",
+    is_flag=True,
+    default=False,
+    help="Purge Amazon credentials and prompt for new credentials",
+)
 @notify_on_crash
 def amazon(
     no_image,
@@ -162,10 +208,24 @@ def amazon(
     p,
     log_stock_check,
     shipping_bypass,
+    clean_profile,
+    clean_credentials,
 ):
     notification_handler.sound_enabled = not disable_sound
     if not notification_handler.sound_enabled:
         log.info("Local sounds have been disabled.")
+
+    if clean_profile and os.path.exists(global_config.get_browser_profile_path()):
+        log.info(
+            f"Removing existing profile at '{global_config.get_browser_profile_path()}'"
+        )
+        profile_size = get_folder_size(global_config.get_browser_profile_path())
+        shutil.rmtree(global_config.get_browser_profile_path())
+        log.info(f"Freed {profile_size}")
+
+    if clean_credentials and os.path.exists(AMAZON_CREDENTIAL_FILE):
+        log.info(f"Removing existing Amazon credentials from {AMAZON_CREDENTIAL_FILE}")
+        os.remove(AMAZON_CREDENTIAL_FILE)
 
     amzn_obj = Amazon(
         headless=headless,
@@ -251,12 +311,43 @@ def test_notifications(disable_sound):
     time.sleep(5)
 
 
+@click.command()
+@click.option("--w", is_flag=True)
+@click.option("--c", is_flag=True)
+def show(w, c):
+    if w and c:
+        print("Choose one option. Program Quitting")
+        exit(0)
+    elif w:
+        show_file = "show_w.txt"
+    elif c:
+        show_file = "show_c.txt"
+    else:
+        print(
+            "Option missing, you must include w or c with show argument. Program Quitting"
+        )
+        exit(0)
+
+    if os.path.exists(LICENSE_PATH):
+
+        with open(os.path.join(LICENSE_PATH, show_file)) as file:
+            try:
+                print(file.read())
+            except FileNotFoundError:
+                log.error("License File Missing. Quitting Program")
+                exit(0)
+    else:
+        log.error("License File Missing. Quitting Program.")
+        exit(0)
+
+
 signal(SIGINT, handler)
 
 main.add_command(amazon)
 main.add_command(amazonajax)
 main.add_command(bestbuy)
 main.add_command(test_notifications)
+main.add_command(show)
 
 # Global scope stuff here
 if is_latest():
@@ -265,7 +356,7 @@ elif version.is_prerelease:
     log.warning(f"FairGame PRE-RELEASE v{version}")
 else:
     log.warning(
-        f"You are running FairGame v{version}, but the most recent version is v{get_latest_version}. "
+        f"You are running FairGame v{version.release}, but the most recent version is v{version.get_latest_version()}. "
         f"Consider upgrading "
     )
 
