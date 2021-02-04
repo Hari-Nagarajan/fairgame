@@ -106,6 +106,7 @@ class Amazon:
 
         global amazon_config
         from cli.cli import global_config
+
         amazon_config = global_config.get_amazon_credentials(encryption_pass)
 
         try:

@@ -59,8 +59,10 @@ AMAZON_DOMAIN = "www.amazon.ca"
 
 PDP_PATH = f"/dp/"
 # REALTIME_INVENTORY_URL = f"{AMAZON_DOMAIN}gp/aod/ajax/ref=aod_f_new?asin="
-REALTIME_INVENTORY_PATH = f"/gp/aod/ajax/ref=aod_f_new?isonlyrenderofferlist=true&asin="
+# REALTIME_INVENTORY_PATH = f"/gp/aod/ajax/ref=aod_f_new?isonlyrenderofferlist=true&asin="
 # REALTIME_INVENTORY_URL = "https://www.amazon.com/gp/aod/ajax/ref=dp_aod_NEW_mbc?asin="
+REALTIME_INVENTORY_PATH = f"/gp/aod/ajax?asin="
+
 CONFIG_FILE_PATH = "config/amazon_ajax_config.json"
 STORE_NAME = "Amazon"
 
@@ -337,6 +339,7 @@ class AmazonStoreHandler(BaseStoreHandler):
             time.sleep(delay + random.randint(0, 3))
             if self.shuffle:
                 random.shuffle(self.item_list)
+
     @contextmanager
     def wait_for_page_change(self, timeout=30):
         """Utility to help manage selenium waiting for a page to load after an action, like a click"""
@@ -501,6 +504,45 @@ class AmazonStoreHandler(BaseStoreHandler):
 
         tree = html.fromstring(payload)
 
+        """Get the pinned offer, if it exists"""
+        pinned_offer = tree.xpath("//div[@id='aod-sticky-pinned-offer']")
+        if not pinned_offer:
+            log.debug(f"No pinned offer for {item.id} = {item.short_name}")
+        else:
+            for idx, offer in enumerate(pinned_offer):
+                merchant_name = offer.xpath(
+                    ".//span[@class='a-size-small a-color-base']"
+                )[0].text.strip()
+                price_text = offer.xpath(".//span[@class='a-price-whole']")[0].text
+                price = parse_price(price_text)
+                shipping_cost = get_shipping_costs(offer, free_shipping_strings)
+                form_action = offer.xpath(".//form[contains(@action,'add-to-cart')]")[
+                    0
+                ].action
+                condition_heading = offer.xpath(".//div[@id='aod-offer-heading']/h5")
+                if condition_heading:
+                    condition = AmazonItemCondition.from_str(
+                        condition_heading[0].text.strip()
+                    )
+                else:
+                    condition = AmazonItemCondition.Unknown
+                offers = offer.xpath(f".//input[@name='offeringID.1']")
+                offer_id = None
+                if len(offers) > 0:
+                    offer_id = offers[0].value
+                else:
+                    log.error("No offer ID found!")
+
+                seller = SellerDetail(
+                    merchant_name,
+                    price,
+                    shipping_cost,
+                    condition,
+                    form_action,
+                    offer_id,
+                )
+                sellers.append(seller)
+
         offers = tree.xpath("//div[@id='aod-offer']")
         if not offers:
             log.debug(f"No offers found for {item.id} = {item.short_name}")
@@ -562,8 +604,16 @@ class AmazonStoreHandler(BaseStoreHandler):
 
     def attempt_purchase(self, item, qualified_seller):
         # Open the item URL in Selenium
+        f = f"https://smile.amazon.com/gp/aws/cart/add.html?OfferListingId.1={qualified_seller.offering_id}&Quantity.1=1"
+
+        self.driver.get(f)
         log.info("Try to ATC and Buy from HERE!")
-        exit(0)
+        try:
+            self.driver.find_element_by_xpath("//input[@alt='Continue']").click()
+        except NoSuchElementException:
+            log.error("Continue button not present on page")
+
+        time.sleep(300)
 
     def get_html(self, url):
         """Unified mechanism to get content to make changing connection clients easier"""
