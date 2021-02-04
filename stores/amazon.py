@@ -505,7 +505,9 @@ class Amazon:
             # Sanity check to see if we have any offers
             try:
                 # Wait for the page to load before determining what's in it by looking for the footer
-                footer: WebElement = WebDriverWait(self.driver, timeout=DEFAULT_MAX_TIMEOUT).until(
+                footer: WebElement = WebDriverWait(
+                    self.driver, timeout=DEFAULT_MAX_TIMEOUT
+                ).until(
                     lambda d: d.find_elements_by_xpath(
                         "//div[@class='nav-footer-line'] | //img[@alt='Dogs of Amazon']"
                     )

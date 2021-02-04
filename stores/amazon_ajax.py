@@ -299,7 +299,7 @@ class AmazonStoreHandler(BaseStoreHandler):
 
         log.info(f'Logged in as {self.amazon_config["username"]}')
 
-    def run(self, delay=45):
+    def run(self, delay=3):
         # Load up the homepage
         self.driver.get(f"https://{self.amazon_domain}")
 
@@ -328,8 +328,10 @@ class AmazonStoreHandler(BaseStoreHandler):
             for item in self.item_list:
                 qualified_seller = self.find_qualified_seller(item)
                 if qualified_seller:
-                    self.attempt_purchase(item, qualified_seller)
-            time.sleep(delay + random.randint(0, 3))
+                    successful = self.attempt_purchase(item, qualified_seller)
+                    if successful:
+                        self.item_list.remove(item)
+                time.sleep(delay + random.randint(0, 3))
             if self.shuffle:
                 random.shuffle(self.item_list)
 
@@ -632,17 +634,28 @@ class AmazonStoreHandler(BaseStoreHandler):
         return data
 
     def attempt_purchase(self, item, qualified_seller):
-        # Open the item URL in Selenium
+        # Open the add.html URL in Selenium
         f = f"https://smile.amazon.com/gp/aws/cart/add.html?OfferListingId.1={qualified_seller.offering_id}&Quantity.1=1"
 
         self.driver.get(f)
-        log.info("Try to ATC and Buy from HERE!")
+        # log.info("Try to ATC and Buy from HERE!")
+        # Click the continue button on the add.html page
+        # TODO: implement logic to confirm there is quantity available
         try:
             self.driver.find_element_by_xpath("//input[@alt='Continue']").click()
         except NoSuchElementException:
             log.error("Continue button not present on page")
 
+        # TODO: pull handle checkout logic from amazon.py (go to navigate_pages, etc.)
+
         time.sleep(300)
+
+        # TODO: return True if purchase was successful, return False if purchase was unsuccessful
+        successful = False
+        if successful:
+            return True
+        else:
+            return False
 
     def get_html(self, url):
         """Unified mechanism to get content to make changing connection clients easier"""
