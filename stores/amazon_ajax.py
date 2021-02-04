@@ -15,7 +15,7 @@ from chromedriver_py import binary_path
 from furl import furl
 from lxml import html
 from price_parser import parse_price, Price
-from selenium import webdriver
+from seleniumwire import webdriver
 from selenium.common.exceptions import (
     NoSuchElementException,
     TimeoutException,
@@ -448,7 +448,9 @@ class AmazonStoreHandler(BaseStoreHandler):
                 cached_item.min_price = item.min_price
                 cached_item.max_price = item.max_price
                 self.item_list[idx] = cached_item
-                log.info(f"Verified ASIN {cached_item.id} as '{cached_item.short_name}'")
+                log.info(
+                    f"Verified ASIN {cached_item.id} as '{cached_item.short_name}'"
+                )
                 verified += 1
                 continue
 
@@ -492,10 +494,13 @@ class AmazonStoreHandler(BaseStoreHandler):
                     item_cache[item.id] = item
                     verified += 1
                 else:
+                    # TODO: Evaluate if this happens with a 200 code
                     doggo = tree.xpath("//img[@alt='Dogs of Amazon']")
                     if doggo:
                         # Bad ASIN or URL... dump it
-                        log.warning(f"Bad ASIN {item.id} for the domain or related failure.  Removing from hunt.")
+                        log.error(
+                            f"Bad ASIN {item.id} for the domain or related failure.  Removing from hunt."
+                        )
                         items_to_purge.append(item)
                     else:
                         log.info(
@@ -532,7 +537,9 @@ class AmazonStoreHandler(BaseStoreHandler):
 
         # Get the pinned offer, if it exists, by checking for a pinned offer area and add to cart button
         pinned_offer = tree.xpath("//div[@id='aod-sticky-pinned-offer']")
-        if not pinned_offer or not tree.xpath("//div[@id='aod-sticky-pinned-offer']//input[@name='submit.addToCart']"):
+        if not pinned_offer or not tree.xpath(
+            "//div[@id='aod-sticky-pinned-offer']//input[@name='submit.addToCart']"
+        ):
             log.debug(f"No pinned offer for {item.id} = {item.short_name}")
         else:
             for idx, offer in enumerate(pinned_offer):
@@ -663,9 +670,15 @@ class AmazonStoreHandler(BaseStoreHandler):
 
         # Selenium
         self.driver.get(url)
+        response_code = 200  # Just assume it's fine... ;-)
+
+        # Access requests via the `requests` attribute
+        for request in self.driver.requests:
+            if request.url == url:
+                response_code = request.response.status_code
+                break
         data = self.driver.page_source
-        # Hard-code response for Selenium requests?
-        return data, 200
+        return data, response_code
 
 
 def parse_condition(condition: str) -> AmazonItemCondition:
