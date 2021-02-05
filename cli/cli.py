@@ -194,7 +194,7 @@ def main():
     "--alt-offers",
     is_flag=True,
     default=False,
-    help="Directly hit the PDP for offers.  Sub-optimal if you have the offers listing available to you.",
+    help="Directly hit the offers page.  Preferred, but deprecated by Amazon.",
 )
 @notify_on_crash
 def amazon(
