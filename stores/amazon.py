@@ -1503,8 +1503,8 @@ class Amazon:
                 prefs["profile.managed_default_content_settings.images"] = 0
             options.add_experimental_option("prefs", prefs)
             options.add_argument(f"user-data-dir={path_to_profile}")
-            if not self.slow_mode:
-                options.set_capability("pageLoadStrategy", "none")
+            #if not self.slow_mode:
+            #    options.set_capability("pageLoadStrategy", "none")
 
             self.setup_driver = False
 
