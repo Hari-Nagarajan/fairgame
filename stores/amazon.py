@@ -525,20 +525,19 @@ class Amazon:
             # Sanity check to see if we have any offers
             try:
                 # Wait for the page to load before determining what's in it by looking for the footer
-                if self.slow_mode:
-                    footer: WebElement = WebDriverWait(
-                        self.driver, timeout=DEFAULT_MAX_TIMEOUT
-                    ).until(
-                        lambda d: d.find_elements_by_xpath(
-                            "//div[@class='nav-footer-line'] | //img[@alt='Dogs of Amazon']"
-                        )
+                footer: WebElement = WebDriverWait(
+                    self.driver, timeout=DEFAULT_MAX_TIMEOUT
+                ).until(
+                    lambda d: d.find_elements_by_xpath(
+                        "//div[@class='nav-footer-line'] | //img[@alt='Dogs of Amazon']"
                     )
-                    if footer and footer[0].tag_name == "img":
-                        log.info(f"Saw dogs for {asin}.  Skipping...")
-                        return False
+                )
+                if footer and footer[0].tag_name == "img":
+                    log.info(f"Saw dogs for {asin}.  Skipping...")
+                    return False
 
-                    log.debug(f"After footer page title {self.driver.title}")
-                    log.debug(f"             page url: {self.driver.current_url}")
+                log.debug(f"After footer page title {self.driver.title}")
+                log.debug(f"             page url: {self.driver.current_url}")
 
                 offers = WebDriverWait(self.driver, timeout=DEFAULT_MAX_TIMEOUT).until(
                     lambda d: d.find_element_by_xpath(
@@ -1503,8 +1502,8 @@ class Amazon:
                 prefs["profile.managed_default_content_settings.images"] = 0
             options.add_experimental_option("prefs", prefs)
             options.add_argument(f"user-data-dir={path_to_profile}")
-            #if not self.slow_mode:
-            #    options.set_capability("pageLoadStrategy", "none")
+            if not self.slow_mode:
+                options.set_capability("pageLoadStrategy", "none")
 
             self.setup_driver = False
 
