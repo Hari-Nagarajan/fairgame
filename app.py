@@ -30,6 +30,7 @@ def sha256sum(filename):
             h.update(mv[:n])
     return h.hexdigest()
 
+
 if os.path.exists("LICENSE") and sha256sum("LICENSE") in license_hash:
     s = """
     FairGame Copyright (C) 2021 Hari Nagarajan
