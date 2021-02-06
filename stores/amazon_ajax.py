@@ -19,6 +19,8 @@ from seleniumwire import webdriver
 from selenium.common.exceptions import (
     NoSuchElementException,
     TimeoutException,
+    WebDriverException,
+    ElementNotInteractableException,
 )
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -129,7 +131,7 @@ class AmazonStoreHandler(BaseStoreHandler):
             enable_headless()
 
         prefs = get_prefs(no_image)
-        set_options(prefs, slow_mode=True)
+        set_options(prefs, slow_mode=slow_mode)
         modify_browser_profile()
 
         # Initialize the Session we'll use for this run
@@ -207,10 +209,13 @@ class AmazonStoreHandler(BaseStoreHandler):
 
         log.info("Inputting email...")
         try:
+
             email_field: WebElement = WebDriverWait(self.driver, 10).until(
                 EC.presence_of_element_located((By.XPATH, '//*[@id="ap_email"]'))
             )
-            email_field.send_keys(self.amazon_config["username"] + Keys.RETURN)
+            with self.wait_for_page_change():
+                email_field.clear()
+                email_field.send_keys(self.amazon_config["username"] + Keys.RETURN)
             if self.driver.find_elements_by_xpath('//*[@id="auth-error-message-box"]'):
                 log.error("Login failed, delete your credentials file")
                 time.sleep(240)
@@ -235,6 +240,7 @@ class AmazonStoreHandler(BaseStoreHandler):
             password_field = WebDriverWait(self.driver, 10).until(
                 EC.presence_of_element_located((By.XPATH, '//*[@id="ap_password"]'))
             )
+            password_field.clear()
             password_field.send_keys(self.amazon_config["password"])
             # check for captcha
             try:
@@ -260,12 +266,16 @@ class AmazonStoreHandler(BaseStoreHandler):
                     log.info(
                         f"Failed to solve {captcha.image_link}, lets reload and get a new captcha."
                     )
+                    self.send_notification(
+                        "Unsolved Captcha", "unsolved_captcha", self.take_screenshots
+                    )
                     self.driver.refresh()
                 else:
                     self.send_notification(
                         "Solving catpcha", "captcha", self.take_screenshots
                     )
                     with self.wait_for_page_change(timeout=10):
+                        captcha_entry.clear()
                         captcha_entry.send_keys(solution + Keys.RETURN)
 
             except Exception as e:
@@ -301,7 +311,8 @@ class AmazonStoreHandler(BaseStoreHandler):
 
     def run(self, delay=3):
         # Load up the homepage
-        self.driver.get(f"https://{self.amazon_domain}")
+        with self.wait_for_page_change():
+            self.driver.get(f"https://{self.amazon_domain}")
 
         # Get a valid amazon session for our requests
         if not self.is_logged_in():
@@ -338,9 +349,13 @@ class AmazonStoreHandler(BaseStoreHandler):
     @contextmanager
     def wait_for_page_change(self, timeout=30):
         """Utility to help manage selenium waiting for a page to load after an action, like a click"""
+        kill_time = get_timeout(timeout)
         old_page = self.driver.find_element_by_tag_name("html")
         yield
         WebDriverWait(self.driver, timeout).until(staleness_of(old_page))
+        # wait for page title to be non-blank
+        while self.driver.title == "" and time.time() < kill_time:
+            time.sleep(0.05)
 
     def find_qualified_seller(self, item) -> SellerDetail or None:
         item_sellers = self.get_item_sellers(item, self.amazon_config["FREE_SHIPPING"])
@@ -637,22 +652,128 @@ class AmazonStoreHandler(BaseStoreHandler):
         # Open the add.html URL in Selenium
         f = f"https://smile.amazon.com/gp/aws/cart/add.html?OfferListingId.1={qualified_seller.offering_id}&Quantity.1=1"
 
-        self.driver.get(f)
-        # log.info("Try to ATC and Buy from HERE!")
-        # Click the continue button on the add.html page
-        # TODO: implement logic to confirm there is quantity available
-        try:
-            self.driver.find_element_by_xpath("//input[@alt='Continue']").click()
-        except NoSuchElementException:
-            log.error("Continue button not present on page")
+        with self.wait_for_page_change(timeout=5):
+            self.driver.get(f)
+            # log.info("Try to ATC and Buy from HERE!")
+            # Click the continue button on the add.html page
+            # TODO: implement logic to confirm there is quantity available
 
-        # TODO: pull handle checkout logic from amazon.py (go to navigate_pages, etc.)
+            xpath = "//input[@alt='Continue']"
+            if wait_for_element_by_xpath(self.driver, xpath):
+                try:
+                    with self.wait_for_page_change():
+                        self.driver.find_element_by_xpath(xpath).click()
+                except NoSuchElementException:
+                    log.error("Continue button not present on page")
+            else:
+                log.error("Continue button not present on page")
 
+        # verify cart is non-zero
+        if self.get_cart_count() != 0:
+
+            CHECKOUT_TITLES = [
+                "Amazon.com Checkout",
+                "Amazon.co.uk Checkout",
+                "Place Your Order - Amazon.ca Checkout",
+                "Place Your Order - Amazon.co.uk Checkout",
+                "Amazon.de Checkout",
+                "Place Your Order - Amazon.de Checkout",
+                "Amazon.de - Bezahlvorgang",
+                "Bestellung aufgeben - Amazon.de-Bezahlvorgang",
+                "Place Your Order - Amazon.com Checkout",
+                "Place Your Order - Amazon.com",
+                "Tramitar pedido en Amazon.es",
+                "Processus de paiement Amazon.com",
+                "Confirmar pedido - Compra Amazon.es",
+                "Passez votre commande - Processus de paiement Amazon.fr",
+                "Ordina - Cassa Amazon.it",
+                "AmazonSmile Checkout",
+                "Plaats je bestelling - Amazon.nl-kassa",
+                "Place Your Order - AmazonSmile Checkout",
+                "Preparing your order",
+                "Ihre Bestellung wird vorbereitet",
+                "Pagamento Amazon.it",
+            ]
+
+            while self.driver.title not in CHECKOUT_TITLES:
+                # try to go directly to cart page:
+                with self.wait_for_page_change(timeout=10):
+                    self.driver.get(
+                        f"https://{self.amazon_domain}/gp/buy/spc/handlers/display.html?hasWorkingJavascript=1"
+                    )
+
+        successful = self.handle_checkout()
         time.sleep(300)
-
-        # TODO: return True if purchase was successful, return False if purchase was unsuccessful
-        successful = False
         if successful:
+            return True
+        else:
+            return False
+
+    def navigate_purchase(self):
+        pass
+
+    def handle_checkout(self, test=True):
+        previous_title = self.driver.title
+        button = None
+        timeout = get_timeout()
+
+        button_xpaths = [
+            '//*[@id="submitOrderButtonId"]/span/input',
+            '//*[@id="bottomSubmitOrderButtonId"]/span/input',
+            '//*[@id="placeYourOrder"]/span/input',
+        ]
+
+        while True:
+            try:
+                button = self.driver.find_element_by_xpath(button_xpaths[0])
+            except NoSuchElementException:
+                pass
+            button_xpaths.append(button_xpaths.pop(0))
+            if button:
+                if button.is_enabled() and button.is_displayed():
+                    break
+            if time.time() > timeout:
+                log.error("couldn't find buttons to proceed to checkout")
+                # self.save_page_source("ptc-error")
+                self.send_notification(
+                    "Error in checkout.  Please check browser window.",
+                    "ptc-error",
+                    self.take_screenshots,
+                )
+                log.info("Refreshing page to try again")
+                self.driver.refresh()
+                time.sleep(3)
+                # self.order_retry += 1
+                return
+        if test:
+            log.info(f"Found button {button.text}, but this is a test")
+            log.info("will not try to complete order")
+            # log.info(f"test time took {time.time() - self.start_time_atc} to check out")
+            # self.try_to_checkout = False
+            # self.great_success = True
+            # if self.single_shot:
+            #     self.asin_list = []
+        else:
+            log.info(f"Clicking Button {button.text} to place order")
+            with self.wait_for_page_change(timeout=10):
+                button.click()
+
+        ORDER_COMPLETE_TITLES = [
+            "Amazon.com Thanks You",
+            "Amazon.ca Thanks You",
+            "AmazonSmile Thanks You",
+            "Thank you",
+            "Amazon.fr Merci",
+            "Merci",
+            "Amazon.es te da las gracias",
+            "Amazon.fr vous remercie.",
+            "Grazie da Amazon.it",
+            "Hartelijk dank",
+            "Thank You",
+            "Amazon.de Vielen Dank",
+        ]
+
+        if self.driver.title in ORDER_COMPLETE_TITLES:
             return True
         else:
             return False
@@ -662,6 +783,8 @@ class AmazonStoreHandler(BaseStoreHandler):
         f = furl(url)
         if not f.scheme:
             f.set(scheme="https")
+        response = self.session.get(f.url, headers=HEADERS)
+        return response.text, response.status_code
 
         # if self.http_client:
         #     # http.client method
@@ -678,19 +801,34 @@ class AmazonStoreHandler(BaseStoreHandler):
         # else:
         #     response = self.session.get(f.url, headers=HEADERS)
         #     return response.text, response.status_code
-        # else:
+        # # else:
+        # #
+        #     # Selenium
+        #     self.driver.get(url)
+        #     response_code = 200  # Just assume it's fine... ;-)
 
-        # Selenium
-        self.driver.get(url)
-        response_code = 200  # Just assume it's fine... ;-)
+        # # Access requests via the `requests` attribute
+        # for request in self.driver.requests:
+        #     if request.url == url:
+        #         response_code = request.response.status_code
+        #         break
+        # data = self.driver.page_source
+        # return data, response_code
 
-        # Access requests via the `requests` attribute
-        for request in self.driver.requests:
-            if request.url == url:
-                response_code = request.response.status_code
-                break
-        data = self.driver.page_source
-        return data, response_code
+    # returns negative number if cart element does not exist, returns number if cart exists
+    def get_cart_count(self):
+        # check if cart number is on the page, if cart items = 0
+        try:
+            element = self.driver.find_element_by_xpath('//*[@id="nav-cart-count"]')
+        except NoSuchElementException:
+            return -1
+        if element:
+            try:
+                return int(element.text)
+            except Exception as e:
+                log.debug("Error converting cart number to integer")
+                log.debug(e)
+                return -1
 
 
 def parse_condition(condition: str) -> AmazonItemCondition:
@@ -739,7 +877,7 @@ def set_options(prefs, slow_mode):
     options.add_experimental_option("prefs", prefs)
     options.add_argument(f"user-data-dir=.profile-amz")
     if not slow_mode:
-        options.set_capability("pageLoadStrategy", "normal")
+        options.set_capability("pageLoadStrategy", "none")
 
 
 def get_prefs(no_image):
@@ -770,3 +908,15 @@ def get_webdriver_pids(driver):
 
 def get_timeout(timeout=DEFAULT_MAX_TIMEOUT):
     return time.time() + timeout
+
+
+def wait_for_element_by_xpath(d, xpath, timeout=10):
+    try:
+        WebDriverWait(d, timeout).until(
+            EC.presence_of_element_located((By.XPATH, xpath))
+        )
+    except TimeoutException:
+        log.error(f"failed to find {xpath}")
+        return False
+
+    return True
