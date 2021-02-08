@@ -462,6 +462,8 @@ class Amazon:
                 self.get_page(f.url)
                 log.debug(f"Initial page title {self.driver.title}")
                 log.debug(f"        page url: {self.driver.current_url}")
+                if self.driver.title in amazon_config["CAPTCHA_PAGE_TITLES"]:
+                    self.handle_captcha()
                 break
             except Exception:
                 fail_counter += 1
@@ -514,7 +516,6 @@ class Amazon:
                 if footer and footer[0].tag_name == "img":
                     log.info(f"Saw dogs for {asin}.  Skipping...")
                     return False
-
 
                 log.debug(f"After footer page title {self.driver.title}")
                 log.debug(f"             page url: {self.driver.current_url}")
@@ -1262,6 +1263,7 @@ class Amazon:
     @debug
     def handle_captcha(self, check_presence=True):
         # wait for captcha to load
+        log.debug("Waiting for captcha to load.")
         time.sleep(DEFAULT_MAX_WEIRD_PAGE_DELAY)
         current_page = self.driver.title
         try:
