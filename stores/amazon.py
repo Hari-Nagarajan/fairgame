@@ -398,7 +398,7 @@ class Amazon:
             # check for captcha
             try:
                 captcha_entry = self.driver.find_element_by_xpath(
-                    '//*[@id="auth-captcha-guess"]'
+                    '//*[@action="https://www.amazon.com/errors/validateCaptcha"]'
                 )
             except sel_exceptions.NoSuchElementException:
                 password_field.send_keys(Keys.RETURN)
