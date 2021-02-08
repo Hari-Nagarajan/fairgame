@@ -164,6 +164,9 @@ class Amazon:
             with open(AUTOBUY_CONFIG_PATH) as json_file:
                 try:
                     config = json.load(json_file)
+                    global instance_name
+                    instance_name = config["instance_name"]
+                    log.info(f"Running as instance name: {instance_name}")
                     self.asin_groups = int(config["asin_groups"])
                     self.amazon_website = config.get(
                         "amazon_website", "smile.amazon.com"
@@ -226,7 +229,7 @@ class Amazon:
             self.login()
         self.notification_handler.play_notify_sound()
         self.send_notification(
-            "Bot Logged in and Starting up", "Start-Up", self.take_screenshots
+            f"{instance_name}: Bot Logged in and Starting up", "Start-Up", self.take_screenshots
         )
         if self.get_cart_count() > 0:
             log.warning(f"Found {cart_quantity} item(s) in your cart.")
@@ -419,7 +422,7 @@ class Amazon:
                     self.driver.refresh()
                 else:
                     self.send_notification(
-                        "Solving catpcha", "captcha", self.take_screenshots
+                        f"{instance_name}: Solving catpcha", "captcha", self.take_screenshots
                     )
                     captcha_entry.send_keys(solution + Keys.RETURN)
                     self.wait_for_page_change(current_page)
@@ -500,7 +503,7 @@ class Amazon:
                         log.error("Failed to delete chrome processes")
                         log.error("Please restart bot")
                         self.send_notification(
-                            message="Bot Failed, please restart bot",
+                            message=f"{instance_name}: Bot Failed, please restart bot",
                             page_name="Bot Failed",
                             take_screenshot=False,
                         )
@@ -509,7 +512,7 @@ class Amazon:
                         log.error("Failed to recreate webdriver processes")
                         log.error("Please restart bot")
                         self.send_notification(
-                            message="Bot Failed, please restart bot",
+                            message=f"{instance_name}: Bot Failed, please restart bot",
                             page_name="Bot Failed",
                             take_screenshot=False,
                         )
@@ -803,7 +806,7 @@ class Amazon:
                 self.notification_handler.play_notify_sound()
                 if self.detailed:
                     self.send_notification(
-                        message=f"Found Stock ASIN:{asin}",
+                        message=f"{instance_name}: Found Stock ASIN:{asin}",
                         page_name="Stock Alert",
                         take_screenshot=self.take_screenshots,
                     )
@@ -824,7 +827,7 @@ class Amazon:
                     log.info("did not add to cart, trying again")
                     log.debug(f"failed title was {self.driver.title}")
                     self.send_notification(
-                        "Failed Add to Cart", "failed-atc", self.take_screenshots
+                        f"{instance_name}: Failed Add to Cart", "failed-atc", self.take_screenshots
                     )
                     self.save_page_source("failed-atc")
                     in_stock = self.check_stock(
@@ -892,7 +895,7 @@ class Amazon:
             if not self.unknown_title_notification_sent:
                 self.notification_handler.play_alarm_sound()
                 self.send_notification(
-                    "User interaction required for checkout!",
+                    f"{instance_name}: User interaction required for checkout!",
                     title,
                     self.take_screenshots,
                 )
@@ -932,12 +935,12 @@ class Amazon:
                     "FairGame thinks it completed the purchase, please verify ASAP"
                 )
                 self.send_notification(
-                    message="FairGame may have made a purchase, please confirm ASAP",
+                    message=f"{instance_name}: FairGame may have made a purchase, please confirm ASAP",
                     page_name="unknown-title-purchase",
                     take_screenshot=self.take_screenshots,
                 )
                 self.send_notification(
-                    message="Notifications that follow assume purchase has been made, YOU MUST CONFIRM THIS ASAP",
+                    message=f"{instance_name}: Notifications that follow assume purchase has been made, YOU MUST CONFIRM THIS ASAP",
                     page_name="confirm-purchase",
                     take_screenshot=False,
                 )
@@ -981,7 +984,7 @@ class Amazon:
                         "If this works, VERIFY THE ADDRESS IT SHIPPED TO IMMEDIATELY!"
                     )
                     self.send_notification(
-                        message="Clicking ship to address, hopefully this works. VERIFY ASAP!",
+                        message=f"{instance_name}: Clicking ship to address, hopefully this works. VERIFY ASAP!",
                         page_name="choose-shipping",
                         take_screenshot=self.take_screenshots,
                     )
@@ -1010,7 +1013,7 @@ class Amazon:
                 f"'{title}' is not a known page title. Please create issue indicating the title with a screenshot of page"
             )
             self.send_notification(
-                f"Encountered Unknown Page Title: `{title}",
+                f"{instance_name}: Encountered Unknown Page Title: `{title}",
                 "unknown-title",
                 self.take_screenshots,
             )
@@ -1100,7 +1103,7 @@ class Amazon:
             log.info("sign up for Prime and this won't happen anymore")
             self.save_page_source("prime-signup-error")
             self.send_notification(
-                "Prime Sign-up Error occurred",
+                f"{instance_name}: Prime Sign-up Error occurred",
                 "prime-signup-error",
                 self.take_screenshots,
             )
@@ -1112,7 +1115,7 @@ class Amazon:
             log.error("Prime offer page popped up, user intervention required")
             self.notification_handler.play_alarm_sound()
             self.notification_handler.send_notification(
-                "Prime offer page popped up, user intervention required"
+                f"{instance_name}: Prime offer page popped up, user intervention required"
             )
             timeout = self.get_timeout(timeout=60)
             while self.driver.title in amazon_config["PRIME_TITLES"]:
@@ -1138,7 +1141,7 @@ class Amazon:
             self.wait_for_page_change(current_page)
         else:
             self.send_notification(
-                "Could not click cart button, user intervention required",
+                f"{instance_name}: Could not click cart button, user intervention required",
                 "home-page-error",
                 self.take_screenshots,
             )
@@ -1178,7 +1181,7 @@ class Amazon:
                 log.info("couldn't find buttons to proceed to checkout")
                 self.save_page_source("ptc-error")
                 self.send_notification(
-                    "Proceed to Checkout Error Occurred",
+                    f"{instance_name}: Proceed to Checkout Error Occurred",
                     "ptc-error",
                     self.take_screenshots,
                 )
@@ -1199,7 +1202,7 @@ class Amazon:
         if button:
             if self.detailed:
                 self.send_notification(
-                    message="Attempting to Proceed to Checkout",
+                    message=f"{instance_name}: Attempting to Proceed to Checkout",
                     page_name="ptc",
                     take_screenshot=self.take_screenshots,
                 )
@@ -1233,7 +1236,7 @@ class Amazon:
                 log.error("couldn't find buttons to proceed to checkout")
                 self.save_page_source("ptc-error")
                 self.send_notification(
-                    "Error in checkout.  Please check browser window.",
+                    f"{instance_name}: Error in checkout.  Please check browser window.",
                     "ptc-error",
                     self.take_screenshots,
                 )
@@ -1258,7 +1261,7 @@ class Amazon:
     @debug
     def handle_order_complete(self):
         log.info("Order Placed.")
-        self.send_notification("Order placed.", "order-placed", self.take_screenshots)
+        self.send_notification(f"{instance_name}: Order placed.", "order-placed", self.take_screenshots)
         self.great_success = True
         if self.single_shot:
             self.asin_list = []
@@ -1268,14 +1271,14 @@ class Amazon:
     @debug
     def handle_doggos(self):
         self.notification_handler.send_notification(
-            "You got dogs, bot may not work correctly. Ending Checkout"
+            f"{instance_name}: You got dogs, bot may not work correctly. Ending Checkout"
         )
         self.try_to_checkout = False
 
     @debug
     def handle_out_of_stock(self):
         self.notification_handler.send_notification(
-            "Carted it, but went out of stock, better luck next time."
+            f"{instance_name}: Carted it, but went out of stock, better luck next time."
         )
         self.try_to_checkout = False
 
@@ -1301,7 +1304,7 @@ class Amazon:
                         time.sleep(3)
                     else:
                         self.send_notification(
-                            "Solving catpcha", "captcha", self.take_screenshots
+                            f"{instance_name}: Solving catpcha", "captcha", self.take_screenshots
                         )
                         self.driver.find_element_by_xpath(
                             '//*[@id="captchacharacters"]'
@@ -1342,7 +1345,7 @@ class Amazon:
                 "Could not find the continue button, user intervention required, complete checkout manually"
             )
             self.notification_handler.send_notification(
-                "Could not click continue button, user intervention required"
+                f"{instance_name}: Could not click continue button, user intervention required"
             )
             time.sleep(300)
 
