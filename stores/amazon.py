@@ -398,7 +398,7 @@ class Amazon:
             # check for captcha
             try:
                 captcha_entry = self.driver.find_element_by_xpath(
-                    '//*[@id="auth-captcha-guess"]'
+                    '//form[contains(@action,"validateCaptcha")]'
                 )
             except sel_exceptions.NoSuchElementException:
                 password_field.send_keys(Keys.RETURN)
@@ -407,29 +407,7 @@ class Amazon:
             log.error("Password entry box did not exist")
 
         if captcha_entry:
-            try:
-                log.info("Stuck on a captcha... Lets try to solve it.")
-                captcha = AmazonCaptcha.fromdriver(self.driver)
-                solution = captcha.solve()
-                log.info(f"The solution is: {solution}")
-                if solution == "Not solved":
-                    log.info(
-                        f"Failed to solve {captcha.image_link}, lets reload and get a new captcha."
-                    )
-                    self.driver.refresh()
-                else:
-                    self.send_notification(
-                        "Solving catpcha", "captcha", self.take_screenshots
-                    )
-                    captcha_entry.send_keys(solution + Keys.RETURN)
-                    self.wait_for_page_change(current_page)
-
-            except Exception as e:
-                log.debug(e)
-                log.info("Error trying to solve captcha. Refresh and retry.")
-                self.driver.refresh()
-                time.sleep(5)
-
+            self.handle_captcha(False)
         if self.driver.title in amazon_config["TWOFA_TITLES"]:
             log.info("enter in your two-step verification code in browser")
             while self.driver.title in amazon_config["TWOFA_TITLES"]:
@@ -478,11 +456,14 @@ class Amazon:
         fail_counter = 0
         presence.searching_update()
 
+        # handles initial page load only
         while True:
             try:
                 self.get_page(f.url)
                 log.debug(f"Initial page title {self.driver.title}")
                 log.debug(f"        page url: {self.driver.current_url}")
+                if self.driver.title in amazon_config["CAPTCHA_PAGE_TITLES"]:
+                    self.handle_captcha()
                 break
             except Exception:
                 fail_counter += 1
@@ -1280,13 +1261,14 @@ class Amazon:
         self.try_to_checkout = False
 
     @debug
-    def handle_captcha(self):
+    def handle_captcha(self, check_presence=True):
         # wait for captcha to load
+        log.debug("Waiting for captcha to load.")
         time.sleep(DEFAULT_MAX_WEIRD_PAGE_DELAY)
         current_page = self.driver.title
         try:
-            if self.driver.find_element_by_xpath(
-                '//form[@action="/errors/validateCaptcha"]'
+            if not check_presence or self.driver.find_element_by_xpath(
+                '//form[contains(@action,"validateCaptcha")]'
             ):
                 try:
                     log.info("Stuck on a captcha... Lets try to solve it.")
