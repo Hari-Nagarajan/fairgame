@@ -31,7 +31,7 @@ if that does not answer your questions.
 
 Community user Easy_XII has created a great cheat sheet for getting started. It includes specific and additional steps
 for Windows users as well as useful product and configuration information. Please start
-with [this guide](https://docs.google.com/document/d/1grN282tPodM9N57bPq4bbNyKZC01t_4A-sLpzzu_7lM/) to get you started
+with [this guide](https://docs.google.com/document/d/14kZ0SNC97DFVRStnrdsJ8xbQO1m42v7svy93kUdtX48) to get you started
 and to answer any initial questions you may have about setup.
 
 **Note:** The above document is community maintained and managed. The authors of Fairgame do not control the contents,
