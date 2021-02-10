@@ -800,10 +800,16 @@ class Amazon:
                     return False
                 self.wait_for_page_change(current_title)
                 # log.info(f"page title is {self.driver.title}")
-                if self.driver.title in amazon_config["SHOPPING_CART_TITLES"]:
+                emtpy_cart_elements = self.driver.find_elements_by_xpath(
+                    "//div[contains(@class, 'sc-your-amazon-cart-is-empty') or contains(@class, 'sc-empty-cart')]"
+                )
+
+                if not emtpy_cart_elements and self.driver.title in amazon_config["SHOPPING_CART_TITLES"]:
                     return True
                 else:
                     log.info("did not add to cart, trying again")
+                    if emtpy_cart_elements:
+                        log.info("Cart appeared empty after clicking Add To Cart button")
                     log.debug(f"failed title was {self.driver.title}")
                     self.send_notification(
                         "Failed Add to Cart", "failed-atc", self.take_screenshots
