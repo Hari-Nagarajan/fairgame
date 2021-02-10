@@ -64,6 +64,8 @@ click.
 
 !!! YOU WILL NEED TO USE THE 3.8 BRANCH OF PYTHON, 3.9.0 BREAKS DEPENDENCIES !!!
 
+It is best if you use the newest version (3.8.7) but 3.8.5 and 3.8.6 should also work. 3.8.0 does not.
+
 ```shell
 pip install pipenv
 pipenv shell 
