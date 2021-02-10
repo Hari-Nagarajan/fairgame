@@ -222,6 +222,7 @@ class Amazon:
         if cart_quantity > 0:
             log.warning(f"Found {cart_quantity} item(s) in your cart.")
             log.info("Delete all item(s) in cart before starting bot.")
+            self.driver.get(AMAZON_URLS["CART_URL"])
             log.info("Exiting in 30 seconds...")
             time.sleep(30)
             return
@@ -235,8 +236,9 @@ class Amazon:
         if self.get_cart_count() > 0:
             log.warning(f"Found {cart_quantity} item(s) in your cart.")
             log.info("Delete all item(s) in cart before starting bot.")
-            log.info("Exiting now...")
-            time.sleep(5)
+            self.driver.get(AMAZON_URLS["CART_URL"])
+            log.info("Exiting in 30 seconds...")
+            time.sleep(30)
             return
 
         keep_going = True
