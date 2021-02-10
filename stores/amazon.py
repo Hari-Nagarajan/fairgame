@@ -23,6 +23,7 @@ import math
 import os
 import platform
 import time
+from contextlib import contextmanager
 from datetime import datetime
 from enum import Enum
 
@@ -35,8 +36,10 @@ from price_parser import parse_price
 from pypresence import exceptions as pyexceptions
 from selenium import webdriver
 from selenium.common import exceptions as sel_exceptions
+from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 from utils import discord_presence as presence
@@ -782,46 +785,96 @@ class Amazon:
             ):
                 log.info("Item in stock and in reserve range!")
                 log.info("clicking add to cart")
-                self.notification_handler.play_notify_sound()
-                if self.detailed:
-                    self.send_notification(
-                        message=f"Found Stock ASIN:{asin}",
-                        page_name="Stock Alert",
-                        take_screenshot=self.take_screenshots,
+                # Get the offering ID
+                offering_id_elements = atc_button.find_elements_by_xpath(
+                    "./preceding::input[@name='offeringID.1'][1]"
+                )
+                if offering_id_elements:
+                    log.info("Attempting Add To Cart with offer ID...")
+                    offering_id = offering_id_elements[0].get_attribute("value")
+                    if self.attempt_atc(offering_id, max_atc_retries=DEFAULT_MAX_ATC_TRIES):
+                        return True
+                    else:
+                        self.send_notification(
+                            "Failed Add to Cart after {max-atc-retries}",
+                            "failed-atc",
+                            self.take_screenshots,
+                        )
+                        self.save_page_source("failed-atc")
+                        return False
+                else:
+                    log.error(
+                        "Unable to find offering ID to add to cart.  Using legacy mode."
+                    )
+                    self.notification_handler.play_notify_sound()
+                    if self.detailed:
+                        self.send_notification(
+                            message=f"Found Stock ASIN:{asin}",
+                            page_name="Stock Alert",
+                            take_screenshot=self.take_screenshots,
+                        )
+
+                    presence.buy_update()
+                    current_title = self.driver.title
+                    # log.info(f"current page title is {current_title}")
+                    try:
+                        atc_button.click()
+                    except IndexError:
+                        log.debug("Index Error")
+                        return False
+                    self.wait_for_page_change(current_title)
+                    # log.info(f"page title is {self.driver.title}")
+                    emtpy_cart_elements = self.driver.find_elements_by_xpath(
+                        "//div[contains(@class, 'sc-your-amazon-cart-is-empty') or contains(@class, 'sc-empty-cart')]"
                     )
 
-                presence.buy_update()
-                current_title = self.driver.title
-                # log.info(f"current page title is {current_title}")
-                try:
-                    atc_button.click()
-                except IndexError:
-                    log.debug("Index Error")
-                    return False
-                self.wait_for_page_change(current_title)
-                # log.info(f"page title is {self.driver.title}")
-                emtpy_cart_elements = self.driver.find_elements_by_xpath(
-                    "//div[contains(@class, 'sc-your-amazon-cart-is-empty') or contains(@class, 'sc-empty-cart')]"
-                )
+                    if (
+                        not emtpy_cart_elements
+                        and self.driver.title in amazon_config["SHOPPING_CART_TITLES"]
+                    ):
+                        return True
+                    else:
+                        log.info("did not add to cart, trying again")
+                        if emtpy_cart_elements:
+                            log.info(
+                                "Cart appeared empty after clicking Add To Cart button"
+                            )
+                        log.debug(f"failed title was {self.driver.title}")
+                        self.send_notification(
+                            "Failed Add to Cart", "failed-atc", self.take_screenshots
+                        )
+                        self.save_page_source("failed-atc")
+                        in_stock = self.check_stock(
+                            asin=asin,
+                            reserve_max=reserve_max,
+                            reserve_min=reserve_min,
+                            retry=retry + 1,
+                        )
+        return in_stock
 
-                if not emtpy_cart_elements and self.driver.title in amazon_config["SHOPPING_CART_TITLES"]:
+    def attempt_atc(self, offering_id, max_atc_retries=DEFAULT_MAX_ATC_TRIES):
+        # Open the add.html URL in Selenium
+        f = f"https://smile.amazon.com/gp/aws/cart/add.html?OfferListingId.1={offering_id}&Quantity.1=1"
+        atc_attempts = 0
+        while atc_attempts < max_atc_retries:
+            with self.wait_for_page_content_change(timeout=5):
+                self.driver.get(f)
+                xpath = "//input[@alt='Continue']"
+                if wait_for_element_by_xpath(self.driver, xpath):
+                    try:
+                        with self.wait_for_page_content_change(timeout=10):
+                            self.driver.find_element_by_xpath(xpath).click()
+                    except sel_exceptions.NoSuchElementException:
+                        log.error("Continue button not present on page")
+                else:
+                    log.error("Continue button not present on page")
+
+                # verify cart is non-zero
+                if self.get_cart_count() != 0:
                     return True
                 else:
-                    log.info("did not add to cart, trying again")
-                    if emtpy_cart_elements:
-                        log.info("Cart appeared empty after clicking Add To Cart button")
-                    log.debug(f"failed title was {self.driver.title}")
-                    self.send_notification(
-                        "Failed Add to Cart", "failed-atc", self.take_screenshots
-                    )
-                    self.save_page_source("failed-atc")
-                    in_stock = self.check_stock(
-                        asin=asin,
-                        reserve_max=reserve_max,
-                        reserve_min=reserve_min,
-                        retry=retry + 1,
-                    )
-        return in_stock
+                    atc_attempts = atc_attempts + 1
+        return False
 
     # search lists of asin lists, and remove the first list that matches provided asin
     @debug
@@ -1153,7 +1206,7 @@ class Amazon:
         while True:
             try:
                 button = self.driver.find_element_by_xpath(
-                    '//*[@id="hlb-ptc-btn-native"]'
+                    '//*[@id="hlb-ptc-btn-native"] | //input[@name="proceedToRetailCheckout"]'
                 )
                 break
             except sel_exceptions.NoSuchElementException:
@@ -1355,6 +1408,16 @@ class Amazon:
         page_source = self.driver.page_source
         with open(file_name, "w", encoding="utf-8") as f:
             f.write(page_source)
+
+    @contextmanager
+    def wait_for_page_content_change(self, timeout=30):
+        """Utility to help manage selenium waiting for a page to load after an action, like a click"""
+        old_page = self.driver.find_element_by_tag_name("html")
+        yield
+        WebDriverWait(self.driver, timeout).until(EC.staleness_of(old_page))
+        WebDriverWait(self.driver, timeout).until(
+            EC.presence_of_element_located((By.XPATH, "//title"))
+        )
 
     def wait_for_page_change(self, page_title, timeout=3):
         time_to_end = self.get_timeout(timeout=timeout)
@@ -1688,3 +1751,15 @@ def get_item_condition(form_action) -> AmazonItemCondition:
     else:
         # log.debug(f"Item condition is unknown: {form_action}")
         return AmazonItemCondition.Unknown
+
+
+def wait_for_element_by_xpath(d, xpath, timeout=10):
+    try:
+        WebDriverWait(d, timeout).until(
+            EC.presence_of_element_located((By.XPATH, xpath))
+        )
+    except sel_exceptions.TimeoutException:
+        log.error(f"failed to find {xpath}")
+        return False
+
+    return True
