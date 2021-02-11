@@ -56,6 +56,7 @@ CHECKOUT_URL = "https://{domain}/gp/cart/desktop/go-to-checkout.html/ref=ox_sc_p
 AUTOBUY_CONFIG_PATH = "config/amazon_config.json"
 
 BUTTON_XPATHS = [
+    '//input[@name="placeYourOrder1"]',
     '//*[@id="submitOrderButtonId"]/span/input',
     '//*[@id="bottomSubmitOrderButtonId"]/span/input',
     '//*[@id="placeYourOrder"]/span/input',
