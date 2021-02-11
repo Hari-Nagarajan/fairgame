@@ -53,6 +53,7 @@ AMAZON_URLS = {
     "ALT_OFFER_URL": "https://{domain}/gp/offer-listing/",
     "OFFER_URL": "https://{domain}/dp/",
     "CART_URL": "https://{domain}/gp/cart/view.html",
+    "ATC_URL": "https://{domain}/gp/aws/cart/add.html",
 }
 CHECKOUT_URL = "https://{domain}/gp/cart/desktop/go-to-checkout.html/ref=ox_sc_proceed?partialCheckoutCart=1&isToBeGiftWrappedBefore=0&proceedToRetailCheckout=Proceed+to+checkout&proceedToCheckout=1&cartInitiateId={cart_id}"
 
@@ -794,7 +795,9 @@ class Amazon:
                 if offering_id_elements:
                     log.info("Attempting Add To Cart with offer ID...")
                     offering_id = offering_id_elements[0].get_attribute("value")
-                    if self.attempt_atc(offering_id, max_atc_retries=DEFAULT_MAX_ATC_TRIES):
+                    if self.attempt_atc(
+                        offering_id, max_atc_retries=DEFAULT_MAX_ATC_TRIES
+                    ):
                         return True
                     else:
                         self.send_notification(
@@ -856,7 +859,7 @@ class Amazon:
 
     def attempt_atc(self, offering_id, max_atc_retries=DEFAULT_MAX_ATC_TRIES):
         # Open the add.html URL in Selenium
-        f = f"https://smile.amazon.com/gp/aws/cart/add.html?OfferListingId.1={offering_id}&Quantity.1=1"
+        f = f"{AMAZON_URLS['ATC_URL']}?OfferListingId.1={offering_id}&Quantity.1=1"
         atc_attempts = 0
         while atc_attempts < max_atc_retries:
             with self.wait_for_page_content_change(timeout=5):
