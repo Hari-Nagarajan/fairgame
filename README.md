@@ -18,7 +18,7 @@ Read through this document and the cheat sheet linked in the next sections. See 
 
 ## Installation
 
-Easy_XII has created a great cheat sheet for getting started, [please follow this guide](https://docs.google.com/document/d/1grN282tPodM9N57bPq4bbNyKZC01t_4A-sLpzzu_7lM/).
+Easy_XII has created a great cheat sheet for getting started, [please follow this guide](https://docs.google.com/document/d/14kZ0SNC97DFVRStnrdsJ8xbQO1m42v7svy93kUdtX48/).
 **Note:** that we do not control the contents of this document, so use some common sense when configuring the bot. Do not ask us
 why the bot does not purchase an $8.49 item when the minimum purchase price is set to $10 in the configuration file that YOU are supposed to update  
 
