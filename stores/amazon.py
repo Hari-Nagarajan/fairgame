@@ -864,7 +864,7 @@ class Amazon:
         while atc_attempts < max_atc_retries:
             with self.wait_for_page_content_change(timeout=5):
                 self.driver.get(f)
-                xpath = "//input[@alt='Continue']"
+                xpath = "//input[@value='add' and @name='add']"
                 if wait_for_element_by_xpath(self.driver, xpath):
                     try:
                         with self.wait_for_page_content_change(timeout=10):
