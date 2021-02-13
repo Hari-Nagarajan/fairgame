@@ -787,7 +787,7 @@ class Amazon:
                 or math.isclose((price_float + ship_float), reserve_min, abs_tol=0.01)
             ):
                 log.info("Item in stock and in reserve range!")
-                log.info("clicking add to cart")
+                log.info("Adding to cart")
                 # Get the offering ID
                 offering_id_elements = atc_button.find_elements_by_xpath(
                     "./preceding::input[@name='offeringID.1'][1]"
@@ -898,6 +898,7 @@ class Amazon:
         # time.sleep(self.page_wait_delay())
 
         title = self.driver.title
+        log.info(f"Navigating page title: '{title}'")
         # see if this resolves blank page title issue?
         if title == "":
             timeout_seconds = DEFAULT_MAX_TIMEOUT
@@ -1201,7 +1202,7 @@ class Amazon:
     @debug
     def handle_cart(self):
         self.start_time_atc = time.time()
-        log.info("clicking checkout.")
+        log.info("Looking for Proceed To Checkout button...")
         try:
             self.save_screenshot("ptc-page")
         except:
@@ -1243,17 +1244,17 @@ class Amazon:
 
         current_page = self.driver.title
         if button:
+            log.info("Found Checkout Button")
             if self.detailed:
                 self.send_notification(
                     message="Attempting to Proceed to Checkout",
                     page_name="ptc",
                     take_screenshot=self.take_screenshots,
                 )
-            log.info("Found Checkout Button")
             try:
                 button.click()
                 log.info("Clicked Proceed to Checkout Button")
-                self.wait_for_page_change(page_title=current_page)
+                self.wait_for_page_change(page_title=current_page, timeout=7)
             except sel_exceptions.WebDriverException:
                 log.error("Problem clicking Proceed to Checkout button.")
                 log.info("Refreshing page to try again")
