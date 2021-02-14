@@ -32,7 +32,7 @@ from amazoncaptcha import AmazonCaptcha
 from chromedriver_py import binary_path  # this will get you the path variable
 from furl import furl
 from lxml import html
-from price_parser import parse_price
+from price_parser import parse_price, Price
 from pypresence import exceptions as pyexceptions
 from selenium import webdriver
 from selenium.common import exceptions as sel_exceptions
@@ -1630,7 +1630,7 @@ def get_timestamp_filename(name, extension):
         return name + "_" + date + "." + extension
 
 
-def get_shipping_costs(tree, free_shipping_string):
+def get_shipping_costs(tree, free_shipping_string) -> Price:
     # Assume Free Shipping and change otherwise
 
     # Shipping collection xpath:
@@ -1650,8 +1650,32 @@ def get_shipping_costs(tree, free_shipping_string):
     # Shipping information is found within either a DIV or a SPAN following the bottleDepositFee DIV
     # What follows is logic to parse out the various pricing formats within the HTML.  Not ideal, but
     # it's what we have to work with.
-    shipping_span_text = shipping_node.text.strip()
+    if shipping_node.text:
+        shipping_span_text = shipping_node.text.strip()
+    else:
+        shipping_span_text = ""
     if shipping_node.tag == "div":
+        # Do we have any spans outlining the price?  Typically seen like this:
+        # <div class="a-row aod-ship-charge">
+        #     <span class="a-size-base a-color-base">+</span>
+        #     <span class="a-size-base a-color-base">S$21.44</span>
+        #     <span class="a-size-base a-color-base">shipping</span>
+        # </div>
+        shipping_spans = shipping_node.xpath(".//span")
+        if shipping_spans:
+            log.debug(
+                f"Found {len(shipping_spans)} shipping SPANs within the shipping DIV"
+            )
+            # Look for a price
+            for shipping_span in shipping_spans:
+                if shipping_span.text and shipping_span.text != "+":
+                    shipping_cost: Price = parse_price(shipping_span.text)
+                    if shipping_cost.currency is not None:
+                        log.debug(
+                            f"Found parseable price with currency symbol: {shipping_cost.currency}"
+                        )
+                        return shipping_cost
+
         if shipping_span_text == "":
             # Assume zero shipping for an empty div
             log.debug(
