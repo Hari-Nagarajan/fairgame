@@ -19,16 +19,17 @@
 
 import os
 import shutil
+import platform
 from datetime import datetime
 from functools import wraps
 from pathlib import Path
 from signal import signal, SIGINT
+from icmplib import ping, multiping, traceroute, resolve, Host, Hop
 
 LICENSE_PATH = os.path.join(
     "cli",
     "license",
 )
-
 
 try:
     import click
@@ -37,7 +38,6 @@ except ModuleNotFoundError as e:
     print("Install the missing module noted above.")
     exit(0)
 import time
-
 
 from notifications.notifications import NotificationHandler, TIME_FORMAT
 from utils.logger import log
@@ -80,7 +80,6 @@ def notify_on_crash(func):
 
 @click.group()
 def main():
-
     pass
 
 
@@ -328,12 +327,85 @@ def show(w, c):
         exit(0)
 
 
+@click.command()
+@click.option("--domain", help="Specify the domain you want to find endpoints for.")
+def find_endpoints(domain):
+    import dns.resolver
+
+    if not domain:
+        log.error("You must specify a domain to resolve for endpoints with --domain.")
+        exit(0)
+        # Default
+    my_resolver = dns.resolver.Resolver()
+    resolved = my_resolver.resolve(domain)
+    for rdata in resolved:
+        log.info(f"Your computer resolves {domain} to {rdata.address}")
+
+    # Find endpoints from various DNS servers
+    endpoints, resolutions = resolve_domain(domain)
+    log.info(
+        f"{domain} resolves to at least {len(endpoints)} distinct IP addresses across {resolutions} lookups:"
+    )
+    endpoints = sorted(endpoints)
+    for endpoint in endpoints:
+        log.info(f" {endpoint}")
+
+    return endpoints
+
+
+def resolve_domain(domain):
+    import dns.resolver
+
+    public_dns_servers = global_config.get_fairgame_config().get("public_dns_servers")
+    resolutions = 0
+    endpoints = set()
+
+    # Resolve the domain for each DNS server to find out how many end points we have
+    for provider in public_dns_servers:
+        # Provider is Google, Verisign, etc.
+        log.info(f"Testing {provider}")
+        for server in public_dns_servers[provider]:
+            # Server is 8.8.8.8 or 1.1.1.1
+            my_resolver = dns.resolver.Resolver()
+            my_resolver.nameservers = [server]
+
+            resolved = my_resolver.resolve(domain)
+            for rdata in resolved:
+                ipv4_address = rdata.address
+                endpoints.add(ipv4_address)
+                resolutions += 1
+                log.debug(f"{domain} resolves to {ipv4_address} via {server}")
+    return endpoints, resolutions
+
+
+@click.command()
+@click.option("--domain", help="Specify the domain you want to find endpoints for.")
+def show_traceroutes(domain):
+    if not domain:
+        log.error("You must specify a domain to test routes using --domain.")
+        exit(0)
+
+    # Get the endpoints to test
+    endpoints, resolutions = resolve_domain(domain=domain)
+
+    if platform.system() == "Windows":
+        trace_command = "tracert -d "
+    else:
+        trace_command = "traceroute -n "
+
+    # Spitball test routes via Python's traceroute
+    for endpoint in endpoints:
+        log.info(f" {trace_command}{endpoint}")
+
+
 signal(SIGINT, handler)
 
 main.add_command(amazon)
 main.add_command(bestbuy)
 main.add_command(test_notifications)
 main.add_command(show)
+main.add_command(find_endpoints)
+main.add_command(show_traceroutes)
 
 # Global scope stuff here
 if is_latest():

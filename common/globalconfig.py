@@ -69,6 +69,9 @@ class GlobalConfig:
         )
         return amazon_config
 
+    def get_fairgame_config(self):
+        return self.fairgame_config
+
     def get_browser_profile_path(self):
         if not self.profile_path:
             self.profile_path = os.path.join(
@@ -76,3 +79,8 @@ class GlobalConfig:
                 self.global_config["FAIRGAME"].get("profile_name", ".profile-amz"),
             )
         return self.profile_path
+
+    def get_property(self, property_name):
+        if property_name not in self.global_config.keys():  # we don't want KeyError
+            return None  # just return None if not found
+        return self.global_config[property_name]
