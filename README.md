@@ -148,7 +148,7 @@ run Chrome, it may very well work. Let us know.
 ```shell
 sudo apt update
 sudo apt upgrade
-sudo apt-get install -y build-essential tk-dev libncurses5-dev libncursesw5-dev libreadline6-dev libdb5.3-dev libgdbm-dev libsqlite3-dev libssl-dev libbz2-dev libexpat1-dev liblzma-dev zlib1g-dev libffi-dev libzbar-dev clang 
+sudo apt-get install -y build-essential tk-dev libncurses5-dev libncursesw5-dev libreadline6-dev libdb5.3-dev libgdbm-dev libsqlite3-dev libssl-dev libbz2-dev libexpat1-dev liblzma-dev zlib1g-dev libffi-dev libzbar-dev clang libxslt1-dev
 
 version=3.8.7
 
