@@ -20,30 +20,25 @@
 import os
 import platform
 import shutil
+import time
 from datetime import datetime
 from functools import wraps
 from pathlib import Path
-from signal import signal, SIGINT
+from signal import getsignal, SIGINT, signal
+
+import click
+
+from common.globalconfig import AMAZON_CREDENTIAL_FILE, GlobalConfig
+from notifications.notifications import NotificationHandler, TIME_FORMAT
+from stores.amazon import Amazon
+from stores.bestbuy import BestBuyHandler
+from utils.logger import log
+from utils.version import is_latest, version
 
 LICENSE_PATH = os.path.join(
     "cli",
     "license",
 )
-
-try:
-    import click
-except ModuleNotFoundError as e:
-    print(e)
-    print("Install the missing module noted above.")
-    exit(0)
-import time
-
-from notifications.notifications import NotificationHandler, TIME_FORMAT
-from utils.logger import log
-from common.globalconfig import GlobalConfig, AMAZON_CREDENTIAL_FILE
-from utils.version import is_latest, version
-from stores.amazon import Amazon
-from stores.bestbuy import BestBuyHandler
 
 
 def get_folder_size(folder):
@@ -58,8 +53,9 @@ def sizeof_fmt(num, suffix="B"):
     return "%.1f%s%s" % (num, "Yi", suffix)
 
 
-def handler(signal, frame):
-    log.info("Caught the stop, exiting.")
+# see https://docs.python.org/3/library/signal.html
+def interrupt_handler(signal_num, frame):
+    log.info(f"Caught the interrupt signal.  Exiting.")
     exit(0)
 
 
@@ -70,7 +66,7 @@ def notify_on_crash(func):
             func(*args, **kwargs)
         except KeyboardInterrupt:
             pass
-        except:
+        else:
             notification_handler.send_notification(f"FairGame has crashed.")
             raise
 
@@ -300,6 +296,7 @@ def test_notifications(disable_sound):
 @click.option("--w", is_flag=True)
 @click.option("--c", is_flag=True)
 def show(w, c):
+    show_file = "show_c.txt"
     if w and c:
         print("Choose one option. Program Quitting")
         exit(0)
@@ -327,7 +324,10 @@ def show(w, c):
 
 
 @click.command()
-@click.option("--domain", help="Specify the domain you want to find endpoints for.")
+@click.option(
+    "--domain",
+    help="Specify the domain you want to find endpoints for (e.g. www.amazon.de, www.amazon.com, smile.amazon.com.",
+)
 def find_endpoints(domain):
     import dns.resolver
 
@@ -336,9 +336,13 @@ def find_endpoints(domain):
         exit(0)
         # Default
     my_resolver = dns.resolver.Resolver()
-    resolved = my_resolver.resolve(domain)
-    for rdata in resolved:
-        log.info(f"Your computer resolves {domain} to {rdata.address}")
+    try:
+        resolved = my_resolver.resolve(domain)
+        for rdata in resolved:
+            log.info(f"Your computer resolves {domain} to {rdata.address}")
+    except Exception as e:
+        log.error(f"Failed to use local resolver due to: {e}")
+        exit(1)
 
     # Find endpoints from various DNS servers
     endpoints, resolutions = resolve_domain(domain)
@@ -368,7 +372,11 @@ def resolve_domain(domain):
             my_resolver = dns.resolver.Resolver()
             my_resolver.nameservers = [server]
 
-            resolved = my_resolver.resolve(domain)
+            try:
+                resolved = my_resolver.resolve(domain)
+            except Exception as e:
+                log.warning(f"Unable to resolve using {provider} server {server} due to: {e}")
+                continue
             for rdata in resolved:
                 ipv4_address = rdata.address
                 endpoints.add(ipv4_address)
@@ -397,7 +405,8 @@ def show_traceroutes(domain):
         log.info(f" {trace_command}{endpoint}")
 
 
-signal(SIGINT, handler)
+# Register Signal Handler for Interrupt
+signal(SIGINT, interrupt_handler)
 
 main.add_command(amazon)
 main.add_command(bestbuy)

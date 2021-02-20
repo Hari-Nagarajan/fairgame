@@ -8,7 +8,6 @@ pyinstaller = "*"
 
 [packages]
 requests = "==2.24.0"
-click = "*"
 selenium = "*"
 chromedriver-py = "==88.0.4324.96"
 furl = "*"
