@@ -18,13 +18,12 @@
 #      https://github.com/Hari-Nagarajan/fairgame
 
 import os
-import shutil
 import platform
+import shutil
 from datetime import datetime
 from functools import wraps
 from pathlib import Path
 from signal import signal, SIGINT
-from icmplib import ping, multiping, traceroute, resolve, Host, Hop
 
 LICENSE_PATH = os.path.join(
     "cli",

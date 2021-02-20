@@ -35,6 +35,7 @@ stdiomask = "*"
 packaging = "*"
 config = "*"
 lxml = "*"
+dnspython = "*"
 
 [requires]
 python_version = "3.8"
