@@ -24,7 +24,7 @@ import time
 from datetime import datetime
 from functools import wraps
 from pathlib import Path
-from signal import getsignal, SIGINT, signal
+from signal import SIGINT, signal
 
 import click
 
@@ -334,7 +334,8 @@ def find_endpoints(domain):
     if not domain:
         log.error("You must specify a domain to resolve for endpoints with --domain.")
         exit(0)
-        # Default
+    log.info(f"Attempting to resolve '{domain}'")
+    # Default
     my_resolver = dns.resolver.Resolver()
     try:
         resolved = my_resolver.resolve(domain)
@@ -375,7 +376,9 @@ def resolve_domain(domain):
             try:
                 resolved = my_resolver.resolve(domain)
             except Exception as e:
-                log.warning(f"Unable to resolve using {provider} server {server} due to: {e}")
+                log.warning(
+                    f"Unable to resolve using {provider} server {server} due to: {e}"
+                )
                 continue
             for rdata in resolved:
                 ipv4_address = rdata.address
