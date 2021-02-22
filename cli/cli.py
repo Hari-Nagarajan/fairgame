@@ -389,7 +389,7 @@ def resolve_domain(domain):
 
 
 @click.command()
-@click.option("--domain", help="Specify the domain you want to find endpoints for.")
+@click.option("--domain", help="Specify the domain you want to generate traceroute commands for.")
 def show_traceroutes(domain):
     if not domain:
         log.error("You must specify a domain to test routes using --domain.")
