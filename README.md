@@ -470,6 +470,49 @@ pavlok app in the ```pavlok_config.json``` file, you can copy the template from 
 Once you have setup your `apprise_config.json ` you can test it by running `python app.py test-notifications` from
 within your pipenv shell. This will send a test notification to all configured notification services.
 
+## CLI Tools
+
+### CDN Endpoints
+
+The `find-endpoints` tool is designed to help you understand how many website domain endpoints exist for your geography
+based on global Content Delivery Networks (CDNs) and your specific network provider. Its purpose is nothing more than to
+educate you about variability of the network depending on how your computer resolves a domain. Doing something useful
+with this knowledge is beyond the scope of this feature.
+
+```shell
+Usage: app.py find-endpoints [OPTIONS]
+
+Options:
+  --domain TEXT  Specify the domain you want to find endpoints for (e.g.
+                 www.amazon.de, www.amazon.com, smile.amazon.com.
+
+  --help         Show this message and exit.
+```
+
+Specifying a domain (e.g. www.amazon.com, www.amazon.es, www.google.com, etc.) will generate a list of IP addresses that
+various public name servers resolve the name to. Hopefully this is helpful in understanding the variable nature of the
+content that different people see.
+
+### Routes
+
+The `show_traceroutes` tool is simply a tool that attempts to generate the commands necessary to determine the various
+paths that the Fairgame could take to get to a domain, based on who is resolving the domain to an IP.
+It uses the [end points](#cdn-endpoints) tool to convert a domain name to the various IPs and generates a list of
+commands you can copy and paste into the console to compare routes.
+
+```shell
+Usage: app.py show-traceroutes [OPTIONS]
+
+Options:
+  --domain TEXT  Specify the domain you want to generate traceroute commands for.
+
+  --help         Show this message and exit.
+```
+
+This is intended for people who feel that they can modify their network situation such that the fastest route is used.
+Explaining the Internet and how routing works is beyond the scope of this command, this tool, this projects, and the
+developers.
+
 ## Troubleshooting
 
 + Re-read this documentation.
