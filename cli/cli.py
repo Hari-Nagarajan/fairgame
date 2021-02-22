@@ -256,6 +256,9 @@ def amazon(
 @click.option("--headless", is_flag=True)
 @notify_on_crash
 def bestbuy(sku, headless):
+    log.warning(
+        "As stated in the documentation, Best Buy is deprecated due to their anti-bot measures for high demand items."
+    )
     bb = BestBuyHandler(
         sku, notification_handler=notification_handler, headless=headless
     )
@@ -389,7 +392,9 @@ def resolve_domain(domain):
 
 
 @click.command()
-@click.option("--domain", help="Specify the domain you want to generate traceroute commands for.")
+@click.option(
+    "--domain", help="Specify the domain you want to generate traceroute commands for."
+)
 def show_traceroutes(domain):
     if not domain:
         log.error("You must specify a domain to test routes using --domain.")
