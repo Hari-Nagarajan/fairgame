@@ -50,7 +50,9 @@ else:
 
 def notfound_message(exception):
     print(exception)
-    print(f"Missing '{exception.name}' module.  If you ran 'pipenv install', try 'pipenv install {exception.name}'")
+    print(
+        f"Missing '{exception.name}' module.  If you ran 'pipenv install', try 'pipenv install {exception.name}'"
+    )
     print("Exiting...")
 
 
@@ -66,4 +68,3 @@ if __name__ == "__main__":
     except ModuleNotFoundError as e:
         notfound_message(e)
         exit(0)
-

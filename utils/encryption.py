@@ -30,7 +30,9 @@ from utils.logger import log
 
 if platform.machine()[:3] == "arm":
     # Not great, but workable way to detect Raspberry Pi
-    log.info("Using reduced CPU and Memory cost parameter for encryption for your platform.")
+    log.info(
+        "Using reduced CPU and Memory cost parameter for encryption for your platform."
+    )
     CPU_MEM_COST = 10
 else:
     CPU_MEM_COST = 20
