@@ -17,23 +17,33 @@
 #      The author may be contacted through the project's GitHub, at:
 #      https://github.com/Hari-Nagarajan/fairgame
 
-import getpass as getpass
-import stdiomask
 import json
-import os
+import platform
 from base64 import b64encode, b64decode
+
+import stdiomask
 from Crypto.Cipher import ChaCha20_Poly1305
-from Crypto.Random import get_random_bytes
 from Crypto.Protocol.KDF import scrypt
+from Crypto.Random import get_random_bytes
 
 from utils.logger import log
+
+if platform.machine()[:3] == "arm":
+    # Not great, but workable way to detect Raspberry Pi
+    log.info(
+        "Using reduced CPU and Memory cost parameter for encryption for your platform."
+    )
+    CPU_MEM_COST = 10
+else:
+    CPU_MEM_COST = 20
 
 
 def encrypt(pt, password):
     """Encryption function to securely store user credentials, uses ChaCha_Poly1305
     with a user defined SCrypt key."""
     salt = get_random_bytes(32)
-    key = scrypt(password, salt, key_len=32, N=2 ** 20, r=8, p=1)
+
+    key = scrypt(password, salt, key_len=32, N=2 ** CPU_MEM_COST, r=8, p=1)
     nonce = get_random_bytes(12)
     cipher = ChaCha20_Poly1305.new(key=key, nonce=nonce)
     ct, tag = cipher.encrypt_and_digest(pt)
@@ -51,7 +61,9 @@ def decrypt(ct, password):
         json_k = ["nonce", "salt", "ct", "tag"]
         json_v = {k: b64decode(b64Ct[k]) for k in json_k}
 
-        key = scrypt(password, json_v["salt"], key_len=32, N=2 ** 20, r=8, p=1)
+        key = scrypt(
+            password, json_v["salt"], key_len=32, N=2 ** CPU_MEM_COST, r=8, p=1
+        )
         cipher = ChaCha20_Poly1305.new(key=key, nonce=json_v["nonce"])
         ptData = cipher.decrypt_and_verify(json_v["ct"], json_v["tag"])
 
