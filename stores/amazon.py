@@ -557,9 +557,14 @@ class Amazon:
                 elif offers.get_attribute("data-action") == "show-all-offers-display":
                     # PDP Page
                     # Find the offers link first, just to burn some cycles in case the flyout is loading
-                    open_offers_link: WebElement = self.driver.find_element_by_xpath(
-                        "//span[@data-action='show-all-offers-display']//a"
-                    )
+                    try:
+                        open_offers_link: WebElement = (
+                            self.driver.find_element_by_xpath(
+                                "//span[@data-action='show-all-offers-display']//a"
+                            )
+                        )
+                    except sel_exceptions.NoSuchElementException:
+                        pass
 
                     # Now check to see if we're already loading the flyout...
                     flyout = self.driver.find_elements_by_xpath(
@@ -580,7 +585,15 @@ class Amazon:
                         continue
 
                     log.debug("Attempting to click the open offers link...")
-                    open_offers_link.click()
+                    try:
+                        open_offers_link.click()
+                    except sel_exceptions.WebDriverException as e:
+                        log.error("Problem clicking open offers link")
+                        log.error("May have issue with rest of this ASIN check cycle")
+                        log.debug(e)
+                        filename = "open-offers-link-error"
+                        self.save_screenshot(filename)
+                        self.save_page_source(filename)
                     try:
                         # Now wait for the flyout to load
                         log.debug("Waiting for flyout...")
