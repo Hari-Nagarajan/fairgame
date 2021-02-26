@@ -89,6 +89,7 @@ DEFAULT_MAX_TIMEOUT = 10
 DEFAULT_MAX_URL_FAIL = 5
 
 amazon_config = {}
+amazon_xpath = {}
 
 
 class Amazon:
@@ -144,6 +145,7 @@ class Amazon:
         from cli.cli import global_config
 
         amazon_config = global_config.get_amazon_config(encryption_pass)
+        amazon_xpath = amazon_config["XPATHS"]
         self.profile_path = global_config.get_browser_profile_path()
 
         try:
@@ -510,6 +512,7 @@ class Amazon:
                         return False
 
         timeout = self.get_timeout()
+        atc_buttons = None
         while True:
             # Sanity check to see if we have any offers
             try:
@@ -557,6 +560,7 @@ class Amazon:
                 elif offers.get_attribute("data-action") == "show-all-offers-display":
                     # PDP Page
                     # Find the offers link first, just to burn some cycles in case the flyout is loading
+                    open_offers_link = None
                     try:
                         open_offers_link: WebElement = (
                             self.driver.find_element_by_xpath(
@@ -584,31 +588,38 @@ class Amazon:
                         )
                         continue
 
-                    log.debug("Attempting to click the open offers link...")
-                    try:
-                        open_offers_link.click()
-                    except sel_exceptions.WebDriverException as e:
-                        log.error("Problem clicking open offers link")
-                        log.error("May have issue with rest of this ASIN check cycle")
-                        log.debug(e)
-                        filename = "open-offers-link-error"
-                        self.save_screenshot(filename)
-                        self.save_page_source(filename)
-                    try:
-                        # Now wait for the flyout to load
-                        log.debug("Waiting for flyout...")
-                        WebDriverWait(self.driver, timeout=DEFAULT_MAX_TIMEOUT).until(
-                            lambda d: d.find_element_by_xpath(
-                                "//div[@id='aod-container'] | //div[@id='olpOfferList']"
+                    if open_offers_link:
+                        log.debug("Attempting to click the open offers link...")
+                        try:
+                            open_offers_link.click()
+                        except sel_exceptions.WebDriverException as e:
+                            log.error("Problem clicking open offers link")
+                            log.error(
+                                "May have issue with rest of this ASIN check cycle"
                             )
-                        )
-                        log.debug("Flyout should be open and populated.")
-                    except sel_exceptions.TimeoutException as te:
-                        log.error(
-                            "Timed out waiting for the flyout to open and populate.  Is the "
-                            "connection slow?  Do you see the flyout populate?"
-                        )
-                    continue
+                            log.debug(e)
+                            filename = "open-offers-link-error"
+                            self.save_screenshot(filename)
+                            self.save_page_source(filename)
+                        try:
+                            # Now wait for the flyout to load
+                            log.debug("Waiting for flyout...")
+                            WebDriverWait(
+                                self.driver, timeout=DEFAULT_MAX_TIMEOUT
+                            ).until(
+                                lambda d: d.find_element_by_xpath(
+                                    "//div[@id='aod-container'] | //div[@id='olpOfferList']"
+                                )
+                            )
+                            log.debug("Flyout should be open and populated.")
+                        except sel_exceptions.TimeoutException as te:
+                            log.error(
+                                "Timed out waiting for the flyout to open and populate.  Is the "
+                                "connection slow?  Do you see the flyout populate?"
+                            )
+                        continue
+                    else:
+                        log.error("Could not open offers link")
                 elif (
                     offers.get_attribute("aria-labelledby")
                     == "submit.add-to-cart-announce"
@@ -656,9 +667,7 @@ class Amazon:
                 )
                 continue
 
-            atc_buttons: WebElement = self.driver.find_elements_by_xpath(
-                "//div[@id='aod-pinned-offer' or @id='aod-offer' or @id='olpOfferList']//input[@name='submit.addToCart']"
-            )
+            atc_buttons: WebElement = self.get_amazon_element(key="ATC")
             # if not atc_buttons:
             #     # Sanity check to see if we have a valid page, but no offers:
             #     offer_count = WebDriverWait(self.driver, timeout=25).until(
@@ -1018,23 +1027,17 @@ class Amazon:
             element = None
             # Prime offer page?
             try:
-                element = self.driver.find_element_by_xpath(
-                    '//*[contains(@class, "no-thanks-button") or contains(@class, "prime-nothanks-button") or contains(@class, "prime-no-button")]'
-                )
+                element = self.get_amazon_element(key="PRIME_NO_THANKS")
             except sel_exceptions.NoSuchElementException:
                 pass
             if element:
-                try:
-                    log.info(
-                        "FairGame thinks it is seeing a Prime Offer, attempting to click No Thanks"
-                    )
-                    element.click()
-                    self.wait_for_page_change(page_title=title)
-                    # if we were able to click, return to program flow
+                if self.do_button_click(
+                    button=element,
+                    clicking_text="FairGame thinks it is seeing a Prime Offer, attempting to click No Thanks",
+                    fail_text="FairGame could not click No Thanks button",
+                    debug=True,
+                ):
                     return
-                except sel_exceptions.ElementNotInteractableException:
-                    log.debug("FairGame could not click No Thanks button")
-
             # see if a use this address (or similar) button is on page (based on known xpaths). Only check if
             # user has set the shipping_bypass flag
             if self.shipping_bypass:
@@ -1092,28 +1095,24 @@ class Amazon:
 
             log.info("trying to click proceed to checkout")
             timeout = self.get_timeout()
-            button = []
             while True:
                 try:
-                    button = self.driver.find_element_by_xpath(
-                        '//*[@id="sc-buy-box-ptc-button"]'
-                    )
+                    button = self.get_amazon_element(key="PTC")
                     break
                 except sel_exceptions.NoSuchElementException:
-                    pass
+                    button = None
                 if time.time() > timeout:
                     log.error("Could not find and click button")
                     break
             if button:
-                try:
-                    log.info("Found ptc button, attempting to click.")
-                    with self.wait_for_page_content_change(timeout=10):
-                        button.click()
-                        log.info("Clicked ptc button")
-                except sel_exceptions.WebDriverException:
-                    log.info(
-                        "Could not click button - refreshing and returning to checkout handler"
-                    )
+                if self.do_button_click(
+                    button=button,
+                    clicking_text="Found ptc button, attempting to click.",
+                    clicked_text="Clicked ptc button",
+                    fail_text="Could not click button",
+                ):
+                    return
+                else:
                     with self.wait_for_page_content_change():
                         self.driver.refresh()
                     return
@@ -1146,19 +1145,9 @@ class Amazon:
     def handle_shipping_page(self):
         element = None
         try:
-            element = self.driver.find_element_by_xpath(
-                '//*[contains(@class,"ship-to-this-address a-button a-button-primary a-button-span12 a-spacing-medium")]'
-            )
+            element = self.get_amazon_element(key="ADDRESS_SELECT")
         except sel_exceptions.NoSuchElementException:
-            try:
-                element = self.driver.find_element_by_xpath('//input[@type="submit"]')
-            except sel_exceptions.NoSuchElementException:
-                try:
-                    element = self.driver.find_element_by_xpath(
-                        '//*[@id="orderSummaryPrimaryActionBtn"]'
-                    )
-                except sel_exceptions.NoSuchElementException:
-                    pass
+            pass
         if element:
             log.warning("FairGame thinks it needs to pick a shipping address.")
             log.warning("It will click whichever ship to this address button it found.")
@@ -1185,11 +1174,14 @@ class Amazon:
         # if we make it this far, it failed to click button
         return False
 
+    def get_amazon_element(self, key):
+        return self.driver.find_element_by_xpath(join_xpaths(amazon_xpath[key]))
+
     # returns negative number if cart element does not exist, returns number if cart exists
     def get_cart_count(self):
         # check if cart number is on the page, if cart items = 0
         try:
-            element = self.driver.find_element_by_xpath('//*[@id="nav-cart-count"]')
+            element = self.get_amazon_element(key="CART")
         except sel_exceptions.NoSuchElementException:
             return -1
         if element:
@@ -1208,10 +1200,7 @@ class Amazon:
         )  # just doing manual wait, sign up for prime if you don't want to deal with this
         button = None
         try:
-            button = self.driver.find_element_by_xpath(
-                # '//*[@class="a-button a-button-base no-thanks-button"]'
-                '//*[contains(@class, "no-thanks-button") or contains(@class, "prime-nothanks-button") or contains(@class, "prime-no-button")]'
-            )
+            button = self.get_amazon_element(key="PRIME_NO_THANKS")
         except sel_exceptions.NoSuchElementException:
             log.error("could not find button")
             log.info("sign up for Prime and this won't happen anymore")
@@ -1250,6 +1239,7 @@ class Amazon:
         clicking_text="Clicking button",
         clicked_text="Button clicked",
         fail_text="Could not click button",
+        debug=False,
     ):
         try:
             with self.wait_for_page_content_change():
@@ -1258,8 +1248,12 @@ class Amazon:
                 log.info(clicked_text)
             return True
         except sel_exceptions.WebDriverException as e:
-            log.error(fail_text)
-            log.error(e)
+            if debug:
+                log.debug(fail_text)
+                log.debug(e)
+            else:
+                log.error(fail_text)
+                log.error(e)
             return False
 
     @debug
@@ -1267,7 +1261,7 @@ class Amazon:
         log.info("On home page, trying to get back to checkout")
         button = None
         try:
-            button = self.driver.find_element_by_xpath('//*[@id="nav-cart"]')
+            button = self.get_amazon_element("CART")
         except sel_exceptions.NoSuchElementException:
             log.info("Could not find cart button")
         current_page = self.driver.title
@@ -1301,24 +1295,15 @@ class Amazon:
         button = None
         while True:
             try:
-                button = self.driver.find_element_by_xpath(
-                    '//*[@id="hlb-ptc-btn-native"] | //input[@name="proceedToRetailCheckout"]'
-                )
+                button = self.get_amazon_element(key="PTC")
                 break
             except sel_exceptions.NoSuchElementException:
-                try:
-                    button = self.driver.find_element_by_xpath('//*[@id="hlb-ptc-btn"]')
-                    break
-                except sel_exceptions.NoSuchElementException:
-                    # also check for address buttons here?
-                    if self.shipping_bypass():
-                        try:
-                            button = self.driver.find_element_by_xpath(
-                                join_xpaths(amazon_config["XPATH_ADDRESS"])
-                            )
-                            break
-                        except sel_exceptions.NoSuchElementException:
-                            pass
+                if self.shipping_bypass:
+                    try:
+                        button = self.get_amazon_element(key="ADDRESS_SELECT")
+                        break
+                    except sel_exceptions.NoSuchElementException:
+                        pass
 
             if time.time() > timeout:
                 log.info("couldn't find buttons to proceed to checkout")
