@@ -1289,7 +1289,16 @@ class Amazon:
                     button = self.driver.find_element_by_xpath('//*[@id="hlb-ptc-btn"]')
                     break
                 except sel_exceptions.NoSuchElementException:
-                    pass
+                    # also check for address buttons here?
+                    if self.shipping_bypass():
+                        try:
+                            button = self.driver.find_element_by_xpath(
+                                join_xpaths(amazon_config["XPATH_ADDRESS"])
+                            )
+                            break
+                        except sel_exceptions.NoSuchElementException:
+                            pass
+
             if time.time() > timeout:
                 log.info("couldn't find buttons to proceed to checkout")
                 self.save_page_source("ptc-error")
@@ -1311,7 +1320,6 @@ class Amazon:
                     self.checkout_retry += 1
                 return
 
-        current_page = self.driver.title
         if button:
             log.info("Found Checkout Button")
             if self.detailed:
@@ -1321,15 +1329,14 @@ class Amazon:
                     take_screenshot=self.take_screenshots,
                 )
             try:
-                button.click()
-                log.info("Clicked Proceed to Checkout Button")
-                self.wait_for_page_change(page_title=current_page, timeout=7)
+                with self.wait_for_page_content_change():
+                    self.do_button_click(button=button)
             except sel_exceptions.WebDriverException:
                 log.error("Problem clicking Proceed to Checkout button.")
                 log.info("Refreshing page to try again")
-                self.driver.refresh()
-                self.wait_for_page_change(page_title=current_page)
-                self.checkout_retry += 1
+                with self.wait_for_page_content_change():
+                    self.driver.refresh()
+                    self.checkout_retry += 1
 
     @debug
     def handle_checkout(self, test):
@@ -1862,3 +1869,7 @@ def wait_for_element_by_xpath(d, xpath, timeout=10):
         return False
 
     return True
+
+
+def join_xpaths(xpath_list, separator=" | "):
+    return separator.join(xpath_list)

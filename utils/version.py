@@ -27,7 +27,7 @@ _LATEST_URL = "https://api.github.com/repos/Hari-Nagarajan/fairgame/releases/lat
 # See https://www.python.org/dev/peps/pep-0440/ for specification
 # See https://www.python.org/dev/peps/pep-0440/#examples-of-compliant-version-schemes for examples
 
-__VERSION = "0.6.1.dev1"
+__VERSION = "0.6.1.dev2"
 version = Version(__VERSION)
 
 
