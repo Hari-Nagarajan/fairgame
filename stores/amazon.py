@@ -939,7 +939,7 @@ class Amazon:
     @debug
     def navigate_pages(self, test):
         title = self.driver.title
-        log.info(f"Navigating page title: '{title}'")
+        log.debug(f"Navigating page title: '{title}'")
         # see if this resolves blank page title issue?
         if title == "":
             timeout_seconds = DEFAULT_MAX_TIMEOUT
@@ -1157,21 +1157,15 @@ class Amazon:
                 page_name="choose-shipping",
                 take_screenshot=self.take_screenshots,
             )
-            try:
-                with self.wait_for_page_content_change(timeout=10):
-                    element.click()
-                    log.info("Clicked button.")
+            if self.do_button_click(
+                button=element, fail_text="Could not click ship to address button"
+            ):
                 return True
-            except sel_exceptions.WebDriverException as e:
-                log.error("Could not click ship to address button")
-                log.error(e)
-                self.save_screenshot(page="shipping-select-error")
-                self.save_page_source(page="shipping-select-error")
-        else:
-            log.error("FairGame cannot find a button to click on the shipping page")
-            self.save_screenshot(page="shipping-select-error")
-            self.save_page_source(page="shipping-select-error")
+
         # if we make it this far, it failed to click button
+        log.error("FairGame cannot find a button to click on the shipping page")
+        self.save_screenshot(page="shipping-select-error")
+        self.save_page_source(page="shipping-select-error")
         return False
 
     def get_amazon_element(self, key):
@@ -1322,7 +1316,8 @@ class Amazon:
                     self.try_to_checkout = False
                 else:
                     log.info("Refreshing page to try again")
-                    self.driver.refresh()
+                    with self.wait_for_page_content_change():
+                        self.driver.refresh()
                     self.checkout_retry += 1
                 return
 
@@ -1334,15 +1329,14 @@ class Amazon:
                     page_name="ptc",
                     take_screenshot=self.take_screenshots,
                 )
-            try:
-                with self.wait_for_page_content_change():
-                    self.do_button_click(button=button)
-            except sel_exceptions.WebDriverException:
+            if self.do_button_click(button=button):
+                return
+            else:
                 log.error("Problem clicking Proceed to Checkout button.")
                 log.info("Refreshing page to try again")
                 with self.wait_for_page_content_change():
                     self.driver.refresh()
-                    self.checkout_retry += 1
+                self.checkout_retry += 1
 
     @debug
     def handle_checkout(self, test):
