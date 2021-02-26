@@ -874,9 +874,13 @@ class Amazon:
                             log.error("Continue button not present on page")
                         except sel_exceptions.ElementNotInteractableException or sel_exceptions.ElementClickInterceptedException or sel_exceptions.ElementNotVisibleException:
                             log.error("Could not click button")
+                            self.take_screenshots(page="atc-error")
+                            self.save_page_source(page="atc-error")
                         except sel_exceptions.WebDriverException as e:
                             log.error("Selenium Error")
                             log.error(e)
+                            self.take_screenshots(page="atc-error")
+                            self.save_page_source(page="atc-error")
                     else:
                         log.error("Continue button not present on page")
 
