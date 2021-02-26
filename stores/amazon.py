@@ -1015,7 +1015,7 @@ class Amazon:
                 element = None
                 try:
                     element = self.driver.find_element_by_xpath(
-                        '//*[@class="ship-to-this-address a-button a-button-primary a-button-span12 a-spacing-medium  "]'
+                        '//*[@class="ship-to-this-address a-button a-button-primary a-button-span12 a-spacing-medium"]'
                     )
                 except sel_exceptions.NoSuchElementException:
                     pass
