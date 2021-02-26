@@ -872,6 +872,11 @@ class Amazon:
                                 self.driver.find_element_by_xpath(xpath).click()
                         except sel_exceptions.NoSuchElementException:
                             log.error("Continue button not present on page")
+                        except sel_exceptions.ElementNotInteractableException or sel_exceptions.ElementClickInterceptedException or sel_exceptions.ElementNotVisibleException:
+                            log.error("Could not click button")
+                        except sel_exceptions.WebDriverException as e:
+                            log.error("Selenium Error")
+                            log.error(e)
                     else:
                         log.error("Continue button not present on page")
 
