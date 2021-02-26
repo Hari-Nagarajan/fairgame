@@ -546,9 +546,7 @@ To keep up with questions, the Discord channel [#FAQ](https://discord.gg/GEsarYK
 answers. If you don't find it there, ask in #tech-support.
 
 1. **Can I run multiple instances of the bot?**
-
-   Yes. For example you can run one instance to check stock on Best Buy and a separate instance to check stock on
-   Amazon. Bear in mind that if you do this you may end up with multiple purchases going through at the same time.
+   While possible, running multiple instances are not a supported usage case. You are on your own to figure this one out.
 
 2. **Does Fairgame automatically bypass CAPTCHA's on the store sites?**
    For Amazon, yes. The bot will try and auto-solve CAPTCHA's during the checkout process.
