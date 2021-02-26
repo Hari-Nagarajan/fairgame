@@ -89,7 +89,6 @@ DEFAULT_MAX_TIMEOUT = 10
 DEFAULT_MAX_URL_FAIL = 5
 
 amazon_config = {}
-amazon_xpath = {}
 
 
 class Amazon:
@@ -145,7 +144,6 @@ class Amazon:
         from cli.cli import global_config
 
         amazon_config = global_config.get_amazon_config(encryption_pass)
-        amazon_xpath = amazon_config["XPATHS"]
         self.profile_path = global_config.get_browser_profile_path()
 
         try:
@@ -1169,7 +1167,9 @@ class Amazon:
         return False
 
     def get_amazon_element(self, key):
-        return self.driver.find_element_by_xpath(join_xpaths(amazon_xpath[key]))
+        return self.driver.find_element_by_xpath(
+            join_xpaths(amazon_config["XPATHS"][key])
+        )
 
     # returns negative number if cart element does not exist, returns number if cart exists
     def get_cart_count(self):
