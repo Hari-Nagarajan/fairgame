@@ -88,7 +88,7 @@ DEFAULT_REFRESH_DELAY = 3
 DEFAULT_MAX_TIMEOUT = 10
 DEFAULT_MAX_URL_FAIL = 5
 
-amazon_config = None
+amazon_config = {}
 
 
 class Amazon:
@@ -869,18 +869,26 @@ class Amazon:
                     xpath = "//input[@value='add' and @name='add']"
                     if wait_for_element_by_xpath(self.driver, xpath):
                         try:
-                            with self.wait_for_page_content_change(timeout=10):
-                                self.driver.find_element_by_xpath(xpath).click()
+                            with self.wait_for_page_content_change(timeout=15):
+                                continue_btn = WebDriverWait(
+                                    self.driver, timeout=5
+                                ).until(EC.element_to_be_clickable((By.XPATH, xpath)))
+                                continue_btn.click()
                         except sel_exceptions.NoSuchElementException:
                             log.error("Continue button not present on page")
-                        except sel_exceptions.ElementNotInteractableException or sel_exceptions.ElementClickInterceptedException or sel_exceptions.ElementNotVisibleException:
-                            log.error("Could not click button")
-                            self.take_screenshots(page="atc-error")
+                        except (
+                            sel_exceptions.ElementNotInteractableException,
+                            sel_exceptions.ElementClickInterceptedException,
+                            sel_exceptions.ElementNotVisibleException,
+                            sel_exceptions.TimeoutException,
+                        ) as e:
+                            log.error(f"Could not click button due to {e}")
+                            self.save_screenshot(page="atc-continue-button`")
                             self.save_page_source(page="atc-error")
                         except sel_exceptions.WebDriverException as e:
                             log.error("Selenium Error")
                             log.error(e)
-                            self.take_screenshots(page="atc-error")
+                            self.save_screenshot(page="atc-error")
                             self.save_page_source(page="atc-error")
                     else:
                         log.error("Continue button not present on page")
