@@ -908,9 +908,6 @@ class Amazon:
     # checkout page navigator
     @debug
     def navigate_pages(self, test):
-        # delay to wait for page load
-        # time.sleep(self.page_wait_delay())
-
         title = self.driver.title
         log.info(f"Navigating page title: '{title}'")
         # see if this resolves blank page title issue?
@@ -950,23 +947,15 @@ class Amazon:
         elif title in amazon_config["BUSINESS_PO_TITLES"]:
             self.handle_business_po()
         elif title in amazon_config["ADDRESS_SELECT"]:
-            if not self.unknown_title_notification_sent:
-                self.notification_handler.play_alarm_sound()
-                self.send_notification(
-                    "User interaction required for checkout!",
-                    title,
-                    self.take_screenshots,
+            if self.shipping_bypass:
+                self.handle_shipping_page()
+            else:
+                log.warning(
+                    "Landed on address selection screen.  Fairgame will NOT select an address for you.  "
+                    "Please select necessary options to arrive at the Review Order Page before the next "
+                    "refresh, or complete checkout manually.  You have 30 seconds."
                 )
-                self.unknown_title_notification_sent = True
-            log.warning(
-                "Landed on address selection screen.  Fairgame will NOT select an address for you.  "
-                "Please select necessary options to arrive at the Review Order Page before the next "
-                "refresh, or complete checkout manually.  You have 30 seconds."
-            )
-            for i in range(30, 0, -1):
-                log.warning(f"{i}...")
-                time.sleep(1)
-            return
+                self.handle_unknown_title(title)
         else:
             log.debug(f"title is: [{title}]")
             # see if we can handle blank titles here
@@ -1025,44 +1014,11 @@ class Amazon:
                 except sel_exceptions.ElementNotInteractableException:
                     log.debug("FairGame could not click No Thanks button")
 
+            # see if a use this address (or similar) button is on page (based on known xpaths). Only check if
+            # user has set the shipping_bypass flag
             if self.shipping_bypass:
-                element = None
-                try:
-                    element = self.driver.find_element_by_xpath(
-                        '//*[contains(@class,"ship-to-this-address a-button a-button-primary a-button-span12 a-spacing-medium")]'
-                    )
-                except sel_exceptions.NoSuchElementException:
-                    try:
-                        element = self.driver.find_element_by_xpath(
-                            '//input[@type="submit"]'
-                        )
-                    except sel_exceptions.NoSuchElementException:
-                        try:
-                            element = self.driver.find_element_by_xpath(
-                                '//*[@id="orderSummaryPrimaryActionBtn"]'
-                            )
-                        except:
-                            pass
-                if element:
-                    log.warning("FairGame thinks it needs to pick a shipping address.")
-                    log.warning(
-                        "It will click whichever ship to this address button it found."
-                    )
-                    log.warning(
-                        "If this works, VERIFY THE ADDRESS IT SHIPPED TO IMMEDIATELY!"
-                    )
-                    self.send_notification(
-                        message="Clicking ship to address, hopefully this works. VERIFY ASAP!",
-                        page_name="choose-shipping",
-                        take_screenshot=self.take_screenshots,
-                    )
-                    try:
-                        element.click()
-                        log.info("Clicked button.")
-                        self.wait_for_page_change(page_title=title)
-                        return
-                    except sel_exceptions.WebDriverException:
-                        log.error("Could not click ship to address button")
+                if self.handle_shipping_page():
+                    return
 
             if self.get_cart_count() == 0:
                 log.info("It appears you have nothing in your cart.")
@@ -1080,23 +1036,29 @@ class Amazon:
             log.error(
                 f"'{title}' is not a known page title. Please create issue indicating the title with a screenshot of page"
             )
-            self.send_notification(
-                f"Encountered Unknown Page Title: `{title}",
-                "unknown-title",
-                self.take_screenshots,
-            )
-            self.save_page_source("unknown-title")
-            log.info("going to try and redirect to cart page")
+            # give user 30 seconds to respond
+            self.handle_unknown_title(title=title)
+            # check if page title changed, if not, then continue doing other checks:
+            if self.driver.title != title:
+                log.info(
+                    "FairGame thinks user intervened in time, will now continue running"
+                )
+                return
+            else:
+                log.warning(
+                    "FairGame does not think the user intervened in time, will attempt other methods to continue"
+                )
+            log.info("Going to try and redirect to cart page")
             try:
-                self.driver.get(AMAZON_URLS["CART_URL"])
+                with self.wait_for_page_content_change(timeout=10):
+                    self.driver.get(AMAZON_URLS["CART_URL"])
             except sel_exceptions.WebDriverException:
                 log.error(
                     "failed to load cart URL, refreshing and returning to handler"
                 )
-                self.driver.refresh()
-                time.sleep(3)
+                with self.wait_for_page_content_change(timeout=10):
+                    self.driver.refresh()
                 return
-            self.wait_for_page_change(page_title=title)
             time.sleep(1)  # wait a second for page to load
             # verify cart quantity is not zero
             # note, not using greater than 0, in case there is an error,
@@ -1119,25 +1081,88 @@ class Amazon:
                 except sel_exceptions.NoSuchElementException:
                     pass
                 if time.time() > timeout:
-                    log.error(
-                        "Could not find and click button, refreshing and returning to handler"
-                    )
-                    self.driver.refresh()
-                    time.sleep(3)
+                    log.error("Could not find and click button")
                     break
             if button:
                 try:
-                    current_title = self.driver.title
                     log.info("Found ptc button, attempting to click.")
-                    button.click()
-                    log.info("Clicked ptc button")
-                    self.wait_for_page_change(page_title=current_title)
+                    with self.wait_for_page_content_change(timeout=10):
+                        button.click()
+                        log.info("Clicked ptc button")
                 except sel_exceptions.WebDriverException:
                     log.info(
                         "Could not click button - refreshing and returning to checkout handler"
                     )
-                    self.driver.refresh()
-                    time.sleep(3)
+                    with self.wait_for_page_content_change():
+                        self.driver.refresh()
+                    return
+
+            # if we made it this far, all attempts to handle page failed, get current page info and return to handler
+            log.error(
+                "FairGame could not navigate current page, refreshing and returning to handler"
+            )
+            self.save_page_source(page="unknown")
+            self.save_screenshot(page="unknown")
+            with self.wait_for_page_content_change():
+                self.driver.refresh()
+            return
+
+    def handle_unknown_title(self, title):
+        if not self.unknown_title_notification_sent:
+            self.notification_handler.play_alarm_sound()
+            self.send_notification(
+                "User interaction required for checkout! You have 30 seconds!",
+                title,
+                self.take_screenshots,
+            )
+            self.unknown_title_notification_sent = True
+        for i in range(30, 0, -1):
+            log.warning(f"{i}...")
+            time.sleep(1)
+        return
+
+    # Method to try and click the handle shipping page
+    def handle_shipping_page(self):
+        element = None
+        try:
+            element = self.driver.find_element_by_xpath(
+                '//*[contains(@class,"ship-to-this-address a-button a-button-primary a-button-span12 a-spacing-medium")]'
+            )
+        except sel_exceptions.NoSuchElementException:
+            try:
+                element = self.driver.find_element_by_xpath('//input[@type="submit"]')
+            except sel_exceptions.NoSuchElementException:
+                try:
+                    element = self.driver.find_element_by_xpath(
+                        '//*[@id="orderSummaryPrimaryActionBtn"]'
+                    )
+                except sel_exceptions.NoSuchElementException:
+                    pass
+        if element:
+            log.warning("FairGame thinks it needs to pick a shipping address.")
+            log.warning("It will click whichever ship to this address button it found.")
+            log.warning("If this works, VERIFY THE ADDRESS IT SHIPPED TO IMMEDIATELY!")
+            self.send_notification(
+                message="Clicking ship to address, hopefully this works. VERIFY ASAP!",
+                page_name="choose-shipping",
+                take_screenshot=self.take_screenshots,
+            )
+            try:
+                with self.wait_for_page_content_change(timeout=10):
+                    element.click()
+                    log.info("Clicked button.")
+                return True
+            except sel_exceptions.WebDriverException as e:
+                log.error("Could not click ship to address button")
+                log.error(e)
+                self.save_screenshot(page="shipping-select-error")
+                self.save_page_source(page="shipping-select-error")
+        else:
+            log.error("FairGame cannot find a button to click on the shipping page")
+            self.save_screenshot(page="shipping-select-error")
+            self.save_page_source(page="shipping-select-error")
+        # if we make it this far, it failed to click button
+        return False
 
     # returns negative number if cart element does not exist, returns number if cart exists
     def get_cart_count(self):
@@ -1176,24 +1201,45 @@ class Amazon:
                 self.take_screenshots,
             )
         if button:
-            current_page = self.driver.title
-            button.click()
-            self.wait_for_page_change(current_page)
-        else:
-            log.error("Prime offer page popped up, user intervention required")
-            self.notification_handler.play_alarm_sound()
-            self.notification_handler.send_notification(
-                "Prime offer page popped up, user intervention required"
-            )
-            timeout = self.get_timeout(timeout=60)
-            while self.driver.title in amazon_config["PRIME_TITLES"]:
-                if time.time() > timeout:
-                    log.info(
-                        "user did not intervene in time, will try and refresh page"
-                    )
+            if self.do_button_click(
+                button=button,
+                clicking_text="Attempting to click No Thanks button on Prime Signup Page",
+                fail_text="Failed to click No Thanks button on Prime Signup Page",
+            ):
+                return
+
+        # If we get to this point, there was either no button, or we couldn't click it (exception hit above)
+        log.error("Prime offer page popped up, user intervention required")
+        self.notification_handler.play_alarm_sound()
+        self.notification_handler.send_notification(
+            "Prime offer page popped up, user intervention required"
+        )
+        timeout = self.get_timeout(timeout=60)
+        while self.driver.title in amazon_config["PRIME_TITLES"]:
+            if time.time() > timeout:
+                log.info("user did not intervene in time, will try and refresh page")
+                with self.wait_for_page_content_change():
                     self.driver.refresh()
-                    time.sleep(DEFAULT_MAX_WEIRD_PAGE_DELAY)
-                    break
+                break
+            time.sleep(0.5)
+
+    def do_button_click(
+        self,
+        button,
+        clicking_text="Clicking button",
+        clicked_text="Button clicked",
+        fail_text="Could not click button",
+    ):
+        try:
+            with self.wait_for_page_content_change():
+                log.info(clicking_text)
+                button.click()
+                log.info(clicked_text)
+            return True
+        except sel_exceptions.WebDriverException as e:
+            log.error(fail_text)
+            log.error(e)
+            return False
 
     @debug
     def handle_home_page(self):
@@ -1205,23 +1251,22 @@ class Amazon:
             log.info("Could not find cart button")
         current_page = self.driver.title
         if button:
-            button.click()
-            self.wait_for_page_change(current_page)
-        else:
-            self.send_notification(
-                "Could not click cart button, user intervention required",
-                "home-page-error",
-                self.take_screenshots,
-            )
-            timeout = self.get_timeout(timeout=300)
-            while self.driver.title == current_page:
-                time.sleep(0.25)
-                if time.time() > timeout:
-                    log.info(
-                        "user failed to intervene in time, returning to stock check"
-                    )
-                    self.try_to_checkout = False
-                    break
+            if self.do_button_click(button=button):
+                return
+
+        # no button found or could not interact with the button
+        self.send_notification(
+            "Could not click cart button, user intervention required",
+            "home-page-error",
+            self.take_screenshots,
+        )
+        timeout = self.get_timeout(timeout=300)
+        while self.driver.title == current_page:
+            time.sleep(0.25)
+            if time.time() > timeout:
+                log.info("user failed to intervene in time, returning to stock check")
+                self.try_to_checkout = False
+                break
 
     @debug
     def handle_cart(self):
