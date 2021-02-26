@@ -862,23 +862,27 @@ class Amazon:
         f = f"{AMAZON_URLS['ATC_URL']}?OfferListingId.1={offering_id}&Quantity.1=1"
         atc_attempts = 0
         while atc_attempts < max_atc_retries:
-            with self.wait_for_page_content_change(timeout=5):
-                self.driver.get(f)
-                xpath = "//input[@value='add' and @name='add']"
-                if wait_for_element_by_xpath(self.driver, xpath):
-                    try:
-                        with self.wait_for_page_content_change(timeout=10):
-                            self.driver.find_element_by_xpath(xpath).click()
-                    except sel_exceptions.NoSuchElementException:
+            try:
+                with self.wait_for_page_content_change(timeout=5):
+                    self.driver.get(f)
+                    xpath = "//input[@value='add' and @name='add']"
+                    if wait_for_element_by_xpath(self.driver, xpath):
+                        try:
+                            with self.wait_for_page_content_change(timeout=10):
+                                self.driver.find_element_by_xpath(xpath).click()
+                        except sel_exceptions.NoSuchElementException:
+                            log.error("Continue button not present on page")
+                    else:
                         log.error("Continue button not present on page")
-                else:
-                    log.error("Continue button not present on page")
 
-                # verify cart is non-zero
-                if self.get_cart_count() != 0:
-                    return True
-                else:
-                    atc_attempts = atc_attempts + 1
+                    # verify cart is non-zero
+                    if self.get_cart_count() != 0:
+                        return True
+                    else:
+                        atc_attempts = atc_attempts + 1
+            except sel_exceptions.TimeoutException:
+                log.error("Could not load webpage within timeout period")
+                atc_attempts += 1
         return False
 
     # search lists of asin lists, and remove the first list that matches provided asin
