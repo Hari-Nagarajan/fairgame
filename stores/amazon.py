@@ -1019,10 +1019,20 @@ class Amazon:
                 element = None
                 try:
                     element = self.driver.find_element_by_xpath(
-                        '//*[@class="ship-to-this-address a-button a-button-primary a-button-span12 a-spacing-medium  "]'
+                        '//*[contains(@class,"ship-to-this-address a-button a-button-primary a-button-span12 a-spacing-medium")]'
                     )
                 except sel_exceptions.NoSuchElementException:
-                    pass
+                    try:
+                        element = self.driver.find_element_by_xpath(
+                            '//input[@type="submit"]'
+                        )
+                    except sel_exceptions.NoSuchElementException:
+                        try:
+                            element = self.driver.find_element_by_xpath(
+                                '//*[@id="orderSummaryPrimaryActionBtn"]'
+                            )
+                        except:
+                            pass
                 if element:
                     log.warning("FairGame thinks it needs to pick a shipping address.")
                     log.warning(
