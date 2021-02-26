@@ -242,11 +242,12 @@ class Amazon:
             time.sleep(30)
             return
 
-        keep_going = True
+        continue_stock_check = True
 
         log.info("Checking stock for items.")
 
-        while keep_going:
+        while continue_stock_check:
+            self.unknown_title_notification_sent = False
             asin = self.run_asins(delay)
             # found something in stock and under reserve
             # initialize loop limiter variables
@@ -281,7 +282,7 @@ class Amazon:
                     self.try_to_checkout = False
             # if no items left it list, let loop end
             if not self.asin_list:
-                keep_going = False
+                continue_stock_check = False
         runtime = time.time() - self.start_time
         log.info(f"FairGame bot ran for {runtime} seconds.")
         time.sleep(10)  # add a delay to shut stuff done
