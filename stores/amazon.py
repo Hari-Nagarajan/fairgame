@@ -884,7 +884,7 @@ class Amazon:
                         ) as e:
                             log.error(f"Could not click button due to {e}")
                             self.save_screenshot(page="atc-continue-button`")
-                            self.save_page_source(page="atc-error")
+                            self.save_page_source(page="atc-continue-button`")
                         except sel_exceptions.WebDriverException as e:
                             log.error("Selenium Error")
                             log.error(e)
