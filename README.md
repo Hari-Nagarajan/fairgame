@@ -62,7 +62,7 @@ our Wiki . You *can* use the "Download Zip" button on the GitHub repository's ho
 more difficult. If you can get setup with the GitHub Desktop app, updating to the latest version of the bot takes 1
 click.
 
-!!! YOU WILL NEED TO USE THE 3.8 BRANCH OF PYTHON, 3.9.0 BREAKS DEPENDENCIES !!!
+**!!! YOU WILL NEED TO USE THE 3.8 BRANCH OF PYTHON, 3.9.X BREAKS DEPENDENCIES !!!**
 
 It is best if you use the newest version (3.8.7) but 3.8.5 and 3.8.6 should also work. 3.8.0 does not.
 
@@ -247,18 +247,17 @@ Options:
 
 Make a copy of `amazon_config.template_json` and rename to `amazon_config.json`. Edit it according to the ASINs you are
 interested in purchasing.  [*What's an
-ASIN?*](https://www.datafeedwatch.com/blog/amazon-asin-number-what-is-it-and-how-do-you-get-it#how-to-find-asin)
+ASIN?*](https://www.datafeedwatch.com/blog/amazon-asin-number-what-is-it-and-how-do-you-get-it#how-to-find-asin) You can find a list of ASINs for some common products people are looking for in the [cheat sheet](https://docs.google.com/document/d/14kZ0SNC97DFVRStnrdsJ8xbQO1m42v7svy93kUdtX48). If it's not in the cheat sheet, you have to look it up yourself.
 
 * `asin_groups` indicates the number of ASIN groups you want to use.
-* `asin_list_x` list of ASINs for products you want to purchase. You must locate these (see Discord or lookup the ASIN
-  on product pages).
+* `asin_list_x` list of ASINs for products you want to purchase. You must locate these for the products you want, use the links above to get started.
     * The first time an item from list "x" is in stock and under its associated reserve, it will purchase it.
     * If the purchase is successful, the bot will not buy anything else from list "x".
     * Use sequential numbers for x, starting from 1. x can be any integer from 1 to 18,446,744,073,709,551,616
 * `reserve_min_x` set a minimum limit to consider for purchasing an item. If a seller has a listing for a 700 dollar
   item a 1 dollar, it's likely fake.
 * `reserve_max_x` is the most amount you want to spend for a single item (i.e., ASIN) in `asin_list_x`. Does not include
-  tax. If --checkshipping flag is active, this includes shipping listed on offer page.
+  tax. If `--checkshipping` flag is active, this includes shipping listed on offer page.
 * `amazon_website` amazon domain you want to use. smile subdomain appears to work better, if available in your
   country. [*What is Smile?*](https://org.amazon.com/)
 
