@@ -665,7 +665,7 @@ class Amazon:
                 )
                 continue
 
-            atc_buttons: WebElement = self.get_amazon_element(key="ATC")
+            atc_buttons: WebElement = self.get_amazon_elements(key="ATC")
             # if not atc_buttons:
             #     # Sanity check to see if we have a valid page, but no offers:
             #     offer_count = WebDriverWait(self.driver, timeout=25).until(
@@ -1168,6 +1168,11 @@ class Amazon:
 
     def get_amazon_element(self, key):
         return self.driver.find_element_by_xpath(
+            join_xpaths(amazon_config["XPATHS"][key])
+        )
+
+    def get_amazon_elements(self, key):
+        return self.driver.find_elements_by_xpath(
             join_xpaths(amazon_config["XPATHS"][key])
         )
 
