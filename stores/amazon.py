@@ -1354,7 +1354,6 @@ class Amazon:
         previous_title = self.driver.title
         button = None
         timeout = self.get_timeout()
-        retries = 0
         while True:
             try:
                 button = self.driver.find_element_by_xpath(self.button_xpaths[0])
