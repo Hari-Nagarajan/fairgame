@@ -284,7 +284,7 @@ class Amazon:
                 if self.buttons_clicked_checkout > 1:
                     self.try_to_checkout = False
                     log.info(
-                        "It's likely that this is one of the infamouse bugged Amazon items."
+                        "It's likely that this is a bugged amazon item."
                     )
                     log.info("Removing this item from the ASIN list so it doesn't clog up the bot")
                     self.remove_asin_list(asin)
