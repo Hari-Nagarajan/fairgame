@@ -665,7 +665,7 @@ class Amazon:
                 )
                 continue
 
-            atc_buttons: WebElement = self.get_amazon_elements(key="ATC")
+            atc_buttons = self.get_amazon_elements(key="ATC")
             # if not atc_buttons:
             #     # Sanity check to see if we have a valid page, but no offers:
             #     offer_count = WebDriverWait(self.driver, timeout=25).until(
@@ -1033,7 +1033,7 @@ class Amazon:
                     button=element,
                     clicking_text="FairGame thinks it is seeing a Prime Offer, attempting to click No Thanks",
                     fail_text="FairGame could not click No Thanks button",
-                    debug=True,
+                    log_debug=True,
                 ):
                     return
             # see if a use this address (or similar) button is on page (based on known xpaths). Only check if
@@ -1238,7 +1238,7 @@ class Amazon:
         clicking_text="Clicking button",
         clicked_text="Button clicked",
         fail_text="Could not click button",
-        debug=False,
+        log_debug=False,
     ):
         try:
             with self.wait_for_page_content_change():
@@ -1247,7 +1247,7 @@ class Amazon:
                 log.info(clicked_text)
             return True
         except sel_exceptions.WebDriverException as e:
-            if debug:
+            if log_debug:
                 log.debug(fail_text)
                 log.debug(e)
             else:
@@ -1352,17 +1352,21 @@ class Amazon:
             try:
                 button = self.driver.find_element_by_xpath(self.button_xpaths[0])
             except sel_exceptions.NoSuchElementException:
-                pass
-            self.button_xpaths.append(self.button_xpaths.pop(0))
+                if self.shipping_bypass:
+                    try:
+                        button = self.get_amazon_element(key="ADDRESS_SELECT")
+                    except sel_exceptions.NoSuchElementException:
+                        pass
+                self.button_xpaths.append(self.button_xpaths.pop(0))
             if button:
                 if button.is_enabled() and button.is_displayed():
                     break
             if time.time() > timeout:
-                log.error("couldn't find buttons to proceed to checkout")
-                self.save_page_source("ptc-error")
+                log.error("couldn't find button to place order")
+                self.save_page_source("pyo-error")
                 self.send_notification(
-                    "Error in checkout.  Please check browser window.",
-                    "ptc-error",
+                    "Error in placing order.  Please check browser window.",
+                    "pyo-error",
                     self.take_screenshots,
                 )
                 log.info("Refreshing page to try again")
