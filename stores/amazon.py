@@ -255,6 +255,7 @@ class Amazon:
             self.checkout_retry = 0
             self.order_retry = 0
             loop_iterations = 0
+            self.buttons_clicked_checkout = 0
             self.great_success = False
             while self.try_to_checkout:
                 try:
@@ -280,6 +281,13 @@ class Amazon:
                 if loop_iterations > DEFAULT_MAX_CHECKOUT_LOOPS:
                     self.fail_to_checkout_note()
                     self.try_to_checkout = False
+                if self.buttons_clicked_checkout > 1:
+                    self.try_to_checkout = False
+                    log.info(
+                        "It's likely that this is one of the infamouse bugged Amazon items."
+                    )
+                    log.info("Removing this item from the ASIN list so it doesn't clog up the bot")
+                    self.remove_asin_list(asin)
             # if no items left it list, let loop end
             if not self.asin_list:
                 continue_stock_check = False
@@ -1228,12 +1236,17 @@ class Amazon:
         clicked_text="Button clicked",
         fail_text="Could not click button",
         log_debug=False,
+        fromcheckout = False,
     ):
         try:
-            with self.wait_for_page_content_change():
+            with self.wait_for_page_content_change(timeout=3):
                 log.info(clicking_text)
                 button.click()
                 log.info(clicked_text)
+                if fromcheckout:
+                    self.buttons_clicked_checkout += 1
+                    if (self.buttons_clicked_checkout > 1):
+                        return False
             return True
         except sel_exceptions.WebDriverException as e:
             if log_debug:
@@ -1341,6 +1354,7 @@ class Amazon:
         previous_title = self.driver.title
         button = None
         timeout = self.get_timeout()
+        retries = 0
         while True:
             try:
                 button = self.driver.find_element_by_xpath(self.button_xpaths[0])
@@ -1377,7 +1391,7 @@ class Amazon:
                 self.asin_list = []
         else:
             log.info(f"Clicking Button {button.text} to place order")
-            self.do_button_click(button=button)
+            self.do_button_click(button=button, fromcheckout=True)
 
     @debug
     def handle_order_complete(self):
