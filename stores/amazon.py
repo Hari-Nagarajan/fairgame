@@ -883,44 +883,32 @@ class Amazon:
         f = f"{AMAZON_URLS['ATC_URL']}?OfferListingId.1={offering_id}&Quantity.1=1"
         atc_attempts = 0
         while atc_attempts < max_atc_retries:
-            try:
-                with self.wait_for_page_content_change(timeout=5):
+            with self.wait_for_page_content_change(timeout=5):
+                try:
                     self.driver.get(f)
-                    xpath = "//input[@value='add' and @name='add']"
-                    if wait_for_element_by_xpath(self.driver, xpath):
-                        try:
-                            with self.wait_for_page_content_change(timeout=15):
-                                continue_btn = WebDriverWait(
-                                    self.driver, timeout=5
-                                ).until(EC.element_to_be_clickable((By.XPATH, xpath)))
-                                continue_btn.click()
-                        except sel_exceptions.NoSuchElementException:
-                            log.error("Continue button not present on page")
-                        except (
-                            sel_exceptions.ElementNotInteractableException,
-                            sel_exceptions.ElementClickInterceptedException,
-                            sel_exceptions.ElementNotVisibleException,
-                            sel_exceptions.TimeoutException,
-                        ) as e:
-                            log.error(f"Could not click button due to {e}")
-                            self.save_screenshot(page="atc-continue-button`")
-                            self.save_page_source(page="atc-continue-button`")
-                        except sel_exceptions.WebDriverException as e:
-                            log.error("Selenium Error")
-                            log.error(e)
-                            self.save_screenshot(page="atc-error")
-                            self.save_page_source(page="atc-error")
-                    else:
-                        log.error("Continue button not present on page")
-
-                    # verify cart is non-zero
+                except sel_exceptions.TimeoutException:
+                    log.error("Failed to get page")
+                    atc_attempts += 1
+                    continue
+            xpath = "//input[@value='add' and @name='add']"
+            if wait_for_element_by_xpath(self.driver, xpath):
+                continue_btn = None
+                try:
+                    continue_btn = WebDriverWait(self.driver, timeout=5).until(
+                        EC.element_to_be_clickable((By.XPATH, xpath))
+                    )
+                except sel_exceptions.TimeoutException:
+                    log.error("No continue button found")
+            if continue_btn:
+                if self.do_button_click(
+                    button=continue_btn, fail_text="Could not click continue button"
+                ):
                     if self.get_cart_count() != 0:
                         return True
                     else:
-                        atc_attempts = atc_attempts + 1
-            except sel_exceptions.TimeoutException:
-                log.error("Could not load webpage within timeout period")
-                atc_attempts += 1
+                        log.info("Nothing added to cart, trying again")
+
+            atc_attempts = atc_attempts + 1
         return False
 
     # search lists of asin lists, and remove the first list that matches provided asin
@@ -1260,7 +1248,7 @@ class Amazon:
         log.info("On home page, trying to get back to checkout")
         button = None
         try:
-            button = self.get_amazon_element("CART")
+            button = self.get_amazon_element("CART_BUTTON")
         except sel_exceptions.NoSuchElementException:
             log.info("Could not find cart button")
         current_page = self.driver.title
