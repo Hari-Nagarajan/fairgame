@@ -283,10 +283,10 @@ class Amazon:
                     self.try_to_checkout = False
                 if self.buttons_clicked_checkout > 1:
                     self.try_to_checkout = False
+                    log.info("It's likely that this is a bugged amazon item.")
                     log.info(
-                        "It's likely that this is a bugged amazon item."
+                        "Removing this item from the ASIN list so it doesn't clog up the bot"
                     )
-                    log.info("Removing this item from the ASIN list so it doesn't clog up the bot")
                     self.remove_asin_list(asin)
             # if no items left it list, let loop end
             if not self.asin_list:
@@ -1236,7 +1236,7 @@ class Amazon:
         clicked_text="Button clicked",
         fail_text="Could not click button",
         log_debug=False,
-        fromcheckout = False,
+        fromcheckout=False,
     ):
         try:
             with self.wait_for_page_content_change(timeout=3):
@@ -1245,7 +1245,7 @@ class Amazon:
                 log.info(clicked_text)
                 if fromcheckout:
                     self.buttons_clicked_checkout += 1
-                    if (self.buttons_clicked_checkout > 1):
+                    if self.buttons_clicked_checkout > 1:
                         return False
             return True
         except sel_exceptions.WebDriverException as e:
