@@ -251,7 +251,7 @@ ASIN?*](https://www.datafeedwatch.com/blog/amazon-asin-number-what-is-it-and-how
 
 * `asin_groups` indicates the number of ASIN groups you want to use.
 * `asin_list_x` list of ASINs for products you want to purchase. You must locate these for the products you want, use the links above to get started.
-    * The first time an item from list "x" is in stock and under its associated reserve, it will purchase it.
+    * The first time an item from list "x" is in stock and under its associated reserve, it will purchase it. FairGame will continue to loop through the other lists until it purchases one item from each (unless the `--single-shot` option is enabled, in which case it stops after the first purchase).
     * If the purchase is successful, the bot will not buy anything else from list "x".
     * Use sequential numbers for x, starting from 1. x can be any integer from 1 to 18,446,744,073,709,551,616
 * `reserve_min_x` set a minimum limit to consider for purchasing an item. If a seller has a listing for a 700 dollar
