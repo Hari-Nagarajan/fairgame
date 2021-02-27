@@ -1303,6 +1303,10 @@ class Amazon:
                         break
                     except sel_exceptions.NoSuchElementException:
                         pass
+            if self.get_cart_count() == 0:
+                log.info("You have no items in cart. Going back to stock check.")
+                self.try_to_checkout = False
+                break
 
             if time.time() > timeout:
                 log.info("couldn't find buttons to proceed to checkout")
@@ -1312,18 +1316,18 @@ class Amazon:
                     "ptc-error",
                     self.take_screenshots,
                 )
-                if self.get_cart_count() == 0:
-                    log.info("It appears this is because you have no items in cart.")
-                    log.info(
-                        "It is likely that the product went out of stock before you could checkout"
-                    )
-                    log.info("Going back to stock check.")
-                    self.try_to_checkout = False
-                else:
-                    log.info("Refreshing page to try again")
-                    with self.wait_for_page_content_change():
-                        self.driver.refresh()
-                    self.checkout_retry += 1
+                # if self.get_cart_count() == 0:
+                #     log.info("It appears this is because you have no items in cart.")
+                #     log.info(
+                #         "It is likely that the product went out of stock before you could checkout"
+                #     )
+                #     log.info("Going back to stock check.")
+                #     self.try_to_checkout = False
+                # else:
+                log.info("Refreshing page to try again")
+                with self.wait_for_page_content_change():
+                    self.driver.refresh()
+                self.checkout_retry += 1
                 return
 
         if button:
