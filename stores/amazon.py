@@ -909,6 +909,7 @@ class Amazon:
                         log.info("Nothing added to cart, trying again")
 
             atc_attempts = atc_attempts + 1
+        log.error("reached maximum ATC attempts, returning to stock check")
         return False
 
     # search lists of asin lists, and remove the first list that matches provided asin
@@ -1376,8 +1377,7 @@ class Amazon:
                 self.asin_list = []
         else:
             log.info(f"Clicking Button {button.text} to place order")
-            button.click()
-        self.wait_for_page_change(page_title=previous_title)
+            self.do_button_click(button=button)
 
     @debug
     def handle_order_complete(self):
