@@ -519,7 +519,7 @@ class Amazon:
                     self.driver, timeout=DEFAULT_MAX_TIMEOUT
                 ).until(
                     lambda d: d.find_elements_by_xpath(
-                        "//div[@class='nav-footer-line'] | //img[@alt='Dogs of Amazon']"
+                        "//div[@class='nav-footer-line'] | //div[@id='navFooter'] | //img[@alt='Dogs of Amazon']"
                     )
                 )
                 if footer and footer[0].tag_name == "img":
