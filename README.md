@@ -192,6 +192,13 @@ Then save and close the file.
 
 ### Amazon
 
+TL;DR Notes:
+* By default, bot will only purchase new items with free shipping.
+* Running the FairGame with the `_Amazon.bat` is easiest. You should change the name of the `_Amazon.bat` file though, so it does not overwrite any changes you made (adding flags, removing `--test`, etc.)
+* Make a copy of the `amazon_config.template_json` file, and rename it to `amazon_config.json`. Modify it as _you_ see fit, with ASINs and min/max reserve prices as you think they should be set.
+* **DO NOT ADD STUFF TO YOUR CART WHILE THE BOT IS RUNNING - IF IT ATTEMPTS TO CHECKOUT, AND THERE ARE ITEMS IN THE CART, BUT YOUR TARGET ITEM DOES NOT ADD TO CART CORRECTLY, IT WILL PURCHASE WHATEVER WAS IN THE CART AND THINK THAT IT PURCHASED YOUR TARGET ITEM.**
+* **EVEN THOUGH THIS IS "TL;DR" YOU STILL NEED TO READ THE WHOLE THING!**
+
 The following flags are specific to the Amazon scripts. They the `[OPTIONS]` to be passed on the command-line to control
 the behavior of Amazon scanning and purchasing. These can be added at the command line or added to a batch file/shell
 script (see `_Amazon.bat` in the root folder of the project). **NOTE:** `--test` flag has been added to `_Amazon.bat`
