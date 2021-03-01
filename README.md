@@ -96,6 +96,28 @@ necessary for your environment. This isn't intended to be a definitive guide, bu
 platform can/does work. Please report back any suggestions to our [Discord](https://discord.gg/qDY2QBtAW6) feedback
 channel.
 
+### Installation MacOS 
+
+Usage on Mojave (10.14) and above. Previous versions of macOS may not be compatible.
+
+Ensure you have Python 3.8.5+ (3.8.7 recommended) installed on your system. If not, you can download it from 
+https://www.python.org/downloads/release/python-387/ in the Files section near the bottom of the page. Make sure 
+to choose macOS 64-bit installer. Once downloaded, you can go through the installer's setup steps.
+
+Download the ZIP of Fairgame from GitHub, or clone it with `git clone https://github.com/Hari-Nagarajan/fairgame`. 
+
+Open up the terminal on macOS (can be found in /Utilities in /Applications in Finder) and type `cd folderLocationHere/Fairgame`. 
+If you do not know where the folder is located, type `cd ` and then drag the Fairgame folder ontop of the terminal window 
+and let go. It then should autofill the folder path.
+
+Type `pip3 install pipenv` and hit enter.
+
+Type `pipenv shell` and hit enter. 
+
+Type `pipenv install` and hit enter. 
+
+Type `python app.py amazon` and go through setup. You will also need to set up the config file, seen below in the Configuration section
+
 ### Installation Ubuntu 20.10 (and probably other distros)
 
 Based off Ubuntu 20.10 with a fresh installation.
