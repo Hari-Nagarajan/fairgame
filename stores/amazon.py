@@ -1497,10 +1497,18 @@ class Amazon:
         """Utility to help manage selenium waiting for a page to load after an action, like a click"""
         old_page = self.driver.find_element_by_tag_name("html")
         yield
-        WebDriverWait(self.driver, timeout).until(EC.staleness_of(old_page))
-        WebDriverWait(self.driver, timeout).until(
-            EC.presence_of_element_located((By.XPATH, "//title"))
-        )
+        try:
+            WebDriverWait(self.driver, timeout).until(EC.staleness_of(old_page))
+            WebDriverWait(self.driver, timeout).until(
+                EC.presence_of_element_located((By.XPATH, "//title"))
+            )
+        except sel_exceptions.TimeoutException:
+            log.info("Timed out reloading page, trying to continue anyway")
+            pass
+        except Exception as e:
+            log.error(f"Trying to recover from error: {e}")
+            pass
+        return None
 
     def wait_for_page_change(self, page_title, timeout=3):
         time_to_end = self.get_timeout(timeout=timeout)
