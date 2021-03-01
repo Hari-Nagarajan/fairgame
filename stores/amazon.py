@@ -1100,7 +1100,7 @@ class Amazon:
                 ):
                     return
                 else:
-                    with self.wait_for_page_content_change(timeout=10):
+                    with self.wait_for_page_content_change(timeout=5):
                         self.driver.refresh()
                     return
 
@@ -1110,7 +1110,7 @@ class Amazon:
             )
             self.save_page_source(page="unknown")
             self.save_screenshot(page="unknown")
-            with self.wait_for_page_content_change(timeout=10):
+            with self.wait_for_page_content_change(timeout=5):
                 self.driver.refresh()
             return
 
@@ -1254,13 +1254,17 @@ class Amazon:
             try:
                 button = self.get_amazon_element("CART_BUTTON")
             except sel_exceptions.NoSuchElementException:
-                log.info("Could not find cart button")
+                pass
             tries += 1
             sleep(0.5)
         current_page = self.driver.title
         if button:
             if self.do_button_click(button=button):
                 return
+            else:
+                log.info("Failed to click on cart button")
+        else:
+            log.info("Could not find cart button after " + str(maxTries) + " tries")
 
         # no button found or could not interact with the button
         self.send_notification(
