@@ -1100,7 +1100,7 @@ class Amazon:
                 ):
                     return
                 else:
-                    with self.wait_for_page_content_change(timeout=5):
+                    with self.wait_for_page_content_change():
                         self.driver.refresh()
                     return
 
@@ -1110,7 +1110,7 @@ class Amazon:
             )
             self.save_page_source(page="unknown")
             self.save_screenshot(page="unknown")
-            with self.wait_for_page_content_change(timeout=5):
+            with self.wait_for_page_content_change():
                 self.driver.refresh()
             return
 
@@ -1502,7 +1502,7 @@ class Amazon:
             f.write(page_source)
 
     @contextmanager
-    def wait_for_page_content_change(self, timeout=30):
+    def wait_for_page_content_change(self, timeout=5):
         """Utility to help manage selenium waiting for a page to load after an action, like a click"""
         old_page = self.driver.find_element_by_tag_name("html")
         yield
