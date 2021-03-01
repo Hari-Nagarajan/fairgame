@@ -1248,14 +1248,23 @@ class Amazon:
     def handle_home_page(self):
         log.info("On home page, trying to get back to checkout")
         button = None
-        try:
-            button = self.get_amazon_element("CART_BUTTON")
-        except sel_exceptions.NoSuchElementException:
-            log.info("Could not find cart button")
+        tries = 0
+        maxTries = 10
+        while not button and tries < maxTries:
+            try:
+                button = self.get_amazon_element("CART_BUTTON")
+            except sel_exceptions.NoSuchElementException:
+                pass
+            tries += 1
+            time.sleep(0.5)
         current_page = self.driver.title
         if button:
             if self.do_button_click(button=button):
                 return
+            else:
+                log.info("Failed to click on cart button")
+        else:
+            log.info("Could not find cart button after " + str(maxTries) + " tries")
 
         # no button found or could not interact with the button
         self.send_notification(
@@ -1493,14 +1502,22 @@ class Amazon:
             f.write(page_source)
 
     @contextmanager
-    def wait_for_page_content_change(self, timeout=30):
+    def wait_for_page_content_change(self, timeout=5):
         """Utility to help manage selenium waiting for a page to load after an action, like a click"""
         old_page = self.driver.find_element_by_tag_name("html")
         yield
-        WebDriverWait(self.driver, timeout).until(EC.staleness_of(old_page))
-        WebDriverWait(self.driver, timeout).until(
-            EC.presence_of_element_located((By.XPATH, "//title"))
-        )
+        try:
+            WebDriverWait(self.driver, timeout).until(EC.staleness_of(old_page))
+            WebDriverWait(self.driver, timeout).until(
+                EC.presence_of_element_located((By.XPATH, "//title"))
+            )
+        except sel_exceptions.TimeoutException:
+            log.info("Timed out reloading page, trying to continue anyway")
+            pass
+        except Exception as e:
+            log.error(f"Trying to recover from error: {e}")
+            pass
+        return None
 
     def wait_for_page_change(self, page_title, timeout=3):
         time_to_end = self.get_timeout(timeout=timeout)
