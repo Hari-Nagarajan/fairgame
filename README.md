@@ -40,6 +40,7 @@ example, do not ask us why the bot does not purchase an item whose price has cha
 purchase price is set to $10 in the configuration file that YOU are supposed to update
 
 ### General
+FairGame should be able to (theoretically) run on any device that has an internet connection and can run Python 3.8.5 or newer and the required dependencies, so these are generic instructions for installation. As indicated above, there are Windows specific instructions provided in the "cheat sheet". In addition, we have some specific platform instructions found in the Platform Specific section below. If you aren't running Windows, or one of the platforms mentioned below, just install Python 3.8.5 or newer, and try the instructions below.
 
 This project uses [Pipenv](https://pypi.org/project/pipenv/) to manage dependencies. Hop in
 my [Discord](https://discord.gg/4rfbNKrmnC) if you have ideas, need help or just want to tell us about how you got your
