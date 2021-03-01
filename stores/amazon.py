@@ -1256,7 +1256,7 @@ class Amazon:
             except sel_exceptions.NoSuchElementException:
                 pass
             tries += 1
-            sleep(0.5)
+            time.sleep(0.5)
         current_page = self.driver.title
         if button:
             if self.do_button_click(button=button):
