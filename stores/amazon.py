@@ -26,6 +26,7 @@ import time
 from contextlib import contextmanager
 from datetime import datetime
 from enum import Enum
+from typing import List
 
 import psutil
 from amazoncaptcha import AmazonCaptcha
@@ -515,7 +516,7 @@ class Amazon:
             # Sanity check to see if we have any offers
             try:
                 # Wait for the page to load before determining what's in it by looking for the footer
-                footer: WebElement = WebDriverWait(
+                footer: List[WebElement] = WebDriverWait(
                     self.driver, timeout=DEFAULT_MAX_TIMEOUT
                 ).until(
                     lambda d: d.find_elements_by_xpath(
@@ -719,61 +720,68 @@ class Amazon:
                 return False
         shipping = []
         shipping_prices = []
-        if self.checkshipping:
-            timeout = self.get_timeout()
-            while True:
-                if not flyout_mode:
-                    shipping = self.driver.find_elements_by_xpath(
-                        '//*[@class="a-color-secondary"]'
-                    )
-                if shipping:
-                    # Convert to prices just in case
-                    for idx, shipping_node in enumerate(shipping):
-                        log.debug(f"Processing shipping node {idx}")
-                        if self.checkshipping:
-                            if amazon_config["SHIPPING_ONLY_IF"] in shipping_node.text:
-                                shipping_prices.append(parse_price("0"))
-                            else:
-                                shipping_prices.append(parse_price(shipping_node.text))
-                        else:
-                            shipping_prices.append(parse_price("0"))
-                else:
-                    # Check for offers
-                    offers = self.driver.find_elements_by_xpath(
-                        "//div[@id='aod-pinned-offer' or @id='aod-offer']"
-                    )
-                    for idx, offer in enumerate(offers):
-                        tree = html.fromstring(offer.get_attribute("innerHTML"))
-                        shipping_prices.append(
-                            get_shipping_costs(tree, amazon_config["FREE_SHIPPING"])
-                        )
-                if shipping_prices:
-                    break
 
-                if time.time() > timeout:
-                    log.info(f"failed to load shipping for {asin}, going to next ASIN")
-                    return False
+        timeout = self.get_timeout()
+        while True:
+            if not flyout_mode:
+                shipping = self.driver.find_elements_by_xpath(
+                    '//*[@class="a-color-secondary"]'
+                )
+            if shipping:
+                # Convert to prices just in case
+                for idx, shipping_node in enumerate(shipping):
+                    log.debug(f"Processing shipping node {idx}")
+                    if self.checkshipping:
+                        if amazon_config["SHIPPING_ONLY_IF"] in shipping_node.text:
+                            shipping_prices.append(parse_price("0"))
+                        else:
+                            shipping_prices.append(parse_price(shipping_node.text))
+                    else:
+                        shipping_prices.append(parse_price("0"))
+            else:
+                # Check for offers
+                # offer_xpath = "//div[@id='aod-pinned-offer' or @id='aod-offer']"
+                offer_xpath = (
+                    "//div[@id='aod-offer' and .//input[@name='submit.addToCart']] | "
+                    "//div[@id='aod-pinned-offer' and .//input[@name='submit.addToCart']]"
+                )
+                offers = self.driver.find_elements_by_xpath(offer_xpath)
+                for idx, offer in enumerate(offers):
+                    tree = html.fromstring(offer.get_attribute("innerHTML"))
+                    shipping_prices.append(
+                        get_shipping_costs(tree, amazon_config["FREE_SHIPPING"])
+                    )
+            if shipping_prices:
+                break
+
+            if time.time() > timeout:
+                log.info(f"failed to load shipping for {asin}, going to next ASIN")
+                return False
 
         in_stock = False
         for shipping_price in shipping_prices:
             log.debug(f"\tShipping Price: {shipping_price}")
 
         for idx, atc_button in enumerate(atc_buttons):
+            # If the user has specified that they only want free items, we can skip any items
+            # that have any shipping cost and early out
+            if not self.checkshipping and shipping_prices[idx].amount_float > 0.00:
+                continue
+
             # Condition check first, using the button to find the form that will divulge the item's condition
             if flyout_mode:
-                condition: WebElement = atc_button.find_elements_by_xpath(
+                condition: List[WebElement] = atc_button.find_elements_by_xpath(
                     "./ancestor::form[@method='post']"
                 )
-
                 if condition:
                     atc_form_action = condition[0].get_attribute("action")
-                    item_condition = get_item_condition(atc_form_action)
+                    seller_item_condition = get_item_condition(atc_form_action)
                     # Lower condition value imply newer
-                    if item_condition.value > self.condition.value:
+                    if seller_item_condition.value > self.condition.value:
                         # Item is below our standards, so skip it
                         log.debug(
                             f"Skipping item because its condition is below the requested level: "
-                            f"{item_condition} is below {self.condition}"
+                            f"{seller_item_condition} is below {self.condition}"
                         )
                         continue
 
@@ -785,19 +793,13 @@ class Amazon:
             except IndexError:
                 log.debug("Price index error")
                 return False
-            try:
-                if self.checkshipping:
-                    ship_price = shipping_prices[idx]
-                else:
-                    ship_price = parse_price("0")
-            except IndexError:
-                log.debug("shipping index error")
-                return False
+            # Include the price, even if it's zero for comparison
+            ship_price = shipping_prices[idx]
             ship_float = ship_price.amount
             price_float = price.amount
             if price_float is None:
                 return False
-            if ship_float is None or not self.checkshipping:
+            if ship_float is None:
                 ship_float = 0
 
             if (
@@ -808,6 +810,10 @@ class Amazon:
                 or math.isclose((price_float + ship_float), reserve_min, abs_tol=0.01)
             ):
                 log.info("Item in stock and in reserve range!")
+                log.info(f"{price_float} + {ship_float} shipping <= {reserve_max}")
+                log.debug(
+                    f"{reserve_min} <= {price_float} + {ship_float} shipping <= {reserve_max}"
+                )
                 log.info("Adding to cart")
                 # Get the offering ID
                 offering_id_elements = atc_button.find_elements_by_xpath(
@@ -891,8 +897,8 @@ class Amazon:
                     atc_attempts += 1
                     continue
             xpath = "//input[@value='add' and @name='add']"
+            continue_btn = None
             if wait_for_element_by_xpath(self.driver, xpath):
-                continue_btn = None
                 try:
                     continue_btn = WebDriverWait(self.driver, timeout=5).until(
                         EC.element_to_be_clickable((By.XPATH, xpath))
@@ -1707,18 +1713,50 @@ def get_timestamp_filename(name, extension):
         return name + "_" + date + "." + extension
 
 
-def get_shipping_costs(tree, free_shipping_string) -> Price:
+def get_shipping_costs(tree, free_shipping_string):
+    # This version expects to find the shipping pricing within a div with the explicit ID 'delivery-message'
+    shipping_xpath = ".//div[@id='delivery-message']"
+    shipping_nodes = tree.xpath(shipping_xpath)
+    count = len(shipping_nodes)
+    if count > 0:
+        # Get the text out of the div and evaluate it
+        shipping_node = shipping_nodes[0]
+        if shipping_node.text:
+            shipping_span_text = shipping_node.text.strip()
+            if any(
+                shipping_span_text.upper() in free_message
+                for free_message in amazon_config["FREE_SHIPPING"]
+            ):
+                # We found some version of "free" inside the span.. but this relies on a match
+                log.info(
+                    f"Assuming free shipping based on this message: '{shipping_span_text}'"
+                )
+                return FREE_SHIPPING_PRICE
+            else:
+                # will it parse?
+                shipping_cost: Price = parse_price(shipping_span_text)
+                if shipping_cost.currency is not None:
+                    log.debug(
+                        f"Found parseable price with currency symbol: {shipping_cost.currency}"
+                    )
+                    return shipping_cost
+    # Try the alternative method...
+    return get_alt_shipping_costs(tree, free_shipping_string)
+
+
+def get_alt_shipping_costs(tree, free_shipping_string) -> Price:
     # Assume Free Shipping and change otherwise
 
     # Shipping collection xpath:
     # .//div[starts-with(@id, 'aod-bottlingDepositFee-')]/following-sibling::span
-    shipping_nodes = tree.xpath(
+    shipping_xpath = (
         ".//div[starts-with(@id, 'aod-bottlingDepositFee-')]/following-sibling::*[1]"
     )
+    shipping_nodes = tree.xpath(shipping_xpath)
     count = len(shipping_nodes)
     log.debug(f"Found {count} shipping nodes.")
     if count == 0:
-        log.warning("No shipping nodes found.  Assuming zero.")
+        log.warning("No shipping nodes (standard or alt) found.  Assuming zero.")
         return FREE_SHIPPING_PRICE
     elif count > 1:
         log.warning("Found multiple shipping nodes.  Using the first.")
