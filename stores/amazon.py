@@ -1100,7 +1100,7 @@ class Amazon:
                 ):
                     return
                 else:
-                    with self.wait_for_page_content_change():
+                    with self.wait_for_page_content_change(timeout=10):
                         self.driver.refresh()
                     return
 
@@ -1110,7 +1110,7 @@ class Amazon:
             )
             self.save_page_source(page="unknown")
             self.save_screenshot(page="unknown")
-            with self.wait_for_page_content_change():
+            with self.wait_for_page_content_change(timeout=10):
                 self.driver.refresh()
             return
 
@@ -1248,10 +1248,15 @@ class Amazon:
     def handle_home_page(self):
         log.info("On home page, trying to get back to checkout")
         button = None
-        try:
-            button = self.get_amazon_element("CART_BUTTON")
-        except sel_exceptions.NoSuchElementException:
-            log.info("Could not find cart button")
+        tries = 0
+        maxTries = 10
+        while not button and tries < maxTries:
+            try:
+                button = self.get_amazon_element("CART_BUTTON")
+            except sel_exceptions.NoSuchElementException:
+                log.info("Could not find cart button")
+            tries += 1
+            sleep(0.5)
         current_page = self.driver.title
         if button:
             if self.do_button_click(button=button):
