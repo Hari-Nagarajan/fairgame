@@ -37,7 +37,7 @@ def encrypt(pt, password):
     salt = get_random_bytes(32)
     mem = math.floor(virtual_memory().available / 1024)
     exponent = math.floor(math.log(mem, 2))
-    n = min(2 ** 20, 2 ** math.floor(math.log(mem, 2)))
+    n = min(2 ** 20, 2 ** exponent)
     key = scrypt(password, salt, key_len=32, N=n, r=8, p=1)
     nonce = get_random_bytes(12)
     cipher = ChaCha20_Poly1305.new(key=key, nonce=nonce)
@@ -58,7 +58,7 @@ def decrypt(ct, password):
 
         mem = math.floor(virtual_memory().available / 1024)
         exponent = math.floor(math.log(mem, 2))
-        n = min(2 ** 20, 2 ** math.floor(math.log(mem, 2)))
+        n = min(2 ** 20, 2 ** exponent)
         key = scrypt(password, json_v["salt"], key_len=32, N=n, r=8, p=1)
         cipher = ChaCha20_Poly1305.new(key=key, nonce=json_v["nonce"])
         ptData = cipher.decrypt_and_verify(json_v["ct"], json_v["tag"])
