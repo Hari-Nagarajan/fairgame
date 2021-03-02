@@ -20,11 +20,13 @@
 import getpass as getpass
 import stdiomask
 import json
+import math
 import os
 from base64 import b64encode, b64decode
 from Crypto.Cipher import ChaCha20_Poly1305
 from Crypto.Random import get_random_bytes
 from Crypto.Protocol.KDF import scrypt
+from psutil import virtual_memory
 
 from utils.logger import log
 
@@ -33,7 +35,10 @@ def encrypt(pt, password):
     """Encryption function to securely store user credentials, uses ChaCha_Poly1305
     with a user defined SCrypt key."""
     salt = get_random_bytes(32)
-    key = scrypt(password, salt, key_len=32, N=2 ** 20, r=8, p=1)
+    mem = math.floor(virtual_memory().available / 1024)
+    exponent = math.floor(math.log(mem, 2))
+    n = min(2 ** 20, 2 ** math.floor(math.log(mem, 2)))
+    key = scrypt(password, salt, key_len=32, N=n, r=8, p=1)
     nonce = get_random_bytes(12)
     cipher = ChaCha20_Poly1305.new(key=key, nonce=nonce)
     ct, tag = cipher.encrypt_and_digest(pt)
@@ -51,7 +56,10 @@ def decrypt(ct, password):
         json_k = ["nonce", "salt", "ct", "tag"]
         json_v = {k: b64decode(b64Ct[k]) for k in json_k}
 
-        key = scrypt(password, json_v["salt"], key_len=32, N=2 ** 20, r=8, p=1)
+        mem = math.floor(virtual_memory().available / 1024)
+        exponent = math.floor(math.log(mem, 2))
+        n = min(2 ** 20, 2 ** math.floor(math.log(mem, 2)))
+        key = scrypt(password, json_v["salt"], key_len=32, N=n, r=8, p=1)
         cipher = ChaCha20_Poly1305.new(key=key, nonce=json_v["nonce"])
         ptData = cipher.decrypt_and_verify(json_v["ct"], json_v["tag"])
 
