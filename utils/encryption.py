@@ -35,10 +35,7 @@ def encrypt(pt, password):
     """Encryption function to securely store user credentials, uses ChaCha_Poly1305
     with a user defined SCrypt key."""
     salt = get_random_bytes(32)
-    mem = math.floor(virtual_memory().available / 1024)
-    exponent = math.floor(math.log(mem, 2))
-    n = min(2 ** 20, 2 ** exponent)
-    key = scrypt(password, salt, key_len=32, N=n, r=8, p=1)
+    key = scrypt(password, salt, key_len=32, N=get_scrypt_cost_factor(), r=8, p=1)
     nonce = get_random_bytes(12)
     cipher = ChaCha20_Poly1305.new(key=key, nonce=nonce)
     ct, tag = cipher.encrypt_and_digest(pt)
@@ -55,11 +52,7 @@ def decrypt(ct, password):
         b64Ct = json.loads(ct)
         json_k = ["nonce", "salt", "ct", "tag"]
         json_v = {k: b64decode(b64Ct[k]) for k in json_k}
-
-        mem = math.floor(virtual_memory().available / 1024)
-        exponent = math.floor(math.log(mem, 2))
-        n = min(2 ** 20, 2 ** exponent)
-        key = scrypt(password, json_v["salt"], key_len=32, N=n, r=8, p=1)
+        key = scrypt(password, json_v["salt"], key_len=32, N=get_scrypt_cost_factor(), r=8, p=1)
         cipher = ChaCha20_Poly1305.new(key=key, nonce=json_v["nonce"])
         ptData = cipher.decrypt_and_verify(json_v["ct"], json_v["tag"])
 
@@ -115,6 +108,15 @@ def load_encrypted_config(config_path, encrypted_pass=None):
         log.error(
             f"Failed to decrypt the credential file. If you have forgotten the password, delete {config_path} and rerun the bot"
         )
+
+def get_scrypt_cost_factor(mem_percentage=0.5):
+    # Returns scrypt cost factor 'N' param based off of system memory
+    # Max value is 2 ** 20
+    mem = math.floor(virtual_memory().total * mem_percentage / 1024)
+    # Value must be a power of 2
+    exponent = math.floor(math.log(mem, 2))
+    return min(2 ** 20, 2 ** exponent)
+
 
 
 # def main():
