@@ -13,6 +13,10 @@ for MSRP.
 
 **If everyone is botting, then no one is botting.**
 
+## Requirements
+
+This project requires a recent 3.8 version of a python branch, 3.8.5 and more recent have been tested, 3.8.8 is preferred. 3.7, 3.9, 3.10 branches will not work. It also requires a working Chrome installation. Running it off a potato is not suggested. 
+
 ## Current Functionality
 
 | **Website** | **Auto Checkout** | **Open Cart Link** | **Test flag** |
@@ -26,6 +30,20 @@ Best Buy has been deprecated, see [details](#best-buy) below.
 
 Read through this document and the cheat sheet linked in the next sections. See the [FAQs](#frequently-asked-questions)
 if that does not answer your questions.
+
+## Known Issues
+
+--no-image can cause the flyout from Amazon not to work, which causes time out issues. Something to do with the javascript that loads, if you have solutions for a fix, all ears.
+
+Pipenv does not like spaces in file paths, so you will either need to run from a place where you do not have spaces in the file path, or set the option for pipenv to run locally in relation to the current file directory with:
+```shell
+set PIPENV_VENV_IN_PROJECT=1 (Windows) 
+export PIPENV_VENV_IN_PROJECT=1 (Linux/Other)
+```
+
+Running the bot minimized can cause time out errors due to how Selenium acts with various versions of Chrome. 
+
+OTP doesn't work in headless. Turn it off when starting up a headless instance, then turn it back on afterwords. 
 
 ## Installation
 
@@ -63,9 +81,9 @@ our Wiki . You *can* use the "Download Zip" button on the GitHub repository's ho
 more difficult. If you can get setup with the GitHub Desktop app, updating to the latest version of the bot takes 1
 click.
 
-!!! YOU WILL NEED TO USE THE 3.8 BRANCH OF PYTHON, 3.9.0 BREAKS DEPENDENCIES !!!
+!!! YOU WILL NEED TO USE THE 3.8 BRANCH OF PYTHON, 3.9.x BREAKS DEPENDENCIES !!!
 
-It is best if you use the newest version (3.8.7) but 3.8.5 and 3.8.6 should also work. 3.8.0 does not.
+It is best if you use the newest version (3.8.8) but 3.8.5, 3.8.6, and 3.8.7 should also work. 3.8.0 does not.
 
 ```shell
 pip install pipenv
@@ -101,8 +119,8 @@ channel.
 
 Usage on Mojave (10.14) and above. Previous versions of macOS may not be compatible.
 
-Ensure you have Python 3.8.5+ (3.8.7 recommended) installed on your system. If not, you can download it from 
-https://www.python.org/downloads/release/python-387/ in the Files section near the bottom of the page. Make sure 
+Ensure you have Python 3.8.5+ (3.8.8 recommended) installed on your system. If not, you can download it from 
+https://www.python.org/downloads/release/python-388/ in the Files section near the bottom of the page. Make sure 
 to choose macOS 64-bit installer. Once downloaded, you can go through the installer's setup steps.
 
 Download the ZIP of Fairgame from GitHub, or clone it with `git clone https://github.com/Hari-Nagarajan/fairgame`. 
@@ -173,7 +191,7 @@ sudo apt update
 sudo apt upgrade
 sudo apt-get install -y build-essential tk-dev libncurses5-dev libncursesw5-dev libreadline6-dev libdb5.3-dev libgdbm-dev libsqlite3-dev libssl-dev libbz2-dev libexpat1-dev liblzma-dev zlib1g-dev libffi-dev libzbar-dev clang libxslt1-dev rustc
 
-version=3.8.7
+version=3.8.8
 
 wget https://www.python.org/ftp/python/$version/Python-$version.tgz
 
@@ -248,7 +266,7 @@ Options:
                       you use this... Screenshots are the best tool we have
                       for troubleshooting
 
-  --disable-presence  Disable Discord Rich Presence functionallity
+  --disable-presence  Disable Discord Rich Presence functionallity, this stops discord from seeing what you are doing.
   --disable-sound     Disable local sounds.  Does not affect Apprise
                       notification sounds.
 
@@ -349,8 +367,7 @@ To verify that your JSON is well formatted, paste and validate it at https://jso
 
 #### Start Up
 
-Previously your username and password were entered into the config file, this is no longer the case. On first launch the
-bot will prompt you for your credentials. You will then be asked for a password to encrypt them. Once done, your
+On first launch the bot will prompt you for your Amazon credentials. You will then be asked for a password to encrypt them. Once done, your
 encrypted credentials will be stored in
 `amazon_credentials.json`. If you ever forget your encryption password, just delete this file and the next launch of the
 bot will recreate it. An example of this will look like the following:
@@ -385,33 +402,39 @@ Example usage:
 ```commandline
 python app.py amazon --test
 ...
-2020-12-23 13:07:38 INFO Initializing Apprise handler using: config/apprise.conf
-2020-12-23 13:07:38 INFO Found Discord configuration
-2020-12-23 13:07:38 INFO FairGame v0.5.4
-2020-12-23 13:07:38 INFO Reading credentials from: config/amazon_credentials.json
-2020-12-23 13:07:43 INFO ==================================================
-2020-12-23 13:07:43 INFO Starting Amazon ASIN Hunt for 2 Products with:
-2020-12-23 13:07:43 INFO --Delay of 3.0 seconds
-2020-12-23 13:07:43 INFO --Free Shipping items only
-2020-12-23 13:07:43 WARNING --Testing Mode.  NO Purchases will be made.
-2020-12-23 13:07:43 INFO --Looking for 1 ASINs between 5.00 and 30.00
-2020-12-23 13:07:43 INFO --Looking for 2 ASINs between 650.00 and 850.00
-2020-12-23 13:07:43 INFO ==================================================
-2020-12-23 13:07:43 INFO Waiting for home page.
-2020-12-23 13:07:44 INFO Already logged in
-2020-12-23 13:07:45 INFO Checking stock for items.
-2020-12-23 13:07:46 INFO Item in stock and in reserve range!
-2020-12-23 13:07:46 INFO clicking add to cart
-2020-12-23 13:07:47 INFO clicking checkout.
-2020-12-23 13:07:47 INFO Email
-2020-12-23 13:07:48 INFO Email not needed.
-2020-12-23 13:07:48 INFO Remember me checkbox
-2020-12-23 13:07:48 INFO Password
-2020-12-23 13:07:49 INFO enter in your two-step verification code in browser
-2020-12-23 13:08:05 INFO Logged in as alan.m.levy@gmail.com
-2020-12-23 13:08:06 INFO Found button , but this is a test
-2020-12-23 13:08:06 INFO will not try to complete order
-2020-12-23 13:08:06 INFO test time took 19.061731576919556 to check out
+2021-03-04 08:49:47|0.6.1.dev5|WARNING|FairGame PRE-RELEASE v0.6.1.dev5
+2021-03-04 08:49:47|0.6.1.dev5|INFO|Initializing Global configuration...
+2021-03-04 08:49:47|0.6.1.dev5|INFO|Initializing Apprise handler using: config/apprise.conf
+2021-03-04 08:49:47|0.6.1.dev5|INFO|Found Telegram configuration
+2021-03-04 08:49:47|0.6.1.dev5|INFO|Found Discord configuration
+2021-03-04 08:49:47|0.6.1.dev5|INFO|Initializing Amazon configuration...
+2021-03-04 08:49:47|0.6.1.dev5|INFO|Reading credentials from: config/amazon_credentials.json
+Credential file password: *********
+2021-03-04 08:49:53|0.6.1.dev5|INFO|==================================================
+2021-03-04 08:49:53|0.6.1.dev5|INFO|Starting Amazon ASIN Hunt on https://smile.amazon.com/ for 2 Products with:
+2021-03-04 08:49:53|0.6.1.dev5|INFO|--Offer URL of: https://smile.amazon.com/dp/
+2021-03-04 08:49:53|0.6.1.dev5|INFO|--Delay of 3.0 seconds
+2021-03-04 08:49:53|0.6.1.dev5|INFO|--Free Shipping items only
+2021-03-04 08:49:53|0.6.1.dev5|INFO|--Looking for 1 ASINs between 5.00 and 30.00
+2021-03-04 08:49:53|0.6.1.dev5|INFO|--Looking for 1 ASINs between 650.00 and 850.00
+2021-03-04 08:49:53|0.6.1.dev5|WARNING|--Testing Mode.  NO Purchases will be made.
+2021-03-04 08:49:53|0.6.1.dev5|INFO|==================================================
+2021-03-04 08:49:53|0.6.1.dev5|INFO|Waiting for home page.
+2021-03-04 08:49:57|0.6.1.dev5|INFO|Lets log in.
+2021-03-04 08:49:57|0.6.1.dev5|INFO|Already logged in
+2021-03-04 08:50:18|0.6.1.dev5|INFO|Checking stock for items.
+2021-03-04 08:50:20|0.6.1.dev5|INFO|Item in stock and in reserve range!
+2021-03-04 08:50:25|0.6.1.dev5|INFO|clicking add to cart
+2021-03-04 08:50:26|0.6.1.dev5|INFO|clicking checkout.
+2021-03-04 08:50:27|0.6.1.dev5|INFO|Email
+2021-03-04 08:50:28|0.6.1.dev5|INFO|Email not needed.
+2021-03-04 08:50:29|0.6.1.dev5|INFO|Remember me checkbox
+2021-03-04 08:50:30|0.6.1.dev5|INFO|Password
+2021-03-04 08:50:33|0.6.1.dev5|INFO|enter in your two-step verification code in browser
+2021-03-04 08:50:35|0.6.1.dev5|INFO|Logged in as me@gmail.com
+2021-03-04 08:50:37|0.6.1.dev5|INFO|Found button , but this is a test
+2021-03-04 08:50:39|0.6.1.dev5|INFO|will not try to complete order
+2021-03-04 08:50:39|0.6.1.dev5|INFO|test time took 19.061731576919556 to check out
 
 ```
 
@@ -533,12 +556,7 @@ answers. If you don't find it there, ask in #tech-support.
 2. **Does Fairgame automatically bypass CAPTCHA's on the store sites?**
    For Amazon, yes. The bot will try and auto-solve CAPTCHA's during the checkout process.
 
-3. **Does `--headless` work?**
-   Yes!  A community user identified the issue with the headless option while running on a Raspberry Pi. This allowed
-   the developers to update the codebase to consistently work correctly on headless server environments. Give it a try
-   and let us know if you have any issues.
-
-4. **Does Fairgame run on a Raspberry Pi?**
+3. **Does Fairgame run on a Raspberry Pi?**
    Yes, with caveats. Most people seem to have success with Raspberry Pi 4. The 2 GB model may need to run the headless
    option due to the smaller memory footprint. Still awaiting community feedback on running on a Pi 3. CPU and memory
    capacity seem to be the limiting factor for older Pi models.
