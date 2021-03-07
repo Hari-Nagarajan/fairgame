@@ -39,7 +39,7 @@ from requests.packages.urllib3.util.retry import Retry
 
 from utils.json_utils import find_values
 from utils.logger import log
-from utils.selenium_utils import enable_headless
+from utils.selenium_utils import enable_headless, disable_gpu
 
 BEST_BUY_PDP_URL = "https://api.bestbuy.com/click/5592e2b895800000/{sku}/pdp"
 BEST_BUY_CART_URL = "https://api.bestbuy.com/click/5592e2b895800000/{sku}/cart"
@@ -65,7 +65,7 @@ options.add_argument("user-data-dir=.profile-bb")
 
 
 class BestBuyHandler:
-    def __init__(self, sku_id, notification_handler, headless=False):
+    def __init__(self, sku_id, notification_handler, headless=False, disable_gpu=False):
         self.notification_handler = notification_handler
         self.sku_id = sku_id
         self.session = requests.Session()
@@ -97,6 +97,8 @@ class BestBuyHandler:
             log.info("Loading headless driver.")
             if headless:
                 enable_headless()  # TODO - check if this still messes up the cookies.
+            if disable_gpu:
+                disable_gpu()
             options.add_argument(
                 "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
             )

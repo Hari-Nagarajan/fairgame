@@ -46,7 +46,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from utils import discord_presence as presence
 from utils.debugger import debug
 from utils.logger import log
-from utils.selenium_utils import options, enable_headless
+from utils.selenium_utils import options, enable_headless, disable_gpu
 
 # Optional OFFER_URL is:     "OFFER_URL": "https://{domain}/dp/",
 AMAZON_URLS = {
@@ -97,6 +97,7 @@ class Amazon:
         self,
         notification_handler,
         headless=False,
+        disable_gpu=False,
         checkshipping=False,
         detailed=False,
         used=False,
@@ -133,6 +134,7 @@ class Amazon:
         self.slow_mode = slow_mode
         self.setup_driver = True
         self.headless = headless
+        self.disable_gpu = disable_gpu
         self.no_image = no_image
         self.log_stock_check = log_stock_check
         self.shipping_bypass = shipping_bypass
@@ -1598,6 +1600,8 @@ class Amazon:
         log.info(f"--Delay of {self.refresh_delay} seconds")
         if self.headless:
             log.info(f"--Chrome is running in Headless mode")
+        if self.disable_gpu:
+            log.info(f"--Chrome is running without GPU acceleration")
         if self.used:
             log.info(f"--Used items are considered for purchase")
         if self.checkshipping:
@@ -1649,6 +1653,9 @@ class Amazon:
 
             if self.headless:
                 enable_headless()
+            
+            if self.disable_gpu:
+                disable_gpu()
 
             prefs = {
                 "profile.password_manager_enabled": False,

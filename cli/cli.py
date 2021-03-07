@@ -108,6 +108,7 @@ def main():
 @click.command()
 @click.option("--no-image", is_flag=True, help="Do not load images")
 @click.option("--headless", is_flag=True, help="Headless mode.")
+@click.option("--disable-gpu", is_flag=True, help="Disable GPU acceleration.")
 @click.option(
     "--test",
     is_flag=True,
@@ -194,6 +195,7 @@ def main():
 def amazon(
     no_image,
     headless,
+    disable_gpu,
     test,
     delay,
     checkshipping,
@@ -229,6 +231,7 @@ def amazon(
 
     amzn_obj = Amazon(
         headless=headless,
+        disable_gpu=disable_gpu,
         notification_handler=notification_handler,
         checkshipping=checkshipping,
         detailed=detailed,
@@ -255,12 +258,12 @@ def amazon(
 @click.option("--sku", type=str, required=True)
 @click.option("--headless", is_flag=True)
 @notify_on_crash
-def bestbuy(sku, headless):
+def bestbuy(sku, headless, disable_gpu):
     log.warning(
         "As stated in the documentation, Best Buy is deprecated due to their anti-bot measures for high demand items."
     )
     bb = BestBuyHandler(
-        sku, notification_handler=notification_handler, headless=headless
+        sku, notification_handler=notification_handler, headless=headless, disable_gpu=disable_gpu
     )
     bb.run_item()
 
