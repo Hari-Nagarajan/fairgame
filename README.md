@@ -17,14 +17,34 @@ for MSRP.
 
 This project requires a recent 3.8 version of a python branch, 3.8.5 and more recent have been tested, 3.8.8 is preferred. 3.7, 3.9, 3.10 branches will not work. It also requires a working Chrome installation. Running it off a potato is not suggested. 
 
+## Quick Start
+
+Here are the very simple steps for running the bot (on Windows):
+1. Turn on your computer
+2. Install Python 3.8.5, 3.8.6, 3.8.7 or 3.8.8. Install to some location that does not include spaces in the path (I suggest C:\Python38). Click the checkbox that says Add Python 3.8 to PATH (or something similar) during the installation
+3. Download GitHub Desktop and Open the FairGame Repository with GitHub Desktop (or download the zip file). Again, make sure this installs to a location without spaces in the path. If you need help with this, look at Wiki.
+4. Open the FairGame folder in File Explorer. Double click __INSTALL (RUN FIRST).bat Don't use admin
+5. After this finishes (it could take a few minutes or longer), make a copy of the amazon_config.template_json file, and rename it to amazon_config.json. If you don't know how to rename file extensions, look it up on Google
+6. Edit the amazon_config.json, this assumes US using smile.amazon.com. Find a product, like a USB stick that is in stock, and put the ASIN for that product in place of the B07JH53M4T listed below (or use that if it is in stock). Change the reserve_min_1 and reserve_max_1 to be below and above the price of the item, respectively: 
+```
+{
+  "asin_groups": 1,
+  "asin_list_1": ["B07JH53M4T"],
+  "reserve_min_1": 5,
+  "reserve_max_1": 15,
+  "amazon_website": "smile.amazon.com"
+}
+```
+7. In File Explorer, double click the `_Amazon.bat` file in the FairGame folder. Type in your amazon email address when asked for your amazon login ID. Type in your amazon account password when asked for your amazon password. Type in a password for your credentials (this can be whatever you want, it just encrypts your account email/password file)
+8. Verify that the bot successfully makes it to the place your order page with the item you put in the config file. If it does not, then you messed something up above. Fix it
+9. Edit the config file with what you want
+10. Remove `--test` from `_Amazon.bat`
+11. Run `_Amazon.bat` and wait
+
+
 ## Current Functionality
 
-| **Website** | **Auto Checkout** | **Open Cart Link** | **Test flag** |
-|:---:|:---:|:---:|:---:|
-| amazon.com |`✔`| | |
-| ~~bestbuy.com~~ | |`✔`| |
-
-Best Buy has been deprecated, see [details](#best-buy) below.
+Only Amazon auto-checkout.
 
 ## Got a question?
 
@@ -443,29 +463,6 @@ Credential file password: *********
 2021-03-04 08:50:39|0.6.1.dev5|INFO|will not try to complete order
 2021-03-04 08:50:39|0.6.1.dev5|INFO|test time took 19.061731576919556 to check out
 
-```
-
-## ~~Best Buy~~
-
-Best Buy is currently deprecated because we don't yet have an effective way to determine item availability without
-scraping and processing the product pages individually. Future updates may see this functionality return, but the
-current code isn't reliable for high demand items and checkout automation has become increasingly hard due to anti-bot
-measures taken by Best Buy.
-
-Original code still exists, but provides very little utility. A 3rd party stock notification service would probably
-serve as a better solution at Best Buy.
-
-~~This is fairly basic right now. Just login to the best buy website in your default browser and then run the command as
-follows:~~
-
-```
-python app.py bestbuy --sku [SKU]
-```
-
-~~Example:~~
-
-```
-python python app.py bestbuy - -sku 6429440
 ```
 
 ## Notifications
