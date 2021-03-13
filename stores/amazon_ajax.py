@@ -354,12 +354,27 @@ class AmazonStoreHandler(BaseStoreHandler):
         message = f"Starting to hunt items at {STORE_NAME}"
         log.info(message)
         self.notification_handler.send_notification(message)
-
+        print("\n\n")
+        recurring_message = "The hunt continues! "
+        update_time = get_timeout(1)
+        idx = 0
+        spinner = ["-", "\\", "|", "/"]
+        # previous_time = time.time()
         while self.item_list:
+            if time.time() > update_time:
+                print(recurring_message, spinner[idx], end="\r")
+                update_time = get_timeout(1)
+                idx += 1
+                if idx == len(spinner):
+                    idx = 0
+
             for item in self.item_list:
                 successful = False
+                start_check = time.time()
                 qualified_seller = self.find_qualified_seller(item)
+                # log.info(f"Check took {time.time() - start_check} seconds")
                 if qualified_seller:
+
                     if self.attempt_atc(offering_id=qualified_seller.offering_id):
                         checkout_attempts = 0
                         self.unknown_title_notification_sent = False
@@ -375,7 +390,11 @@ class AmazonStoreHandler(BaseStoreHandler):
                                     self.item_list.remove(item)
                                 break
                             checkout_attempts += 1
-                time.sleep(delay + random.randint(0, 3))
+
+                time.sleep(delay)
+                # log.info(f"Actual delay was {time.time() - previous_time}")
+                # previous_time = time.time()
+                # time.sleep(delay + random.randint(0, 3))
                 if successful:
                     break
             if self.shuffle:
