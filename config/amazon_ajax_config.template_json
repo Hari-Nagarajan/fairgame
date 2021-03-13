@@ -1,30 +1,15 @@
 {
   "items": [
     {
-      "asin": "B07MFBLN7K"
-    },
+      "asins": ["B08WT47L8B", "B07MFBLN7K", "B07MBQPQ62", "B0088PUEPK"],
+      "min-price": 500,
+      "max-price": 600
+    }
     {
-      "asin": "B07MBQPQ62"
-    },
-    {
-      "asin": "B0088PUEPK"
+      "asins": ["B07TXBRRGT", "B011F7W3LU", "B08J6F174Z"],
+      "min-price": 400,
+      "max-price": 401
     }
   ],
-  "testing_items": [
-    {
-      "asin": "B07TXBRRGT"
-    },
-    {
-      "asin": "B011F7W3LU"
-    },
-    {
-      "asin": "B08J6F174Z"
-    },
-    {
-      "asin": "B002CQU14A"
-    },
-    {
-      "asin": "B0795DP124"
-    }
-  ]
+  "amazon_domain": "smile.amazon.com"
 }
