@@ -176,7 +176,7 @@ class AmazonStoreHandler(BaseStoreHandler):
     def delete_driver(self):
         try:
             if platform.system() == "Windows" and self.driver:
-                log.info("Cleaning up after web driver...")
+                log.debug("Cleaning up after web driver...")
                 # brute force kill child Chrome pids with fire
                 for pid in self.webdriver_child_pids:
                     try:
@@ -190,8 +190,8 @@ class AmazonStoreHandler(BaseStoreHandler):
                 self.driver.quit()
 
         except Exception as e:
-            log.info(e)
-            log.info(
+            log.debug(e)
+            log.debug(
                 "Failed to clean up after web driver.  Please manually close browser."
             )
             return False
@@ -221,7 +221,7 @@ class AmazonStoreHandler(BaseStoreHandler):
             )
             skip_link.click()
         except TimeoutException as e:
-            log.error(
+            log.debug(
                 "Timed out waiting for signin link.  Unable to find matching "
                 "xpath for '//a[@data-nav-role='signin']'"
             )
@@ -246,7 +246,7 @@ class AmazonStoreHandler(BaseStoreHandler):
             log.exception(e)
             exit(1)
 
-        log.info("Checking 'rememberMe' checkbox...")
+        log.debug("Checking 'rememberMe' checkbox...")
         try:
             remember_me = WebDriverWait(self.driver, 10).until(
                 EC.presence_of_element_located((By.XPATH, '//*[@name="rememberMe"]'))
@@ -279,12 +279,12 @@ class AmazonStoreHandler(BaseStoreHandler):
 
         if captcha_entry:
             try:
-                log.info("Stuck on a captcha... Lets try to solve it.")
+                log.debug("Stuck on a captcha... Lets try to solve it.")
                 captcha = AmazonCaptcha.fromdriver(self.driver)
                 solution = captcha.solve()
-                log.info(f"The solution is: {solution}")
+                log.debug(f"The solution is: {solution}")
                 if solution == "Not solved":
-                    log.info(
+                    log.debug(
                         f"Failed to solve {captcha.image_link}, lets reload and get a new captcha."
                     )
                     self.send_notification(
@@ -301,7 +301,7 @@ class AmazonStoreHandler(BaseStoreHandler):
 
             except Exception as e:
                 log.debug(e)
-                log.info("Error trying to solve captcha. Refresh and retry.")
+                log.debug("Error trying to solve captcha. Refresh and retry.")
                 self.driver.refresh()
                 time.sleep(5)
 
@@ -322,7 +322,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                 )
                 skip_link.click()
             except TimeoutException as e:
-                log.error(
+                log.debug(
                     "Timed out waiting for the skip link.  Unable to find matching "
                     "xpath for '//a[contains(@id, 'skip-link')]'"
                 )
@@ -342,7 +342,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         # Verify the configuration file
         if not self.verify():
             # try one more time
-            log.info("Failed to verify... trying more more time")
+            log.debug("Failed to verify... trying more more time")
             self.verify()
 
         # To keep the user busy https://github.com/jakesgordon/javascript-tetris
@@ -359,7 +359,6 @@ class AmazonStoreHandler(BaseStoreHandler):
         update_time = get_timeout(1)
         idx = 0
         spinner = ["-", "\\", "|", "/"]
-        # previous_time = time.time()
         while self.item_list:
             if time.time() > update_time:
                 print(recurring_message, spinner[idx], end="\r")
@@ -370,9 +369,7 @@ class AmazonStoreHandler(BaseStoreHandler):
 
             for item in self.item_list:
                 successful = False
-                start_check = time.time()
                 qualified_seller = self.find_qualified_seller(item)
-                # log.info(f"Check took {time.time() - start_check} seconds")
                 if qualified_seller:
 
                     if self.attempt_atc(offering_id=qualified_seller.offering_id):
@@ -392,9 +389,6 @@ class AmazonStoreHandler(BaseStoreHandler):
                             checkout_attempts += 1
 
                 time.sleep(delay)
-                # log.info(f"Actual delay was {time.time() - previous_time}")
-                # previous_time = time.time()
-                # time.sleep(delay + random.randint(0, 3))
                 if successful:
                     break
             if self.shuffle:
@@ -466,7 +460,7 @@ class AmazonStoreHandler(BaseStoreHandler):
             return seller
 
     def parse_config(self):
-        log.info(f"Processing config file from {CONFIG_FILE_PATH}")
+        log.debug(f"Processing config file from {CONFIG_FILE_PATH}")
         # Parse the configuration file to get our hunt list
         try:
             with open(CONFIG_FILE_PATH) as json_file:
@@ -486,7 +480,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                 f"Configuration file not found at {CONFIG_FILE_PATH}.  Please see {CONFIG_FILE_PATH}_template."
             )
             exit(1)
-        log.info(f"Found {len(self.item_list)} items to track at {STORE_NAME}.")
+        log.debug(f"Found {len(self.item_list)} items to track at {STORE_NAME}.")
 
     def parse_items(self, json_items):
         for json_item in json_items:
@@ -534,7 +528,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                 )
 
     def verify(self):
-        log.info("Verifying item list...")
+        log.debug("Verifying item list...")
         items_to_purge = []
         verified = 0
         item_cache_file = os.path.join(
@@ -559,7 +553,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                 cached_item.min_price = item.min_price
                 cached_item.max_price = item.max_price
                 self.item_list[idx] = cached_item
-                log.info(
+                log.debug(
                     f"Verified ASIN {cached_item.id} as '{cached_item.short_name}'"
                 )
                 verified += 1
@@ -601,7 +595,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                         if len(item.name) > 40
                         else item.name
                     )
-                    log.info(f"Verified ASIN {item.id} as '{item.short_name}'")
+                    log.debug(f"Verified ASIN {item.id} as '{item.short_name}'")
                     item_cache[item.id] = item
                     verified += 1
                 else:
@@ -614,7 +608,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                         )
                         items_to_purge.append(item)
                     else:
-                        log.info(
+                        log.debug(
                             f"Unable to verify ASIN {item.id}.  Continuing without verification."
                         )
             else:
@@ -627,7 +621,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         for item in items_to_purge:
             self.item_list.remove(item)
 
-        log.info(
+        log.debug(
             f"Verified {verified} out of {len(self.item_list)} items on {STORE_NAME}"
         )
         pickle.dump(item_cache, open(item_cache_file, "wb"))
@@ -742,69 +736,6 @@ class AmazonStoreHandler(BaseStoreHandler):
             )
             item.status_code = status
         return data
-
-    # def attempt_purchase(self, item, qualified_seller):
-    #     # Open the add.html URL in Selenium
-    #     f = f"https://smile.amazon.com/gp/aws/cart/add.html?OfferListingId.1={qualified_seller.offering_id}&Quantity.1=1"
-    #
-    #     with self.wait_for_page_change(timeout=5):
-    #         if not self.get_page(url=f):
-    #             return False
-    #
-    #     # log.info("Try to ATC and Buy from HERE!")
-    #     # Click the continue button on the add.html page
-    #     # TODO: implement logic to confirm there is quantity available
-    #
-    #     xpath = self.get_amazon_element(key="CONTINUE")
-    #     if wait_for_element_by_xpath(self.driver, xpath):
-    #         try:
-    #             with self.wait_for_page_change():
-    #                 self.driver.find_element_by_xpath(xpath).click()
-    #         except NoSuchElementException:
-    #             log.error("Continue button not present on page")
-    #     else:
-    #         log.error("Continue button not present on page")
-    #
-    #     # verify cart is non-zero
-    #     if self.get_cart_count() != 0:
-    #
-    #         CHECKOUT_TITLES = [
-    #             "Amazon.com Checkout",
-    #             "Amazon.co.uk Checkout",
-    #             "Place Your Order - Amazon.ca Checkout",
-    #             "Place Your Order - Amazon.co.uk Checkout",
-    #             "Amazon.de Checkout",
-    #             "Place Your Order - Amazon.de Checkout",
-    #             "Amazon.de - Bezahlvorgang",
-    #             "Bestellung aufgeben - Amazon.de-Bezahlvorgang",
-    #             "Place Your Order - Amazon.com Checkout",
-    #             "Place Your Order - Amazon.com",
-    #             "Tramitar pedido en Amazon.es",
-    #             "Processus de paiement Amazon.com",
-    #             "Confirmar pedido - Compra Amazon.es",
-    #             "Passez votre commande - Processus de paiement Amazon.fr",
-    #             "Ordina - Cassa Amazon.it",
-    #             "AmazonSmile Checkout",
-    #             "Plaats je bestelling - Amazon.nl-kassa",
-    #             "Place Your Order - AmazonSmile Checkout",
-    #             "Preparing your order",
-    #             "Ihre Bestellung wird vorbereitet",
-    #             "Pagamento Amazon.it",
-    #         ]
-    #
-    #         while self.driver.title not in CHECKOUT_TITLES:
-    #             # try to go directly to cart page:
-    #             with self.wait_for_page_change(timeout=10):
-    #                 self.driver.get(
-    #                     f"https://{self.amazon_domain}/gp/buy/spc/handlers/display.html?hasWorkingJavascript=1"
-    #                 )
-    #
-    #     successful = self.handle_checkout()
-    #     time.sleep(300)
-    #     if successful:
-    #         return True
-    #     else:
-    #         return False
 
     def attempt_atc(self, offering_id):
         # Open the add.html URL in Selenium
@@ -949,7 +880,7 @@ class AmazonStoreHandler(BaseStoreHandler):
             # if above checks don't work, just continue on to trying to resolve
 
             # try to handle an unknown title
-            log.error(
+            log.debug(
                 f"'{title}' is not a known page title. Please create issue indicating the title with a screenshot of page"
             )
             # give user 30 seconds to respond
@@ -964,7 +895,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                 log.warning(
                     "FairGame does not think the user intervened in time, will attempt other methods to continue"
                 )
-            log.info("Going to try and redirect to cart page")
+            log.debug("Going to try and redirect to cart page")
             try:
                 with self.wait_for_page_content_change(timeout=10):
                     self.driver.get(AMAZON_URLS["CART_URL"])
@@ -982,7 +913,7 @@ class AmazonStoreHandler(BaseStoreHandler):
             if self.get_cart_count() == 0:
                 return False
 
-            log.info("trying to click proceed to checkout")
+            log.debug("trying to click proceed to checkout")
             timeout = get_timeout()
             while True:
                 try:
@@ -991,7 +922,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                 except NoSuchElementException:
                     button = None
                 if time.time() > timeout:
-                    log.error("Could not find and click button")
+                    log.debug("Could not find and click button")
                     break
             if button:
                 if self.do_button_click(
@@ -1059,7 +990,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         return False
 
     def handle_prime_signup(self):
-        log.info("Prime offer page popped up, attempting to click No Thanks")
+        log.debug("Prime offer page popped up, attempting to click No Thanks")
         time.sleep(
             2
         )  # just doing manual wait, sign up for prime if you don't want to deal with this
@@ -1081,7 +1012,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         timeout = get_timeout(timeout=60)
         while self.driver.title in amazon_config["PRIME_TITLES"]:
             if time.time() > timeout:
-                log.info("user did not intervene in time, will try and refresh page")
+                log.debug("user did not intervene in time, will try and refresh page")
                 with self.wait_for_page_content_change():
                     self.driver.refresh()
                 break
@@ -1110,7 +1041,7 @@ class AmazonStoreHandler(BaseStoreHandler):
     def handle_cart(self):
         self.start_time_atc = time.time()
         if self.get_cart_count() == 0:
-            log.info("You have no items in cart. Going back to stock check.")
+            log.debug("You have no items in cart.")
             return False
 
         log.debug("Looking for Proceed To Checkout button...")
@@ -1200,12 +1131,12 @@ class AmazonStoreHandler(BaseStoreHandler):
                 '//form[contains(@action,"validateCaptcha")]'
             ):
                 try:
-                    log.info("Stuck on a captcha... Lets try to solve it.")
+                    log.debug("Stuck on a captcha... Lets try to solve it.")
                     captcha = AmazonCaptcha.fromdriver(self.driver)
                     solution = captcha.solve()
-                    log.info(f"The solution is: {solution}")
+                    log.debug(f"The solution is: {solution}")
                     if solution == "Not solved":
-                        log.info(
+                        log.debug(
                             f"Failed to solve {captcha.image_link}, lets reload and get a new captcha."
                         )
                         self.driver.refresh()
@@ -1220,7 +1151,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                             ).send_keys(solution + Keys.RETURN)
                 except Exception as e:
                     log.debug(e)
-                    log.info("Error trying to solve captcha. Refresh and retry.")
+                    log.debug("Error trying to solve captcha. Refresh and retry.")
                     with self.wait_for_page_content_change():
                         self.driver.refresh()
         except NoSuchElementException:
@@ -1230,13 +1161,13 @@ class AmazonStoreHandler(BaseStoreHandler):
                 self.driver.refresh()
 
     def handle_business_po(self):
-        log.info("On Business PO Page, Trying to move on to checkout")
+        log.debug("On Business PO Page, Trying to move on to checkout")
         button = self.wait_get_clickable_amazon_element("BUSINESS_PO_BUTTON")
         if button:
             if self.do_button_click(button=button):
                 return True
         else:
-            log.debug(
+            log.info(
                 "Could not find the continue button, user intervention required, complete checkout manually"
             )
             self.notification_handler.send_notification(
@@ -1252,35 +1183,6 @@ class AmazonStoreHandler(BaseStoreHandler):
             f.set(scheme="https")
         response = self.session.get(f.url, headers=HEADERS)
         return response.text, response.status_code
-
-        # if self.http_client:
-        #     # http.client method
-        #     self.conn.request("GET", str(f.path), "", HEADERS)
-        #     response = self.conn.getresponse()
-        #     data = response.read()
-        #     return data.decode("utf-8"), response.status
-        # elif self.http_20_client:
-        #     # hyper HTTP20Connection method
-        #     self.conn20.request("GET", str(f.path), "", HEADERS)
-        #     response = self.conn20.get_response()
-        #     data = response.read()
-        #     return data.decode("utf-8"), response.status
-        # else:
-        #     response = self.session.get(f.url, headers=HEADERS)
-        #     return response.text, response.status_code
-        # # else:
-        # #
-        #     # Selenium
-        #     self.driver.get(url)
-        #     response_code = 200  # Just assume it's fine... ;-)
-
-        # # Access requests via the `requests` attribute
-        # for request in self.driver.requests:
-        #     if request.url == url:
-        #         response_code = request.response.status_code
-        #         break
-        # data = self.driver.page_source
-        # return data, response_code
 
     # returns negative number if cart element does not exist, returns number if cart exists
     def get_cart_count(self):
