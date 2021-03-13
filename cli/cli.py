@@ -32,6 +32,7 @@ from common.globalconfig import AMAZON_CREDENTIAL_FILE, GlobalConfig
 from notifications.notifications import NotificationHandler, TIME_FORMAT
 
 from stores.amazon import Amazon
+from stores.amazon_ajax import AmazonStoreHandler
 from stores.bestbuy import BestBuyHandler
 from utils.logger import log
 from utils.version import is_latest, version
@@ -256,8 +257,11 @@ def amazon(
 @click.option(
     "--delay", type=float, default=3.0, help="Time to wait between checks for item[s]"
 )
+@click.option(
+    "--test", is_flag=True, default=False, help="Test mode, will not purchase item"
+)
 @click.command()
-def amazonajax(delay):
+def amazonajax(delay, test=False):
     log.warning(
         "Experimental test balloon.  Do not attempt to use.  Your computer could catch fire."
     )
@@ -265,7 +269,7 @@ def amazonajax(delay):
 
     try:
 
-        amazon_ajax_obj.run(delay=delay)
+        amazon_ajax_obj.run(delay=delay, test=test)
     except RuntimeError:
         del amazon_ajax_obj
         log.error("Exiting Program...")
