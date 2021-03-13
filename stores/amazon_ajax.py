@@ -15,13 +15,15 @@ from chromedriver_py import binary_path
 from furl import furl
 from lxml import html
 from price_parser import parse_price, Price
-from seleniumwire import webdriver
+
+# from seleniumwire import webdriver
 from selenium.common.exceptions import (
     NoSuchElementException,
     TimeoutException,
     WebDriverException,
     ElementNotInteractableException,
 )
+from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
