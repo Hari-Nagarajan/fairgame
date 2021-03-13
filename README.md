@@ -31,7 +31,7 @@ if that does not answer your questions.
 
 Community user Easy_XII has created a great cheat sheet for getting started. It includes specific and additional steps
 for Windows users as well as useful product and configuration information. Please start
-with [this guide](https://docs.google.com/document/d/1grN282tPodM9N57bPq4bbNyKZC01t_4A-sLpzzu_7lM/) to get you started
+with [this guide](https://docs.google.com/document/d/14kZ0SNC97DFVRStnrdsJ8xbQO1m42v7svy93kUdtX48) to get you started
 and to answer any initial questions you may have about setup.
 
 **Note:** The above document is community maintained and managed. The authors of Fairgame do not control the contents,
@@ -62,7 +62,9 @@ our Wiki . You *can* use the "Download Zip" button on the GitHub repository's ho
 more difficult. If you can get setup with the GitHub Desktop app, updating to the latest version of the bot takes 1
 click.
 
-!!! YOU WILL NEED TO USE THE 3.8 BRANCH OF PYTHON, 3.9.0 BREAKS DEPENDENCIES !!!
+**!!! YOU WILL NEED TO USE THE 3.8 BRANCH OF PYTHON, 3.9.X BREAKS DEPENDENCIES !!!**
+
+It is best if you use the newest version (3.8.7) but 3.8.5 and 3.8.6 should also work. 3.8.0 does not.
 
 ```shell
 pip install pipenv
@@ -190,6 +192,13 @@ Then save and close the file.
 
 ### Amazon
 
+TL;DR Notes:
+* By default, bot will only purchase new items with free shipping.
+* Running the FairGame with the `_Amazon.bat` is easiest. You should change the name of the `_Amazon.bat` file though, so it does not overwrite any changes you made (adding flags, removing `--test`, etc.)
+* Make a copy of the `amazon_config.template_json` file, and rename it to `amazon_config.json`. Modify it as _you_ see fit, with ASINs and min/max reserve prices as you think they should be set.
+* **DO NOT ADD STUFF TO YOUR CART WHILE THE BOT IS RUNNING - IF IT ATTEMPTS TO CHECKOUT, AND THERE ARE ITEMS IN THE CART, BUT YOUR TARGET ITEM DOES NOT ADD TO CART CORRECTLY, IT WILL PURCHASE WHATEVER WAS IN THE CART AND THINK THAT IT PURCHASED YOUR TARGET ITEM.**
+* **EVEN THOUGH THIS IS "TL;DR" YOU STILL NEED TO READ THE WHOLE THING!**
+
 The following flags are specific to the Amazon scripts. They the `[OPTIONS]` to be passed on the command-line to control
 the behavior of Amazon scanning and purchasing. These can be added at the command line or added to a batch file/shell
 script (see `_Amazon.bat` in the root folder of the project). **NOTE:** `--test` flag has been added to `_Amazon.bat`
@@ -245,18 +254,17 @@ Options:
 
 Make a copy of `amazon_config.template_json` and rename to `amazon_config.json`. Edit it according to the ASINs you are
 interested in purchasing.  [*What's an
-ASIN?*](https://www.datafeedwatch.com/blog/amazon-asin-number-what-is-it-and-how-do-you-get-it#how-to-find-asin)
+ASIN?*](https://www.datafeedwatch.com/blog/amazon-asin-number-what-is-it-and-how-do-you-get-it#how-to-find-asin) You can find a list of ASINs for some common products people are looking for in the [cheat sheet](https://docs.google.com/document/d/14kZ0SNC97DFVRStnrdsJ8xbQO1m42v7svy93kUdtX48). If it's not in the cheat sheet, you have to look it up yourself.
 
 * `asin_groups` indicates the number of ASIN groups you want to use.
-* `asin_list_x` list of ASINs for products you want to purchase. You must locate these (see Discord or lookup the ASIN
-  on product pages).
-    * The first time an item from list "x" is in stock and under its associated reserve, it will purchase it.
+* `asin_list_x` list of ASINs for products you want to purchase. You must locate these for the products you want, use the links above to get started.
+    * The first time an item from list "x" is in stock and under its associated reserve, it will purchase it. FairGame will continue to loop through the other lists until it purchases one item from each (unless the `--single-shot` option is enabled, in which case it stops after the first purchase).
     * If the purchase is successful, the bot will not buy anything else from list "x".
     * Use sequential numbers for x, starting from 1. x can be any integer from 1 to 18,446,744,073,709,551,616
 * `reserve_min_x` set a minimum limit to consider for purchasing an item. If a seller has a listing for a 700 dollar
   item a 1 dollar, it's likely fake.
 * `reserve_max_x` is the most amount you want to spend for a single item (i.e., ASIN) in `asin_list_x`. Does not include
-  tax. If --checkshipping flag is active, this includes shipping listed on offer page.
+  tax. If `--checkshipping` flag is active, this includes shipping listed on offer page.
 * `amazon_website` amazon domain you want to use. smile subdomain appears to work better, if available in your
   country. [*What is Smile?*](https://org.amazon.com/)
 
@@ -468,6 +476,49 @@ pavlok app in the ```pavlok_config.json``` file, you can copy the template from 
 Once you have setup your `apprise_config.json ` you can test it by running `python app.py test-notifications` from
 within your pipenv shell. This will send a test notification to all configured notification services.
 
+## CLI Tools
+
+### CDN Endpoints
+
+The `find-endpoints` tool is designed to help you understand how many website domain endpoints exist for your geography
+based on global Content Delivery Networks (CDNs) and your specific network provider. Its purpose is nothing more than to
+educate you about variability of the network depending on how your computer resolves a domain. Doing something useful
+with this knowledge is beyond the scope of this feature.
+
+```shell
+Usage: app.py find-endpoints [OPTIONS]
+
+Options:
+  --domain TEXT  Specify the domain you want to find endpoints for (e.g.
+                 www.amazon.de, www.amazon.com, smile.amazon.com.
+
+  --help         Show this message and exit.
+```
+
+Specifying a domain (e.g. www.amazon.com, www.amazon.es, www.google.com, etc.) will generate a list of IP addresses that
+various public name servers resolve the name to. Hopefully this is helpful in understanding the variable nature of the
+content that different people see.
+
+### Routes
+
+The `show_traceroutes` tool is simply a tool that attempts to generate the commands necessary to determine the various
+paths that the Fairgame could take to get to a domain, based on who is resolving the domain to an IP.
+It uses the [end points](#cdn-endpoints) tool to convert a domain name to the various IPs and generates a list of
+commands you can copy and paste into the console to compare routes.
+
+```shell
+Usage: app.py show-traceroutes [OPTIONS]
+
+Options:
+  --domain TEXT  Specify the domain you want to generate traceroute commands for.
+
+  --help         Show this message and exit.
+```
+
+This is intended for people who feel that they can modify their network situation such that the fastest route is used.
+Explaining the Internet and how routing works is beyond the scope of this command, this tool, this projects, and the
+developers.
+
 ## Troubleshooting
 
 + Re-read this documentation.
@@ -501,9 +552,7 @@ To keep up with questions, the Discord channel [#FAQ](https://discord.gg/GEsarYK
 answers. If you don't find it there, ask in #tech-support.
 
 1. **Can I run multiple instances of the bot?**
-
-   Yes. For example you can run one instance to check stock on Best Buy and a separate instance to check stock on
-   Amazon. Bear in mind that if you do this you may end up with multiple purchases going through at the same time.
+   While possible, running multiple instances are not a supported usage case. You are on your own to figure this one out.
 
 2. **Does Fairgame automatically bypass CAPTCHA's on the store sites?**
    For Amazon, yes. The bot will try and auto-solve CAPTCHA's during the checkout process.

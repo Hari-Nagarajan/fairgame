@@ -48,8 +48,23 @@ else:
     exit(0)
 
 
-from cli import cli
+def notfound_message(exception):
+    print(exception)
+    print(
+        f"Missing '{exception.name}' module.  If you ran 'pipenv install', try 'pipenv install {exception.name}'"
+    )
+    print("Exiting...")
 
+
+try:
+    from cli import cli
+except ModuleNotFoundError as e:
+    notfound_message(e)
+    exit(0)
 
 if __name__ == "__main__":
-    cli.main()
+    try:
+        cli.main()
+    except ModuleNotFoundError as e:
+        notfound_message(e)
+        exit(0)
