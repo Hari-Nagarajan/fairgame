@@ -354,6 +354,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         message = f"Starting to hunt items at {STORE_NAME}"
         log.info(message)
         self.notification_handler.send_notification(message)
+        self.save_screenshot("logged-in")
         print("\n\n")
         recurring_message = "The hunt continues! "
         update_time = get_timeout(1)
@@ -756,6 +757,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                         return True
                     else:
                         log.debug("Nothing added to cart, trying again")
+                        self.save_screenshot("atc-fail")
             atc_attempts += 1
         log.debug("reached maximum ATC attempts, returning to stock check")
         return False
