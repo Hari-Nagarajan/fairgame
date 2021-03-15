@@ -7,6 +7,7 @@ import random
 import time
 import typing
 from contextlib import contextmanager
+from datetime import datetime
 
 import psutil
 import requests
@@ -15,15 +16,14 @@ from chromedriver_py import binary_path
 from furl import furl
 from lxml import html
 from price_parser import parse_price, Price
+from selenium import webdriver
 
 # from seleniumwire import webdriver
 from selenium.common.exceptions import (
     NoSuchElementException,
     TimeoutException,
     WebDriverException,
-    ElementNotInteractableException,
 )
-from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
@@ -33,18 +33,17 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from common.amazon_support import (
     AmazonItemCondition,
-    FGItem,
-    SellerDetail,
     condition_check,
-    price_check,
-    solve_captcha,
+    FGItem,
     get_shipping_costs,
+    price_check,
+    SellerDetail,
+    solve_captcha,
 )
 from notifications.notifications import NotificationHandler
 from stores.basestore import BaseStoreHandler
 from utils.logger import log
 from utils.selenium_utils import enable_headless, options
-from datetime import datetime
 
 # PDP_URL = "https://smile.amazon.com/gp/product/"
 # AMAZON_DOMAIN = "www.amazon.com.au"
@@ -655,9 +654,6 @@ class AmazonStoreHandler(BaseStoreHandler):
                 price_text = offer.xpath(".//span[@class='a-price-whole']")[0].text
                 price = parse_price(price_text)
                 shipping_cost = get_shipping_costs(offer, free_shipping_strings)
-                form_action = offer.xpath(".//form[contains(@action,'add-to-cart')]")[
-                    0
-                ].action
                 condition_heading = offer.xpath(".//div[@id='aod-offer-heading']/h5")
                 if condition_heading:
                     condition = AmazonItemCondition.from_str(
@@ -677,7 +673,6 @@ class AmazonStoreHandler(BaseStoreHandler):
                     price,
                     shipping_cost,
                     condition,
-                    form_action,
                     offer_id,
                 )
                 sellers.append(seller)
@@ -698,9 +693,6 @@ class AmazonStoreHandler(BaseStoreHandler):
             price = parse_price(price_text)
 
             shipping_cost = get_shipping_costs(offer, free_shipping_strings)
-            form_action = offer.xpath(".//form[contains(@action,'add-to-cart')]")[
-                0
-            ].action
             condition_heading = offer.xpath(".//div[@id='aod-offer-heading']/h5")
             if condition_heading:
                 condition = AmazonItemCondition.from_str(
@@ -720,7 +712,6 @@ class AmazonStoreHandler(BaseStoreHandler):
                 price,
                 shipping_cost,
                 condition,
-                form_action,
                 offer_id,
             )
             sellers.append(seller)

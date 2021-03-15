@@ -19,6 +19,8 @@ class AmazonItemCondition(Enum):
     Refurbished = 20
     Rental = 30
     Open_box = 40
+    OpenBoxLikeNew = 40
+    Used = 40
     UsedLikeNew = 40
     UsedVeryGood = 50
     UsedGood = 60
@@ -33,6 +35,9 @@ class AmazonItemCondition(Enum):
     def from_str(cls, label):
         # Straight lookup
         try:
+            if label.strip() == "":
+                return AmazonItemCondition.Unknown
+
             condition = AmazonItemCondition[label]
             return condition
         except KeyError:
@@ -43,6 +48,7 @@ class AmazonItemCondition(Enum):
                 condition = AmazonItemCondition[cleaned_label]
                 return condition
             except KeyError:
+                log.error(f"Found invalid Item Condition Key: '{label}'")
                 raise NotImplementedError
 
 
@@ -52,9 +58,7 @@ class SellerDetail:
     price: Price
     shipping_cost: Price
     condition: int = AmazonItemCondition.New
-    atc_url: str = None
     offering_id: str = None
-    xpath = f"//form[@action='{atc_url}'//input[@name='submit.addToCart']"
 
     @property
     def selling_price(self) -> Decimal:

@@ -25,7 +25,6 @@ import platform
 import time
 from contextlib import contextmanager
 from datetime import datetime
-from enum import Enum
 from typing import List
 
 import psutil
@@ -43,10 +42,11 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
+from common.amazon_support import AmazonItemCondition
 from utils import discord_presence as presence
 from utils.debugger import debug
 from utils.logger import log
-from utils.selenium_utils import options, enable_headless
+from utils.selenium_utils import enable_headless, options
 
 # Optional OFFER_URL is:     "OFFER_URL": "https://{domain}/dp/",
 AMAZON_URLS = {
@@ -1863,40 +1863,6 @@ def get_alt_shipping_costs(tree, free_shipping_string) -> Price:
                 f"Unable to locate price.  Assuming 0.  Found this: '{shipping_span_text}'  Consider reporting to #tech-support Discord."
             )
     return FREE_SHIPPING_PRICE
-
-
-class AmazonItemCondition(Enum):
-    # See https://sellercentral.amazon.com/gp/help/external/200386310?language=en_US&ref=efph_200386310_cont_G1831
-    New = 10
-    Renewed = 20
-    Refurbished = 20
-    Rental = 30
-    Open_box = 40
-    UsedLikeNew = 40
-    UsedVeryGood = 50
-    UsedGood = 60
-    UsedAcceptable = 70
-    CollectibleLikeNew = 40
-    CollectibleVeryGood = 50
-    CollectibleGood = 60
-    CollectibleAcceptable = 70
-    Unknown = 1000
-
-    @classmethod
-    def from_str(cls, label):
-        # Straight lookup
-        try:
-            condition = AmazonItemCondition[label]
-            return condition
-        except KeyError:
-            # Key doesn't exist as a Member, so try cleaning up the string
-            cleaned_label = "".join(label.split())
-            cleaned_label = cleaned_label.replace("-", "")
-            try:
-                condition = AmazonItemCondition[cleaned_label]
-                return condition
-            except KeyError:
-                raise NotImplementedError
 
 
 def get_item_condition(form_action) -> AmazonItemCondition:
