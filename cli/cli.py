@@ -31,7 +31,6 @@ import click
 from common.globalconfig import AMAZON_CREDENTIAL_FILE, GlobalConfig
 from notifications.notifications import NotificationHandler, TIME_FORMAT
 from stores.amazon import Amazon
-from stores.bestbuy import BestBuyHandler
 from utils.logger import log
 from utils.version import is_latest, version
 
@@ -251,20 +250,6 @@ def amazon(
         time.sleep(5)
 
 
-@click.command()
-@click.option("--sku", type=str, required=True)
-@click.option("--headless", is_flag=True)
-@notify_on_crash
-def bestbuy(sku, headless):
-    log.warning(
-        "As stated in the documentation, Best Buy is deprecated due to their anti-bot measures for high demand items."
-    )
-    bb = BestBuyHandler(
-        sku, notification_handler=notification_handler, headless=headless
-    )
-    bb.run_item()
-
-
 @click.option(
     "--disable-sound",
     is_flag=True,
@@ -417,7 +402,6 @@ def show_traceroutes(domain):
 signal(SIGINT, interrupt_handler)
 
 main.add_command(amazon)
-main.add_command(bestbuy)
 main.add_command(test_notifications)
 main.add_command(show)
 main.add_command(find_endpoints)
