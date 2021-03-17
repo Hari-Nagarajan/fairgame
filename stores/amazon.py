@@ -88,6 +88,7 @@ MAX_CHECKOUT_BUTTON_WAIT = 3  # integers only
 DEFAULT_REFRESH_DELAY = 3
 DEFAULT_MAX_TIMEOUT = 10
 DEFAULT_MAX_URL_FAIL = 5
+SPINNER = ["-", "\\", "|", "/"]
 
 amazon_config = {}
 
@@ -248,6 +249,7 @@ class Amazon:
         log.info("Checking stock for items.")
 
         while continue_stock_check:
+
             self.unknown_title_notification_sent = False
             asin = self.run_asins(delay)
             # found something in stock and under reserve
@@ -426,11 +428,17 @@ class Amazon:
 
     @debug
     def run_asins(self, delay):
+        recurring_message = "The hunt continues! "
+        idx = 0
         found_asin = False
+        update_time = int(time.time()) + 1
         while not found_asin:
             for i in range(len(self.asin_list)):
                 for asin in self.asin_list[i]:
-                    # start_time = time.time()
+                    if time.time() > update_time:
+                        print(recurring_message, SPINNER[idx], end="\r")
+                        update_time = int(time.time()) + 1
+                        idx = (idx + 1) % len(SPINNER)
                     if self.log_stock_check:
                         log.info(f"Checking ASIN: {asin}.")
                     if self.check_stock(asin, self.reserve_min[i], self.reserve_max[i]):
@@ -646,9 +654,9 @@ class Amazon:
 
                     return False
                 if len(offer_count) == 0:
-                    log.info("No offers found.  Moving on.")
+                    log.debug("No offers found.  Moving on.")
                     return False
-                log.info(
+                log.debug(
                     f"Found {len(offer_count)} offers for {asin}.  Evaluating offers..."
                 )
 
@@ -696,7 +704,7 @@ class Amazon:
             if test and (test.text in amazon_config["NO_SELLERS"]):
                 return False
             if time.time() > timeout:
-                log.info(f"failed to load page for {asin}, going to next ASIN")
+                log.debug(f"failed to load page for {asin}, going to next ASIN")
                 return False
 
         timeout = self.get_timeout()
@@ -716,7 +724,7 @@ class Amazon:
             if prices:
                 break
             if time.time() > timeout:
-                log.info(f"failed to load prices for {asin}, going to next ASIN")
+                log.debug(f"failed to load prices for {asin}, going to next ASIN")
                 return False
         shipping = []
         shipping_prices = []
@@ -755,7 +763,7 @@ class Amazon:
                 break
 
             if time.time() > timeout:
-                log.info(f"failed to load shipping for {asin}, going to next ASIN")
+                log.debug(f"failed to load shipping for {asin}, going to next ASIN")
                 return False
 
         in_stock = False
@@ -810,7 +818,6 @@ class Amazon:
                 or math.isclose((price_float + ship_float), reserve_min, abs_tol=0.01)
             ):
                 log.info("Item in stock and in reserve range!")
-                log.info(f"{price_float} + {ship_float} shipping <= {reserve_max}")
                 log.debug(
                     f"{reserve_min} <= {price_float} + {ship_float} shipping <= {reserve_max}"
                 )
@@ -1745,7 +1752,7 @@ def get_shipping_costs(tree, free_shipping_string):
                 for free_message in amazon_config["FREE_SHIPPING"]
             ):
                 # We found some version of "free" inside the span.. but this relies on a match
-                log.info(
+                log.debug(
                     f"Assuming free shipping based on this message: '{shipping_span_text}'"
                 )
                 return FREE_SHIPPING_PRICE
