@@ -1,8 +1,19 @@
-# Fairgame
+# FairGame
 
-[Installation](#Installation) | [Usage](#Usage) | [Discord](https://discord.gg/4rfbNKrmnC) | [Troubleshooting](#Troubleshooting)
+#Table of Contents:
+* [About FairGame](#About FairGame)
+* [Current Functionality](#Current Functionality)  
+* [Installation](#Installation)
+    * [Requirements](#Requirements)
+    * [Quick Start](#Quick Start)
+    * []
+    
+    
 
-## Why???
+
+ [Discord](https://discord.gg/4rfbNKrmnC) | [Troubleshooting](#Troubleshooting)
+
+## About FairGame
 
 We built this in response to the severe tech scalping situation that's happening right now. Almost every tech product
 that's coming out right now is being instantly brought out by scalping groups and then resold at at insane prices. $699
@@ -13,17 +24,28 @@ for MSRP.
 
 **If everyone is botting, then no one is botting.**
 
-## Requirements
+## Current Functionality
 
-This project requires a recent 3.8 version of a python branch, 3.8.5 and more recent have been tested, 3.8.8 is preferred. 3.7, 3.9, 3.10 branches will not work. It also requires a working Chrome installation. Running it off a potato is not suggested. 
+Only Amazon auto-checkout.
 
-## Quick Start
+## Installation
+
+### Requirements
+
+***!!! YOU WILL NEED TO USE THE 3.8.5+ BRANCH OF PYTHON, 3.9.x BREAKS DEPENDENCIES !!!***
+
+It is best if you use the newest version (3.8.8) but 3.8.5, 3.8.6, and 3.8.7 should also work. 
+
+It also requires a working Chrome installation. 
+Running it off a potato (<2GB of RAM) is not suggested. 
+
+### Quick Start
 
 Here are the very simple steps for running the bot (on Windows):
 1. Turn on your computer
-2. Install Python 3.8.5, 3.8.6, 3.8.7 or 3.8.8. Install to some location that does not include spaces in the path (I suggest C:\Python38). Click the checkbox that says Add Python 3.8 to PATH (or something similar) during the installation
-3. Download GitHub Desktop and Open the FairGame Repository with GitHub Desktop (or download the zip file). Again, make sure this installs to a location without spaces in the path. If you need help with this, look at Wiki.
-4. Open the FairGame folder in File Explorer. Double click __INSTALL (RUN FIRST).bat Don't use admin
+2. Install Python 3.8.5, 3.8.6, 3.8.7 or 3.8.8. The install path should not include any spaces (I suggest C:\Python38). ***Click the checkbox that says Add Python 3.8 to PATH (or something similar) during the installation***
+3. Download GitHub Desktop and open the FairGame repository with GitHub Desktop (or download the zip file). Again, make sure this installs (or is saved) to a location without spaces in the path. If you need help with this, look at Wiki.
+4. Open the FairGame folder in File Explorer. Double click __INSTALL (RUN FIRST).bat. ***Do NOT use administrative mode***
 5. After this finishes (it could take a few minutes or longer), make a copy of the amazon_config.template_json file, and rename it to amazon_config.json. If you don't know how to rename file extensions, look it up on Google
 6. Edit the amazon_config.json, this assumes US using smile.amazon.com. Find a product, like a USB stick that is in stock, and put the ASIN for that product in place of the B07JH53M4T listed below (or use that if it is in stock). Change the reserve_min_1 and reserve_max_1 to be below and above the price of the item, respectively: 
 ```
@@ -41,10 +63,8 @@ Here are the very simple steps for running the bot (on Windows):
 10. Remove `--test` from `_Amazon.bat`
 11. Run `_Amazon.bat` and wait
 
+### Configuration
 
-## Current Functionality
-
-Only Amazon auto-checkout.
 
 ## Got a question?
 
@@ -65,7 +85,8 @@ Running the bot minimized can cause time out errors due to how Selenium acts wit
 
 OTP doesn't work in headless. Turn it off when starting up a headless instance, then turn it back on afterwords. 
 
-## Installation
+### Other Installation Guides
+
 
 Community user Easy_XII has created a great cheat sheet for getting started. It includes specific and additional steps
 for Windows users as well as useful product and configuration information. Please start
@@ -78,7 +99,6 @@ example, do not ask us why the bot does not purchase an item whose price has cha
 purchase price is set to $10 in the configuration file that YOU are supposed to update
 
 ### General
-FairGame should be able to (theoretically) run on any device that has an internet connection and can run Python 3.8.5 or newer and the required dependencies, so these are generic instructions for installation. As indicated above, there are Windows specific instructions provided in the "cheat sheet". In addition, we have some specific platform instructions found in the Platform Specific section below. If you aren't running Windows, or one of the platforms mentioned below, just install Python 3.8.5 or newer, and try the instructions below.
 
 This project uses [Pipenv](https://pypi.org/project/pipenv/) to manage dependencies. Hop in
 my [Discord](https://discord.gg/4rfbNKrmnC) if you have ideas, need help or just want to tell us about how you got your
@@ -101,9 +121,9 @@ our Wiki . You *can* use the "Download Zip" button on the GitHub repository's ho
 more difficult. If you can get setup with the GitHub Desktop app, updating to the latest version of the bot takes 1
 click.
 
-!!! YOU WILL NEED TO USE THE 3.8 BRANCH OF PYTHON, 3.9.x BREAKS DEPENDENCIES !!!
+**!!! YOU WILL NEED TO USE THE 3.8 BRANCH OF PYTHON, 3.9.X BREAKS DEPENDENCIES !!!**
 
-It is best if you use the newest version (3.8.8) but 3.8.5, 3.8.6, and 3.8.7 should also work. 3.8.0 does not.
+It is best if you use the newest version (3.8.7) but 3.8.5 and 3.8.6 should also work. 3.8.0 does not.
 
 ```shell
 pip install pipenv
@@ -134,28 +154,6 @@ are welcome. These are typically created during installation in a single environ
 necessary for your environment. This isn't intended to be a definitive guide, but a starting point as validation that a
 platform can/does work. Please report back any suggestions to our [Discord](https://discord.gg/qDY2QBtAW6) feedback
 channel.
-
-### Installation MacOS 
-
-Usage on Mojave (10.14) and above. Previous versions of macOS may not be compatible.
-
-Ensure you have Python 3.8.5+ (3.8.8 recommended) installed on your system. If not, you can download it from 
-https://www.python.org/downloads/release/python-388/ in the Files section near the bottom of the page. Make sure 
-to choose macOS 64-bit installer. Once downloaded, you can go through the installer's setup steps.
-
-Download the ZIP of Fairgame from GitHub, or clone it with `git clone https://github.com/Hari-Nagarajan/fairgame`. 
-
-Open up the terminal on macOS (can be found in /Utilities in /Applications in Finder) and type `cd folderLocationHere/Fairgame`. 
-If you do not know where the folder is located, type `cd ` and then drag the Fairgame folder ontop of the terminal window 
-and let go. It then should autofill the folder path.
-
-Type `pip3 install pipenv` and hit enter.
-
-Type `pipenv shell` and hit enter. 
-
-Type `pipenv install` and hit enter. 
-
-Type `python app.py amazon` and go through setup. You will also need to set up the config file, seen below in the Configuration section
 
 ### Installation Ubuntu 20.10 (and probably other distros)
 
@@ -209,9 +207,9 @@ run Chrome, it may very well work. Let us know.
 ```shell
 sudo apt update
 sudo apt upgrade
-sudo apt-get install -y build-essential tk-dev libncurses5-dev libncursesw5-dev libreadline6-dev libdb5.3-dev libgdbm-dev libsqlite3-dev libssl-dev libbz2-dev libexpat1-dev liblzma-dev zlib1g-dev libffi-dev libzbar-dev clang libxslt1-dev rustc
+sudo apt-get install -y build-essential tk-dev libncurses5-dev libncursesw5-dev libreadline6-dev libdb5.3-dev libgdbm-dev libsqlite3-dev libssl-dev libbz2-dev libexpat1-dev liblzma-dev zlib1g-dev libffi-dev libzbar-dev clang 
 
-version=3.8.8
+version=3.8.7
 
 wget https://www.python.org/ftp/python/$version/Python-$version.tgz
 
@@ -224,13 +222,13 @@ sudo make altinstall
 sudo python3 -m pip install --upgrade pip
 
 sudo apt install chromium-chromedriver
+cp /usr/bin/chromedriver /home/fairgame/.local/share/virtualenvs/fairgame-<RANDOMCHARS>/lib/python3.8/site-packages/chromedriver_py/chromedriver_linux64
 git clone https://github.com/Hari-Nagarajan/fairgame
 cd fairgame/
 pip3 install pipenv
 export PATH=$PATH:/home/$USER/.local/bin
 pipenv shell 
 pipenv install
-cp /usr/bin/chromedriver /home/fairgame/.local/share/virtualenvs/fairgame-<RANDOMCHARS>/lib/python3.8/site-packages/chromedriver_py/chromedriver_linux64
 ```
 
 Leave this Terminal window open.
@@ -293,7 +291,7 @@ Options:
                       you use this... Screenshots are the best tool we have
                       for troubleshooting
 
-  --disable-presence  Disable Discord Rich Presence functionallity, this stops discord from seeing what you are doing.
+  --disable-presence  Disable Discord Rich Presence functionallity
   --disable-sound     Disable local sounds.  Does not affect Apprise
                       notification sounds.
 
@@ -315,18 +313,17 @@ Options:
 
 Make a copy of `amazon_config.template_json` and rename to `amazon_config.json`. Edit it according to the ASINs you are
 interested in purchasing.  [*What's an
-ASIN?*](https://www.datafeedwatch.com/blog/amazon-asin-number-what-is-it-and-how-do-you-get-it#how-to-find-asin)
+ASIN?*](https://www.datafeedwatch.com/blog/amazon-asin-number-what-is-it-and-how-do-you-get-it#how-to-find-asin) You can find a list of ASINs for some common products people are looking for in the [cheat sheet](https://docs.google.com/document/d/14kZ0SNC97DFVRStnrdsJ8xbQO1m42v7svy93kUdtX48). If it's not in the cheat sheet, you have to look it up yourself.
 
 * `asin_groups` indicates the number of ASIN groups you want to use.
-* `asin_list_x` list of ASINs for products you want to purchase. You must locate these (see Discord or lookup the ASIN
-  on product pages).
-    * The first time an item from list "x" is in stock and under its associated reserve, it will purchase it.
+* `asin_list_x` list of ASINs for products you want to purchase. You must locate these for the products you want, use the links above to get started.
+    * The first time an item from list "x" is in stock and under its associated reserve, it will purchase it. FairGame will continue to loop through the other lists until it purchases one item from each (unless the `--single-shot` option is enabled, in which case it stops after the first purchase).
     * If the purchase is successful, the bot will not buy anything else from list "x".
     * Use sequential numbers for x, starting from 1. x can be any integer from 1 to 18,446,744,073,709,551,616
 * `reserve_min_x` set a minimum limit to consider for purchasing an item. If a seller has a listing for a 700 dollar
   item a 1 dollar, it's likely fake.
 * `reserve_max_x` is the most amount you want to spend for a single item (i.e., ASIN) in `asin_list_x`. Does not include
-  tax. If --checkshipping flag is active, this includes shipping listed on offer page.
+  tax. If `--checkshipping` flag is active, this includes shipping listed on offer page.
 * `amazon_website` amazon domain you want to use. smile subdomain appears to work better, if available in your
   country. [*What is Smile?*](https://org.amazon.com/)
 
@@ -394,7 +391,8 @@ To verify that your JSON is well formatted, paste and validate it at https://jso
 
 #### Start Up
 
-On first launch the bot will prompt you for your Amazon credentials. You will then be asked for a password to encrypt them. Once done, your
+Previously your username and password were entered into the config file, this is no longer the case. On first launch the
+bot will prompt you for your credentials. You will then be asked for a password to encrypt them. Once done, your
 encrypted credentials will be stored in
 `amazon_credentials.json`. If you ever forget your encryption password, just delete this file and the next launch of the
 bot will recreate it. An example of this will look like the following:
@@ -429,40 +427,57 @@ Example usage:
 ```commandline
 python app.py amazon --test
 ...
-2021-03-04 08:49:47|0.6.1.dev5|WARNING|FairGame PRE-RELEASE v0.6.1.dev5
-2021-03-04 08:49:47|0.6.1.dev5|INFO|Initializing Global configuration...
-2021-03-04 08:49:47|0.6.1.dev5|INFO|Initializing Apprise handler using: config/apprise.conf
-2021-03-04 08:49:47|0.6.1.dev5|INFO|Found Telegram configuration
-2021-03-04 08:49:47|0.6.1.dev5|INFO|Found Discord configuration
-2021-03-04 08:49:47|0.6.1.dev5|INFO|Initializing Amazon configuration...
-2021-03-04 08:49:47|0.6.1.dev5|INFO|Reading credentials from: config/amazon_credentials.json
-Credential file password: *********
-2021-03-04 08:49:53|0.6.1.dev5|INFO|==================================================
-2021-03-04 08:49:53|0.6.1.dev5|INFO|Starting Amazon ASIN Hunt on https://smile.amazon.com/ for 2 Products with:
-2021-03-04 08:49:53|0.6.1.dev5|INFO|--Offer URL of: https://smile.amazon.com/dp/
-2021-03-04 08:49:53|0.6.1.dev5|INFO|--Delay of 3.0 seconds
-2021-03-04 08:49:53|0.6.1.dev5|INFO|--Free Shipping items only
-2021-03-04 08:49:53|0.6.1.dev5|INFO|--Looking for 1 ASINs between 5.00 and 30.00
-2021-03-04 08:49:53|0.6.1.dev5|INFO|--Looking for 1 ASINs between 650.00 and 850.00
-2021-03-04 08:49:53|0.6.1.dev5|WARNING|--Testing Mode.  NO Purchases will be made.
-2021-03-04 08:49:53|0.6.1.dev5|INFO|==================================================
-2021-03-04 08:49:53|0.6.1.dev5|INFO|Waiting for home page.
-2021-03-04 08:49:57|0.6.1.dev5|INFO|Lets log in.
-2021-03-04 08:49:57|0.6.1.dev5|INFO|Already logged in
-2021-03-04 08:50:18|0.6.1.dev5|INFO|Checking stock for items.
-2021-03-04 08:50:20|0.6.1.dev5|INFO|Item in stock and in reserve range!
-2021-03-04 08:50:25|0.6.1.dev5|INFO|clicking add to cart
-2021-03-04 08:50:26|0.6.1.dev5|INFO|clicking checkout.
-2021-03-04 08:50:27|0.6.1.dev5|INFO|Email
-2021-03-04 08:50:28|0.6.1.dev5|INFO|Email not needed.
-2021-03-04 08:50:29|0.6.1.dev5|INFO|Remember me checkbox
-2021-03-04 08:50:30|0.6.1.dev5|INFO|Password
-2021-03-04 08:50:33|0.6.1.dev5|INFO|enter in your two-step verification code in browser
-2021-03-04 08:50:35|0.6.1.dev5|INFO|Logged in as me@gmail.com
-2021-03-04 08:50:37|0.6.1.dev5|INFO|Found button , but this is a test
-2021-03-04 08:50:39|0.6.1.dev5|INFO|will not try to complete order
-2021-03-04 08:50:39|0.6.1.dev5|INFO|test time took 19.061731576919556 to check out
+2020-12-23 13:07:38 INFO Initializing Apprise handler using: config/apprise.conf
+2020-12-23 13:07:38 INFO Found Discord configuration
+2020-12-23 13:07:38 INFO FairGame v0.5.4
+2020-12-23 13:07:38 INFO Reading credentials from: config/amazon_credentials.json
+2020-12-23 13:07:43 INFO ==================================================
+2020-12-23 13:07:43 INFO Starting Amazon ASIN Hunt for 2 Products with:
+2020-12-23 13:07:43 INFO --Delay of 3.0 seconds
+2020-12-23 13:07:43 INFO --Free Shipping items only
+2020-12-23 13:07:43 WARNING --Testing Mode.  NO Purchases will be made.
+2020-12-23 13:07:43 INFO --Looking for 1 ASINs between 5.00 and 30.00
+2020-12-23 13:07:43 INFO --Looking for 2 ASINs between 650.00 and 850.00
+2020-12-23 13:07:43 INFO ==================================================
+2020-12-23 13:07:43 INFO Waiting for home page.
+2020-12-23 13:07:44 INFO Already logged in
+2020-12-23 13:07:45 INFO Checking stock for items.
+2020-12-23 13:07:46 INFO Item in stock and in reserve range!
+2020-12-23 13:07:46 INFO clicking add to cart
+2020-12-23 13:07:47 INFO clicking checkout.
+2020-12-23 13:07:47 INFO Email
+2020-12-23 13:07:48 INFO Email not needed.
+2020-12-23 13:07:48 INFO Remember me checkbox
+2020-12-23 13:07:48 INFO Password
+2020-12-23 13:07:49 INFO enter in your two-step verification code in browser
+2020-12-23 13:08:05 INFO Logged in as alan.m.levy@gmail.com
+2020-12-23 13:08:06 INFO Found button , but this is a test
+2020-12-23 13:08:06 INFO will not try to complete order
+2020-12-23 13:08:06 INFO test time took 19.061731576919556 to check out
 
+```
+
+## ~~Best Buy~~
+
+Best Buy is currently deprecated because we don't yet have an effective way to determine item availability without
+scraping and processing the product pages individually. Future updates may see this functionality return, but the
+current code isn't reliable for high demand items and checkout automation has become increasingly hard due to anti-bot
+measures taken by Best Buy.
+
+Original code still exists, but provides very little utility. A 3rd party stock notification service would probably
+serve as a better solution at Best Buy.
+
+~~This is fairly basic right now. Just login to the best buy website in your default browser and then run the command as
+follows:~~
+
+```
+python app.py bestbuy --sku [SKU]
+```
+
+~~Example:~~
+
+```
+python python app.py bestbuy - -sku 6429440
 ```
 
 ## Notifications
@@ -520,6 +535,49 @@ pavlok app in the ```pavlok_config.json``` file, you can copy the template from 
 Once you have setup your `apprise_config.json ` you can test it by running `python app.py test-notifications` from
 within your pipenv shell. This will send a test notification to all configured notification services.
 
+## CLI Tools
+
+### CDN Endpoints
+
+The `find-endpoints` tool is designed to help you understand how many website domain endpoints exist for your geography
+based on global Content Delivery Networks (CDNs) and your specific network provider. Its purpose is nothing more than to
+educate you about variability of the network depending on how your computer resolves a domain. Doing something useful
+with this knowledge is beyond the scope of this feature.
+
+```shell
+Usage: app.py find-endpoints [OPTIONS]
+
+Options:
+  --domain TEXT  Specify the domain you want to find endpoints for (e.g.
+                 www.amazon.de, www.amazon.com, smile.amazon.com.
+
+  --help         Show this message and exit.
+```
+
+Specifying a domain (e.g. www.amazon.com, www.amazon.es, www.google.com, etc.) will generate a list of IP addresses that
+various public name servers resolve the name to. Hopefully this is helpful in understanding the variable nature of the
+content that different people see.
+
+### Routes
+
+The `show_traceroutes` tool is simply a tool that attempts to generate the commands necessary to determine the various
+paths that the Fairgame could take to get to a domain, based on who is resolving the domain to an IP.
+It uses the [end points](#cdn-endpoints) tool to convert a domain name to the various IPs and generates a list of
+commands you can copy and paste into the console to compare routes.
+
+```shell
+Usage: app.py show-traceroutes [OPTIONS]
+
+Options:
+  --domain TEXT  Specify the domain you want to generate traceroute commands for.
+
+  --help         Show this message and exit.
+```
+
+This is intended for people who feel that they can modify their network situation such that the fastest route is used.
+Explaining the Internet and how routing works is beyond the scope of this command, this tool, this projects, and the
+developers.
+
 ## Troubleshooting
 
 + Re-read this documentation.
@@ -553,13 +611,17 @@ To keep up with questions, the Discord channel [#FAQ](https://discord.gg/GEsarYK
 answers. If you don't find it there, ask in #tech-support.
 
 1. **Can I run multiple instances of the bot?**
-
    While possible, running multiple instances are not a supported usage case. You are on your own to figure this one out.
 
 2. **Does Fairgame automatically bypass CAPTCHA's on the store sites?**
    For Amazon, yes. The bot will try and auto-solve CAPTCHA's during the checkout process.
 
-3. **Does Fairgame run on a Raspberry Pi?**
+3. **Does `--headless` work?**
+   Yes!  A community user identified the issue with the headless option while running on a Raspberry Pi. This allowed
+   the developers to update the codebase to consistently work correctly on headless server environments. Give it a try
+   and let us know if you have any issues.
+
+4. **Does Fairgame run on a Raspberry Pi?**
    Yes, with caveats. Most people seem to have success with Raspberry Pi 4. The 2 GB model may need to run the headless
    option due to the smaller memory footprint. Still awaiting community feedback on running on a Pi 3. CPU and memory
    capacity seem to be the limiting factor for older Pi models.
