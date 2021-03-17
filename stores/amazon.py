@@ -495,21 +495,7 @@ class Amazon:
             # Sanity check to see if we have any offers
             try:
                 # Wait for the page to load before determining what's in it by looking for the footer
-                footer: List[WebElement] = WebDriverWait(
-                    self.driver, timeout=DEFAULT_MAX_TIMEOUT
-                ).until(
-                    lambda d: d.find_elements_by_xpath(
-                        "//div[@class='nav-footer-line'] | //div[@id='navFooter'] | //img[@alt='Dogs of Amazon']"
-                    )
-                )
-                if footer and footer[0].tag_name == "img":
-                    log.info(f"Saw dogs for {asin}.  Skipping...")
-                    return False
-
-                log.debug(f"After footer page title {self.driver.title}")
-                log.debug(f"             page url: {self.driver.current_url}")
-
-                offers = WebDriverWait(self.driver, timeout=DEFAULT_MAX_TIMEOUT).until(
+                offer_container = WebDriverWait(self.driver, timeout=DEFAULT_MAX_TIMEOUT).until(
                     lambda d: d.find_element_by_xpath(
                         "//div[@id='aod-container'] | "
                         "//div[@id='backInStock' or @id='outOfStock'] |"
@@ -518,7 +504,7 @@ class Amazon:
                     )
                 )
                 offer_count = []
-                offer_id = offers.get_attribute("id")
+                offer_id = offer_container.get_attribute("id")
                 if offer_id == "outOfStock" or offer_id == "backInStock":
                     # No dice... Early out and move on
                     log.debug("Item is currently unavailable.  Moving on...")
@@ -528,7 +514,7 @@ class Amazon:
                     offer_count = self.driver.find_elements_by_xpath(
                         "//div[@id='aod-pinned-offer' or @id='aod-offer']//input[@name='submit.addToCart']"
                     )
-                elif offers.get_attribute("data-action") == "show-all-offers-display":
+                elif offer_container.get_attribute("data-action") == "show-all-offers-display":
                     # PDP Page
                     # Find the offers link first, just to burn some cycles in case the flyout is loading
                     open_offers_link = None
@@ -592,7 +578,7 @@ class Amazon:
                     else:
                         log.error("Could not open offers link")
                 elif (
-                    offers.get_attribute("aria-labelledby")
+                    offer_container.get_attribute("aria-labelledby")
                     == "submit.add-to-cart-announce"
                 ):
                     # Use the Buy Box as an Offer as a last resort since it is not guaranteed to be a good offer
@@ -602,13 +588,13 @@ class Amazon:
                     log.warning(
                         "We found elements, but didn't recognize any of the combinations."
                     )
-                    log.warning(f"Element found: {offers.tag_name}")
+                    log.warning(f"Element found: {offer_container.tag_name}")
                     attrs = self.driver.execute_script(
                         "var items = {}; "
                         "for (index = 0; index < arguments[0].attributes.length; ++index) "
                         "{ items[arguments[0].attributes[index].name] = arguments[0].attributes[index].value }; "
                         "return items;",
-                        offers,
+                        offer_container,
                     )
                     log.warning("Dumping element attributes:")
                     for attr in attrs:
@@ -699,8 +685,8 @@ class Amazon:
                     "//div[@id='aod-offer' and .//input[@name='submit.addToCart']] | "
                     "//div[@id='aod-pinned-offer' and .//input[@name='submit.addToCart']]"
                 )
-            offers = self.driver.find_elements_by_xpath(offer_xpath)
-            for idx, offer in enumerate(offers):
+            offer_container = self.driver.find_elements_by_xpath(offer_xpath)
+            for idx, offer in enumerate(offer_container):
                 tree = html.fromstring(offer.get_attribute("innerHTML"))
                 shipping_prices.append(
                     get_shipping_costs(tree, amazon_config["FREE_SHIPPING"])
