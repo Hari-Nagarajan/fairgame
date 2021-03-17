@@ -436,7 +436,8 @@ class Amazon:
             return False
 
         # Force the flyout by default
-        f = furl(self.ACTIVE_OFFER_URL + asin + "/#aod")
+        # f = furl(self.ACTIVE_OFFER_URL + asin + "/#aod")
+        f = furl(self.ACTIVE_OFFER_URL + asin)
         fail_counter = 0
         presence.searching_update()
 
@@ -488,6 +489,7 @@ class Amazon:
         timeout = self.get_timeout()
         atc_buttons = None
         while True:
+            buy_box = False
             # Sanity check to see if we have any offers
             try:
                 # Wait for the page to load before determining what's in it by looking for the footer
@@ -575,7 +577,7 @@ class Amazon:
                                 self.driver, timeout=DEFAULT_MAX_TIMEOUT
                             ).until(
                                 lambda d: d.find_element_by_xpath(
-                                    "//div[@id='aod-container'] | //div[@id='olpOfferList']"
+                                    "//div[@id='aod-container']"
                                 )
                             )
                             log.debug("Flyout should be open and populated.")
@@ -591,11 +593,9 @@ class Amazon:
                     offers.get_attribute("aria-labelledby")
                     == "submit.add-to-cart-announce"
                 ):
-                    # TODO: This assumes we're on a PDP with only an add to cart button... no offers
-                    log.warning(
-                        "NOT YET IMPLEMENTED: PDP represents only item worth considering.  No other sellers available."
-                        " TODO: Parse pricing and Add To Cart from PDP if item qualifies."
-                    )
+                    # Use the Buy Box as an Offer as a last resort since it is not guaranteed to be a good offer
+                    buy_box = True
+                    offer_count = self.driver.find_elements_by_xpath("//div[@id='qualifiedBuybox']//input[@id='add-to-cart-button']")
                 else:
                     log.warning(
                         "We found elements, but didn't recognize any of the combinations."
@@ -634,7 +634,10 @@ class Amazon:
                 )
                 continue
 
-            atc_buttons = self.get_amazon_elements(key="ATC")
+            if buy_box:
+                atc_buttons = self.get_amazon_elements(key="ATC_BUY_BOX")
+            else:
+                atc_buttons = self.get_amazon_elements(key="ATC")
             # if not atc_buttons:
             #     # Sanity check to see if we have a valid page, but no offers:
             #     offer_count = WebDriverWait(self.driver, timeout=25).until(
@@ -669,9 +672,12 @@ class Amazon:
 
         timeout = self.get_timeout()
         while True:
-            prices = self.driver.find_elements_by_xpath(
-                "//div[@id='aod-pinned-offer' or @id='aod-offer']//div[contains(@id, 'aod-price')]//span[@class='a-price']//span[@class='a-offscreen']"
-            )
+            if buy_box:
+                prices = self.driver.find_elements_by_xpath("//span[@id='price_inside_buybox']")
+            else:
+                prices = self.driver.find_elements_by_xpath(
+                    "//div[@id='aod-pinned-offer' or @id='aod-offer']//div[contains(@id, 'aod-price')]//span[@class='a-price']//span[@class='a-offscreen']"
+                )
             if prices:
                 break
             if time.time() > timeout:
@@ -684,10 +690,13 @@ class Amazon:
         while True:
             # Check for offers
             # offer_xpath = "//div[@id='aod-pinned-offer' or @id='aod-offer']"
-            offer_xpath = (
-                "//div[@id='aod-offer' and .//input[@name='submit.addToCart']] | "
-                "//div[@id='aod-pinned-offer' and .//input[@name='submit.addToCart']]"
-            )
+            if buy_box:
+                offer_xpath = "//form[@id='addToCart']"
+            else:
+                offer_xpath = (
+                    "//div[@id='aod-offer' and .//input[@name='submit.addToCart']] | "
+                    "//div[@id='aod-pinned-offer' and .//input[@name='submit.addToCart']]"
+                )
             offers = self.driver.find_elements_by_xpath(offer_xpath)
             for idx, offer in enumerate(offers):
                 tree = html.fromstring(offer.get_attribute("innerHTML"))
@@ -710,21 +719,23 @@ class Amazon:
                 continue
 
             # Condition check first, using the button to find the form that will divulge the item's condition
-
-            condition: List[WebElement] = atc_button.find_elements_by_xpath(
-                "./ancestor::form[@method='post']"
-            )
-            if condition:
-                atc_form_action = condition[0].get_attribute("action")
-                seller_item_condition = get_item_condition(atc_form_action)
-                # Lower condition value imply newer
-                if seller_item_condition.value > self.condition.value:
-                    # Item is below our standards, so skip it
-                    log.debug(
-                        f"Skipping item because its condition is below the requested level: "
-                        f"{seller_item_condition} is below {self.condition}"
-                    )
-                    continue
+            # with the assumption that anything in the Buy Box on the PDP *must* be New and therefor will clear
+            # any condition hurdle.
+            if not buy_box:
+                condition: List[WebElement] = atc_button.find_elements_by_xpath(
+                    "./ancestor::form[@method='post']"
+                )
+                if condition:
+                    atc_form_action = condition[0].get_attribute("action")
+                    seller_item_condition = get_item_condition(atc_form_action)
+                    # Lower condition value imply newer
+                    if seller_item_condition.value > self.condition.value:
+                        # Item is below our standards, so skip it
+                        log.debug(
+                            f"Skipping item because its condition is below the requested level: "
+                            f"{seller_item_condition} is below {self.condition}"
+                        )
+                        continue
 
             try:
                 price = parse_price(prices[idx].get_attribute("innerHTML"))
@@ -754,7 +765,7 @@ class Amazon:
                 log.info("Adding to cart")
                 # Get the offering ID
                 offering_id_elements = atc_button.find_elements_by_xpath(
-                    "./preceding::input[@name='offeringID.1'][1]"
+                    "./preceding::input[@name='offeringID.1'][1] | ./preceding::input[@id='offerListingID']"
                 )
                 if offering_id_elements:
                     log.info("Attempting Add To Cart with offer ID...")
@@ -1667,7 +1678,7 @@ def get_timestamp_filename(name, extension):
 
 def get_shipping_costs(tree, free_shipping_string):
     # This version expects to find the shipping pricing within a div with the explicit ID 'delivery-message'
-    shipping_xpath = ".//div[@id='delivery-message']"
+    shipping_xpath = ".//div[@id='delivery-message'] | .//span[@id='priceBadging_feature_div']"
     shipping_nodes = tree.xpath(shipping_xpath)
     count = len(shipping_nodes)
     if count > 0:
