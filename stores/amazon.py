@@ -48,10 +48,8 @@ from utils.debugger import debug
 from utils.logger import log
 from utils.selenium_utils import options, enable_headless
 
-# Optional OFFER_URL is:     "OFFER_URL": "https://{domain}/dp/",
 AMAZON_URLS = {
     "BASE_URL": "https://{domain}/",
-    "ALT_OFFER_URL": "https://{domain}/gp/offer-listing/",
     "OFFER_URL": "https://{domain}/dp/",
     "CART_URL": "https://{domain}/gp/cart/view.html",
     "ATC_URL": "https://{domain}/gp/aws/cart/add.html",
@@ -66,15 +64,6 @@ BUTTON_XPATHS = [
     '//*[@id="bottomSubmitOrderButtonId"]/span/input',
     '//*[@id="placeYourOrder"]/span/input',
 ]
-# old xpaths, not sure these were needed for current work flow
-# '//*[@id="orderSummaryPrimaryActionBtn"]',
-# '//input[@name="placeYourOrder1"]',
-# '//*[@id="hlb-ptc-btn-native"]',
-# '//*[@id="sc-buy-box-ptc-button"]/span/input',
-# '//*[@id="buy-now-button"]',
-# Prime popup
-# //*[@id="primeAutomaticPopoverAdContent"]/div/div/div[1]/a
-# //*[@id="primeAutomaticPopoverAdContent"]/div/div/div[1]/a
 FREE_SHIPPING_PRICE = parse_price("0.00")
 
 DEFAULT_MAX_CHECKOUT_LOOPS = 20
@@ -109,7 +98,6 @@ class Amazon:
         encryption_pass=None,
         log_stock_check=False,
         shipping_bypass=False,
-        alt_offers=False,
     ):
         self.notification_handler = notification_handler
         self.asin_list = []
@@ -138,7 +126,6 @@ class Amazon:
         self.log_stock_check = log_stock_check
         self.shipping_bypass = shipping_bypass
         self.unknown_title_notification_sent = False
-        self.alt_offers = alt_offers
 
         presence.enabled = not disable_presence
 
@@ -197,9 +184,6 @@ class Amazon:
 
         for key in AMAZON_URLS.keys():
             AMAZON_URLS[key] = AMAZON_URLS[key].format(domain=self.amazon_website)
-        if self.alt_offers:
-            log.info("Using alternate page for offer parsing.")
-            self.ACTIVE_OFFER_URL = AMAZON_URLS["ALT_OFFER_URL"]
         else:
             self.ACTIVE_OFFER_URL = AMAZON_URLS["OFFER_URL"]
 
@@ -443,7 +427,6 @@ class Amazon:
                         log.info(f"Checking ASIN: {asin}.")
                     if self.check_stock(asin, self.reserve_min[i], self.reserve_max[i]):
                         return asin
-                    # log.info(f"check time took {time.time()-start_time} seconds")
                     time.sleep(delay)
 
     @debug
@@ -452,24 +435,8 @@ class Amazon:
             log.info("max add to cart retries hit, returning to asin check")
             return False
 
-        if self.alt_offers:
-            if self.checkshipping:
-                if self.used:
-                    f = furl(self.ACTIVE_OFFER_URL + asin)
-                else:
-                    f = furl(self.ACTIVE_OFFER_URL + asin + "/ref=olp_f_new&f_new=true")
-            else:
-                if self.used:
-                    f = furl(self.ACTIVE_OFFER_URL + asin + "/f_freeShipping=on")
-                else:
-                    f = furl(
-                        self.ACTIVE_OFFER_URL
-                        + asin
-                        + "/ref=olp_f_new&f_new=true&f_freeShipping=on"
-                    )
-        else:
-            # Force the flyout by default
-            f = furl(self.ACTIVE_OFFER_URL + asin + "/#aod")
+        # Force the flyout by default
+        f = furl(self.ACTIVE_OFFER_URL + asin + "/#aod")
         fail_counter = 0
         presence.searching_update()
 
@@ -541,7 +508,6 @@ class Amazon:
                 offers = WebDriverWait(self.driver, timeout=DEFAULT_MAX_TIMEOUT).until(
                     lambda d: d.find_element_by_xpath(
                         "//div[@id='aod-container'] | "
-                        "//div[@id='olpOfferList'] | "
                         "//div[@id='backInStock' or @id='outOfStock'] |"
                         "//span[@data-action='show-all-offers-display'] | "
                         "//input[@name='submit.add-to-cart' and not(//span[@data-action='show-all-offers-display'])]"
@@ -551,14 +517,8 @@ class Amazon:
                 offer_id = offers.get_attribute("id")
                 if offer_id == "outOfStock" or offer_id == "backInStock":
                     # No dice... Early out and move on
-                    log.info("Item is currently unavailable.  Moving on...")
+                    log.debug("Item is currently unavailable.  Moving on...")
                     return False
-
-                if offer_id == "olpOfferList":
-                    # Offers Page ... count the 'a-row' classes to know how many offers we 'see'
-                    offer_count = self.driver.find_elements_by_xpath(
-                        "//div[@id='olpOfferList']//div[contains(@class, 'olpOffer')]"
-                    )
                 elif offer_id == "aod-container":
                     # Offer Flyout or Ajax call ... count the 'aod-offer' divs that we 'see'
                     offer_count = self.driver.find_elements_by_xpath(
@@ -631,7 +591,7 @@ class Amazon:
                     offers.get_attribute("aria-labelledby")
                     == "submit.add-to-cart-announce"
                 ):
-                    # This assumes we're on a PDP with only an add to cart button... no offers
+                    # TODO: This assumes we're on a PDP with only an add to cart button... no offers
                     log.warning(
                         "NOT YET IMPLEMENTED: PDP represents only item worth considering.  No other sellers available."
                         " TODO: Parse pricing and Add To Cart from PDP if item qualifies."
@@ -708,19 +668,10 @@ class Amazon:
                 return False
 
         timeout = self.get_timeout()
-        flyout_mode = False
         while True:
             prices = self.driver.find_elements_by_xpath(
-                '//*[@class="a-size-large a-color-price olpOfferPrice a-text-bold"]'
+                "//div[@id='aod-pinned-offer' or @id='aod-offer']//div[contains(@id, 'aod-price')]//span[@class='a-price']//span[@class='a-offscreen']"
             )
-            if not prices:
-                # Try the flyout x-paths
-                prices = self.driver.find_elements_by_xpath(
-                    "//div[@id='aod-pinned-offer' or @id='aod-offer']//div[contains(@id, 'aod-price')]//span[@class='a-price']//span[@class='a-offscreen']"
-                )
-                if prices:
-                    flyout_mode = True
-                    break
             if prices:
                 break
             if time.time() > timeout:
@@ -731,34 +682,18 @@ class Amazon:
 
         timeout = self.get_timeout()
         while True:
-            if not flyout_mode:
-                shipping = self.driver.find_elements_by_xpath(
-                    '//*[@class="a-color-secondary"]'
+            # Check for offers
+            # offer_xpath = "//div[@id='aod-pinned-offer' or @id='aod-offer']"
+            offer_xpath = (
+                "//div[@id='aod-offer' and .//input[@name='submit.addToCart']] | "
+                "//div[@id='aod-pinned-offer' and .//input[@name='submit.addToCart']]"
+            )
+            offers = self.driver.find_elements_by_xpath(offer_xpath)
+            for idx, offer in enumerate(offers):
+                tree = html.fromstring(offer.get_attribute("innerHTML"))
+                shipping_prices.append(
+                    get_shipping_costs(tree, amazon_config["FREE_SHIPPING"])
                 )
-            if shipping:
-                # Convert to prices just in case
-                for idx, shipping_node in enumerate(shipping):
-                    log.debug(f"Processing shipping node {idx}")
-                    if self.checkshipping:
-                        if amazon_config["SHIPPING_ONLY_IF"] in shipping_node.text:
-                            shipping_prices.append(parse_price("0"))
-                        else:
-                            shipping_prices.append(parse_price(shipping_node.text))
-                    else:
-                        shipping_prices.append(parse_price("0"))
-            else:
-                # Check for offers
-                # offer_xpath = "//div[@id='aod-pinned-offer' or @id='aod-offer']"
-                offer_xpath = (
-                    "//div[@id='aod-offer' and .//input[@name='submit.addToCart']] | "
-                    "//div[@id='aod-pinned-offer' and .//input[@name='submit.addToCart']]"
-                )
-                offers = self.driver.find_elements_by_xpath(offer_xpath)
-                for idx, offer in enumerate(offers):
-                    tree = html.fromstring(offer.get_attribute("innerHTML"))
-                    shipping_prices.append(
-                        get_shipping_costs(tree, amazon_config["FREE_SHIPPING"])
-                    )
             if shipping_prices:
                 break
 
@@ -767,8 +702,6 @@ class Amazon:
                 return False
 
         in_stock = False
-        for shipping_price in shipping_prices:
-            log.debug(f"\tShipping Price: {shipping_price}")
 
         for idx, atc_button in enumerate(atc_buttons):
             # If the user has specified that they only want free items, we can skip any items
@@ -777,27 +710,24 @@ class Amazon:
                 continue
 
             # Condition check first, using the button to find the form that will divulge the item's condition
-            if flyout_mode:
-                condition: List[WebElement] = atc_button.find_elements_by_xpath(
-                    "./ancestor::form[@method='post']"
-                )
-                if condition:
-                    atc_form_action = condition[0].get_attribute("action")
-                    seller_item_condition = get_item_condition(atc_form_action)
-                    # Lower condition value imply newer
-                    if seller_item_condition.value > self.condition.value:
-                        # Item is below our standards, so skip it
-                        log.debug(
-                            f"Skipping item because its condition is below the requested level: "
-                            f"{seller_item_condition} is below {self.condition}"
-                        )
-                        continue
+
+            condition: List[WebElement] = atc_button.find_elements_by_xpath(
+                "./ancestor::form[@method='post']"
+            )
+            if condition:
+                atc_form_action = condition[0].get_attribute("action")
+                seller_item_condition = get_item_condition(atc_form_action)
+                # Lower condition value imply newer
+                if seller_item_condition.value > self.condition.value:
+                    # Item is below our standards, so skip it
+                    log.debug(
+                        f"Skipping item because its condition is below the requested level: "
+                        f"{seller_item_condition} is below {self.condition}"
+                    )
+                    continue
 
             try:
-                if flyout_mode:
-                    price = parse_price(prices[idx].get_attribute("innerHTML"))
-                else:
-                    price = parse_price(prices[idx].text)
+                price = parse_price(prices[idx].get_attribute("innerHTML"))
             except IndexError:
                 log.debug("Price index error")
                 return False
@@ -1645,8 +1575,6 @@ class Amazon:
             log.info(f"--No images will be requested")
         if not self.notification_handler.sound_enabled:
             log.info(f"--Notification sounds are disabled.")
-        if self.ACTIVE_OFFER_URL == AMAZON_URLS["ALT_OFFER_URL"]:
-            log.info(f"--Using alternate offers URL")
         if self.testing:
             log.warning(f"--Testing Mode.  NO Purchases will be made.")
         log.info(f"{'=' * 50}")

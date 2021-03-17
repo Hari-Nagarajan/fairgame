@@ -184,12 +184,6 @@ def main():
     default=False,
     help="Purge Amazon credentials and prompt for new credentials",
 )
-@click.option(
-    "--alt-offers",
-    is_flag=True,
-    default=False,
-    help="Directly hit the offers page.  Preferred, but deprecated by Amazon.",
-)
 @notify_on_crash
 def amazon(
     no_image,
@@ -209,7 +203,6 @@ def amazon(
     shipping_bypass,
     clean_profile,
     clean_credentials,
-    alt_offers,
 ):
     notification_handler.sound_enabled = not disable_sound
     if not notification_handler.sound_enabled:
@@ -241,7 +234,6 @@ def amazon(
         encryption_pass=p,
         log_stock_check=log_stock_check,
         shipping_bypass=shipping_bypass,
-        alt_offers=alt_offers,
     )
     try:
         amzn_obj.run(delay=delay, test=test)
