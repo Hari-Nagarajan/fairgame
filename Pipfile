@@ -23,7 +23,7 @@ prompt_toolkit = "*"
 aiohttp = "*"
 pyobjc = { version = "*", sys_platform = "== 'darwin'" }
 async-timeout = "*"
-amazoncaptcha = "==0.4.4"
+amazoncaptcha = "*"
 browser-cookie3 = "*"
 coloredlogs = "*"
 apprise = "*"
