@@ -1400,6 +1400,7 @@ class Amazon:
     def handle_order_complete(self):
         log.info("Order Placed.")
         self.send_notification("Order placed.", "order-placed", self.take_screenshots)
+        self.notification_handler.play_purchase_sound()
         self.great_success = True
         if self.single_shot:
             self.asin_list = []
