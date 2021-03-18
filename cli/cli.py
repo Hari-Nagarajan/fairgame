@@ -261,18 +261,136 @@ def amazon(
         time.sleep(5)
 
 
+@click.command()
+@click.option("--headless", is_flag=True, help="Headless mode.")
+@click.option(
+    "--test",
+    is_flag=True,
+    help="Run the checkout flow, but do not actually purchase the item[s]",
+)
 @click.option(
     "--delay", type=float, default=3.0, help="Time to wait between checks for item[s]"
 )
 @click.option(
-    "--test", is_flag=True, default=False, help="Test mode, will not purchase item"
+    "--checkshipping",
+    is_flag=True,
+    help="Factor shipping costs into reserve price and look for items with a shipping price",
 )
-@click.command()
-def amazonajax(delay, test=False):
+@click.option(
+    "--detailed",
+    is_flag=True,
+    help="Take more screenshots. !!!!!! This could cause you to miss checkouts !!!!!!",
+)
+@click.option("--single-shot", is_flag=True, help="Quit after 1 successful purchase")
+@click.option(
+    "--no-screenshots",
+    is_flag=True,
+    help="Take NO screenshots, do not bother asking for help if you use this... Screenshots are the best tool we have for troubleshooting",
+)
+@click.option(
+    "--disable-presence",
+    is_flag=True,
+    help="Disable Discord Rich Presence functionallity",
+)
+@click.option(
+    "--disable-sound",
+    is_flag=True,
+    default=False,
+    help="Disable local sounds.  Does not affect Apprise notification " "sounds.",
+)
+@click.option(
+    "--slow-mode",
+    is_flag=True,
+    default=False,
+    help="Uses normal page load strategy for selenium. Default is none",
+)
+@click.option(
+    "--p",
+    type=str,
+    default=None,
+    help="Pass in encryption file password as argument",
+)
+@click.option(
+    "--log-stock-check",
+    is_flag=True,
+    default=False,
+    help="writes stock check information to terminal and log",
+)
+@click.option(
+    "--shipping-bypass",
+    is_flag=True,
+    default=False,
+    help="Will attempt to click ship to address button. USE AT YOUR OWN RISK!",
+)
+@click.option(
+    "--clean-profile",
+    is_flag=True,
+    default=False,
+    help="Purge the user profile that Fairgame uses for browsing",
+)
+@click.option(
+    "--clean-credentials",
+    is_flag=True,
+    default=False,
+    help="Purge Amazon credentials and prompt for new credentials",
+)
+@click.option(
+    "--captcha-wait",
+    is_flag=True,
+    default=False,
+    help="Wait if captcha could not be solved. Only occurs if enters captcha handler during checkout.",
+)
+@notify_on_crash
+def amazonajax(
+    headless,
+    test,
+    delay,
+    checkshipping,
+    detailed,
+    single_shot,
+    no_screenshots,
+    disable_presence,
+    disable_sound,
+    slow_mode,
+    p,
+    log_stock_check,
+    shipping_bypass,
+    clean_profile,
+    clean_credentials,
+    captcha_wait,
+):
     log.warning(
         "Experimental test balloon.  Do not attempt to use.  Your computer could catch fire."
     )
-    amazon_ajax_obj = AmazonStoreHandler(notification_handler)
+    notification_handler.sound_enabled = not disable_sound
+    if not notification_handler.sound_enabled:
+        log.info("Local sounds have been disabled.")
+
+    if clean_profile and os.path.exists(global_config.get_browser_profile_path()):
+        log.info(
+            f"Removing existing profile at '{global_config.get_browser_profile_path()}'"
+        )
+        profile_size = get_folder_size(global_config.get_browser_profile_path())
+        shutil.rmtree(global_config.get_browser_profile_path())
+        log.info(f"Freed {profile_size}")
+
+    if clean_credentials and os.path.exists(AMAZON_CREDENTIAL_FILE):
+        log.info(f"Removing existing Amazon credentials from {AMAZON_CREDENTIAL_FILE}")
+        os.remove(AMAZON_CREDENTIAL_FILE)
+    amazon_ajax_obj = AmazonStoreHandler(
+        headless=headless,
+        notification_handler=notification_handler,
+        checkshipping=checkshipping,
+        detailed=detailed,
+        single_shot=single_shot,
+        no_screenshots=no_screenshots,
+        disable_presence=disable_presence,
+        slow_mode=slow_mode,
+        encryption_pass=p,
+        log_stock_check=log_stock_check,
+        shipping_bypass=shipping_bypass,
+        wait_on_captcha_fail=captcha_wait
+    )
 
     try:
 

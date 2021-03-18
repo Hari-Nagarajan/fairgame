@@ -71,10 +71,7 @@ AMAZON_URLS = {
 }
 
 PDP_PATH = f"/dp/"
-# REALTIME_INVENTORY_URL = f"{AMAZON_DOMAIN}gp/aod/ajax/ref=aod_f_new?asin="
-# REALTIME_INVENTORY_PATH = f"/gp/aod/ajax/ref=aod_f_new?isonlyrenderofferlist=true&asin="
-# REALTIME_INVENTORY_URL = "https://www.amazon.com/gp/aod/ajax/ref=dp_aod_NEW_mbc?asin="
-REALTIME_INVENTORY_PATH = f"/gp/aod/ajax?asin="
+REALTIME_INVENTORY_PATH = f"gp/aod/ajax?asin="
 
 CONFIG_FILE_PATH = "config/amazon_ajax_config.json"
 STORE_NAME = "Amazon"
@@ -110,15 +107,14 @@ class AmazonStoreHandler(BaseStoreHandler):
         headless=False,
         checkshipping=False,
         detailed=False,
-        used=False,
         single_shot=False,
         no_screenshots=False,
         disable_presence=False,
         slow_mode=False,
-        no_image=False,
         encryption_pass=None,
         log_stock_check=False,
         shipping_bypass=False,
+        wait_on_captcha_fail=False,
     ) -> None:
         super().__init__()
 
@@ -135,9 +131,9 @@ class AmazonStoreHandler(BaseStoreHandler):
         self.shipping_bypass = shipping_bypass
         self.single_shot = single_shot
         self.detailed = detailed
-        self.used = used
         self.disable_presence = disable_presence
         self.log_stock_check = log_stock_check
+        self.wait_on_captcha_fail = wait_on_captcha_fail
 
         from cli.cli import global_config
 
@@ -152,7 +148,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         if headless:
             enable_headless()
 
-        prefs = get_prefs(no_image)
+        prefs = get_prefs(no_image=False)
         set_options(prefs, slow_mode=slow_mode)
         modify_browser_profile()
 
