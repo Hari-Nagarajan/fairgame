@@ -19,13 +19,13 @@ This project requires a recent 3.8 version of a python branch, 3.8.5 and more re
 
 ## Quick Start
 
-Here are the very simple steps for running the bot (on Windows):
-1. Turn on your computer
-2. Install Python 3.8.5, 3.8.6, 3.8.7 or 3.8.8. Install to some location that does not include spaces in the path (I suggest C:\Python38). Click the checkbox that says Add Python 3.8 to PATH (or something similar) during the installation
+Here are the very simple steps for running the bot on Windows:
+1. [Turn on your computer](https://www.google.com/search?q=how+do+I+turn+on+my+computer)
+2. Install Python 3.8.5, 3.8.6, 3.8.7 or 3.8.8. Install to some location that does not include spaces in the path (I suggest C:\Python38). Click the checkbox that says Add Python 3.8 to PATH (or something similar) during the installation.
 3. Download GitHub Desktop and Open the FairGame Repository with GitHub Desktop (or download the zip file). Again, make sure this installs to a location without spaces in the path. If you need help with this, look at Wiki.
-4. Open the FairGame folder in File Explorer. Double click __INSTALL (RUN FIRST).bat Don't use admin
-5. After this finishes (it could take a few minutes or longer), make a copy of the amazon_config.template_json file, and rename it to amazon_config.json. If you don't know how to rename file extensions, look it up on Google
-6. Edit the amazon_config.json, this assumes US using smile.amazon.com. Find a product, like a USB stick that is in stock, and put the ASIN for that product in place of the B07JH53M4T listed below (or use that if it is in stock). Change the reserve_min_1 and reserve_max_1 to be below and above the price of the item, respectively: 
+4. Open the FairGame folder in File Explorer. Double click __INSTALL (RUN FIRST).bat ***DON'T USE ADMINSTRATIVE MODE***.
+5. After this finishes (it could take a few minutes or longer), make a copy of the amazon_config.template_json file, and rename it to amazon_config.json. If you don't know how to rename file extensions, look it up on [Google](https://www.google.com/search?q=how+do+I+rename+file+extensions+in+Windows).
+6. Edit the amazon_config.json, this assumes US using smile.amazon.com. Using Amazon Smile requires that you select a charity. If you do not know how to do this, use [Google](https://www.google.com/search?q=how+do+i+select+a+charity+on+amazon+smile). Find a product, like a USB stick that is in stock, and put the [ASIN](https://www.google.com/search?q=what+is+an+ASIN) for that product in place of the B07JH53M4T listed below (or use that if it is in stock). Change the reserve_min_1 and reserve_max_1 to be below and above the price of the item, respectively: 
 ```
 {
   "asin_groups": 1,
@@ -35,7 +35,7 @@ Here are the very simple steps for running the bot (on Windows):
   "amazon_website": "smile.amazon.com"
 }
 ```
-7. In File Explorer, double click the `_Amazon.bat` file in the FairGame folder. Type in your amazon email address when asked for your amazon login ID. Type in your amazon account password when asked for your amazon password. Type in a password for your credentials (this can be whatever you want, it just encrypts your account email/password file)
+7. In File Explorer, double click the `_Amazon.bat` file in the FairGame folder. ***DON'T USE ADMINSTRATIVE MODE***. Type in your amazon email address when asked for your amazon login ID. Type in your amazon account password when asked for your amazon password. Type in a password for your credentials (this can be whatever you want, it just encrypts your account email/password file)
 8. Verify that the bot successfully makes it to the place your order page with the item you put in the config file. If it does not, then you messed something up above. Fix it
 9. Edit the config file with what you want
 10. Remove `--test` from `_Amazon.bat`
