@@ -257,7 +257,7 @@ def price_check(item, seller):
 
 
 def condition_check(item, seller):
-    if item.condition.value <= seller.condition.value:
+    if item.condition.value >= seller.condition.value:
         return True
     else:
         return False
