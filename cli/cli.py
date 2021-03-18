@@ -191,9 +191,9 @@ def main():
 )
 @click.option(
     "--captcha-wait",
-    is_Flag=True,
+    is_flag=True,
     default=False,
-    help="Wait if captcha could not be solved. Only occurs if enters captcha handler during checkout."
+    help="Wait if captcha could not be solved. Only occurs if enters captcha handler during checkout.",
 )
 @notify_on_crash
 def amazon(
