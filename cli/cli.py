@@ -189,6 +189,12 @@ def main():
     default=False,
     help="Directly hit the offers page.  Preferred, but deprecated by Amazon.",
 )
+@click.option(
+    "--captcha-wait",
+    is_Flag=True,
+    default=False,
+    help="Wait if captcha could not be solved. Only occurs if enters captcha handler during checkout."
+)
 @notify_on_crash
 def amazon(
     no_image,
@@ -209,6 +215,7 @@ def amazon(
     clean_profile,
     clean_credentials,
     alt_offers,
+    captcha_wait,
 ):
     notification_handler.sound_enabled = not disable_sound
     if not notification_handler.sound_enabled:
@@ -241,6 +248,7 @@ def amazon(
         log_stock_check=log_stock_check,
         shipping_bypass=shipping_bypass,
         alt_offers=alt_offers,
+        wait_on_captcha_fail=captcha_wait
     )
     try:
         amzn_obj.run(delay=delay, test=test)

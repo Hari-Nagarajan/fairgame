@@ -109,6 +109,7 @@ class Amazon:
         log_stock_check=False,
         shipping_bypass=False,
         alt_offers=False,
+        wait_on_captcha_fail=False,
     ):
         self.notification_handler = notification_handler
         self.asin_list = []
@@ -138,6 +139,7 @@ class Amazon:
         self.shipping_bypass = shipping_bypass
         self.unknown_title_notification_sent = False
         self.alt_offers = alt_offers
+        self.wait_on_captcha_fail = wait_on_captcha_fail
 
         presence.enabled = not disable_presence
 
@@ -1437,26 +1439,52 @@ class Amazon:
                         log.info(
                             f"Failed to solve {captcha.image_link}, lets reload and get a new captcha."
                         )
-                        self.driver.refresh()
-                        time.sleep(3)
+                        if self.wait_on_captcha_fail:
+                            log.info("Will wait up to 60 seconds for user to solve captcha")
+                            self.send("User Intervention Required - captcha check", "captcha", self.take_screenshots)
+                            with self.wait_for_page_content_change():
+                                timeout = self.get_timeout(timeout=60)
+                                while time.time() < timeout and self.driver.title == current_page:
+                                    time.sleep(0.5)
+                                # check above is not true, then we must have passed captcha, return back to nav handler
+                                # Otherwise refresh page to try again - either way, returning to nav page handler
+                                if time.time() >timeout and self.driver.title == current_page:
+                                    log.info("User intervention did not occur in time - will attempt to refresh page and try again")
+                                    self.driver.refresh()
+                                    return False
+                                else:
+                                    return True
+                    # Solved (!?)
                     else:
-                        self.send_notification(
-                            "Solving catpcha", "captcha", self.take_screenshots
-                        )
-                        self.driver.find_element_by_xpath(
-                            '//*[@id="captchacharacters"]'
-                        ).send_keys(solution + Keys.RETURN)
-                        self.wait_for_page_change(page_title=current_page)
+                        # take screenshot if user asked for detailed
+                        if self.detailed:
+                            self.send_notification(
+                                "Solving catpcha", "captcha", self.take_screenshots
+                            )
+                        try:
+                            captcha_field = self.driver.find_element_by_xpath(
+                                '//*[@id="captchacharacters"]'
+                            )
+                        except sel_exceptions.NoSuchElementException:
+                            log.debug("Could not locate captcha")
+                            captcha_field = None
+                        if captcha_field:
+                            with self.wait_for_page_content_change():
+                                captcha_field.send_keys(solution + Keys.RETURN)
+                            return True
+                        else:
+                            return False
                 except Exception as e:
                     log.debug(e)
-                    log.info("Error trying to solve captcha. Refresh and retry.")
-                    self.driver.refresh()
-                    time.sleep(3)
+                    log.debug("Error trying to solve captcha. Refresh and retry.")
+                    with self.wait_for_page_content_change():
+                        self.driver.refresh()
+                    return False
         except sel_exceptions.NoSuchElementException:
-            log.error("captcha page does not contain captcha element")
-            log.error("refreshing")
-            self.driver.refresh()
-            time.sleep(3)
+            log.debug("captcha page does not contain captcha element")
+            with self.wait_for_page_content_change():
+                self.driver.refresh()
+            return False
 
     @debug
     def handle_business_po(self):
