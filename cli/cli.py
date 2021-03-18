@@ -184,12 +184,6 @@ def main():
     help="Purge Amazon credentials and prompt for new credentials",
 )
 @click.option(
-    "--alt-offers",
-    is_flag=True,
-    default=False,
-    help="Directly hit the offers page.  Preferred, but deprecated by Amazon.",
-)
-@click.option(
     "--captcha-wait",
     is_flag=True,
     default=False,
