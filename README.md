@@ -209,7 +209,7 @@ run Chrome, it may very well work. Let us know.
 ```shell
 sudo apt update
 sudo apt upgrade
-sudo apt-get install -y build-essential tk-dev libncurses5-dev libncursesw5-dev libreadline6-dev libdb5.3-dev libgdbm-dev libsqlite3-dev libssl-dev libbz2-dev libexpat1-dev liblzma-dev zlib1g-dev libffi-dev libzbar-dev clang libxslt1-dev rustc
+sudo apt-get install -y build-essential tk-dev libreadline-dev libdb5.3-dev libgdbm-dev libsqlite3-dev libssl-dev libbz2-dev libexpat1-dev liblzma-dev zlib1g-dev libffi-dev libxslt1-dev rustc libjpeg-dev zlib1g-dev libfreetype6-dev liblcms1-dev libopenjp2-7 libtiff5 libncurses5-dev libncursesw5-dev chromium-chromedriver
 
 version=3.8.8
 
@@ -221,16 +221,17 @@ cd Python-$version
 make -j4
 sudo make altinstall
 
-sudo python3 -m pip install --upgrade pip
+cd ..
 
-sudo apt install chromium-chromedriver
+sudo python3.8 -m pip install --upgrade pip
+
 git clone https://github.com/Hari-Nagarajan/fairgame
 cd fairgame/
 pip3 install pipenv
 export PATH=$PATH:/home/$USER/.local/bin
 pipenv shell 
 pipenv install
-cp /usr/bin/chromedriver /home/fairgame/.local/share/virtualenvs/fairgame-<RANDOMCHARS>/lib/python3.8/site-packages/chromedriver_py/chromedriver_linux64
+cp /usr/bin/chromedriver /home/$USER/.local/share/virtualenvs/fairgame-<RANDOMCHARS>/lib/python3.8/site-packages/chromedriver_py/chromedriver_linux64
 ```
 
 Leave this Terminal window open.
@@ -248,6 +249,8 @@ to
 `self.path = "chromedriver"`
 
 Then save and close the file.
+
+Back in the terminal you kept open, under the fairgame folder you can now type `python app.py amazon` and run the bot, or add any flags after you wish to use like --headless or --delay x to make `python app.py amazon --headless --delay 4`
 
 ## Usage
 
