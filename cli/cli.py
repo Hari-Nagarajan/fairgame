@@ -33,7 +33,6 @@ from notifications.notifications import NotificationHandler, TIME_FORMAT
 
 from stores.amazon import Amazon
 from stores.amazon_ajax import AmazonStoreHandler
-from stores.bestbuy import BestBuyHandler
 from utils.logger import log
 from utils.version import is_latest, version
 
@@ -192,6 +191,12 @@ def main():
     default=False,
     help="Directly hit the offers page.  Preferred, but deprecated by Amazon.",
 )
+@click.option(
+    "--captcha-wait",
+    is_flag=True,
+    default=False,
+    help="Wait if captcha could not be solved. Only occurs if enters captcha handler during checkout.",
+)
 @notify_on_crash
 def amazon(
     no_image,
@@ -212,6 +217,7 @@ def amazon(
     clean_profile,
     clean_credentials,
     alt_offers,
+    captcha_wait,
 ):
     notification_handler.sound_enabled = not disable_sound
     if not notification_handler.sound_enabled:
@@ -244,6 +250,7 @@ def amazon(
         log_stock_check=log_stock_check,
         shipping_bypass=shipping_bypass,
         alt_offers=alt_offers,
+        wait_on_captcha_fail=captcha_wait
     )
 
     try:
@@ -274,20 +281,6 @@ def amazonajax(delay, test=False):
         del amazon_ajax_obj
         log.error("Exiting Program...")
         time.sleep(5)
-
-
-@click.command()
-@click.option("--sku", type=str, required=True)
-@click.option("--headless", is_flag=True)
-@notify_on_crash
-def bestbuy(sku, headless):
-    log.warning(
-        "As stated in the documentation, Best Buy is deprecated due to their anti-bot measures for high demand items."
-    )
-    bb = BestBuyHandler(
-        sku, notification_handler=notification_handler, headless=headless
-    )
-    bb.run_item()
 
 
 @click.option(
@@ -443,7 +436,6 @@ signal(SIGINT, interrupt_handler)
 
 main.add_command(amazon)
 main.add_command(amazonajax)
-main.add_command(bestbuy)
 main.add_command(test_notifications)
 main.add_command(show)
 main.add_command(find_endpoints)
