@@ -281,8 +281,8 @@ Options:
                       item[s]
 
   --delay FLOAT       Time to wait between checks for item[s]
-  --checkshipping     Factor shipping costs into reserve price and look for
-                      items with a shipping price
+  --checkshipping     Also include items with a shipping price in the search.
+                      Shipping costs are factored into reserve price check calculation.
 
   --detailed          Take more screenshots. !!!!!! This could cause you to
                       miss checkouts !!!!!!
