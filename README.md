@@ -1,11 +1,11 @@
 # FairGame
 
 #Table of Contents:
-* [About FairGame](#About FairGame)
-* [Current Functionality](#Current Functionality)  
+* [About FairGame](#About-FairGame)
+* [Current Functionality](#Current-Functionality)  
 * [Installation](#Installation)
     * [Requirements](#Requirements)
-    * [Quick Start](#Quick Start)
+    * [Windows Quick Start](#Windows-Quick-Start)
     * []
     
     
@@ -13,7 +13,7 @@
 
  [Discord](https://discord.gg/4rfbNKrmnC) | [Troubleshooting](#Troubleshooting)
 
-## About FairGame
+# About FairGame
 
 We built this in response to the severe tech scalping situation that's happening right now. Almost every tech product
 that's coming out right now is being instantly brought out by scalping groups and then resold at at insane prices. $699
@@ -28,9 +28,9 @@ for MSRP.
 
 Only Amazon auto-checkout.
 
-## Installation
+# Installation
 
-### Requirements
+## Requirements
 
 ***!!! YOU WILL NEED TO USE THE 3.8.5+ BRANCH OF PYTHON, 3.9.x BREAKS DEPENDENCIES !!!***
 
@@ -39,7 +39,7 @@ It is best if you use the newest version (3.8.8) but 3.8.5, 3.8.6, and 3.8.7 sho
 It also requires a working Chrome installation. 
 Running it off a potato (<2GB of RAM) is not suggested. 
 
-### Quick Start
+## Windows Quick Start
 
 Here are the very simple steps for running the bot (on Windows):
 1. Turn on your computer
@@ -66,10 +66,7 @@ Here are the very simple steps for running the bot (on Windows):
 ### Configuration
 
 
-## Got a question?
 
-Read through this document and the cheat sheet linked in the next sections. See the [FAQs](#frequently-asked-questions)
-if that does not answer your questions.
 
 ## Known Issues
 
