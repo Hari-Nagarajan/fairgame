@@ -108,7 +108,9 @@ Here are the very simple steps for running the bot on Windows:
    asked for your amazon password. Type in a password for your credentials (this can be whatever you want, it just 
    encrypts your account email/password file)
 8. Verify that the bot successfully makes it to the place your order page with the item you put in the config file. 
-   If it does not, then you messed something up above. Fix it
+   If it does not, then:
+   * You messed something up above, and need to fix it; or,
+   * It is asking you for your address and payment info. You need to make a purchase manually with the bot in a separate tab and verify that it correctly sets your defaults for the browser. See [#faq on our Discord](https://discord.gg/GEsarYKMAw).
 9. Edit the config file with what you want
 10. Remove `--test` from `_Amazon.bat`
 11. Run `_Amazon.bat` and wait
