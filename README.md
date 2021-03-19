@@ -31,7 +31,7 @@
     
 
 # Quick Links
- [Discord](https://discord.gg/4rfbNKrmnC) | [Python Download (3.8.8)](#https://www.python.org/downloads/release/python-388/)
+ [Discord](https://discord.gg/4rfbNKrmnC) | [Python Download (3.8.8)](https://www.python.org/downloads/release/python-388/)
 
 # About FairGame
 
@@ -116,7 +116,7 @@ Here are the very simple steps for running the bot on Windows:
 Additional information about running FairGame can be found in the rest of the documentation.
 
 ## Detailed Directions
-###Python
+### Python
 This project uses Python 3.8.X and uses [Pipenv](https://pypi.org/project/pipenv/) to manage dependencies. 
 
 ### Downloading FairGame
