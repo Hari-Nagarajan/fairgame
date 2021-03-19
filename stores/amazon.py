@@ -1441,16 +1441,30 @@ class Amazon:
                             f"Failed to solve {captcha.image_link}, lets reload and get a new captcha."
                         )
                         if self.wait_on_captcha_fail:
-                            log.info("Will wait up to 60 seconds for user to solve captcha")
-                            self.send("User Intervention Required - captcha check", "captcha", self.take_screenshots)
+                            log.info(
+                                "Will wait up to 60 seconds for user to solve captcha"
+                            )
+                            self.send(
+                                "User Intervention Required - captcha check",
+                                "captcha",
+                                self.take_screenshots,
+                            )
                             with self.wait_for_page_content_change():
                                 timeout = self.get_timeout(timeout=60)
-                                while time.time() < timeout and self.driver.title == current_page:
+                                while (
+                                    time.time() < timeout
+                                    and self.driver.title == current_page
+                                ):
                                     time.sleep(0.5)
                                 # check above is not true, then we must have passed captcha, return back to nav handler
                                 # Otherwise refresh page to try again - either way, returning to nav page handler
-                                if time.time() >timeout and self.driver.title == current_page:
-                                    log.info("User intervention did not occur in time - will attempt to refresh page and try again")
+                                if (
+                                    time.time() > timeout
+                                    and self.driver.title == current_page
+                                ):
+                                    log.info(
+                                        "User intervention did not occur in time - will attempt to refresh page and try again"
+                                    )
                                     self.driver.refresh()
                                     return False
                                 else:

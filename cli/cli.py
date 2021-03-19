@@ -248,7 +248,7 @@ def amazon(
         log_stock_check=log_stock_check,
         shipping_bypass=shipping_bypass,
         alt_offers=alt_offers,
-        wait_on_captcha_fail=captcha_wait
+        wait_on_captcha_fail=captcha_wait,
     )
     try:
         amzn_obj.run(delay=delay, test=test)
