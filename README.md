@@ -20,7 +20,7 @@
         * [Sounds](#Sounds)
         * [Apprise](#Apprise)
         * [Pavlok](#Pavlok)
-        * [Testing notifications](#Testing notifications)
+        * [Testing notifications](#Testing-notifications)
     * [CLI Tools](#CLI-Tools)
         * [CDN Endpoints](#CDN-Endpoints)
         * [Routes](#Routes)
