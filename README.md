@@ -1,6 +1,6 @@
 # FairGame
 
-#Table of Contents:
+# Table of Contents:
 * [About FairGame](#About-FairGame)
     * [Current Functionality](#Current-Functionality)  
 * [Installation](#Installation)
