@@ -1,1 +1,1 @@
-cmd /k pipenv run python app.py amazon --test
+cmd /k pipenv run python app.py amazon --headless

@@ -24,7 +24,7 @@
 
 # Slack (https://github.com/caronc/apprise/wiki/Notify_slack)
 
-# https://hooks.slack.com/services/{tokenA}/{tokenB}/{tokenC}
+https://hooks.slack.com/services/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
 #  OR
 # slack://{tokenA}/{tokenB}/{tokenC}
 
