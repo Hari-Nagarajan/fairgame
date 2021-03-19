@@ -12,6 +12,7 @@
         * [Installing Dependencies](#Installing-Dependencies)
         * [Configuration](#Configuration)
         * [Running the program](#Running-the-program)
+        * [Start Up](#Start-Up)
     * [Other Installation Help](#Other-Installation-Help)
         * [Cheat Sheet](#Cheat-Sheet)
         * [Platform Specific](#Platform-Specific)
