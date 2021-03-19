@@ -463,7 +463,7 @@ class Amazon:
                     )
         else:
             # Force the flyout by default
-            f = furl(self.ACTIVE_OFFER_URL + asin + "/#aod")
+            f = furl(self.ACTIVE_OFFER_URL + asin + "?aod=1")
         fail_counter = 0
         presence.searching_update()
 
