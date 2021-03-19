@@ -307,7 +307,7 @@ pipenv run python app.py amazon
 
 Running FairGame to look for new and used items, and also include items that may have a shipping cost:
 ```shell
-pipenv run python app.py amazon --checkshipping --checkshipping
+pipenv run python app.py amazon --used --checkshipping
 ```
 
 Running Fairgame with delay of 4.5 seconds, and automatically putting in the credentials password of `abcd1234`
@@ -588,7 +588,7 @@ Options:
 ```
 
 This is intended for people who feel that they can modify their network situation such that the fastest route is used.
-Explaining the Internet and how routing works is beyond the scope of this command, this tool, this projects, and the
+Explaining the Internet and how routing works is beyond the scope of this command, this tool, this project, and the
 developers.
 
 # Issues Running FairGame 
@@ -626,9 +626,9 @@ export PIPENV_VENV_IN_PROJECT=1 (Linux/Other)
   ```
 
 + **Error: ```selenium.common.exceptions.SessionNotCreatedException: Message: session not created: 
-  This version of ChromeDriver only supports Chrome version 87```**
+  This version of ChromeDriver only supports Chrome version 89```**
 
-  You are not running the proper version of Chrome this requires. As of this update, the current version is Chrome 87.
+  You are not running the proper version of Chrome this requires. As of this update, the current version is Chrome 89.
   Check your version by going to ```chrome://version/``` in your browser. We are going to be targeting the current stable
   build of chrome. If you are behind, please update, if you are on a beta or canary branch, you'll have to build your own
   version of chromedriver-py.
@@ -652,6 +652,7 @@ answers. If you don't find it there, ask in #tech-support.
 4. **Does Fairgame run on a Raspberry Pi?**
    Yes, with caveats. Most people seem to have success with Raspberry Pi 4. The 2 GB model may need to run the headless
    option due to the smaller memory footprint. Still awaiting community feedback on running on a Pi 3. CPU and memory
-   capacity seem to be the limiting factor for older Pi models.
+   capacity seem to be the limiting factor for older Pi models. The Pi is also much slower then even a semi-recent
+   (5 years or less) laptop. 
 
 
