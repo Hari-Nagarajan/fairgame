@@ -727,7 +727,7 @@ class Amazon:
         while True:
             if not flyout_mode:
                 shipping = self.driver.find_elements_by_xpath(
-                    '//*[@class="a-color-secondary"]'
+                    '//*[@class="a-color-secondary a-size-base"]'
                 )
             if shipping:
                 # Convert to prices just in case
