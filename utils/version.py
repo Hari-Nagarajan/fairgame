@@ -16,6 +16,7 @@
 #
 #      The author may be contacted through the project's GitHub, at:
 #      https://github.com/Hari-Nagarajan/fairgame
+from json.decoder import JSONDecodeError
 
 import requests
 from utils.logger import log
@@ -29,7 +30,7 @@ _LATEST_URL = "https://api.github.com/repos/Hari-Nagarajan/fairgame/releases/lat
 # See https://www.python.org/dev/peps/pep-0440/ for specification
 # See https://www.python.org/dev/peps/pep-0440/#examples-of-compliant-version-schemes for examples
 
-__VERSION = "0.6.2"
+__VERSION = "0.6.3.dev1"
 version = Version(__VERSION)
 
 
@@ -49,7 +50,7 @@ def get_latest_version():
         r = requests.get(_LATEST_URL)
         data = r.json()
         latest_version = parse(str(data["tag_name"]))
-    except InvalidVersion:
+    except (InvalidVersion, JSONDecodeError, KeyError):
         # Return a safe, but wrong version
         latest_version = parse("0.0")
     except req_exceptions.RequestException as e:

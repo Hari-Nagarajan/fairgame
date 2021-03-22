@@ -184,12 +184,6 @@ def main():
     help="Purge Amazon credentials and prompt for new credentials",
 )
 @click.option(
-    "--alt-offers",
-    is_flag=True,
-    default=False,
-    help="Directly hit the offers page.  Preferred, but deprecated by Amazon.",
-)
-@click.option(
     "--captcha-wait",
     is_flag=True,
     default=False,
@@ -214,7 +208,6 @@ def amazon(
     shipping_bypass,
     clean_profile,
     clean_credentials,
-    alt_offers,
     captcha_wait,
 ):
     notification_handler.sound_enabled = not disable_sound
@@ -247,8 +240,7 @@ def amazon(
         encryption_pass=p,
         log_stock_check=log_stock_check,
         shipping_bypass=shipping_bypass,
-        alt_offers=alt_offers,
-        wait_on_captcha_fail=captcha_wait,
+        wait_on_captcha_fail=captcha_wait
     )
     try:
         amzn_obj.run(delay=delay, test=test)
