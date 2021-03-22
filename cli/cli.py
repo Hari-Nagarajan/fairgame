@@ -261,7 +261,7 @@ def amazon(
     help="Run the checkout flow, but do not actually purchase the item[s]",
 )
 @click.option(
-    "--delay", type=float, default=3.0, help="Time to wait between checks for item[s]"
+    "--delay", type=float, default=5.0, help="Time to wait between checks for item[s]"
 )
 @click.option(
     "--checkshipping",

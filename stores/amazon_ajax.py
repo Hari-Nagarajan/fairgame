@@ -134,6 +134,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         self.disable_presence = disable_presence
         self.log_stock_check = log_stock_check
         self.wait_on_captcha_fail = wait_on_captcha_fail
+        self.amazon_cookies = {}
 
         from cli.cli import global_config
 
@@ -325,7 +326,7 @@ class AmazonStoreHandler(BaseStoreHandler):
 
         log.info(f'Logged in as {amazon_config["username"]}')
 
-    def run(self, delay=3, test=False):
+    def run(self, delay=5, test=False):
         # Load up the homepage
         with self.wait_for_page_change():
             self.driver.get(f"https://{self.amazon_domain}")
@@ -333,6 +334,9 @@ class AmazonStoreHandler(BaseStoreHandler):
         # Get a valid amazon session for our requests
         if not self.is_logged_in():
             self.login()
+
+        # get cookies
+        self.amazon_cookies = self.driver.get_cookies()
 
         # Verify the configuration file
         if not self.verify():
@@ -364,10 +368,12 @@ class AmazonStoreHandler(BaseStoreHandler):
                     idx = 0
 
             for item in self.item_list:
+                start_time = time.time()
+                delay_time = start_time + delay
                 successful = False
                 qualified_seller = self.find_qualified_seller(item)
+                log.debug(f"ASIN check for {item.id} took {time.time()-start_time} seconds.")
                 if qualified_seller:
-
                     if self.attempt_atc(offering_id=qualified_seller.offering_id):
                         checkout_attempts = 0
                         self.unknown_title_notification_sent = False
@@ -383,8 +389,8 @@ class AmazonStoreHandler(BaseStoreHandler):
                                     self.item_list.remove(item)
                                 break
                             checkout_attempts += 1
-
-                time.sleep(delay)
+                while time.time() < delay_time:
+                    time.sleep(0.01)
                 if successful:
                     break
             if self.shuffle:
