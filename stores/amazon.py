@@ -430,7 +430,7 @@ class Amazon:
                         log.info(f"Checking ASIN: {asin}.")
                     if self.check_stock(asin, self.reserve_min[i], self.reserve_max[i]):
                         return asin
-                    if time.time < delay_time:
+                    if time.time() < delay_time:
                         time.sleep(0.01)
 
     @debug
