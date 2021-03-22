@@ -47,7 +47,7 @@ def is_latest():
 
 def get_latest_version():
     try:
-        r = requests.get(_LATEST_URL)
+        r = requests.get(_LATEST_URL, timeout=5)
         data = r.json()
         latest_version = parse(str(data["tag_name"]))
     except (InvalidVersion, JSONDecodeError, KeyError):
