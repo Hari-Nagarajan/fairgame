@@ -18,7 +18,9 @@
 #      https://github.com/Hari-Nagarajan/fairgame
 
 import requests
+from utils.logger import log
 from packaging.version import Version, parse, InvalidVersion
+from requests import exceptions as req_exceptions
 
 _LATEST_URL = "https://api.github.com/repos/Hari-Nagarajan/fairgame/releases/latest"
 
@@ -49,5 +51,8 @@ def get_latest_version():
         latest_version = parse(str(data["tag_name"]))
     except InvalidVersion:
         # Return a safe, but wrong version
+        latest_version = parse("0.0")
+    except req_exceptions.RequestException as e:
+        log.debug(e)
         latest_version = parse("0.0")
     return latest_version
