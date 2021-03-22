@@ -33,7 +33,7 @@ from notifications.notifications import NotificationHandler, TIME_FORMAT
 from stores.amazon import Amazon
 from stores.bestbuy import BestBuyHandler
 from utils.logger import log
-from utils.version import is_latest, version
+from utils.version import get_latest_version, is_latest, version
 
 LICENSE_PATH = os.path.join(
     "cli",
@@ -430,7 +430,7 @@ elif version.is_prerelease:
     log.warning(f"FairGame PRE-RELEASE v{version}")
 else:
     log.warning(
-        f"You are running FairGame v{version.release}, but the most recent version is v{version.get_latest_version()}. "
+        f"You are running FairGame v{version.release}, but the most recent version is v{get_latest_version()}. "
         f"Consider upgrading "
     )
 
