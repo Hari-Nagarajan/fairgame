@@ -354,6 +354,9 @@ def amazonajax(
     log.warning(
         "Experimental test balloon.  Do not attempt to use.  Your computer could catch fire."
     )
+    log.warning(
+        "Do not ask for help running this in Discord. Code is work in progress and is likely broken in many places."
+    )
     notification_handler.sound_enabled = not disable_sound
     if not notification_handler.sound_enabled:
         log.info("Local sounds have been disabled.")
