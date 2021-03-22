@@ -421,6 +421,7 @@ class Amazon:
         while not found_asin:
             for i in range(len(self.asin_list)):
                 for asin in self.asin_list[i]:
+                    delay_time = self.get_timeout(delay)
                     if time.time() > update_time:
                         print(recurring_message, SPINNER[idx], end="\r")
                         update_time = int(time.time()) + 1
@@ -429,7 +430,8 @@ class Amazon:
                         log.info(f"Checking ASIN: {asin}.")
                     if self.check_stock(asin, self.reserve_min[i], self.reserve_max[i]):
                         return asin
-                    time.sleep(delay)
+                    if time.time < delay_time:
+                        time.sleep(0.01)
 
     @debug
     def check_stock(self, asin, reserve_min, reserve_max, retry=0):
