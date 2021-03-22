@@ -21,3 +21,4 @@ geckodriver.log
 html_saves/*.html
 screenshots/*.png
 logs/*.log*
+Amazon.bat
