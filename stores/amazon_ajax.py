@@ -372,7 +372,9 @@ class AmazonStoreHandler(BaseStoreHandler):
                 delay_time = start_time + delay
                 successful = False
                 qualified_seller = self.find_qualified_seller(item)
-                log.debug(f"ASIN check for {item.id} took {time.time()-start_time} seconds.")
+                log.debug(
+                    f"ASIN check for {item.id} took {time.time()-start_time} seconds."
+                )
                 if qualified_seller:
                     if self.attempt_atc(offering_id=qualified_seller.offering_id):
                         checkout_attempts = 0

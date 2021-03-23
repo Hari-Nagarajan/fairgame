@@ -19,7 +19,8 @@
 from json.decoder import JSONDecodeError
 
 import requests
-#from utils.logger import log
+
+# from utils.logger import log
 from packaging.version import Version, parse, InvalidVersion
 from requests import exceptions as req_exceptions
 
@@ -54,6 +55,6 @@ def get_latest_version():
         # Return a safe, but wrong version
         latest_version = parse("0.0")
     except req_exceptions.RequestException as e:
-        #log.debug(e)
+        # log.debug(e)
         latest_version = parse("0.0")
     return latest_version

@@ -430,7 +430,7 @@ class Amazon:
                         log.info(f"Checking ASIN: {asin}.")
                     if self.check_stock(asin, self.reserve_min[i], self.reserve_max[i]):
                         return asin
-                    if time.time() < delay_time:
+                    while time.time() < delay_time:
                         time.sleep(0.01)
 
     @debug
@@ -497,7 +497,9 @@ class Amazon:
             # Sanity check to see if we have any offers
             try:
                 # Wait for the page to load before determining what's in it by looking for the footer
-                offer_container = WebDriverWait(self.driver, timeout=DEFAULT_MAX_TIMEOUT).until(
+                offer_container = WebDriverWait(
+                    self.driver, timeout=DEFAULT_MAX_TIMEOUT
+                ).until(
                     lambda d: d.find_element_by_xpath(
                         "//div[@id='aod-container'] | "
                         "//div[@id='backInStock' or @id='outOfStock'] |"
@@ -516,7 +518,10 @@ class Amazon:
                     offer_count = self.driver.find_elements_by_xpath(
                         "//div[@id='aod-pinned-offer' or @id='aod-offer']//input[@name='submit.addToCart']"
                     )
-                elif offer_container.get_attribute("data-action") == "show-all-offers-display":
+                elif (
+                    offer_container.get_attribute("data-action")
+                    == "show-all-offers-display"
+                ):
                     # PDP Page
                     # Find the offers link first, just to burn some cycles in case the flyout is loading
                     open_offers_link = None
@@ -585,7 +590,9 @@ class Amazon:
                 ):
                     # Use the Buy Box as an Offer as a last resort since it is not guaranteed to be a good offer
                     buy_box = True
-                    offer_count = self.driver.find_elements_by_xpath("//div[@id='qualifiedBuybox']//input[@id='add-to-cart-button']")
+                    offer_count = self.driver.find_elements_by_xpath(
+                        "//div[@id='qualifiedBuybox']//input[@id='add-to-cart-button']"
+                    )
                 else:
                     log.warning(
                         "We found elements, but didn't recognize any of the combinations."
@@ -663,7 +670,9 @@ class Amazon:
         timeout = self.get_timeout()
         while True:
             if buy_box:
-                prices = self.driver.find_elements_by_xpath("//span[@id='price_inside_buybox']")
+                prices = self.driver.find_elements_by_xpath(
+                    "//span[@id='price_inside_buybox']"
+                )
             else:
                 prices = self.driver.find_elements_by_xpath(
                     "//div[@id='aod-pinned-offer' or @id='aod-offer']//div[contains(@id, 'aod-price')]//span[@class='a-price']//span[@class='a-offscreen']"
@@ -1709,7 +1718,9 @@ def get_timestamp_filename(name, extension):
 
 def get_shipping_costs(tree, free_shipping_string):
     # This version expects to find the shipping pricing within a div with the explicit ID 'delivery-message'
-    shipping_xpath = ".//div[@id='delivery-message'] | .//span[@id='priceBadging_feature_div']"
+    shipping_xpath = (
+        ".//div[@id='delivery-message'] | .//span[@id='priceBadging_feature_div']"
+    )
     shipping_nodes = tree.xpath(shipping_xpath)
     count = len(shipping_nodes)
     if count > 0:

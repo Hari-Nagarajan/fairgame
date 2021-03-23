@@ -242,7 +242,7 @@ def amazon(
         encryption_pass=p,
         log_stock_check=log_stock_check,
         shipping_bypass=shipping_bypass,
-        wait_on_captcha_fail=captcha_wait
+        wait_on_captcha_fail=captcha_wait,
     )
 
     try:
@@ -384,7 +384,7 @@ def amazonajax(
         encryption_pass=p,
         log_stock_check=log_stock_check,
         shipping_bypass=shipping_bypass,
-        wait_on_captcha_fail=captcha_wait
+        wait_on_captcha_fail=captcha_wait,
     )
 
     try:
