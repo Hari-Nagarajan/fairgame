@@ -230,7 +230,7 @@ class AmazonStoreHandler(BaseStoreHandler):
             email_field: WebElement = WebDriverWait(self.driver, 10).until(
                 EC.presence_of_element_located((By.XPATH, '//*[@id="ap_email"]'))
             )
-            with self.wait_for_page_change():
+            with self.wait_for_page_content_change():
                 email_field.clear()
                 email_field.send_keys(amazon_config["username"] + Keys.RETURN)
             if self.driver.find_elements_by_xpath('//*[@id="auth-error-message-box"]'):
@@ -265,7 +265,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                     '//*[@id="auth-captcha-guess"]'
                 )
             except NoSuchElementException:
-                with self.wait_for_page_change(timeout=10):
+                with self.wait_for_page_content_change(timeout=10):
                     password_field.send_keys(Keys.RETURN)
 
         except NoSuchElementException:
@@ -291,7 +291,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                     self.send_notification(
                         "Solving catpcha", "captcha", self.take_screenshots
                     )
-                    with self.wait_for_page_change(timeout=10):
+                    with self.wait_for_page_content_change(timeout=10):
                         captcha_entry.clear()
                         captcha_entry.send_keys(solution + Keys.RETURN)
 
@@ -1232,7 +1232,8 @@ class AmazonStoreHandler(BaseStoreHandler):
 
     def get_page(self, url):
         try:
-            self.driver.get(url=url)
+            with self.wait_for_page_content_change():
+                self.driver.get(url=url)
             return True
         except TimeoutException:
             log.debug("Failed to load page within timeout period")
