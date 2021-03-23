@@ -404,6 +404,9 @@ Open terminal. Either right click desktop and go to Open In Terminal, or search 
 Install Google Chrome:
 `wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && sudo dpkg -i google-chrome-stable_current_amd64.deb`
 
+Add Python3 repo:
+`sudo add-apt-repository universe && sudo apt-get update`
+
 Install Pip:
 `sudo apt install python3-pip`
 
