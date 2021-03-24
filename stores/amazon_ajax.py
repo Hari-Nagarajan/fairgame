@@ -1266,9 +1266,11 @@ class AmazonStoreHandler(BaseStoreHandler):
         with open(file_name, "w", encoding="utf-8") as f:
             f.write(page_source)
 
-    def check_captcha(self, f):
+    def check_captcha_selenium(self, f):
         @wraps(f)
         def wrapper(*args, **kwargs):
+            with self.wait_for_page_content_change():
+                f(*args, **kwargs)
             try:
                 captcha_element = self.get_amazon_element(key="CAPTCHA_VALIDATE")
             except NoSuchElementException:
@@ -1335,7 +1337,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                         return True
                     else:
                         return False
-            return f(*args, **kwargs)
+            return True
         return wrapper
 
 
