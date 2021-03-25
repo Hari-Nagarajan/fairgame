@@ -576,6 +576,7 @@ developers.
 
 # Issues Running FairGame 
 ## Known Issues
+* DO NOT change the zoom setting of the browser (it must be at 100%). Selenium doesn't work with the zoom at any other setting.
 * Pipenv does not like spaces in file paths, so you will either need to run from a place where you do not have spaces 
   in the file path, or set the option for pipenv to run locally in relation to the current file directory with:
 ```shell
