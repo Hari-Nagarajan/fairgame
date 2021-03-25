@@ -1276,16 +1276,18 @@ class AmazonStoreHandler(BaseStoreHandler):
             except NoSuchElementException:
                 captcha_element = None
             if captcha_element:
-                captcha_link = self.driver.page_source.split('<img src="')[1].split('">')[0]  # extract captcha link
-                captcha = AmazonCaptcha.fromlink(captcha_link)  # pass it to `fromlink` class method
+                captcha_link = self.driver.page_source.split('<img src="')[1].split(
+                    '">'
+                )[
+                    0
+                ]  # extract captcha link
+                captcha = AmazonCaptcha.fromlink(
+                    captcha_link
+                )  # pass it to `fromlink` class method
                 if captcha == "Not solved":
-                    log.info(
-                        f"Failed to solve {captcha.image_link}"
-                    )
+                    log.info(f"Failed to solve {captcha.image_link}")
                     if self.wait_on_captcha_fail:
-                        log.info(
-                            "Will wait up to 60 seconds for user to solve captcha"
-                        )
+                        log.info("Will wait up to 60 seconds for user to solve captcha")
                         self.send(
                             "User Intervention Required - captcha check",
                             "captcha",
@@ -1295,15 +1297,15 @@ class AmazonStoreHandler(BaseStoreHandler):
                             timeout = self.get_timeout(timeout=60)
                             current_page = self.driver.title
                             while (
-                                    time.time() < timeout
-                                    and self.driver.title == current_page
+                                time.time() < timeout
+                                and self.driver.title == current_page
                             ):
                                 time.sleep(0.5)
                             # check above is not true, then we must have passed captcha, return back to nav handler
                             # Otherwise refresh page to try again - either way, returning to nav page handler
                             if (
-                                    time.time() > timeout
-                                    and self.driver.title == current_page
+                                time.time() > timeout
+                                and self.driver.title == current_page
                             ):
                                 log.info(
                                     "User intervention did not occur in time - will attempt to refresh page and try again"
@@ -1320,13 +1322,17 @@ class AmazonStoreHandler(BaseStoreHandler):
                             "Solving catpcha", "captcha", self.take_screenshots
                         )
                     try:
-                        captcha_field = self.get_amazon_element(key="CAPTCHA_TEXT_FIELD")
+                        captcha_field = self.get_amazon_element(
+                            key="CAPTCHA_TEXT_FIELD"
+                        )
                     except NoSuchElementException:
                         log.debug("Could not locate captcha entry field")
                         captcha_field = None
                     if captcha_field:
                         try:
-                            check_password = self.get_amazon_element(key="PASSWORD_TEXT_FIELD")
+                            check_password = self.get_amazon_element(
+                                key="PASSWORD_TEXT_FIELD"
+                            )
                         except NoSuchElementException:
                             check_password = None
                         if check_password:
@@ -1338,6 +1344,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                     else:
                         return False
             return True
+
         return wrapper
 
 

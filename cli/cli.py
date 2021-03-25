@@ -109,6 +109,7 @@ def main():
 @click.command()
 @click.option("--no-image", is_flag=True, help="Do not load images")
 @click.option("--headless", is_flag=True, help="Headless mode.")
+@click.option("--disable-gpu", is_flag=True, help="Disable GPU acceleration.")
 @click.option(
     "--test",
     is_flag=True,
@@ -195,6 +196,7 @@ def main():
 def amazon(
     no_image,
     headless,
+    disable_gpu,
     test,
     delay,
     checkshipping,
@@ -230,6 +232,7 @@ def amazon(
 
     amzn_obj = Amazon(
         headless=headless,
+        disable_gpu=disable_gpu,
         notification_handler=notification_handler,
         checkshipping=checkshipping,
         detailed=detailed,
