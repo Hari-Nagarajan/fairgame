@@ -63,6 +63,18 @@ except ModuleNotFoundError as e:
     exit(0)
 
 if __name__ == "__main__":
+    # Create necessary sub-directories if they don't exist
+    if not os.path.exists("screenshots"):
+        try:
+            os.makedirs("screenshots")
+        except:
+            raise
+
+    if not os.path.exists("html_saves"):
+        try:
+            os.makedirs("html_saves")
+        except:
+            raise
     try:
         cli.main()
     except ModuleNotFoundError as e:
