@@ -21,7 +21,7 @@ Steps to reproduce the behavior:
 A clear and concise description of what you expected to happen.
 
 **Screenshots**
-If applicable, add screenshots to help explain your problem. These are found in the bot directory.
+Add screenshots to help explain your problem. Submit screenshots of your terminal window and your browser, if applicable. Browser screenshots can sometimes be found in the bot directory. **Do not submit an issue without screenshots and/or log files.**
 
 **Desktop (please complete the following information):**
  - OS: [e.g. iOS]
