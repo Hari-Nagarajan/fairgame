@@ -654,10 +654,19 @@ class AmazonStoreHandler(BaseStoreHandler):
 
         tree = html.fromstring(payload)
 
+        # look for product ASIN
         page_asin = tree.xpath("//input[@id='ftSelectAsin']")
-        if page_asin[0].value.strip() != item.id:
+        if page_asin:
+            try:
+                found_asin = page_asin[0].value.strip()
+            except AttributeError or IndexError:
+                found_asin = "[NO ASIN FOUND ON PAGE]"
+        else:
+            found_asin = "[NO ASIN FOUND ON PAGE]"
+
+        if found_asin != item.id:
             log.debug(
-                f"Page ASIN was {page_asin[0].value.strip()}; Item ASIN was {item.id}"
+                f"Aborting Check, ASINs do not match. Found {found_asin}; Searching for {item.id}."
             )
             return None
 
