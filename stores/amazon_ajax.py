@@ -45,6 +45,8 @@ from stores.basestore import BaseStoreHandler
 from utils.logger import log
 from utils.selenium_utils import enable_headless, options
 
+from functools import wraps
+
 # PDP_URL = "https://smile.amazon.com/gp/product/"
 # AMAZON_DOMAIN = "www.amazon.com.au"
 # AMAZON_DOMAIN = "www.amazon.com.br"
@@ -1278,6 +1280,87 @@ class AmazonStoreHandler(BaseStoreHandler):
         page_source = self.driver.page_source
         with open(file_name, "w", encoding="utf-8") as f:
             f.write(page_source)
+
+    def check_captcha_selenium(self, f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            with self.wait_for_page_content_change():
+                f(*args, **kwargs)
+            try:
+                captcha_element = self.get_amazon_element(key="CAPTCHA_VALIDATE")
+            except NoSuchElementException:
+                captcha_element = None
+            if captcha_element:
+                captcha_link = self.driver.page_source.split('<img src="')[1].split(
+                    '">'
+                )[
+                    0
+                ]  # extract captcha link
+                captcha = AmazonCaptcha.fromlink(
+                    captcha_link
+                )  # pass it to `fromlink` class method
+                if captcha == "Not solved":
+                    log.info(f"Failed to solve {captcha.image_link}")
+                    if self.wait_on_captcha_fail:
+                        log.info("Will wait up to 60 seconds for user to solve captcha")
+                        self.send(
+                            "User Intervention Required - captcha check",
+                            "captcha",
+                            self.take_screenshots,
+                        )
+                        with self.wait_for_page_content_change():
+                            timeout = self.get_timeout(timeout=60)
+                            current_page = self.driver.title
+                            while (
+                                time.time() < timeout
+                                and self.driver.title == current_page
+                            ):
+                                time.sleep(0.5)
+                            # check above is not true, then we must have passed captcha, return back to nav handler
+                            # Otherwise refresh page to try again - either way, returning to nav page handler
+                            if (
+                                time.time() > timeout
+                                and self.driver.title == current_page
+                            ):
+                                log.info(
+                                    "User intervention did not occur in time - will attempt to refresh page and try again"
+                                )
+                                return False
+                            elif self.driver.title != current_page:
+                                return True
+                    else:
+                        return False
+                else:  # solved!
+                    # take screenshot if user asked for detailed
+                    if self.detailed:
+                        self.send_notification(
+                            "Solving catpcha", "captcha", self.take_screenshots
+                        )
+                    try:
+                        captcha_field = self.get_amazon_element(
+                            key="CAPTCHA_TEXT_FIELD"
+                        )
+                    except NoSuchElementException:
+                        log.debug("Could not locate captcha entry field")
+                        captcha_field = None
+                    if captcha_field:
+                        try:
+                            check_password = self.get_amazon_element(
+                                key="PASSWORD_TEXT_FIELD"
+                            )
+                        except NoSuchElementException:
+                            check_password = None
+                        if check_password:
+                            check_password.clear()
+                            check_password.send_keys(amazon_config["password"])
+                        with self.wait_for_page_content_change():
+                            captcha_field.send_keys(captcha + Keys.RETURN)
+                        return True
+                    else:
+                        return False
+            return True
+
+        return wrapper
 
 
 def parse_condition(condition: str) -> AmazonItemCondition:
