@@ -359,15 +359,22 @@ class AmazonStoreHandler(BaseStoreHandler):
         update_time = get_timeout(1)
         idx = 0
         spinner = ["-", "\\", "|", "/"]
+        check_count = 1
         while self.item_list:
-            if time.time() > update_time:
-                print(recurring_message, spinner[idx], end="\r")
-                update_time = get_timeout(1)
-                idx += 1
-                if idx == len(spinner):
-                    idx = 0
 
             for item in self.item_list:
+                if time.time() > update_time:
+                    print(
+                        recurring_message,
+                        f"Checked {item.id}; Check Count: {check_count} ,",
+                        spinner[idx],
+                        end="\r",
+                    )
+                    update_time = get_timeout(1)
+                    check_count += 1
+                    idx += 1
+                    if idx == len(spinner):
+                        idx = 0
                 start_time = time.time()
                 delay_time = start_time + delay
                 successful = False
@@ -447,21 +454,22 @@ class AmazonStoreHandler(BaseStoreHandler):
 
     def find_qualified_seller(self, item) -> SellerDetail or None:
         item_sellers = self.get_item_sellers(item, amazon_config["FREE_SHIPPING"])
-        for seller in item_sellers:
-            if not self.check_shipping and not free_shipping_check(seller):
-                log.debug("Failed shipping hurdle.")
-                return
-            log.debug("Passed shipping hurdle.")
-            if not condition_check(item, seller):
-                log.debug("Failed item condition hurdle.")
-                return
-            log.debug("Passed item condition hurdle.")
-            if not price_check(item, seller):
-                log.debug("Failed price condition hurdle.")
-                return
-            log.debug("Pass price condition hurdle.")
+        if item_sellers:
+            for seller in item_sellers:
+                if not self.check_shipping and not free_shipping_check(seller):
+                    log.debug("Failed shipping hurdle.")
+                    return
+                log.debug("Passed shipping hurdle.")
+                if not condition_check(item, seller):
+                    log.debug("Failed item condition hurdle.")
+                    return
+                log.debug("Passed item condition hurdle.")
+                if not price_check(item, seller):
+                    log.debug("Failed price condition hurdle.")
+                    return
+                log.debug("Pass price condition hurdle.")
 
-            return seller
+                return seller
 
     def parse_config(self):
         log.debug(f"Processing config file from {CONFIG_FILE_PATH}")
@@ -643,6 +651,13 @@ class AmazonStoreHandler(BaseStoreHandler):
             return sellers
 
         tree = html.fromstring(payload)
+
+        page_asin = tree.xpath("//input[@id='ftSelectAsin']")
+        if page_asin[0].value.strip() != item.id:
+            log.debug(
+                f"Page ASIN was {page_asin[0].value.strip()}; Item ASIN was {item.id}"
+            )
+            return None
 
         # Get the pinned offer, if it exists, by checking for a pinned offer area and add to cart button
         pinned_offer = tree.xpath("//div[@id='aod-sticky-pinned-offer']")
