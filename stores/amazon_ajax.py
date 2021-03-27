@@ -84,7 +84,20 @@ HEADERS = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
     "Accept-Encoding": "gzip, deflate, sdch, br",
     "Accept-Language": "en-US,en;q=0.8",
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36",
+    "downlink": "8.35",
+    "ect": "4g",
+    "origin": "https://smile.amazon.com",
+    "pragma": "no-cache",
+    "rtt": "50",
+    "sec-ch-ua": '"Google Chrome";v="89", "Chromium";v="89", ";Not A Brand";v="99"',
+    "sec-ch-ua-mobile": "?0",
+    "sec-fetch-dest": "document",
+    "sec-fetch-mode": "navigate",
+    "sec-fetch-site": "same-origin",
+    "sec-fetch-user": "?1",
+    "upgrade-insecure-requests": "1",
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36",
+    "content-type": "application/x-www-form-urlencoded",
 }
 
 
@@ -382,7 +395,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                 successful = False
                 qualified_seller = self.find_qualified_seller(item)
                 log.debug(
-                    f"ASIN check for {item.id} took {time.time()-start_time} seconds."
+                    f"ASIN check for {item.id} took {time.time() - start_time} seconds."
                 )
                 if qualified_seller:
                     if self.attempt_atc(offering_id=qualified_seller.offering_id):
@@ -681,7 +694,9 @@ class AmazonStoreHandler(BaseStoreHandler):
                 merchant_name = offer.xpath(
                     ".//span[@class='a-size-small a-color-base']"
                 )[0].text.strip()
-                price_text = offer.xpath(".//span[@class='a-price-whole']")[0].text
+                price_text = offer.xpath(".//span[@class='a-price-whole']")[
+                    0
+                ].text.strip()
                 price = parse_price(price_text)
                 shipping_cost = get_shipping_costs(offer, free_shipping_strings)
                 condition_heading = offer.xpath(".//div[@id='aod-offer-heading']/h5")
@@ -697,6 +712,192 @@ class AmazonStoreHandler(BaseStoreHandler):
                     offer_id = offers[0].value
                 else:
                     log.error("No offer ID found!")
+
+                #################################
+                ### REQUESTS CODE STARTS HERE ###
+                #################################
+
+                post_info = offer.xpath(".//form")
+                # print(post_info)
+                # for item in post_info:
+                #     print(item)
+                #     print(item.action)
+                # os.system("pause")
+
+                post_action = post_info[0].action
+                post_inputs = offer.xpath(".//form//input")
+                post_payload = {}
+                for thing in post_inputs:
+                    post_payload[thing.name] = thing.value
+                if post_payload["submit.addToCart"] is None:
+                    post_payload["submit.addToCart"] = "Submit"
+
+                headers = HEADERS
+                # print(self.amazon_cookies)
+                cookies = {c["name"]: c["value"] for c in self.amazon_cookies}
+                # print(cookies)
+                # os.system("pause")
+                cookie_list = []
+                for cookie in cookies:
+                    cookie_list.append(f"{cookie}={cookies[cookie]}")
+                    # cookie_string.append(f"{cookie.key}={cookie.value}")
+                cookie_header = "; ".join(cookie_list)
+                # print(cookie_header)
+                # os.system("pause")
+                # exit(1)
+                headers["cookie"] = cookie_header
+                headers[
+                    "referer"
+                ] = f"https://smile.amazon.com/gp/aod/ajax?asin={item.id}"
+                # print(headers)
+                # os.system("pause")
+                submit_url = f"https://smile.amazon.com{post_action}"
+
+                post_payload["session-id"] = cookies["session-id"]
+
+                r = requests.post(submit_url, headers=headers, data=post_payload)
+
+                submit_url = "https://smile.amazon.com/gp/cart/view.html/ref=lh_co_dup?ie=UTF8&proceedToCheckout.x=129"
+                r = requests.get(submit_url, headers=headers)
+
+                pyo_html = html.fromstring(r.text)
+
+                PYO_params = {
+                    "submitFromSPC": "",
+                    "fasttrackExpiration": "",
+                    "countdownThreshold": "",
+                    "showSimplifiedCountdown": "",
+                    "countdownId": "",
+                    "gift-message-text": "",
+                    "concealment-item-message": "Ship+in+Amazon+packaging+selected",
+                    "dupOrderCheckArgs": "",
+                    "order0": "",
+                    "shippingofferingid0.0": "",
+                    "guaranteetype0.0": "",
+                    "issss0.0": "",
+                    "shipsplitpriority0.0": "",
+                    "isShipWhenCompleteValid0.0": "",
+                    "isShipWheneverValid0.0": "",
+                    "shippingofferingid0.1": "",
+                    "guaranteetype0.1": "",
+                    "issss0.1": "",
+                    "shipsplitpriority0.1": "",
+                    "isShipWhenCompleteValid0.1": "",
+                    "isShipWheneverValid0.1": "",
+                    "shippingofferingid0.2": "",
+                    "guaranteetype0.2": "",
+                    "issss0.2:": "",
+                    "shipsplitpriority0.2": "",
+                    "isShipWhenCompleteValid0.2": "",
+                    "isShipWheneverValid0.2": "",
+                    "previousshippingofferingid0": "",
+                    "previousguaranteetype0": "",
+                    "previousissss0": "",
+                    "previousshippriority0": "",
+                    "lineitemids0": "",
+                    "currentshippingspeed": "",
+                    "previousShippingSpeed0": "",
+                    "currentshipsplitpreference": "",
+                    "shippriority.0.shipWhenever": "",
+                    "groupcount": "",
+                    "shiptrialprefix": "",
+                    "csrfToken": "",
+                    "fromAnywhere": "",
+                    "redirectOnSuccess": "",
+                    "purchaseTotal": "",
+                    "purchaseTotalCurrency": "",
+                    "purchaseID": "",
+                    "purchaseCustomerId": "",
+                    "useCtb": "",
+                    "scopeId": "",
+                    "isQuantityInvariant": "",
+                    "promiseTime-0": "",
+                    "promiseAsin-0": "",
+                    "selectedPaymentPaystationId": "",
+                    "hasWorkingJavascript": "1",
+                    "placeYourOrder1": "1",
+                    "isfirsttimecustomer": "0",
+                    "isTFXEligible": "",
+                    "isFxEnabled": "",
+                    "isFXTncShown": "",
+                }
+
+                PYO_keys = [
+                    "submitFromSPC",
+                    "fasttrackExpiration",
+                    "countdownThreshold",
+                    "showSimplifiedCountdown",
+                    "countdownId",
+                    "dupOrderCheckArgs",
+                    "order0",
+                    "shippingofferingid0.0",
+                    "guaranteetype0.0",
+                    "issss0.0",
+                    "shipsplitpriority0.0",
+                    "isShipWhenCompleteValid0.0",
+                    "isShipWheneverValid0.0",
+                    "shippingofferingid0.1",
+                    "guaranteetype0.1",
+                    "issss0.1",
+                    "shipsplitpriority0.1",
+                    "isShipWhenCompleteValid0.1",
+                    "isShipWheneverValid0.1",
+                    "shippingofferingid0.2",
+                    "guaranteetype0.2",
+                    "issss0.2:",
+                    "shipsplitpriority0.2",
+                    "isShipWhenCompleteValid0.2",
+                    "isShipWheneverValid0.2",
+                    "previousshippingofferingid0",
+                    "previousguaranteetype0",
+                    "previousissss0",
+                    "previousshippriority0",
+                    "lineitemids0",
+                    "currentshippingspeed",
+                    "previousShippingSpeed0",
+                    "currentshipsplitpreference",
+                    "shippriority.0.shipWhenever",
+                    "groupcount",
+                    "shiptrialprefix",
+                    "csrfToken",
+                    "fromAnywhere",
+                    "redirectOnSuccess",
+                    "purchaseTotal",
+                    "purchaseTotalCurrency",
+                    "purchaseID",
+                    "purchaseCustomerId",
+                    "useCtb",
+                    "scopeId",
+                    "isQuantityInvariant",
+                    "promiseTime-0",
+                    "promiseAsin-0",
+                    "selectedPaymentPaystationId",
+                    "isfirsttimecustomer",
+                    "isTFXEligible",
+                    "isFxEnabled",
+                    "isFXTncShown",
+                ]
+
+                quantity_key = pyo_html.xpath(
+                    ".//label[@class='a-native-dropdown quantity-dropdown-select js-select']"
+                )[0].values()[0]
+                PYO_params[quantity_key] = "1"
+                for key in PYO_keys:
+                    try:
+                        value = pyo_html.xpath(f".//input[@name='{key}']")[0].value
+                        PYO_params[key] = value
+                    except IndexError:
+                        pass
+
+                print(PYO_params)
+                os.system("pause")
+
+                submit_url = f"https://smile.amazon.com/gp/buy/spc/handlers/static-submit-decoupled.html/ref=ox_spc_place_order?"
+                r = requests.post(submit_url, headers=headers, data=PYO_params)
+
+                ################################
+                ### REQUESTS CODE STOPS HERE ###
+                ################################
 
                 seller = SellerDetail(
                     merchant_name,
