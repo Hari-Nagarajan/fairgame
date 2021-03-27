@@ -20,7 +20,6 @@
     * [Notifications](#Notifications)
         * [Sounds](#Sounds)
         * [Apprise](#Apprise)
-        * [Pavlok](#Pavlok)
         * [Testing notifications](#Testing-notifications)
     * [CLI Tools](#CLI-Tools)
         * [CDN Endpoints](#CDN-Endpoints)
@@ -66,10 +65,10 @@ FairGame only works on Amazon and can automatically check out.
 
 ## Requirements
 
-***!!! YOU WILL NEED TO USE THE 3.8.5+ BRANCH OF PYTHON, ANY OTHER BRANCH/VERSION (Anaconda, 2.7, 3.9.x, 
+***!!! YOU WILL NEED TO USE THE 3.8 BRANCH OF PYTHON, ANY OTHER BRANCH/VERSION (Anaconda, 2.7, 3.9.x, 3.10, 4.0,
 toaster, etc.) BREAKS DEPENDENCIES !!!***
 
-It is best if you use the newest version (3.8.8) but 3.8.5, 3.8.6, and 3.8.7 should also work. 
+It is best if you use the newest version of **3.8** (at this time, 3.8.8) but 3.8.5, 3.8.6, and 3.8.7 should also work. 
 
 It also requires a working Chrome installation. 
 Running it on a potato (<2GB of RAM) is not suggested. 
@@ -323,7 +322,6 @@ If you ever forget your encryption password, just delete this file and the next 
 An example of this will look like the following:
 
 ```shell
-python app.py amazon
 INFO Initializing Apprise handler
 INFO Initializing other notification handlers
 INFO Enabled Handlers: ['Audio']
@@ -339,7 +337,6 @@ INFO Credentials safely stored.
 Starting the bot when you have created an encrypted file:
 
 ```shell
-python app.py amazon --test
 INFO Initializing Apprise handler
 INFO Initializing other notification handlers
 INFO Enabled Handlers: ['Audio']
@@ -393,7 +390,7 @@ Type `pipenv shell` and hit enter.
 
 Type `pipenv install` and hit enter. 
 
-Type `python app.py amazon` and go through setup. You will also need to set up the config file, seen below in the Configuration section
+Type `pipenv run python app.py amazon` and go through setup. You will also need to set up the config file, seen below in the Configuration section
 
 #### Installation Ubuntu 20.10 (and probably other distros)
 
@@ -488,7 +485,7 @@ to
 
 Then save and close the file.
 
-Back in the terminal you kept open, under the fairgame folder you can now type `python app.py amazon` and run the bot, or add any flags after you wish to use like --headless or --delay x to make `python app.py amazon --headless --delay 4`
+Back in the terminal you kept open, under the fairgame folder you can now type `pipenv run python app.py amazon` and run the bot, or add any flags after you wish to use like `--headless` or `--delay x` to make `pipenv run python app.py amazon --headless --delay 4`
 
 # Advanced Configuration 
 ## Notifications
@@ -527,20 +524,6 @@ tgram://{bot_token}/{chat_id}/
 # Slack (https://github.com/caronc/apprise/wiki/Notify_slack)
 https://hooks.slack.com/services/{tokenA}/{tokenB}/{tokenC}
 
-```
-
-### Pavlok
-
-To enable shock notifications to
-your [Pavlok Shockwatch](https://www.amazon.com/Pavlok-PAV2-PERIMETER-BLACK-2/dp/B01N8VJX8P?), store the url from the
-pavlok app in the ```pavlok_config.json``` file, you can copy the template from ```pavlok_config.template_json```.
-
-**WARNING:** This feature does not currently support adjusting the intensity, it will always be max (255).
-
-```json
-{
-  "base_url": "url goes here"
-}
 ```
 
 ### Testing notifications
@@ -593,6 +576,7 @@ developers.
 
 # Issues Running FairGame 
 ## Known Issues
+* DO NOT change the zoom setting of the browser (it must be at 100%). Selenium doesn't work with the zoom at any other setting.
 * Pipenv does not like spaces in file paths, so you will either need to run from a place where you do not have spaces 
   in the file path, or set the option for pipenv to run locally in relation to the current file directory with:
 ```shell
@@ -654,5 +638,4 @@ answers. If you don't find it there, ask in #tech-support.
    option due to the smaller memory footprint. Still awaiting community feedback on running on a Pi 3. CPU and memory
    capacity seem to be the limiting factor for older Pi models. The Pi is also much slower then even a semi-recent
    (5 years or less) laptop. 
-
 
