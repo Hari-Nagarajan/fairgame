@@ -77,7 +77,7 @@ AMAZON_URLS = {
 PDP_PATH = f"/dp/"
 REALTIME_INVENTORY_PATH = f"gp/aod/ajax?asin="
 
-CONFIG_FILE_PATH = "config/amazon_ajax_config.json"
+CONFIG_FILE_PATH = "config/amazon_requests_config.json"
 STORE_NAME = "Amazon"
 DEFAULT_MAX_TIMEOUT = 10
 
@@ -788,18 +788,25 @@ class AmazonStoreHandler(BaseStoreHandler):
 
         r = self.session.post(url=url, data=payload_inputs)
 
-        if r.status_code is "200":
+        print(r.status_code)
+        with open("atc-response", "w") as f:
+            f.write(r.text)
+        if r.status_code == 200:
+            log.info("ATC successful")
             return True
         else:
+            log.info("ATC unsuccessful")
             return False
 
     def ptc(self):
         url = f"https://{self.amazon_domain}/gp/cart/view.html/ref=lh_co_dup?ie=UTF8&proceedToCheckout.x=129"
         r = self.session.get(url=url)
 
-        if r.status_code is "200":
+        if r.status_code == 200:
+            log.info("PTC successful")
             return r.text
         else:
+            log.info("PTC unsuccessful")
             return None
 
     def pyo(self, page):
@@ -880,14 +887,10 @@ class AmazonStoreHandler(BaseStoreHandler):
         url = f"https://{self.amazon_domain}/gp/buy/spc/handlers/static-submit-decoupled.html/ref=ox_spc_place_order?"
         r = self.session.post(url=url, data=pyo_params)
 
-        if r.status_code is "200":
+        if r.status_code == 200:
             return True
         else:
             return False
-
-        ################################
-        ### REQUESTS CODE STOPS HERE ###
-        ################################
 
     def get_real_time_data(self, item):
         log.debug(f"Calling {STORE_NAME} for {item.short_name} using {item.furl.url}")

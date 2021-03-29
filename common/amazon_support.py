@@ -59,7 +59,7 @@ class SellerDetail:
     shipping_cost: Price
     condition: int = AmazonItemCondition.New
     offering_id: str = None
-    atc_form = []
+    atc_form: list = []
 
     @property
     def selling_price(self) -> Decimal:

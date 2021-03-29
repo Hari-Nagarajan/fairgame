@@ -32,7 +32,7 @@ from common.globalconfig import AMAZON_CREDENTIAL_FILE, GlobalConfig
 from notifications.notifications import NotificationHandler, TIME_FORMAT
 
 from stores.amazon import Amazon
-from stores.amazon_ajax import AmazonStoreHandler
+from stores.amazon_requests import AmazonStoreHandler
 from utils.logger import log
 from utils.version import is_latest, version, get_latest_version
 
@@ -69,7 +69,10 @@ def notify_on_crash(func):
             pass
         else:
             notification_handler.send_notification(f"FairGame has crashed.")
-            raise
+            try:
+                raise
+            except RuntimeError:
+                pass
 
     return decorator
 
@@ -77,33 +80,6 @@ def notify_on_crash(func):
 @click.group()
 def main():
     pass
-
-
-# @click.command()
-# @click.option(
-#     "--gpu",
-#     type=click.Choice(GPU_DISPLAY_NAMES, case_sensitive=False),
-#     prompt="What GPU are you after?",
-#     cls=QuestionaryOption,
-# )
-# @click.option(
-#     "--locale",
-#     type=click.Choice(CURRENCY_LOCALE_MAP.keys(), case_sensitive=False),
-#     prompt="What locale shall we use?",
-#     cls=QuestionaryOption,
-# )
-# @click.option("--test", is_flag=True)
-# @click.option("--interval", type=int, default=5)
-# @notify_on_crash
-# def nvidia(gpu, locale, test, interval):
-#     nv = NvidiaBuyer(
-#         gpu,
-#         notification_handler=notification_handler,
-#         locale=locale,
-#         test=test,
-#         interval=interval,
-#     )
-#     nv.run_items()
 
 
 @click.command()
@@ -336,7 +312,7 @@ def amazon(
     help="Wait if captcha could not be solved. Only occurs if enters captcha handler during checkout.",
 )
 @notify_on_crash
-def amazonajax(
+def amazonrequests(
     headless,
     test,
     delay,
@@ -375,7 +351,7 @@ def amazonajax(
     if clean_credentials and os.path.exists(AMAZON_CREDENTIAL_FILE):
         log.info(f"Removing existing Amazon credentials from {AMAZON_CREDENTIAL_FILE}")
         os.remove(AMAZON_CREDENTIAL_FILE)
-    amazon_ajax_obj = AmazonStoreHandler(
+    amazon_requests_obj = AmazonStoreHandler(
         headless=headless,
         notification_handler=notification_handler,
         checkshipping=checkshipping,
@@ -392,9 +368,9 @@ def amazonajax(
 
     try:
 
-        amazon_ajax_obj.run(delay=delay, test=test)
+        amazon_requests_obj.run(delay=delay, test=test)
     except RuntimeError:
-        del amazon_ajax_obj
+        del amazon_requests_obj
         log.error("Exiting Program...")
         time.sleep(5)
 
@@ -551,7 +527,7 @@ def show_traceroutes(domain):
 signal(SIGINT, interrupt_handler)
 
 main.add_command(amazon)
-main.add_command(amazonajax)
+main.add_command(amazonrequests)
 main.add_command(test_notifications)
 main.add_command(show)
 main.add_command(find_endpoints)
