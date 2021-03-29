@@ -216,7 +216,7 @@ class AmazonStoreHandler(BaseStoreHandler):
             return not any(sign_in in text for sign_in in amazon_config["SIGN_IN_TEXT"])
         except NoSuchElementException:
 
-            return False
+            return True
 
     def login(self):
         log.info(f"Logging in to {self.amazon_domain}...")
@@ -410,6 +410,8 @@ class AmazonStoreHandler(BaseStoreHandler):
                 if qualified_seller:
                     if self.atc(qualified_seller=qualified_seller, item=item):
                         r = self.ptc()
+                        with open("ptc-source.html", "w", encoding="utf-8") as f:
+                            f.write(r)
                         if r:
                             if test:
                                 print(
@@ -769,7 +771,9 @@ class AmazonStoreHandler(BaseStoreHandler):
             else:
                 log.error("No offer ID found!")
 
-            atc_form = offer.xpath(".//form")
+            atc_form = []
+            atc_form.append(offer.xpath(".//form[@method='post']")[0].action)
+            atc_form.append(offer.xpath(".//form//input"))
 
             seller = SellerDetail(
                 merchant_name,
@@ -777,6 +781,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                 shipping_cost,
                 condition,
                 offer_id,
+                atc_form=atc_form,
             )
             sellers.append(seller)
         return sellers
