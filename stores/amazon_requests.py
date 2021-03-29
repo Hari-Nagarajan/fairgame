@@ -411,7 +411,14 @@ class AmazonStoreHandler(BaseStoreHandler):
                     if self.atc(qualified_seller=qualified_seller, item=item):
                         r = self.ptc()
                         if r:
-                            if self.pyo(page=r):
+                            if test:
+                                print(
+                                    "Proceeded to Checkout - Will not Place Order as this is a Test",
+                                    end="/r",
+                                )
+                                # in Test mode, clear the list
+                                self.item_list.clear()
+                            elif self.pyo(page=r):
                                 if self.single_shot:
                                     self.item_list.clear()
                                 else:
@@ -731,7 +738,10 @@ class AmazonStoreHandler(BaseStoreHandler):
 
         offers = tree.xpath("//div[@id='aod-offer']")
         if not offers:
-            log.debug(f"No offers found for {item.id} = {item.short_name}")
+            if sellers:
+                log.debug(f"Only found pinned offer for {item.id} = {item.short_name}")
+            else:
+                log.debug(f"No offers found for {item.id} = {item.short_name}")
             return sellers
         for idx, offer in enumerate(offers):
             # This is preferred, but Amazon itself has unique URL parameters that I haven't identified yet
@@ -789,7 +799,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         r = self.session.post(url=url, data=payload_inputs)
 
         print(r.status_code)
-        with open("atc-response", "w") as f:
+        with open("atc-response.html", "w") as f:
             f.write(r.text)
         if r.status_code == 200:
             log.info("ATC successful")
