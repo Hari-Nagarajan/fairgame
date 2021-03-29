@@ -18,17 +18,17 @@ class AmazonItemCondition(Enum):
     Renewed = 20
     Refurbished = 20
     Rental = 30
-    Open_box = 40
-    OpenBoxLikeNew = 40
-    Used = 40
-    UsedLikeNew = 40
-    UsedVeryGood = 50
-    UsedGood = 60
-    UsedAcceptable = 70
     CollectibleLikeNew = 40
     CollectibleVeryGood = 50
     CollectibleGood = 60
     CollectibleAcceptable = 70
+    Open_box = 40
+    OpenBoxLikeNew = 40
+    UsedLikeNew = 40
+    UsedVeryGood = 50
+    UsedGood = 60
+    UsedAcceptable = 70
+    Used = 80
     Unknown = 1000
 
     @classmethod
