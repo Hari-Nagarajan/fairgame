@@ -885,8 +885,8 @@ class AmazonStoreHandler(BaseStoreHandler):
 
         quantity_key = pyo_html.xpath(
             ".//label[@class='a-native-dropdown quantity-dropdown-select js-select']"
-        )[0].values()[0]
-        pyo_params[quantity_key] = "1"
+        )
+        pyo_params[quantity_key[0].get("for")] = "1"
         for key in pyo_keys:
             try:
                 value = pyo_html.xpath(f".//input[@name='{key}']")[0].value
