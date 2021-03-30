@@ -216,7 +216,7 @@ class AmazonStoreHandler(BaseStoreHandler):
             return not any(sign_in in text for sign_in in amazon_config["SIGN_IN_TEXT"])
         except NoSuchElementException:
 
-            return True
+            return False
 
     def login(self):
         log.info(f"Logging in to {self.amazon_domain}...")
