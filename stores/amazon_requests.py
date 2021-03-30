@@ -410,8 +410,8 @@ class AmazonStoreHandler(BaseStoreHandler):
                 if qualified_seller:
                     if self.atc(qualified_seller=qualified_seller, item=item):
                         r = self.ptc()
-                        with open("ptc-source.html", "w", encoding="utf-8") as f:
-                            f.write(r)
+                        # with open("ptc-source.html", "w", encoding="utf-8") as f:
+                        #     f.write(r)
                         if r:
                             if test:
                                 print(
@@ -680,7 +680,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         tree = html.fromstring(payload)
 
         if item.status_code == 503:
-            with open("503-page.html", "w'") as f:
+            with open("503-page.html", "w", encoding="utf-8") as f:
                 f.write(payload)
             log.info("Status Code 503, Checking for Captcha")
             # Check for CAPTCHA
