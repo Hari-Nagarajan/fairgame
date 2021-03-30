@@ -679,6 +679,29 @@ class AmazonStoreHandler(BaseStoreHandler):
 
         tree = html.fromstring(payload)
 
+        if item.status_code == 503:
+            with open("503-page.html", "w'") as f:
+                f.write(payload)
+            log.info("Status Code 503, Checking for Captcha")
+            # Check for CAPTCHA
+            captcha_form_element = tree.xpath(
+                "//form[contains(@action,'validateCaptcha')]"
+            )
+            if captcha_form_element:
+                log.info("captcha found")
+                url = f"https://{self.amazon_domain}/{REALTIME_INVENTORY_PATH}{item.id}"
+                # Solving captcha and resetting data
+                data, status = solve_captcha(
+                    self.session, captcha_form_element[0], url
+                )
+                if status != 503:
+                    tree = html.fromstring(data)
+                else:
+                    log.info(f"No valid page for ASIN {item.id}")
+                    return sellers
+            else:
+                log.info("captcha not found")
+
         # look for product ASIN
         page_asin = tree.xpath("//input[@id='ftSelectAsin']")
         if page_asin:
