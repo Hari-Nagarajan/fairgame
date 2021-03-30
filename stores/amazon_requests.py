@@ -989,7 +989,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         f = furl(url)
         if not f.scheme:
             f.set(scheme="https")
-        response = self.session.get(f.url, headers=HEADERS)
+        response = self.session.get(f.url)
         return response.text, response.status_code
 
     # returns negative number if cart element does not exist, returns number if cart exists
