@@ -233,6 +233,7 @@ def solve_captcha(session, form_element, pdp_url: str):
         solution = captcha.solve()
 
         if solution:
+            log.info(f"solution is:{solution} ")
             form_inputs = form_element.xpath(".//input")
             input_dict = {}
             for form_input in form_inputs:

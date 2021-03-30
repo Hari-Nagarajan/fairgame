@@ -624,7 +624,11 @@ class AmazonStoreHandler(BaseStoreHandler):
                     "//form[contains(@action,'validateCaptcha')]"
                 )
                 if captcha_form_element:
-                    tree = solve_captcha(self.session, captcha_form_element[0], pdp_url)
+                    data, status = solve_captcha(self.session, captcha_form_element[0], pdp_url)
+                    if status != 200:
+                        log.debug(f"ASIN {item.id} failed, skipping...")
+                        continue
+                    tree = html.fromstring(data)
 
                 title = tree.xpath('//*[@id="productTitle"]')
                 if len(title) > 0:
