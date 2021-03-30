@@ -243,7 +243,7 @@ def solve_captcha(session, form_element, pdp_url: str):
             f = furl(pdp_url)  # Use the original URL to get the schema and host
             f = f.set(path=form_element.attrib["action"])
             f.add(args=input_dict)
-            response = session.get(f.furl)
+            response = session.get(f.url)
             log.debug(f"Captcha response was {response.status_code}")
             return response.text, response.status_code
 
