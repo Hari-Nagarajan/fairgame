@@ -109,10 +109,16 @@ Here are the very simple steps for running the bot on Windows:
 8. Verify that the bot successfully makes it to the place your order page with the item you put in the config file. 
    If it does not, then:
    * You messed something up above, and need to fix it; or,
-   * It is asking you for your address and payment info. You need to make a purchase manually with the bot in a separate tab and verify that it correctly sets your defaults for the browser. See [#faq on our Discord](https://discord.gg/GEsarYKMAw).
-9. Edit the config file with what you want
-10. Remove `--test` from `_Amazon.bat`
-11. Run `_Amazon.bat` and wait
+   * It is asking you for your address and payment info. In a separate tab within the bots browser, you need to:
+     * Make sure one-click purchasing is set up for your account in the bot's browser, 
+     * verify there is a default payment method and default address associated with that payment method,
+     * And then make a purchase manually with the bot in a separate tab and verify that it correctly sets your 
+       defaults for the browser. 
+     * See [#faq on our Discord](https://discord.gg/GEsarYKMAw) for additional information.
+9. Edit the `amazon_config.json` file with the item(s) you want to look for. See [Configuration](#Configuration) 
+   and [Configuration Examples](#Configuration-Examples) for additional information
+11. Remove `--test` from `_Amazon.bat`
+12. Run `_Amazon.bat` and wait
 
 
 Additional information about running FairGame can be found in the rest of the documentation.
