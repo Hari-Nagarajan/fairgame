@@ -5,7 +5,7 @@
     * [Current Functionality](#Current-Functionality)  
 * [Installation](#Installation)
     * [Requirements](#Requirements)
-    * [Windows Quick Start](#Windows-Quick-Start)
+    * [Quick Start](#Quick-Start)
     * [Detailed Directions](#Detailed-Directions)
         * [Python](#Python)
         * [Downloading FairGame](#Downloading-FairGame)
@@ -73,9 +73,12 @@ It is best if you use the newest version of **3.8** (at this time, 3.8.8) but 3.
 It also requires a working Chrome installation. 
 Running it on a potato (<2GB of RAM) is not suggested. 
 
-## Windows Quick Start
+## Quick Start
 
-Here are the very simple steps for running the bot on Windows:
+Here are the very simple steps for running the bot on Windows, however most of these instructions should be followed
+regardless of your OS (obviously you aren't running .bat files if you aren't on Windows, or using GitHub Desktop if not 
+available on your OS). See [Platform Specific](#Platform-Specific) instructions for help installing Python and
+dependencies in other operating systems:
 1. [Turn on your computer](https://www.google.com/search?q=how+do+I+turn+on+my+computer)
 2. Install Python 3.8.5, 3.8.6, 3.8.7 or 3.8.8. Install to some location that does not include spaces in the path 
    (we suggest C:\Python38). Click the checkbox that says Add Python 3.8 to PATH (or something similar) 
