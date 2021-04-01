@@ -14,7 +14,7 @@
         * [Running the program](#Running-the-program)
         * [Start Up](#Start-Up)
     * [Other Installation Help](#Other-Installation-Help)
-        * [Cheat Sheet](#Cheat-Sheet)
+        * [ASINs](#ASINs)
         * [Platform Specific](#Platform-Specific)
 * [Advanced Configuration](#Advanced-Configuration) 
     * [Notifications](#Notifications)
@@ -166,9 +166,8 @@ Make a copy of `amazon_config.template_json` and
 [rename](https://www.google.com/search?q=how+to+change+file+extensions+on+windows+10) to `amazon_config.json`. Edit it 
 according to the 
 [ASINs](https://www.datafeedwatch.com/blog/amazon-asin-number-what-is-it-and-how-do-you-get-it#how-to-find-asin) you are
-interested in purchasing. You can find a list of ASINs for some common products people are looking for in the 
-[cheat sheet](https://docs.google.com/document/d/14kZ0SNC97DFVRStnrdsJ8xbQO1m42v7svy93kUdtX48). If it's not in the 
-cheat sheet, you have to look it up yourself.
+interested in purchasing. You can find a list of ASINs for some common products people are looking for on our 
+Discord [#asins](https://discord.gg/DuVXAN5FnN). If it's not in there, you have to look it up yourself.
 
 * `asin_groups` indicates the number of ASIN groups (or lists) you want to use.
 * `asin_list_x` list of ASINs for products you want to purchase. You must locate these for the products you want, use 
@@ -356,20 +355,8 @@ Credential file password: <enter the previously created password>
 
 ## Other Installation Help
 
-### Cheat Sheet
-#### Windows Installation Guide and ASIN lists
-Community user Easy_XII has created a great cheat sheet for getting started and has gathered many of the common ASINs 
-people are looking for. It includes specific and additional steps (and pictures) for Windows users as well as useful
-product and configuration information. Please start with 
-[this guide](https://docs.google.com/document/d/14kZ0SNC97DFVRStnrdsJ8xbQO1m42v7svy93kUdtX48) to get you started
-and to answer any initial questions you may have about setup.
-
-**Note:** The above document is community maintained and managed. The authors of FairGame do not control the contents,
-and this document and any other help guides/videos may not be updated for the latest release, so use some common sense
-when configuring the bot as both the bot and the sites we interact with change over time. For example, do not ask us 
-why the bot does not purchase an item whose price has changed to $8.49 when the _minimum_ purchase price is set to $10
-in the configuration file that YOU are supposed to update
-
+### ASINs
+See (#asins)[https://discord.gg/DuVXAN5FnN] channel on our Discord server, or look them up on Amazon.
 
 ### Platform Specific
 
