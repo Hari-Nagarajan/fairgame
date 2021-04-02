@@ -39,6 +39,7 @@ from common.amazon_support import (
     price_check,
     SellerDetail,
     solve_captcha,
+    merchant_check,
 )
 from notifications.notifications import NotificationHandler
 from stores.basestore import BaseStoreHandler
@@ -352,17 +353,16 @@ class AmazonStoreHandler(BaseStoreHandler):
         if not self.is_logged_in():
             self.login()
 
-        # get cookies
-        self.amazon_cookies = self.driver.get_cookies()
+        # get cookies, might use these for checkout later, with no cookies on
+        cookie_names = ["session-id", "ubid-main", "x-main", "at-main", "sess-at-main"]
+        for c in self.driver.get_cookies():
+            if c["name"] in cookie_names:
+                self.amazon_cookies[c["name"]] = c["value"]
+
         # update session with cookies from Selenium
-        headers = {}
-        cookies = {c["name"]: c["value"] for c in self.amazon_cookies}
-        cookie_list = []
-        for cookie in cookies:
-            cookie_list.append(f"{cookie}={cookies[cookie]}")
-        cookie_header = "; ".join(cookie_list)
-        headers["cookie"] = cookie_header
-        self.session.headers.update(headers)
+        self.session.cookies = {
+            c["name"]: c["value"] for c in self.driver.get_cookies()
+        }
 
         # Verify the configuration file
         if not self.verify():
@@ -382,7 +382,6 @@ class AmazonStoreHandler(BaseStoreHandler):
         self.save_screenshot("logged-in")
         print("\n\n")
         recurring_message = "The hunt continues! "
-        update_time = get_timeout(1)
         idx = 0
         spinner = ["-", "\\", "|", "/"]
         check_count = 1
@@ -395,7 +394,6 @@ class AmazonStoreHandler(BaseStoreHandler):
                     spinner[idx],
                     end="\r",
                 )
-                update_time = get_timeout(1)
                 check_count += 1
                 idx += 1
                 if idx == len(spinner):
@@ -494,7 +492,11 @@ class AmazonStoreHandler(BaseStoreHandler):
                 if not price_check(item, seller):
                     log.debug("Failed price condition hurdle.")
                     return
-                log.debug("Pass price condition hurdle.")
+                log.debug("Passed price condition hurdle.")
+                if not merchant_check(item, seller):
+                    log.debug("Failed merchant id condition hurdle.")
+                    return
+                log.debug("Passed merchant id condition hurdle.")
 
                 return seller
 
@@ -544,6 +546,11 @@ class AmazonStoreHandler(BaseStoreHandler):
                 else:
                     condition = AmazonItemCondition.New
 
+                if "merchant_id" in json_item:
+                    merchant_id = json_item["merchant_id"]
+                else:
+                    merchant_id = "any"
+
                 # Create new instances of an item for each asin specified
                 asins_collection = json_item["asins"]
                 if isinstance(asins_collection, str):
@@ -559,6 +566,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                             min_price,
                             max_price,
                             condition=condition,
+                            merchant_id=merchant_id,
                         )
                     )
             else:
@@ -591,6 +599,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                 cached_item.condition = item.condition
                 cached_item.min_price = item.min_price
                 cached_item.max_price = item.max_price
+                cached_item.merchant_id = item.merchant_id
                 self.item_list[idx] = cached_item
                 log.debug(
                     f"Verified ASIN {cached_item.id} as '{cached_item.short_name}'"
@@ -722,17 +731,21 @@ class AmazonStoreHandler(BaseStoreHandler):
             )
             return None
 
-        # Get the pinned offer, if it exists, by checking for a pinned offer area and add to cart button
-        pinned_offer = tree.xpath("//div[@id='aod-sticky-pinned-offer']")
-        if not pinned_offer or not tree.xpath(
-            "//div[@id='aod-sticky-pinned-offer']//input[@name='submit.addToCart']"
-        ):
-            log.debug(f"No pinned offer for {item.id} = {item.short_name}")
+        # Get all the offers (pinned and others)
+        offers = tree.xpath(
+            "//div[@id='aod-sticky-pinned-offer'] | //div[@id='aod-offer']"
+        )
+
+        # I don't really get the OR part of this, how could the first part fail, but the second part not fail?
+        # if not pinned_offer or not tree.xpath(
+        #     "//div[@id='aod-sticky-pinned-offer']//input[@name='submit.addToCart'] | //div[@id='aod-offer']//input[@name='submit.addToCart']"
+        # ):
+        #
+        if not offers:
+            log.debug(f"No offers for {item.id} = {item.short_name}")
         else:
-            for idx, offer in enumerate(pinned_offer):
-                merchant_name = offer.xpath(
-                    ".//span[@class='a-size-small a-color-base']"
-                )[0].text.strip()
+            for idx, offer in enumerate(offers):
+                merchant_id = offer.xpath(".//input[@id='ftSelectMerchant']")[0].value
                 price_text = offer.xpath(".//span[@class='a-price-whole']")[
                     0
                 ].text.strip()
@@ -751,12 +764,13 @@ class AmazonStoreHandler(BaseStoreHandler):
                     offer_id = offers[0].value
                 else:
                     log.error("No offer ID found!")
-                atc_form = []
-                atc_form.append(offer.xpath(".//form[@method='post']")[0].action)
-                atc_form.append(offer.xpath(".//form//input"))
+                atc_form = [
+                    offer.xpath(".//form[@method='post']")[0].action,
+                    offer.xpath(".//form//input"),
+                ]
 
                 seller = SellerDetail(
-                    merchant_name,
+                    merchant_id,
                     price,
                     shipping_cost,
                     condition,
@@ -764,53 +778,6 @@ class AmazonStoreHandler(BaseStoreHandler):
                     atc_form=atc_form,
                 )
                 sellers.append(seller)
-
-        offers = tree.xpath("//div[@id='aod-offer']")
-        if not offers:
-            if sellers:
-                log.debug(f"Only found pinned offer for {item.id} = {item.short_name}")
-            else:
-                log.debug(f"No offers found for {item.id} = {item.short_name}")
-            return sellers
-        for idx, offer in enumerate(offers):
-            # This is preferred, but Amazon itself has unique URL parameters that I haven't identified yet
-            # merchant_name = offer.xpath(
-            #     ".//a[@target='_blank' and contains(@href, 'merch_name')]"
-            # )[0].text.strip()
-            merchant_name = offer.xpath(".//a[@target='_blank']")[0].text.strip()
-            price_text = offer.xpath(
-                ".//div[contains(@id, 'aod-price-')]//span[contains(@class,'a-offscreen')]"
-            )[0].text
-            price = parse_price(price_text)
-
-            shipping_cost = get_shipping_costs(offer, free_shipping_strings)
-            condition_heading = offer.xpath(".//div[@id='aod-offer-heading']/h5")
-            if condition_heading:
-                condition = AmazonItemCondition.from_str(
-                    condition_heading[0].text.strip()
-                )
-            else:
-                condition = AmazonItemCondition.Unknown
-            offers = offer.xpath(f".//input[@name='offeringID.1']")
-            offer_id = None
-            if len(offers) > 0:
-                offer_id = offers[0].value
-            else:
-                log.error("No offer ID found!")
-
-            atc_form = []
-            atc_form.append(offer.xpath(".//form[@method='post']")[0].action)
-            atc_form.append(offer.xpath(".//form//input"))
-
-            seller = SellerDetail(
-                merchant_name,
-                price,
-                shipping_cost,
-                condition,
-                offer_id,
-                atc_form=atc_form,
-            )
-            sellers.append(seller)
         return sellers
 
     def atc(self, qualified_seller, item):
@@ -823,6 +790,10 @@ class AmazonStoreHandler(BaseStoreHandler):
         self.session.headers.update(
             {"referer": f"https://{self.amazon_domain}/gp/aod/ajax?asin={item.id}"}
         )
+        # payload_inputs = {
+        #     "offerListing.1": qualified_seller.offering_id,
+        #     "quantity.1": "1",
+        # }
 
         url = f"https://{self.amazon_domain}{post_action}"
         session_id = self.driver.get_cookie("session-id")
