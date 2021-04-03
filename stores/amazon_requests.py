@@ -18,7 +18,6 @@ from lxml import html
 from price_parser import parse_price, Price
 from selenium import webdriver
 
-# from seleniumwire import webdriver
 from selenium.common.exceptions import (
     NoSuchElementException,
     TimeoutException,
@@ -360,9 +359,8 @@ class AmazonStoreHandler(BaseStoreHandler):
                 self.amazon_cookies[c["name"]] = c["value"]
 
         # update session with cookies from Selenium
-        self.session.cookies = {
-            c["name"]: c["value"] for c in self.driver.get_cookies()
-        }
+        for c in self.driver.get_cookies():
+            self.session.cookies.set(name=c["name"], value=c["value"])
 
         # Verify the configuration file
         if not self.verify():
@@ -414,7 +412,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                             if test:
                                 print(
                                     "Proceeded to Checkout - Will not Place Order as this is a Test",
-                                    end="/r",
+                                    end="\r",
                                 )
                                 # in Test mode, clear the list
                                 self.item_list.clear()
@@ -633,7 +631,9 @@ class AmazonStoreHandler(BaseStoreHandler):
                     "//form[contains(@action,'validateCaptcha')]"
                 )
                 if captcha_form_element:
-                    data, status = solve_captcha(self.session, captcha_form_element[0], pdp_url)
+                    data, status = solve_captcha(
+                        self.session, captcha_form_element[0], pdp_url
+                    )
                     if status != 200:
                         log.debug(f"ASIN {item.id} failed, skipping...")
                         continue
@@ -704,9 +704,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                 log.info("captcha found")
                 url = f"https://{self.amazon_domain}/{REALTIME_INVENTORY_PATH}{item.id}"
                 # Solving captcha and resetting data
-                data, status = solve_captcha(
-                    self.session, captcha_form_element[0], url
-                )
+                data, status = solve_captcha(self.session, captcha_form_element[0], url)
                 if status != 503:
                     tree = html.fromstring(data)
                 else:
