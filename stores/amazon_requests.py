@@ -170,15 +170,36 @@ class AmazonStoreHandler(BaseStoreHandler):
         set_options(prefs, slow_mode=slow_mode)
         modify_browser_profile()
 
-        # Initialize the Session we'll use for this run
-        self.session = requests.Session()
-        self.session.headers.update(HEADERS)
+        # Initialize the Session we'll use for stock checking
+        self.session_stock_check = requests.Session()
+        self.session_stock_check.headers.update(HEADERS)
         # self.conn = http.client.HTTPSConnection(self.amazon_domain)
         # self.conn20 = HTTP20Connection(self.amazon_domain)
+
+        # Initialize proxies for stock check session:
+        # self.proxies = [
+        #     {
+        #       'http': 'http://X.X.X.X:XXXX',
+        #       'https': 'http://X.X.X.X:XXXX',
+        #     },
+        #     {
+        #       'http': 'http://X.X.X.X:XXXX',
+        #       'https': 'http://X.X.X.X:XXXX',
+        #     },
+        # ]
+
+        self.proxies = []
+
+        if self.proxies:
+            self.session_stock_check.proxies.update(self.proxies[0])
 
         # Spawn the web browser
         self.driver = create_driver(options)
         self.webdriver_child_pids = get_webdriver_pids(self.driver)
+
+        # Initialize the checkout session
+        self.session_checkout = requests.Session()
+        self.session_checkout.headers.update(HEADERS)
 
     def __del__(self):
         message = f"Shutting down {STORE_NAME} Store Handler."
@@ -352,15 +373,11 @@ class AmazonStoreHandler(BaseStoreHandler):
         if not self.is_logged_in():
             self.login()
 
-        # get cookies, might use these for checkout later, with no cookies on
-        cookie_names = ["session-id", "ubid-main", "x-main", "at-main", "sess-at-main"]
-        for c in self.driver.get_cookies():
-            if c["name"] in cookie_names:
-                self.amazon_cookies[c["name"]] = c["value"]
-
-        # update session with cookies from Selenium
-        for c in self.driver.get_cookies():
-            self.session.cookies.set(name=c["name"], value=c["value"])
+        # Transfer cookies from selenium session.
+        # Do not transfer cookies to stock check if using proxies
+        if not self.proxies:
+            transfer_selenium_cookies(self.driver, self.session_stock_check)
+        transfer_selenium_cookies(self.driver, self.session_checkout)
 
         # Verify the configuration file
         if not self.verify():
@@ -609,7 +626,7 @@ class AmazonStoreHandler(BaseStoreHandler):
             pdp_url = f"https://{self.amazon_domain}{PDP_PATH}{item.id}"
             log.debug(f"Verifying at {pdp_url} ...")
 
-            data, status = self.get_html(pdp_url)
+            data, status = self.get_html(pdp_url, s=self.session_stock_check)
             if status == 503:
                 # Check for CAPTCHA
                 tree = html.fromstring(data)
@@ -619,7 +636,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                 if captcha_form_element:
                     # Solving captcha and resetting data
                     data, status = solve_captcha(
-                        self.session, captcha_form_element[0], pdp_url
+                        self.session_stock_check, captcha_form_element[0], pdp_url
                     )
 
             if status == 200:
@@ -632,7 +649,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                 )
                 if captcha_form_element:
                     data, status = solve_captcha(
-                        self.session, captcha_form_element[0], pdp_url
+                        self.session_stock_check, captcha_form_element[0], pdp_url
                     )
                     if status != 200:
                         log.debug(f"ASIN {item.id} failed, skipping...")
@@ -785,7 +802,7 @@ class AmazonStoreHandler(BaseStoreHandler):
             payload_inputs[payload_input.name] = payload_input.value
 
         payload_inputs.update({"submit.addToCart": "Submit"})
-        self.session.headers.update(
+        self.session_checkout.headers.update(
             {"referer": f"https://{self.amazon_domain}/gp/aod/ajax?asin={item.id}"}
         )
         # payload_inputs = {
@@ -797,7 +814,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         session_id = self.driver.get_cookie("session-id")
         payload_inputs["session-id"] = session_id["value"]
 
-        r = self.session.post(url=url, data=payload_inputs)
+        r = self.session_checkout.post(url=url, data=payload_inputs)
 
         print(r.status_code)
         with open("atc-response.html", "w") as f:
@@ -811,7 +828,7 @@ class AmazonStoreHandler(BaseStoreHandler):
 
     def ptc(self):
         url = f"https://{self.amazon_domain}/gp/cart/view.html/ref=lh_co_dup?ie=UTF8&proceedToCheckout.x=129"
-        r = self.session.get(url=url)
+        r = self.session_checkout.get(url=url)
 
         if r.status_code == 200:
             log.info("PTC successful")
@@ -896,7 +913,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                 pass
 
         url = f"https://{self.amazon_domain}/gp/buy/spc/handlers/static-submit-decoupled.html/ref=ox_spc_place_order?"
-        r = self.session.post(url=url, data=pyo_params)
+        r = self.session_checkout.post(url=url, data=pyo_params)
 
         if r.status_code == 200:
             return True
@@ -905,7 +922,13 @@ class AmazonStoreHandler(BaseStoreHandler):
 
     def get_real_time_data(self, item):
         log.debug(f"Calling {STORE_NAME} for {item.short_name} using {item.furl.url}")
-        data, status = self.get_html(item.furl.url)
+        data, status = self.get_html(item.furl.url, s=self.session_stock_check)
+
+        # rotate proxy, if it is being utilized
+        if self.proxies:
+            self.proxies.append(self.proxies.pop[0])
+            self.session_stock_check.proxies.update(self.proxies[0])
+
         if item.status_code != status:
             # Track when we flip-flop between status codes.  200 -> 204 may be intelligent caching at Amazon.
             # We need to know if it ever goes back to a 200
@@ -953,12 +976,12 @@ class AmazonStoreHandler(BaseStoreHandler):
             with self.wait_for_page_content_change():
                 self.driver.refresh()
 
-    def get_html(self, url):
+    def get_html(self, url, s: requests.Session):
         """Unified mechanism to get content to make changing connection clients easier"""
         f = furl(url)
         if not f.scheme:
             f.set(scheme="https")
-        response = self.session.get(f.url)
+        response = s.get(f.url)
         return response.text, response.status_code
 
     # returns negative number if cart element does not exist, returns number if cart exists
@@ -1230,3 +1253,15 @@ def get_timestamp_filename(name, extension):
         return name + "_" + date + extension
     else:
         return name + "_" + date + "." + extension
+
+
+def transfer_selenium_cookies(d: webdriver.Chrome, s: requests.Session):
+    # get cookies, might use these for checkout later, with no cookies on
+    # cookie_names = ["session-id", "ubid-main", "x-main", "at-main", "sess-at-main"]
+    # for c in self.driver.get_cookies():
+    #     if c["name"] in cookie_names:
+    #         self.amazon_cookies[c["name"]] = c["value"]
+
+    # update session with cookies from Selenium
+    for c in d.get_cookies():
+        s.cookies.set(name=c["name"], value=c["value"])
