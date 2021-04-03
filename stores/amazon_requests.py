@@ -500,7 +500,9 @@ class AmazonStoreHandler(BaseStoreHandler):
                     log.debug("Failed shipping hurdle.")
                     return
                 log.debug("Passed shipping hurdle.")
-                if not condition_check(item, seller):
+                if item.condition == AmazonItemCondition.Any:
+                    log.debug("Skipping condition check")
+                elif not condition_check(item, seller):
                     log.debug("Failed item condition hurdle.")
                     return
                 log.debug("Passed item condition hurdle.")
