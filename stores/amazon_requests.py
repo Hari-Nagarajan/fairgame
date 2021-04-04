@@ -776,10 +776,19 @@ class AmazonStoreHandler(BaseStoreHandler):
             log.debug(f"No offers for {item.id} = {item.short_name}")
         else:
             for idx, offer in enumerate(offers):
-                merchant_id = offer.xpath(".//input[@id='ftSelectMerchant']")[0].value
-                price_text = offer.xpath(".//span[@class='a-price-whole']")[
-                    0
-                ].text.strip()
+                try:
+                    merchant_id = offer.xpath(".//input[@id='ftSelectMerchant']")[
+                        0
+                    ].value
+                except IndexError:
+                    merchant_id = None
+                try:
+                    price_text = offer.xpath(".//span[@class='a-price-whole']")[
+                        0
+                    ].text.strip()
+                except IndexError:
+                    log.debug("No price found for this offer, skipping")
+                    continue
                 price = parse_price(price_text)
                 shipping_cost = get_shipping_costs(offer, free_shipping_strings)
                 condition_heading = offer.xpath(".//div[@id='aod-offer-heading']/h5")
