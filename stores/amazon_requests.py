@@ -234,6 +234,27 @@ class AmazonStoreHandler(BaseStoreHandler):
             return False
         return True
 
+    def handle_startup(self):
+        time.sleep(3)
+        if self.is_logged_in():
+            log.info("Already logged in")
+        else:
+            log.info("Lets log in.")
+
+            is_smile = "smile" in AMAZON_URLS["BASE_URL"]
+            xpath = (
+                '//*[@id="ge-hello"]/div/span/a'
+                if is_smile
+                else '//*[@id="nav-link-accountList"]/div/span'
+            )
+
+            try:
+                self.driver.find_element_by_xpath(xpath).click()
+            except NoSuchElementException:
+                log.error("Log in button does not exist")
+            log.info("Wait for Sign In page")
+            time.sleep(3)
+
     def is_logged_in(self):
         try:
             text = self.driver.find_element_by_id("nav-link-accountList").text
@@ -249,21 +270,21 @@ class AmazonStoreHandler(BaseStoreHandler):
         remember_me: WebElement
         password_field: WebElement
 
-        # Look for a sign in link
-        try:
-            skip_link: WebElement = WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located(
-                    (By.XPATH, "//a[contains(@href, '/ap/signin/')]")
-                )
-            )
-            skip_link.click()
-        except TimeoutException as e:
-            log.debug(
-                "Timed out waiting for signin link.  Unable to find matching "
-                "xpath for '//a[@data-nav-role='signin']'"
-            )
-            log.exception(e)
-            exit(1)
+        # # Look for a sign in link
+        # try:
+        #     skip_link: WebElement = WebDriverWait(self.driver, 10).until(
+        #         EC.presence_of_element_located(
+        #             (By.XPATH, "//a[contains(@href, '/ap/signin/')]")
+        #         )
+        #     )
+        #     skip_link.click()
+        # except TimeoutException as e:
+        #     log.debug(
+        #         "Timed out waiting for signin link.  Unable to find matching "
+        #         "xpath for '//a[@data-nav-role='signin']'"
+        #     )
+        #     log.exception(e)
+        #     exit(1)
 
         log.info("Inputting email...")
         try:
@@ -372,6 +393,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         with self.wait_for_page_change():
             self.driver.get(f"https://{self.amazon_domain}")
 
+        self.handle_startup()
         # Get a valid amazon session for our requests
         if not self.is_logged_in():
             self.login()
