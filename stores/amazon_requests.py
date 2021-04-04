@@ -806,7 +806,9 @@ class AmazonStoreHandler(BaseStoreHandler):
                 log.info("captcha found")
                 url = f"https://{self.amazon_domain}/{REALTIME_INVENTORY_PATH}{item.id}"
                 # Solving captcha and resetting data
-                data, status = solve_captcha(self.session, captcha_form_element[0], url)
+                data, status = solve_captcha(
+                    self.session_stock_check, captcha_form_element[0], url
+                )
                 if status != 503:
                     tree = html.fromstring(data)
                 else:
