@@ -652,6 +652,9 @@ class AmazonStoreHandler(BaseStoreHandler):
             log.debug(f"Verifying at {pdp_url} ...")
 
             data, status = self.get_html(pdp_url, s=self.session_stock_check)
+            if not data and not status:
+                log.debug("Response empty, skipping item")
+                continue
             if status == 503:
                 # Check for CAPTCHA
                 tree = html.fromstring(data)
@@ -728,7 +731,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         sellers = []
         # This is where the parsing magic goes
         log.debug(f"payload is {len(payload)} bytes")
-        if len(payload) == 0:
+        if payload is None or len(payload) == 0:
             log.error("Empty Response.  Skipping...")
             return sellers
 
@@ -903,7 +906,11 @@ class AmazonStoreHandler(BaseStoreHandler):
 
     def ptc(self):
         url = f"https://{self.amazon_domain}/gp/cart/view.html/ref=lh_co_dup?ie=UTF8&proceedToCheckout.x=129"
-        r = self.session_checkout.get(url=url, timeout=5)
+        try:
+            r = self.session_checkout.get(url=url, timeout=5)
+        except requests.exceptions.Timeout:
+            log.debug("Request Timed Out")
+            return None
 
         if r.status_code == 200:
             log.info("PTC successful")
@@ -1058,7 +1065,11 @@ class AmazonStoreHandler(BaseStoreHandler):
         f = furl(url)
         if not f.scheme:
             f.set(scheme="https")
-        response = s.get(f.url, timeout=5)
+        try:
+            response = s.get(f.url, timeout=5)
+        except requests.exceptions.Timeout:
+            log.debug("timeout on get_html")
+            return None, None
         return response.text, response.status_code
 
     # returns negative number if cart element does not exist, returns number if cart exists
