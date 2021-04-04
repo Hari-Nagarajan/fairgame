@@ -9,6 +9,8 @@ import typing
 from contextlib import contextmanager
 from datetime import datetime
 
+import re
+
 import psutil
 import requests
 from amazoncaptcha import AmazonCaptcha
@@ -136,6 +138,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         super().__init__()
 
         self.shuffle = True
+        self.buy_it_now = True
 
         self.notification_handler = notification_handler
         self.check_shipping = checkshipping
@@ -421,7 +424,18 @@ class AmazonStoreHandler(BaseStoreHandler):
                     f"ASIN check for {item.id} took {time.time() - start_time} seconds."
                 )
                 if qualified_seller:
-                    if self.atc(qualified_seller=qualified_seller, item=item):
+                    if self.buy_it_now:
+                        pid, anti_csrf = self.turbo_initiate(
+                            qualified_seller=qualified_seller
+                        )
+                        if pid and anti_csrf:
+                            if self.turbo_checkout(pid=pid, anti_csrf=anti_csrf):
+                                if self.single_shot:
+                                    self.item_list.clear()
+                                else:
+                                    self.item_list.remove(item)
+
+                    elif self.atc(qualified_seller=qualified_seller, item=item):
                         r = self.ptc()
                         # with open("ptc-source.html", "w", encoding="utf-8") as f:
                         #     f.write(r)
@@ -797,6 +811,47 @@ class AmazonStoreHandler(BaseStoreHandler):
                 sellers.append(seller)
         return sellers
 
+    def turbo_initiate(self, qualified_seller):
+        url = f"https://{self.amazon_domain}/checkout/turbo-initiate?ref_=dp_start-bbf_1_glance_buyNow_2-1&pipelineType=turbo&weblab=RCX_CHECKOUT_TURBO_DESKTOP_NONPRIME_87784&temporaryAddToCart=1"
+        payload_inputs = {
+            "offerListing.1": qualified_seller.offering_id,
+            "quantity.1": "1",
+        }
+
+        r = self.session_checkout.post(url=url, data=payload_inputs)
+        if r.status_code == 200 and r.text:
+            log.debug("turbo-initiate successful")
+            find_pid = re.search(r"pid=(.*?)&amp;", r.text)
+            if find_pid:
+                pid = find_pid.group(1)
+            else:
+                pid = None
+            find_anti_csrf = re.search(r"'anti-csrftoken-a2z' value='(.*?)'", r.text)
+            if find_anti_csrf:
+                anti_csrf = find_anti_csrf.group(1)
+            else:
+                anti_csrf = None
+            return pid, anti_csrf
+        else:
+            log.debug("turbo-intiate unsuccessful")
+            with open("atc-failed-response.html", "w", encoding="utf-8") as f:
+                f.write(r.text)
+            return None, None
+
+    def turbo_checkout(self, pid, anti_csrf):
+        url = f"https://{self.amazon_domain}/checkout/spc/place-order?ref_=chk_spc_placeOrder&clientId=retailwebsite&pipelineType=turbo&pid={pid}"
+
+        header_update = {"anti-csrftoken-a2z": anti_csrf}
+        self.session_checkout.headers.update(header_update)
+        r = self.session_checkout.post(url=url)
+        if r.status_code == 200 or r.status_code == 500:
+            log.debug("Checkout maybe successful, check order page!")
+            # TODO: Implement GET request to confirm checkout
+            return True
+        else:
+            log.debug(f"Status Code: {r.status_code} was returned")
+            return False
+
     def atc(self, qualified_seller, item):
         post_action = qualified_seller.atc_form[0]
         payload_inputs = {}
@@ -818,9 +873,9 @@ class AmazonStoreHandler(BaseStoreHandler):
 
         r = self.session_checkout.post(url=url, data=payload_inputs)
 
-        print(r.status_code)
-        with open("atc-response.html", "w") as f:
-            f.write(r.text)
+        # print(r.status_code)
+        # with open("atc-response.html", "w") as f:
+        #     f.write(r.text)
         if r.status_code == 200:
             log.info("ATC successful")
             return True
@@ -1265,5 +1320,7 @@ def transfer_selenium_cookies(d: webdriver.Chrome, s: requests.Session):
     #         self.amazon_cookies[c["name"]] = c["value"]
 
     # update session with cookies from Selenium
+    cookie_names = ["session-id", "ubid-main", "x-main", "at-main", "sess-at-main"]
     for c in d.get_cookies():
-        s.cookies.set(name=c["name"], value=c["value"])
+        if c["name"] in cookie_names:
+            s.cookies.set(name=c["name"], value=c["value"])
