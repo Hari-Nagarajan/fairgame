@@ -311,6 +311,12 @@ def amazon(
     default=False,
     help="Wait if captcha could not be solved. Only occurs if enters captcha handler during checkout.",
 )
+@click.option(
+    "--offerid",
+    type=str,
+    default=None,
+    help="Pass in offer id and run offer id code. USE AT YOUR OWN RISK.",
+)
 @notify_on_crash
 def amazonrequests(
     headless,
@@ -329,6 +335,7 @@ def amazonrequests(
     clean_profile,
     clean_credentials,
     captcha_wait,
+    offerid,
 ):
     log.warning(
         "Experimental test balloon.  Do not attempt to use.  Your computer could catch fire."
@@ -367,8 +374,10 @@ def amazonrequests(
     )
 
     try:
-
-        amazon_requests_obj.run(delay=delay, test=test)
+        if offerid:
+            amazon_requests_obj.run_offer_id(offerid=offerid, delay=delay)
+        else:
+            amazon_requests_obj.run(delay=delay, test=test)
     except RuntimeError:
         del amazon_requests_obj
         log.error("Exiting Program...")

@@ -375,6 +375,63 @@ class AmazonStoreHandler(BaseStoreHandler):
 
         log.info(f'Logged in as {amazon_config["username"]}')
 
+    # Test code, use at your own RISK
+    def run_offer_id(self, offerid, delay=5):
+        # Load up the homepage
+        with self.wait_for_page_change():
+            self.driver.get(f"https://{self.amazon_domain}")
+
+        self.handle_startup()
+        # Get a valid amazon session for our requests
+        if not self.is_logged_in():
+            self.login()
+
+        transfer_selenium_cookies(self.driver, self.session_checkout)
+
+        message = f"Starting to hunt items at {STORE_NAME}"
+        log.info(message)
+        self.notification_handler.send_notification(message)
+        self.save_screenshot("logged-in")
+        print("\n\n")
+        recurring_message = "The hunt continues! "
+        idx = 0
+        spinner = ["-", "\\", "|", "/"]
+        check_count = 1
+        print(
+            "Do not ask in Discord what to do if your account gets banned running this code!"
+        )
+        print(f"Checking OfferID: {offerid}\n")
+
+        item = SellerDetail(
+            offering_id=offerid,
+            merchant_id="",
+            price=parse_price("0"),
+            shipping_cost=parse_price("0"),
+        )
+        while True:
+            print(
+                recurring_message,
+                f"Check Count: {check_count} ,",
+                spinner[idx],
+                end="\r",
+            )
+            check_count += 1
+            idx += 1
+            if idx == len(spinner):
+                idx = 0
+            delay_time = time.time() + delay
+
+            pid, anti_csrf = self.turbo_initiate(qualified_seller=item)
+            if pid and anti_csrf:
+                if self.turbo_checkout(pid=pid, anti_csrf=anti_csrf):
+                    break
+
+            while time.time() < delay_time:
+                time.sleep(0.01)
+
+        log.info("May have completed purchase, check orders!")
+        log.info("Shutting down")
+
     def run(self, delay=5, test=False):
         # Load up the homepage
         with self.wait_for_page_change():
