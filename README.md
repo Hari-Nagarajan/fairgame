@@ -46,7 +46,7 @@ for MSRP.
 
 ## Current Functionality
 
-FairGame only works on Amazon and can automatically check out.
+FairGame only works on Amazon and can automatically place an order.
 ### Other Notes on Functionality
 * By default, FairGame will only purchase new items with free shipping. This can be changed with options on the command
   line, see [Configuration](#Configuration).
