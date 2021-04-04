@@ -1122,9 +1122,17 @@ class AmazonStoreHandler(BaseStoreHandler):
         f = furl(url)
         if not f.scheme:
             f.set(scheme="https")
+        sessions_exceptions = [
+            requests.exceptions.Timeout,
+            requests.exceptions.ConnectionError,
+            ConnectionError,
+            ConnectionRefusedError,
+            ConnectionAbortedError,
+            ConnectionResetError,
+        ]
         try:
             response = s.get(f.url, timeout=5)
-        except requests.exceptions.Timeout:
+        except sessions_exceptions:
             log.debug("timeout on get_html")
             return None, None
         return response.text, response.status_code
