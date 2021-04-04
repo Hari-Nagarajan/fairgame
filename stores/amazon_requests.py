@@ -1014,7 +1014,7 @@ class AmazonStoreHandler(BaseStoreHandler):
 
         # rotate proxy, if it is being utilized
         if self.proxies:
-            self.proxies.append(self.proxies.pop[0])
+            self.proxies.append(self.proxies.pop(0))
             self.session_stock_check.proxies.update(self.proxies[0])
 
         if item.status_code != status:
