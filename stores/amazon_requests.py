@@ -378,7 +378,7 @@ class AmazonStoreHandler(BaseStoreHandler):
     def run(self, delay=5, test=False):
         # Load up the homepage
         with self.wait_for_page_change():
-            self.driver.get(f"https://{self.amazon_domain}", timeout=5)
+            self.driver.get(f"https://{self.amazon_domain}")
 
         self.handle_startup()
         # Get a valid amazon session for our requests
@@ -997,6 +997,8 @@ class AmazonStoreHandler(BaseStoreHandler):
 
     def get_real_time_data(self, item):
         log.debug(f"Calling {STORE_NAME} for {item.short_name} using {item.furl.url}")
+        if self.proxies:
+            log.debug(f"Using proxy: {self.proxies[0]}")
         data, status = self.get_html(item.furl.url, s=self.session_stock_check)
 
         # rotate proxy, if it is being utilized
@@ -1113,7 +1115,7 @@ class AmazonStoreHandler(BaseStoreHandler):
     def get_page(self, url):
         try:
             with self.wait_for_page_content_change():
-                self.driver.get(url=url, timeout=5)
+                self.driver.get(url=url)
             return True
         except TimeoutException:
             log.debug("Failed to load page within timeout period")
