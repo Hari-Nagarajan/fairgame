@@ -786,11 +786,11 @@ class AmazonStoreHandler(BaseStoreHandler):
         """Parse out information to from the aod-offer nodes populate ItemDetail instances for each item """
         payload = self.get_real_time_data(item)
         sellers = []
-        # This is where the parsing magic goes
-        log.debug(f"payload is {len(payload)} bytes")
         if payload is None or len(payload) == 0:
             log.error("Empty Response.  Skipping...")
             return sellers
+        # This is where the parsing magic goes
+        log.debug(f"payload is {len(payload)} bytes")
 
         tree = html.fromstring(payload)
 
