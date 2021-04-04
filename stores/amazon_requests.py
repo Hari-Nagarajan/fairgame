@@ -378,7 +378,7 @@ class AmazonStoreHandler(BaseStoreHandler):
     def run(self, delay=5, test=False):
         # Load up the homepage
         with self.wait_for_page_change():
-            self.driver.get(f"https://{self.amazon_domain}")
+            self.driver.get(f"https://{self.amazon_domain}", timeout=5)
 
         self.handle_startup()
         # Get a valid amazon session for our requests
@@ -903,7 +903,7 @@ class AmazonStoreHandler(BaseStoreHandler):
 
     def ptc(self):
         url = f"https://{self.amazon_domain}/gp/cart/view.html/ref=lh_co_dup?ie=UTF8&proceedToCheckout.x=129"
-        r = self.session_checkout.get(url=url)
+        r = self.session_checkout.get(url=url, timeout=5)
 
         if r.status_code == 200:
             log.info("PTC successful")
@@ -1056,7 +1056,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         f = furl(url)
         if not f.scheme:
             f.set(scheme="https")
-        response = s.get(f.url)
+        response = s.get(f.url, timeout=5)
         return response.text, response.status_code
 
     # returns negative number if cart element does not exist, returns number if cart exists
@@ -1113,7 +1113,7 @@ class AmazonStoreHandler(BaseStoreHandler):
     def get_page(self, url):
         try:
             with self.wait_for_page_content_change():
-                self.driver.get(url=url)
+                self.driver.get(url=url, timeout=5)
             return True
         except TimeoutException:
             log.debug("Failed to load page within timeout period")
