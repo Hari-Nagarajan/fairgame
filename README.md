@@ -86,9 +86,9 @@ dependencies in other operating systems:
 3. Download GitHub Desktop and Open the FairGame Repository with GitHub Desktop (or download the zip file). 
    Again, make sure this installs to a location without spaces in the path. If you need help with this, look at Wiki.
 4. Open the FairGame folder in File Explorer. Double click __INSTALL (RUN FIRST).bat ***DON'T USE ADMINISTRATIVE MODE***.
-5. After this finishes (it could take a few minutes or longer), make a copy of the amazon_config.template_json file,
-   and rename it to amazon_config.json. If you don't know how to rename file extensions, look it up on
-   [Google](https://www.google.com/search?q=how+do+I+rename+file+extensions+in+Windows).
+5. After this finishes (it could take a few minutes or longer), open the `config` folder in the FairGame folder, make 
+   a copy of the amazon_config.template_json file and rename it to amazon_config.json. If you don't know how to rename
+   file extensions, look it up on [Google](https://www.google.com/search?q=how+do+I+rename+file+extensions+in+Windows).
 6. Edit the amazon_config.json, this assumes US using smile.amazon.com. Using Amazon Smile requires that you select
    a charity. If you do not know how to do this, use 
    [Google](https://www.google.com/search?q=how+do+i+select+a+charity+on+amazon+smile). 
@@ -162,8 +162,8 @@ pipenv install
 
 ### Configuration
 
-Make a copy of `amazon_config.template_json` and 
-[rename](https://www.google.com/search?q=how+to+change+file+extensions+on+windows+10) to `amazon_config.json`. Edit it 
+In the `config` folder, make a copy of `amazon_config.template_json` and 
+[rename](https://www.google.com/search?q=how+to+change+file+extensions+on+windows+10) it to `amazon_config.json`. Edit it 
 according to the 
 [ASINs](https://www.datafeedwatch.com/blog/amazon-asin-number-what-is-it-and-how-do-you-get-it#how-to-find-asin) you are
 interested in purchasing. You can find a list of ASINs for some common products people are looking for on our 
