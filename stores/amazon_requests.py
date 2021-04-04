@@ -810,7 +810,8 @@ class AmazonStoreHandler(BaseStoreHandler):
                     self.session_stock_check, captcha_form_element[0], url
                 )
                 if status != 503:
-                    tree = html.fromstring(data)
+                    payload = data
+                    tree = html.fromstring(payload)
                 else:
                     log.info(f"No valid page for ASIN {item.id}")
                     return sellers
@@ -822,10 +823,14 @@ class AmazonStoreHandler(BaseStoreHandler):
         if page_asin:
             try:
                 found_asin = page_asin[0].value.strip()
-            except AttributeError or IndexError:
+            except (AttributeError, IndexError):
                 found_asin = "[NO ASIN FOUND ON PAGE]"
         else:
-            found_asin = "[NO ASIN FOUND ON PAGE]"
+            find_asin = re.search(r"asin = \"(.*?)\"", payload)
+            if find_asin:
+                found_asin = find_asin.group(1)
+            else:
+                found_asin = "[NO ASIN FOUND ON PAGE]"
 
         if found_asin != item.id:
             log.debug(
