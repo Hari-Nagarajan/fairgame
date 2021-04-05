@@ -619,7 +619,7 @@ To keep up with questions, the Discord channel [#FAQ](https://discord.gg/GEsarYK
 answers. If you don't find it there, ask in #tech-support. 
 
 1. **Can I run multiple instances of the bot?**
-   While possible, running multiple instances is not supported.
+   It is possible, however we do not support running multiple instances nor any issues that may be encountered while doing so.
 
 2. **Does Fairgame automatically bypass CAPTCHA's on the store sites?**
    The bot will try and auto-solve CAPTCHA's during the checkout process.
