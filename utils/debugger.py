@@ -20,6 +20,7 @@
 from utils.logger import log
 
 import functools
+import time
 
 
 def debug(func):
@@ -31,8 +32,11 @@ def debug(func):
         kwargs_repr = [f"{k}={v!r}" for k, v in kwargs.items()]  # 2
         signature = ", ".join(args_repr + kwargs_repr)  # 3
         log.debug(f"Calling {func.__name__}({signature})")
+        start_time = time.time()
         value = func(*args, **kwargs)
-        log.debug(f"{func.__name__!r} returned {value!r}")  # 4
+        log.debug(
+            f"{func.__name__!r} returned {value!r}. Function ran for {start_time-time.time()} seconds."
+        )  # 4
         return value
 
     return wrapper_debug

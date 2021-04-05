@@ -8,6 +8,7 @@ import time
 import typing
 from contextlib import contextmanager
 from datetime import datetime
+from utils.debugger import debug
 
 import re
 
@@ -572,6 +573,7 @@ class AmazonStoreHandler(BaseStoreHandler):
             log.debug(e)
             return False
 
+    @debug
     def find_qualified_seller(self, item) -> SellerDetail or None:
         item_sellers = self.get_item_sellers(item, amazon_config["FREE_SHIPPING"])
         if item_sellers:
@@ -782,6 +784,7 @@ class AmazonStoreHandler(BaseStoreHandler):
 
         return True
 
+    @debug
     def get_item_sellers(self, item, free_shipping_strings):
         """Parse out information to from the aod-offer nodes populate ItemDetail instances for each item """
         payload = self.get_real_time_data(item)
@@ -896,6 +899,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                 sellers.append(seller)
         return sellers
 
+    @debug
     def turbo_initiate(self, qualified_seller):
         url = f"https://{self.amazon_domain}/checkout/turbo-initiate?ref_=dp_start-bbf_1_glance_buyNow_2-1&pipelineType=turbo&weblab=RCX_CHECKOUT_TURBO_DESKTOP_NONPRIME_87784&temporaryAddToCart=1"
         payload_inputs = {
@@ -928,6 +932,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                 f.write(r.text)
             return None, None
 
+    @debug
     def turbo_checkout(self, pid, anti_csrf):
         log.debug("trying to checkout")
         url = f"https://{self.amazon_domain}/checkout/spc/place-order?ref_=chk_spc_placeOrder&clientId=retailwebsite&pipelineType=turbo&pid={pid}"
