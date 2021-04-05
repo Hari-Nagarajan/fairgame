@@ -258,7 +258,7 @@ def solve_captcha(session, form_element, pdp_url: str):
 
 
 def price_check(item, seller):
-    if item.max_price.amount > seller.selling_price > item.min_price.amount:
+    if item.max_price.amount >= seller.selling_price >= item.min_price.amount:
         return True
     else:
         return False
