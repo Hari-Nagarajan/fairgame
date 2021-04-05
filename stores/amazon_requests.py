@@ -1132,10 +1132,6 @@ class AmazonStoreHandler(BaseStoreHandler):
         sessions_exceptions = [
             requests.exceptions.Timeout,
             requests.exceptions.ConnectionError,
-            ConnectionError,
-            ConnectionRefusedError,
-            ConnectionAbortedError,
-            ConnectionResetError,
         ]
         try:
             response = s.get(f.url, timeout=5)
