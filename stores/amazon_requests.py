@@ -905,7 +905,6 @@ class AmazonStoreHandler(BaseStoreHandler):
 
         r = self.session_checkout.post(url=url, data=payload_inputs)
         if r.status_code == 200 and r.text:
-            log.debug("turbo-initiate successful")
             find_pid = re.search(r"pid=(.*?)&amp;", r.text)
             if find_pid:
                 pid = find_pid.group(1)
@@ -916,6 +915,12 @@ class AmazonStoreHandler(BaseStoreHandler):
                 anti_csrf = find_anti_csrf.group(1)
             else:
                 anti_csrf = None
+            if pid and anti_csrf:
+                log.debug("turbo-initiate successful")
+            else:
+                log.debug("turbo-initiate unsuccessful")
+                with open("atc-failed-response.html", "w", encoding="utf-8") as f:
+                    f.write(r.text)
             return pid, anti_csrf
         else:
             log.debug("turbo-initiate unsuccessful")
@@ -924,6 +929,7 @@ class AmazonStoreHandler(BaseStoreHandler):
             return None, None
 
     def turbo_checkout(self, pid, anti_csrf):
+        log.debug("trying to checkout")
         url = f"https://{self.amazon_domain}/checkout/spc/place-order?ref_=chk_spc_placeOrder&clientId=retailwebsite&pipelineType=turbo&pid={pid}"
 
         header_update = {"anti-csrftoken-a2z": anti_csrf}
