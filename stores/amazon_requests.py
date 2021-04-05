@@ -918,7 +918,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                 anti_csrf = None
             return pid, anti_csrf
         else:
-            log.debug("turbo-intiate unsuccessful")
+            log.debug("turbo-initiate unsuccessful")
             with open("atc-failed-response.html", "w", encoding="utf-8") as f:
                 f.write(r.text)
             return None, None
