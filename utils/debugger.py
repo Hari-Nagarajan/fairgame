@@ -35,7 +35,7 @@ def debug(func):
         start_time = time.time()
         value = func(*args, **kwargs)
         log.debug(
-            f"{func.__name__!r} returned {value!r}. Function ran for {start_time-time.time()} seconds."
+            f"{func.__name__!r} returned {value!r}. Function ran for {time.time()-start_time} seconds."
         )  # 4
         return value
 
