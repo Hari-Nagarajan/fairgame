@@ -317,6 +317,12 @@ def amazon(
     default=None,
     help="Pass in offer id and run offer id code. USE AT YOUR OWN RISK.",
 )
+@click.option(
+    "--all-cookies",
+    is_Flag=True,
+    default=False,
+    help="Pulls all the cookies from selenium, rather than targeted ones. May help with login issues?",
+)
 @notify_on_crash
 def amazonrequests(
     headless,
@@ -336,6 +342,7 @@ def amazonrequests(
     clean_credentials,
     captcha_wait,
     offerid,
+    all_cookies,
 ):
     log.warning(
         "Experimental test balloon.  Do not attempt to use.  Your computer could catch fire."
@@ -375,9 +382,11 @@ def amazonrequests(
 
     try:
         if offerid:
-            amazon_requests_obj.run_offer_id(offerid=offerid, delay=delay)
+            amazon_requests_obj.run_offer_id(
+                offerid=offerid, delay=delay, all_cookies=all_cookies
+            )
         else:
-            amazon_requests_obj.run(delay=delay, test=test)
+            amazon_requests_obj.run(delay=delay, test=test, all_cookies=all_cookies)
     except RuntimeError:
         del amazon_requests_obj
         log.error("Exiting Program...")

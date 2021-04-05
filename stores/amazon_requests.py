@@ -377,7 +377,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         log.info(f'Logged in as {amazon_config["username"]}')
 
     # Test code, use at your own RISK
-    def run_offer_id(self, offerid, delay=5):
+    def run_offer_id(self, offerid, delay=5, all_cookies=False):
         # Load up the homepage
         with self.wait_for_page_change():
             self.driver.get(f"https://{self.amazon_domain}")
@@ -387,7 +387,9 @@ class AmazonStoreHandler(BaseStoreHandler):
         if not self.is_logged_in():
             self.login()
 
-        transfer_selenium_cookies(self.driver, self.session_checkout)
+        transfer_selenium_cookies(
+            self.driver, self.session_checkout, all_cookies=all_cookies
+        )
 
         message = f"Starting to hunt items at {STORE_NAME}"
         log.info(message)
@@ -433,7 +435,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         log.info("May have completed purchase, check orders!")
         log.info("Shutting down")
 
-    def run(self, delay=5, test=False):
+    def run(self, delay=5, test=False, all_cookies=False):
         # Load up the homepage
         with self.wait_for_page_change():
             self.driver.get(f"https://{self.amazon_domain}")
@@ -446,8 +448,12 @@ class AmazonStoreHandler(BaseStoreHandler):
         # Transfer cookies from selenium session.
         # Do not transfer cookies to stock check if using proxies
         if not self.proxies:
-            transfer_selenium_cookies(self.driver, self.session_stock_check)
-        transfer_selenium_cookies(self.driver, self.session_checkout)
+            transfer_selenium_cookies(
+                self.driver, self.session_stock_check, all_cookies=all_cookies
+            )
+        transfer_selenium_cookies(
+            self.driver, self.session_checkout, all_cookies=all_cookies
+        )
 
         # Verify the configuration file
         if not self.verify():
@@ -1422,7 +1428,9 @@ def get_timestamp_filename(name, extension):
         return name + "_" + date + "." + extension
 
 
-def transfer_selenium_cookies(d: webdriver.Chrome, s: requests.Session):
+def transfer_selenium_cookies(
+    d: webdriver.Chrome, s: requests.Session, all_cookies=False
+):
     # get cookies, might use these for checkout later, with no cookies on
     # cookie_names = ["session-id", "ubid-main", "x-main", "at-main", "sess-at-main"]
     # for c in self.driver.get_cookies():
@@ -1432,5 +1440,5 @@ def transfer_selenium_cookies(d: webdriver.Chrome, s: requests.Session):
     # update session with cookies from Selenium
     cookie_names = ["session-id", "ubid-main", "x-main", "at-main", "sess-at-main"]
     for c in d.get_cookies():
-        if c["name"] in cookie_names:
+        if all_cookies or c["name"] in cookie_names:
             s.cookies.set(name=c["name"], value=c["value"])
