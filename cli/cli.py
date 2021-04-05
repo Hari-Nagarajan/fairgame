@@ -319,7 +319,7 @@ def amazon(
 )
 @click.option(
     "--all-cookies",
-    is_Flag=True,
+    is_flag=True,
     default=False,
     help="Pulls all the cookies from selenium, rather than targeted ones. May help with login issues?",
 )
