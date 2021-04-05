@@ -67,12 +67,9 @@ def notify_on_crash(func):
             func(*args, **kwargs)
         except KeyboardInterrupt:
             pass
-        else:
+        except Exception as e:
+            log.debug(e)
             notification_handler.send_notification(f"FairGame has crashed.")
-            try:
-                raise
-            except RuntimeError:
-                pass
 
     return decorator
 
