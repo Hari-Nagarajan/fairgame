@@ -954,6 +954,7 @@ class AmazonStoreHandler(BaseStoreHandler):
             log.debug(f"Status Code: {r.status_code} was returned")
             return False
 
+    @debug
     def atc(self, qualified_seller, item):
         post_action = qualified_seller.atc_form[0]
         payload_inputs = {}
@@ -985,6 +986,7 @@ class AmazonStoreHandler(BaseStoreHandler):
             log.info("ATC unsuccessful")
             return False
 
+    @debug
     def ptc(self):
         url = f"https://{self.amazon_domain}/gp/cart/view.html/ref=lh_co_dup?ie=UTF8&proceedToCheckout.x=129"
         try:
@@ -1000,6 +1002,7 @@ class AmazonStoreHandler(BaseStoreHandler):
             log.info("PTC unsuccessful")
             return None
 
+    @debug
     def pyo(self, page):
         pyo_html = html.fromstring(page)
         pyo_params = {
@@ -1067,13 +1070,19 @@ class AmazonStoreHandler(BaseStoreHandler):
         quantity_key = pyo_html.xpath(
             ".//label[@class='a-native-dropdown quantity-dropdown-select js-select']"
         )
-        pyo_params[quantity_key[0].get("for")] = "1"
+        try:
+            pyo_params[quantity_key[0].get("for")] = "1"
+        except IndexError as e:
+            log.debug(e)
+            log.debug("quantity key error, skipping")
+
         for key in pyo_keys:
             try:
                 value = pyo_html.xpath(f".//input[@name='{key}']")[0].value
                 pyo_params[key] = value
-            except IndexError:
-                pass
+            except IndexError as e:
+                log.debug(e)
+                log.debug(f"Error with {key}, skipping")
 
         url = f"https://{self.amazon_domain}/gp/buy/spc/handlers/static-submit-decoupled.html/ref=ox_spc_place_order?"
         r = self.session_checkout.post(url=url, data=pyo_params)
@@ -1141,6 +1150,7 @@ class AmazonStoreHandler(BaseStoreHandler):
             with self.wait_for_page_content_change():
                 self.driver.refresh()
 
+    @debug
     def get_html(self, url, s: requests.Session):
         """Unified mechanism to get content to make changing connection clients easier"""
         f = furl(url)
