@@ -210,6 +210,10 @@ class Amazon:
         self.show_config()
 
         log.info("Waiting for home page.")
+        
+        self.driver.get("chrome://settings/clearBrowserData")
+        time.sleep(1)
+        self.driver.find_element_by_xpath("//*[@id='clearBrowsingDataConfirm']").click()
         while True:
             try:
                 self.get_page(url=AMAZON_URLS["BASE_URL"])
