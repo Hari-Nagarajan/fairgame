@@ -445,6 +445,8 @@ class AmazonStoreHandler(BaseStoreHandler):
         if not self.is_logged_in():
             self.login()
 
+        time.sleep(5)
+
         # Transfer cookies from selenium session.
         # Do not transfer cookies to stock check if using proxies
         if not self.proxies:
