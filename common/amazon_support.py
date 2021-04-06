@@ -18,6 +18,10 @@ class AmazonItemCondition(Enum):
     Renewed = 20
     Refurbished = 20
     Rental = 30
+    LikeNew = 40
+    VeryGood = 50
+    Good = 60
+    Acceptable = 70
     CollectibleLikeNew = 40
     CollectibleVeryGood = 50
     CollectibleGood = 60
