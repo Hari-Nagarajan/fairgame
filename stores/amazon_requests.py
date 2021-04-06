@@ -995,7 +995,7 @@ class AmazonStoreHandler(BaseStoreHandler):
             log.debug("Request Timed Out")
             return None
 
-        if r.status_code == 200:
+        if r.status_code == 200 and r.text:
             log.info("PTC successful")
             return r.text
         else:
@@ -1004,6 +1004,7 @@ class AmazonStoreHandler(BaseStoreHandler):
 
     @debug
     def pyo(self, page):
+        log.dev(page)
         pyo_html = html.fromstring(page)
         pyo_params = {
             "submitFromSPC": "",
