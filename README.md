@@ -83,12 +83,23 @@ dependencies in other operating systems:
 2. Install Python 3.8.5, 3.8.6, 3.8.7 or 3.8.8. Install to some location that does not include spaces in the path 
    (we suggest C:\Python38). Click the checkbox that says Add Python 3.8 to PATH (or something similar) 
    during the installation.
+   
+   ![Add Python 3.8 to PATH](https://github.com/Hari-Nagarajan/fairgame/blob/master/docs/images/PythonInstalltoPath.png)
+   
 3. Download GitHub Desktop and Open the FairGame Repository with GitHub Desktop (or download the zip file). 
    Again, make sure this installs to a location without spaces in the path. If you need help with this, look at Wiki.
 4. Open the FairGame folder in File Explorer. Double click __INSTALL (RUN FIRST).bat ***DON'T USE ADMINISTRATIVE MODE***.
+   
+   ![Run Install RUN FIRST.bat](https://github.com/Hari-Nagarajan/fairgame/blob/master/docs/images/Step4.png)
+   
 5. After this finishes (it could take a few minutes or longer), open the `config` folder in the FairGame folder, make 
    a copy of the amazon_config.template_json file and rename it to amazon_config.json. If you don't know how to rename
    file extensions, look it up on [Google](https://www.google.com/search?q=how+do+I+rename+file+extensions+in+Windows).
+   
+   ![Config Folder](https://github.com/Hari-Nagarajan/fairgame/blob/master/docs/images/step5a.png)
+   
+   ![Copy template](https://github.com/Hari-Nagarajan/fairgame/blob/master/docs/images/Step5b.png)
+   
 6. Edit the amazon_config.json, this assumes US using smile.amazon.com. Using Amazon Smile requires that you select
    a charity. If you do not know how to do this, use 
    [Google](https://www.google.com/search?q=how+do+i+select+a+charity+on+amazon+smile). 
@@ -105,10 +116,16 @@ dependencies in other operating systems:
   "amazon_website": "smile.amazon.com"
 }
 ```
+   
+   ![Edit config file](https://github.com/Hari-Nagarajan/fairgame/blob/master/docs/images/Step6.png)
+   
 7. In File Explorer, double click the `_Amazon.bat` file in the FairGame folder. ***DON'T USE ADMINISTRATIVE MODE***. 
    Type in your amazon email address when asked for your amazon login ID. Type in your amazon account password when 
    asked for your amazon password. Type in a password for your credentials (this can be whatever you want, it just 
    encrypts your account email/password file)
+   
+   ![Run Amazon.bat](https://github.com/Hari-Nagarajan/fairgame/blob/master/docs/images/Step7.png)
+   
 8. Verify that the bot successfully makes it to the place your order page with the item you put in the config file. 
    If it does not, then:
    * You messed something up above, and need to fix it; or,
@@ -120,8 +137,11 @@ dependencies in other operating systems:
      * See [#faq on our Discord](https://discord.gg/GEsarYKMAw) for additional information.
 9. Edit the `amazon_config.json` file with the item(s) you want to look for. See [Configuration](#Configuration) 
    and [Configuration Examples](#Configuration-Examples) for additional information
-11. Remove `--test` from `_Amazon.bat`
-12. Run `_Amazon.bat` and wait
+10. Remove `--test` from `_Amazon.bat`
+   
+   ![Remove Test](https://github.com/Hari-Nagarajan/fairgame/blob/master/docs/images/Step10.png)
+   
+11. Run `_Amazon.bat` and wait
 
 
 Additional information about running FairGame can be found in the rest of the documentation.
