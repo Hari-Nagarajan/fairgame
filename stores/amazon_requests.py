@@ -1152,6 +1152,9 @@ class AmazonStoreHandler(BaseStoreHandler):
             log.debug(e)
             log.debug("timeout on get_html")
             return None, None
+        except Exception as e:
+            log.debug(e)
+            return None, None
         return response.text, response.status_code
 
     # returns negative number if cart element does not exist, returns number if cart exists
