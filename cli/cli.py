@@ -538,6 +538,11 @@ def show_traceroutes(domain):
         log.info(f" {trace_command}{endpoint}")
 
 
+@click.command()
+def test_logging():
+    log.dev("This is a test of the dev log level")
+
+
 # Register Signal Handler for Interrupt
 signal(SIGINT, interrupt_handler)
 
@@ -547,6 +552,7 @@ main.add_command(test_notifications)
 main.add_command(show)
 main.add_command(find_endpoints)
 main.add_command(show_traceroutes)
+main.add_command(test_logging)
 
 # Global scope stuff here
 if is_latest():

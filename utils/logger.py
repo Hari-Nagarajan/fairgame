@@ -22,8 +22,10 @@ import logging
 import os
 from utils.version import version
 from logging import handlers
+from types import MethodType
 
 FORMAT = "%(asctime)s|{}|%(levelname)s| %(message)s".format(version)
+DEV = 5
 
 LOG_DIR = "logs"
 LOG_FILE_NAME = "fairgame.log"
@@ -53,15 +55,22 @@ if os.path.isfile(LOG_FILE_PATH):
 
 logging.basicConfig(
     filename=LOG_FILE_PATH,
-    level=logging.DEBUG,
+    level=logging.DEBUG if version.release else DEV,
     format=FORMAT,
 )
 
+
+def dev(a: logging.Logger, *args, **kwargs):
+    a.log(DEV, *args, **kwargs)
+
+
+logging.addLevelName(DEV, "DEV")
 log = logging.getLogger("fairgame")
 log.setLevel(logging.DEBUG)
+log.dev = MethodType(dev, log)
 
 if version.is_devrelease or version.is_prerelease:
-    LOGLEVEL = os.environ.get("LOGLEVEL", "DEBUG").upper()
+    LOGLEVEL = DEV
 else:
     LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
 stream_handler = logging.StreamHandler()

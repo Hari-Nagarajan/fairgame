@@ -1442,3 +1442,4 @@ def transfer_selenium_cookies(
     for c in d.get_cookies():
         if all_cookies or c["name"] in cookie_names:
             s.cookies.set(name=c["name"], value=c["value"])
+            log.dev(f'Set Cookie {c["name"]} as value {c["value"]}')
