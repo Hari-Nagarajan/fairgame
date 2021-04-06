@@ -513,6 +513,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                         # with open("ptc-source.html", "w", encoding="utf-8") as f:
                         #     f.write(r)
                         if r:
+                            log.debug(r)
                             if test:
                                 print(
                                     "Proceeded to Checkout - Will not Place Order as this is a Test",
@@ -1004,7 +1005,6 @@ class AmazonStoreHandler(BaseStoreHandler):
 
     @debug
     def pyo(self, page):
-        log.dev(page)
         pyo_html = html.fromstring(page)
         pyo_params = {
             "submitFromSPC": "",
