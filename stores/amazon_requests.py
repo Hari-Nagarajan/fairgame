@@ -122,6 +122,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         log_stock_check=False,
         shipping_bypass=False,
         wait_on_captcha_fail=False,
+        transfer_headers=False,
     ) -> None:
         super().__init__()
 
@@ -143,6 +144,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         self.log_stock_check = log_stock_check
         self.wait_on_captcha_fail = wait_on_captcha_fail
         self.amazon_cookies = {}
+        self.transfer_headers = transfer_headers
 
         from cli.cli import global_config
 
@@ -447,15 +449,32 @@ class AmazonStoreHandler(BaseStoreHandler):
 
         time.sleep(5)
 
+        sel_headers = self.driver.execute_script(
+            "var req = new XMLHttpRequest();req.open('GET', document.location, false);req.send(null);return req.getAllResponseHeaders()"
+        )
+
+        # type(headers) == str
+
+        headers = sel_headers.splitlines()
+        header = {}
+        for h in headers:
+            header[h.split(": ")[0]] = h.split(": ")[1]
+
         # Transfer cookies from selenium session.
         # Do not transfer cookies to stock check if using proxies
         if not self.proxies:
             transfer_selenium_cookies(
                 self.driver, self.session_stock_check, all_cookies=all_cookies
             )
+            if self.transfer_headers:
+                for head in header:
+                    self.session_stock_check.headers.update(head)
         transfer_selenium_cookies(
             self.driver, self.session_checkout, all_cookies=all_cookies
         )
+        if self.transfer_headers:
+            for head in header:
+                self.session_checkout.headers.update(head)
 
         # Verify the configuration file
         if not self.verify():

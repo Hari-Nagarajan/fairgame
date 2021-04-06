@@ -320,6 +320,12 @@ def amazon(
     default=False,
     help="Pulls all the cookies from selenium, rather than targeted ones. May help with login issues?",
 )
+@click.option(
+    "--transfer-headers",
+    is_flag=True,
+    default=False,
+    help="Transfers headers from selenium session",
+)
 @notify_on_crash
 def amazonrequests(
     headless,
@@ -340,6 +346,7 @@ def amazonrequests(
     captcha_wait,
     offerid,
     all_cookies,
+    transfer_headers,
 ):
     log.warning(
         "Experimental test balloon.  Do not attempt to use.  Your computer could catch fire."
@@ -375,6 +382,7 @@ def amazonrequests(
         log_stock_check=log_stock_check,
         shipping_bypass=shipping_bypass,
         wait_on_captcha_fail=captcha_wait,
+        transfer_headers=transfer_headers,
     )
 
     try:
