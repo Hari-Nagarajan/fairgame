@@ -1,4 +1,4 @@
-# FairGame
+# FairGame README
 
 # Table of Contents:
 * [About FairGame](#About-FairGame)
@@ -31,7 +31,8 @@
     
 
 # Quick Links
- [Discord](https://discord.gg/4rfbNKrmnC) | [Python Download (3.8.8)](https://www.python.org/downloads/release/python-388/)
+ * [Discord](https://discord.gg/4rfbNKrmnC) **DO NOT ASK QUESTIONS IN DISCORD BEFORE READING THIS DOCUMENT**
+ * [Python Download (3.8.8)](https://www.python.org/downloads/release/python-388/)
 
 # About FairGame
 
