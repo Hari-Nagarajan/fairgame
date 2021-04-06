@@ -1,142 +1,95 @@
-import json
+#      FairGame - Automated Purchasing Program
+#      Copyright (C) 2021  Hari Nagarajan
+#
+#      This program is free software: you can redistribute it and/or modify
+#      it under the terms of the GNU General Public License as published by
+#      the Free Software Foundation, either version 3 of the License, or
+#      (at your option) any later version.
+#
+#      This program is distributed in the hope that it will be useful,
+#      but WITHOUT ANY WARRANTY; without even the implied warranty of
+#      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#      GNU General Public License for more details.
+#
+#      You should have received a copy of the GNU General Public License
+#      along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+#      The author may be contacted through the project's GitHub, at:
+#      https://github.com/Hari-Nagarajan/fairgame
+
 import queue
 import threading
-from concurrent.futures import ThreadPoolExecutor
 from os import path
-
+from playsound import playsound
 import apprise
 
-from notifications.providers.audio import AudioHandler
-from notifications.providers.discord import DiscordHandler
-from notifications.providers.join import JoinHandler
-from notifications.providers.slack import SlackHandler
-from notifications.providers.telegram import TelegramHandler
-from notifications.providers.twilio import TwilioHandler
 from utils.logger import log
 
 TIME_FORMAT = "%Y-%m-%d @ %H:%M:%S"
 
-
-APPRISE_CONFIG_PATH = "config/apprise_config.json"
+APPRISE_CONFIG_PATH = "config/apprise.conf"
+NOTIFICATION_SOUND_PATH = "notifications/notify.mp3"
+PURCHASE_SOUND_PATH = "notifications/purchase.mp3"
+ALARM_SOUND_PATH = "notifications/alarm-frenzy-493.mp3"
 
 
 class NotificationHandler:
-    def __init__(self):
-        log.info("Initializing Apprise handler")
-        self.apb = apprise.Apprise()
+    enabled_handlers = []
+    sound_enabled = True
 
+    def __init__(self):
         if path.exists(APPRISE_CONFIG_PATH):
-            with open(APPRISE_CONFIG_PATH) as json_file:
-                configs = json.load(json_file)
-                for config in configs:
-                    self.apb.add(config["url"])
+            log.info(f"Initializing Apprise handler using: {APPRISE_CONFIG_PATH}")
+            self.apb = apprise.Apprise()
+            config = apprise.AppriseConfig()
+            config.add(APPRISE_CONFIG_PATH)
+            # Get the service names from the config, not the Apprise instance when reading from config file
+            for server in config.servers():
+                log.info(f"Found {server.service_name} configuration")
+                self.enabled_handlers.append(server.service_name)
+            self.apb.add(config)
             self.queue = queue.Queue()
             self.start_worker()
             self.enabled = True
         else:
             self.enabled = False
-            log.debug("No Apprise config found.")
+            log.info(f"No Apprise config found at {APPRISE_CONFIG_PATH}.")
+            log.info(f"For notifications, see {APPRISE_CONFIG_PATH}_template")
 
-        log.info("Initializing other notification handlers")
-        self.audio_handler = AudioHandler()
-        self.twilio_handler = TwilioHandler()  # Deprecate soon
-        self.discord_handler = DiscordHandler()  # Deprecate soon
-        self.join_handler = JoinHandler()  # Deprecate soon
-        self.telegram_handler = TelegramHandler()  # Deprecate soon
-        self.slack_handler = SlackHandler()  # Deprecate soon
-
-        deprecation_message = "The standalone {notification} handler will be deprecated soon, please delete your {notification}_config.json and add the equivalent apprise url: '{apprise_url}' to 'config/apprise_config.json'"
-        if self.slack_handler.enabled:
-            slack_apprise_url = self.slack_handler.generate_apprise_url()
-            log.warning(
-                deprecation_message.format(
-                    notification="slack", apprise_url=slack_apprise_url
-                )
-            )
-            self.apb.add(slack_apprise_url)
-
-        if self.twilio_handler.enabled:
-            twilio_apprise_url = self.twilio_handler.generate_apprise_url()
-            log.warning(
-                deprecation_message.format(
-                    notification="twilio", apprise_url=twilio_apprise_url
-                )
-            )
-            self.apb.add(twilio_apprise_url)
-
-        if self.telegram_handler.enabled:
-            telegram_apprise_url = self.telegram_handler.generate_apprise_url()
-            log.warning(
-                deprecation_message.format(
-                    notification="telegram", apprise_url=telegram_apprise_url
-                )
-            )
-            self.apb.add(telegram_apprise_url)
-
-        if self.join_handler.enabled:
-            join_apprise_url = self.join_handler.generate_apprise_url()
-            log.warning(
-                deprecation_message.format(
-                    notification="join", apprise_url=join_apprise_url
-                )
-            )
-            self.apb.add(join_apprise_url)
-
-        if self.discord_handler.enabled:
-            discord_apprise_url = self.discord_handler.generate_apprise_url()
-            log.warning(
-                deprecation_message.format(
-                    notification="discord", apprise_url=discord_apprise_url
-                )
-            )
-            self.apb.add(discord_apprise_url)
-
-        enabled_handlers = self.get_enabled_handlers()
-        log.info(f"Enabled Handlers: {enabled_handlers}")
-        if len(enabled_handlers) > 0:
-            self.executor = ThreadPoolExecutor(max_workers=len(enabled_handlers))
-
-    def get_enabled_handlers(self):
-        enabled_handlers = []
-        if self.audio_handler.enabled:
-            enabled_handlers.append("Audio")
-        if self.twilio_handler.enabled:
-            enabled_handlers.append("Twilio")
-        if self.discord_handler.enabled:
-            enabled_handlers.append("Discord")
-        if self.join_handler.enabled:
-            enabled_handlers.append("Join")
-        if self.telegram_handler.enabled:
-            enabled_handlers.append("Telegram")
-        if self.slack_handler.enabled:
-            enabled_handlers.append("Slack")
-        return enabled_handlers
-
-    def send_notification(self, message, screenshot=False, **kwargs):
+    def send_notification(self, message, ss_name=[], **kwargs):
         if self.enabled:
-            self.queue.put((message, screenshot))
-
-        if self.audio_handler.enabled:
-            self.executor.submit(self.audio_handler.play, **kwargs)
-        if self.twilio_handler.enabled:
-            self.executor.submit(self.twilio_handler.send, message)
-        if self.discord_handler.enabled:
-            self.executor.submit(self.discord_handler.send, message)
-        if self.join_handler.enabled:
-            self.executor.submit(self.join_handler.send, message)
-        if self.telegram_handler.enabled:
-            self.executor.submit(self.telegram_handler.send, message)
-        if self.slack_handler.enabled:
-            self.executor.submit(self.slack_handler.send, message)
+            self.queue.put((message, ss_name))
 
     def message_sender(self):
         while True:
-            message, screenshot = self.queue.get()
-            if screenshot:
-                self.apb.notify(body=message, attach="screenshot.png")
+            message, ss_name = self.queue.get()
+
+            if ss_name:
+                self.apb.notify(body=message, attach=ss_name)
             else:
                 self.apb.notify(body=message)
             self.queue.task_done()
 
     def start_worker(self):
         threading.Thread(target=self.message_sender, daemon=True).start()
+
+    def play_notify_sound(self):
+        self.play(NOTIFICATION_SOUND_PATH)
+
+    def play_alarm_sound(self):
+        self.play(ALARM_SOUND_PATH)
+
+    def play_purchase_sound(self):
+        self.play(PURCHASE_SOUND_PATH)
+
+    def play(self, audio_file=None, **kwargs):
+        if self.sound_enabled:
+            try:
+                # See https://github.com/TaylorSMarks/playsound
+                playsound(audio_file if audio_file else NOTIFICATION_SOUND_PATH, False)
+            except Exception as e:
+                log.error(e)
+                log.warn(
+                    "Error playing notification sound. Disabling local audio notifications."
+                )
+                self.sound_enabled = False

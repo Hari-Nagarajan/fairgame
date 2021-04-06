@@ -1,14 +1,41 @@
+#      FairGame - Automated Purchasing Program
+#      Copyright (C) 2021  Hari Nagarajan
+#
+#      This program is free software: you can redistribute it and/or modify
+#      it under the terms of the GNU General Public License as published by
+#      the Free Software Foundation, either version 3 of the License, or
+#      (at your option) any later version.
+#
+#      This program is distributed in the hope that it will be useful,
+#      but WITHOUT ANY WARRANTY; without even the implied warranty of
+#      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#      GNU General Public License for more details.
+#
+#      You should have received a copy of the GNU General Public License
+#      along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+#      The author may be contacted through the project's GitHub, at:
+#      https://github.com/Hari-Nagarajan/fairgame
+
 import requests
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.wait import WebDriverWait
-
+from selenium.webdriver.remote.remote_connection import LOGGER as selenium_logger
+from urllib3.connectionpool import log as urllib_logger
+from logging import WARNING as logging_WARNING
 
 options = Options()
-options.add_experimental_option("excludeSwitches", ["enable-automation"])
+options.add_experimental_option(
+    "excludeSwitches", ["enable-automation", "enable-logging"]
+)
 options.add_experimental_option("useAutomationExtension", False)
+# CHROME ONLY option to prevent Restore Session popup
+options.add_argument("--disable-session-crashed-bubble")
+selenium_logger.setLevel(logging_WARNING)
+urllib_logger.setLevel(logging_WARNING)
 
 
 class AnyEc:
@@ -26,16 +53,6 @@ class AnyEc:
                     return True
             except:
                 pass
-
-
-def no_amazon_image():
-    prefs = {"profile.managed_default_content_settings.images": 2}
-    options.add_experimental_option("prefs", prefs)
-
-
-def yes_amazon_image():
-    prefs = {"profile.managed_default_content_settings.images": 0}
-    options.add_experimental_option("prefs", prefs)
 
 
 def wait_for_element(d, e_id, time=30):

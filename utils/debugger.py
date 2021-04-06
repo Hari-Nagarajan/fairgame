@@ -17,13 +17,22 @@
 #      The author may be contacted through the project's GitHub, at:
 #      https://github.com/Hari-Nagarajan/fairgame
 
-import click
-import questionary
+from utils.logger import log
+
+import functools
 
 
-class QuestionaryOption(click.Option):
-    def __init__(self, param_decls=None, **attrs):
-        click.Option.__init__(self, param_decls, **attrs)
+def debug(func):
+    """Print the function signature and return value"""
 
-    def prompt_for_value(self, ctx):
-        return questionary.select(self.prompt, choices=self.type.choices).unsafe_ask()
+    @functools.wraps(func)
+    def wrapper_debug(*args, **kwargs):
+        args_repr = [repr(a) for a in args]  # 1
+        kwargs_repr = [f"{k}={v!r}" for k, v in kwargs.items()]  # 2
+        signature = ", ".join(args_repr + kwargs_repr)  # 3
+        log.debug(f"Calling {func.__name__}({signature})")
+        value = func(*args, **kwargs)
+        log.debug(f"{func.__name__!r} returned {value!r}")  # 4
+        return value
+
+    return wrapper_debug

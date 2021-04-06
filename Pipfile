@@ -7,10 +7,10 @@ verify_ssl = true
 pyinstaller = "*"
 
 [packages]
-requests = "*"
+requests = "==2.24.0"
 click = "*"
 selenium = "*"
-chromedriver-py = "==85.0.4183.87"
+chromedriver-py = "==88.0.4324.96"
 furl = "*"
 twilio = "*"
 discord-webhook = "*"
@@ -21,14 +21,21 @@ slackclient = "*"
 playsound = "*"
 prompt_toolkit = "*"
 aiohttp = "*"
-pyobjc = {version = "*", sys_platform = "== 'darwin'"}
+pyobjc = { version = "*", sys_platform = "== 'darwin'" }
 async-timeout = "*"
-amazoncaptcha = "==0.4.4"
+amazoncaptcha = "*"
 browser-cookie3 = "*"
 coloredlogs = "*"
 apprise = "*"
-
-
+price-parser = "*"
+pypresence = "==4.0.0"
+pywin32 = { version = "*", sys_platform = "== 'win32'" }
+psutil = "*"
+stdiomask = "*"
+packaging = "*"
+config = "*"
+lxml = "*"
+dnspython = "*"
 
 [requires]
 python_version = "3.8"
