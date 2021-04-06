@@ -98,6 +98,7 @@ dependencies in other operating systems:
    
    ![Config Folder](https://github.com/Hari-Nagarajan/fairgame/blob/master/docs/images/step5a.png)
    
+   **Ignore extra files in this folder. Screenshot is based on development files. Just follow instructions as written!**
    ![Copy template](https://github.com/Hari-Nagarajan/fairgame/blob/master/docs/images/Step5b.png)
    
 6. Edit the amazon_config.json, this assumes US using smile.amazon.com. Using Amazon Smile requires that you select
