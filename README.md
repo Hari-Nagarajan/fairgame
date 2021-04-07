@@ -454,10 +454,10 @@ Edit the newly created files with your settings based on your [configuration](#c
 
 #### Installation Raspberry Pi 4 (2 GB+)
 
-This is an abridged version of the community created document by UnidentifiedWarlock and Judarius.  It can be 
-found [here](https://docs.google.com/document/d/1VUxXhATZ8sZOJxdh3AIY6OGqwLRmrAcPikKZAwphIE8/edit). If the steps here
-don't work on your Pi 4, look there for additional options. This hasn't been tested on a Pi 3, but given enough RAM to
-run Chrome, it may very well work. Let us know. 
+This is an abridged version of the community created document by UnidentifiedWarlock and Judarius (link to this
+document can be found at end of this section, however you should **follow the README directions first!**). If the 
+README steps don't work on your Pi 4, look at that document for additional options. This hasn't been tested
+on a Pi 3, but given enough RAM to run Chrome, it may very well work. Let us know. 
 
 ```shell
 sudo apt update
@@ -504,6 +504,8 @@ to
 Then save and close the file.
 
 Back in the terminal you kept open, under the fairgame folder you can now type `pipenv run python app.py amazon` and run the bot, or add any flags after you wish to use like `--headless` or `--delay x` to make `pipenv run python app.py amazon --headless --delay 4`
+
+Basis for the above directions can be found [here](https://docs.google.com/document/d/1VUxXhATZ8sZOJxdh3AIY6OGqwLRmrAcPikKZAwphIE8/edit)
 
 # Advanced Configuration 
 ## Notifications
