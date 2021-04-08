@@ -15,6 +15,8 @@ FREE_SHIPPING_PRICE = parse_price("0.00")
 class AmazonItemCondition(Enum):
     # See https://sellercentral.amazon.com/gp/help/external/200386310?language=en_US&ref=efph_200386310_cont_G1831
     New = 10
+    Nuevo = 10
+    Neuf = 10
     Renewed = 20
     Refurbished = 20
     Rental = 30
