@@ -11,6 +11,39 @@ from utils.logger import log
 
 FREE_SHIPPING_PRICE = parse_price("0.00")
 
+MERCHANT_IDS = [
+    "A2Q3Y263D00KWC",
+    "A2EUQ1WTGCTBG2",
+    "A1AM78C64UM0Y8",
+    "ATVPDKIKX0DER",
+    "A2VIGQ35RCS4UG",
+    "A1PA6795UKMFR9",
+    "ARBP9OOSHTCHU",
+    "A1RKKUPIHCS9HS",
+    "A13V1IB3VIYZZH",
+    "A1F83G8C2ARO7P",
+    "A21TJRUUN4KGV",
+    "APJ6JRA9NG5V4",
+    "A1805IZSGTT6HS",
+    "A1C3SOZRARQ6R3",
+    "A17E79C6D8DWNP",
+    "A2NODRKZP88ZB9",
+    "A33AVAJ2PDY3EV",
+    "A19VAU5U5O7RUS",
+    "A39IBJ37TRP1C6",
+    "A1VC38T7YXB528",
+    "A3P5ROKL5A1OLE",
+    "A2OAJ7377F756P",
+    "A2KVF7QXNCLV8H",
+    "A1X6FK5RDHNB96",
+    "A2CVHYRTWLQO9T",
+    "A3JWKAKR8XB7XF",
+    "AN1VRQENFRJN5",
+    "A3DWYIK6Y9EEQB",
+    "A1AT7YVPFBWXBL",
+    "A11IL2PNWYJU7H",
+]
+
 
 class AmazonItemCondition(Enum):
     # See https://sellercentral.amazon.com/gp/help/external/200386310?language=en_US&ref=efph_200386310_cont_G1831
@@ -276,7 +309,11 @@ def condition_check(item, seller):
 
 
 def merchant_check(item, seller):
-    if item.merchant_id.lower() == "any" or item.merchant_id == seller.merchant_id:
+    if (
+        item.merchant_id.lower() == "any"
+        or (item.merchant_id.lower() == "amazon" and seller.merchant_id in MERCHANT_IDS)
+        or item.merchant_id == seller.merchant_id
+    ):
         return True
     else:
         return False
