@@ -17,6 +17,8 @@ class AmazonItemCondition(Enum):
     New = 10
     Nuevo = 10
     Neuf = 10
+    Neu = 10
+    Nuovo = 10
     Renewed = 20
     Refurbished = 20
     Rental = 30
