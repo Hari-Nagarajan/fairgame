@@ -888,7 +888,12 @@ class AmazonStoreHandler(BaseStoreHandler):
                         0
                     ].value
                 except IndexError:
-                    merchant_id = None
+                    find_merchant_id = re.search(r"merchantId = \"(.*?)\";", payload)
+                    if find_merchant_id:
+                        merchant_id = find_merchant_id.group(1)
+                    else:
+                        log.debug("No Merchant ID found")
+                        merchant_id = ""
                 try:
                     price_text = offer.xpath(".//span[@class='a-price-whole']")[
                         0
@@ -1051,7 +1056,7 @@ class AmazonStoreHandler(BaseStoreHandler):
             "isShipWheneverValid0.1": "",
             "shippingofferingid0.2": "",
             "guaranteetype0.2": "",
-            "issss0.2:": "",
+            "issss0.2": "",
             "shipsplitpriority0.2": "",
             "isShipWhenCompleteValid0.2": "",
             "isShipWheneverValid0.2": "",
