@@ -195,6 +195,12 @@ def main():
     default=False,
     help="Wait if captcha could not be solved. Only occurs if enters captcha handler during checkout.",
 )
+@click.option(
+    "--clear-cache",
+    is_flag=True,
+    default=False,
+    help="Clear cache and cookies on initial load",
+)
 @notify_on_crash
 def amazon(
     no_image,
@@ -216,6 +222,7 @@ def amazon(
     clean_credentials,
     alt_offers,
     captcha_wait,
+    clear_cache,
 ):
     notification_handler.sound_enabled = not disable_sound
     if not notification_handler.sound_enabled:
@@ -249,6 +256,7 @@ def amazon(
         shipping_bypass=shipping_bypass,
         alt_offers=alt_offers,
         wait_on_captcha_fail=captcha_wait,
+        clear_cache=clear_cache,
     )
     try:
         amzn_obj.run(delay=delay, test=test)

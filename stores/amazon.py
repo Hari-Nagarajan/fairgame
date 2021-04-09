@@ -110,6 +110,7 @@ class Amazon:
         shipping_bypass=False,
         alt_offers=False,
         wait_on_captcha_fail=False,
+        clear_cache=False,
     ):
         self.notification_handler = notification_handler
         self.asin_list = []
@@ -140,6 +141,7 @@ class Amazon:
         self.unknown_title_notification_sent = False
         self.alt_offers = alt_offers
         self.wait_on_captcha_fail = wait_on_captcha_fail
+        self.clear_cache = clear_cache
 
         presence.enabled = not disable_presence
 
@@ -210,6 +212,17 @@ class Amazon:
         self.show_config()
 
         log.info("Waiting for home page.")
+
+        if self.clear_cache:
+            log.info("Clearing cache and cookies.")
+            send_command = ('POST', '/session/$sessionId/chromium/send_command')
+            self.driver.command_executor._commands['SEND_COMMAND'] = send_command
+            self.driver.execute('SEND_COMMAND', dict(cmd='Network.clearBrowserCache', params={}))
+            time.sleep(1)
+            self.driver.execute('SEND_COMMAND', dict(cmd='Network.clearBrowserCookies', params={}))
+            log.info("Cache and cookies cleared.")
+
+
         while True:
             try:
                 self.get_page(url=AMAZON_URLS["BASE_URL"])
