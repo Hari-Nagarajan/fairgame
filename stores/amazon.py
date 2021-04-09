@@ -215,13 +215,16 @@ class Amazon:
 
         if self.clear_cache:
             log.info("Clearing cache and cookies.")
-            send_command = ('POST', '/session/$sessionId/chromium/send_command')
-            self.driver.command_executor._commands['SEND_COMMAND'] = send_command
-            self.driver.execute('SEND_COMMAND', dict(cmd='Network.clearBrowserCache', params={}))
+            send_command = ("POST", "/session/$sessionId/chromium/send_command")
+            self.driver.command_executor._commands["SEND_COMMAND"] = send_command
+            self.driver.execute(
+                "SEND_COMMAND", dict(cmd="Network.clearBrowserCache", params={})
+            )
             time.sleep(1)
-            self.driver.execute('SEND_COMMAND', dict(cmd='Network.clearBrowserCookies', params={}))
+            self.driver.execute(
+                "SEND_COMMAND", dict(cmd="Network.clearBrowserCookies", params={})
+            )
             log.info("Cache and cookies cleared.")
-
 
         while True:
             try:
