@@ -606,7 +606,7 @@ set PIPENV_VENV_IN_PROJECT=1 (Windows)
 export PIPENV_VENV_IN_PROJECT=1 (Linux/Other)
 ```
 
-* Running the bot minimized can cause time out errors due to how Selenium acts with various versions of Chrome. 
+* Running the bot's Chrome browser minimized can cause time out errors due to how Selenium acts with various versions of Chrome. 
 
 * One time passcode (OTP) doesn't work in headless. Turn it off when starting up a headless instance, then turn 
   it back on afterwords.
