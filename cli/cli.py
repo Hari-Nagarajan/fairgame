@@ -63,9 +63,11 @@ def notify_on_crash(func):
     def decorator(*args, **kwargs):
         try:
             func(*args, **kwargs)
+
         except KeyboardInterrupt:
-            log.info("Caught Ctrl-C - Exiting...")
+            log.info("Caught ctrl-c; Exiting...")
             return
+
         except:
             notification_handler.send_notification(f"FairGame has crashed.")
             raise

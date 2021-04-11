@@ -126,7 +126,9 @@ class Amazon:
         self.single_shot = single_shot
         self.take_screenshots = not no_screenshots
         self.start_time = time.time()
+        self.start_time_check = 0
         self.start_time_atc = 0
+        self.end_time_atc = 0
         self.webdriver_child_pids = []
         self.driver = None
         self.refresh_delay = DEFAULT_REFRESH_DELAY
@@ -432,7 +434,7 @@ class Amazon:
         while not found_asin:
             for i in range(len(self.asin_list)):
                 for asin in self.asin_list[i]:
-                    # start_time = time.time()
+                    self.start_time_check = time.time()
                     if self.log_stock_check:
                         log.info(f"Checking ASIN: {asin}.")
                     if self.check_stock(asin, self.reserve_min[i], self.reserve_max[i]):
@@ -526,7 +528,7 @@ class Amazon:
                     )
                 )
                 if footer and footer[0].tag_name == "img":
-                    log.info(f"Saw dogs for {asin}.  Skipping...")
+                    log.warning(f"Saw dogs for {asin}.  Skipping...")
                     return False
 
                 log.debug(f"After footer page title {self.driver.title}")
@@ -698,7 +700,7 @@ class Amazon:
             if test and (test.text in amazon_config["NO_SELLERS"]):
                 return False
             if time.time() > timeout:
-                log.info(f"failed to load page for {asin}, going to next ASIN")
+                log.warning(f"Failed to load page for {asin}, going to next ASIN")
                 return False
 
         timeout = self.get_timeout()
@@ -718,7 +720,7 @@ class Amazon:
             if prices:
                 break
             if time.time() > timeout:
-                log.info(f"failed to load prices for {asin}, going to next ASIN")
+                log.warning(f"Failed to load prices for {asin}, going to next ASIN")
                 return False
         shipping = []
         shipping_prices = []
@@ -757,7 +759,7 @@ class Amazon:
                 break
 
             if time.time() > timeout:
-                log.info(f"failed to load shipping for {asin}, going to next ASIN")
+                log.warning(f"Failed to load shipping for {asin}, going to next ASIN")
                 return False
 
         in_stock = False
@@ -829,6 +831,7 @@ class Amazon:
                     ):
                         return True
                     else:
+                        log.error(f"Failed to Add to Cart with offer ID: {offering_id}")
                         self.send_notification(
                             "Failed Add to Cart after {max-atc-retries}",
                             "failed-atc",
@@ -868,9 +871,9 @@ class Amazon:
                     ):
                         return True
                     else:
-                        log.info("did not add to cart, trying again")
+                        log.warning("Did not add to cart, trying again")
                         if emtpy_cart_elements:
-                            log.info(
+                            log.warning(
                                 "Cart appeared empty after clicking Add To Cart button"
                             )
                         log.debug(f"failed title was {self.driver.title}")
@@ -942,14 +945,15 @@ class Amazon:
                 f"Title was blank, checking to find a real title for {timeout_seconds} seconds"
             )
             timeout = self.get_timeout(timeout=timeout_seconds)
-            while True:
+            while time.time() <= timeout:
                 if self.driver.title != "":
                     title = self.driver.title
                     log.debug(f"found a real title: {title}.")
                     break
-                if time.time() > timeout:
-                    log.debug("Time out reached, page title was still blank.")
-                    break
+                time.sleep(0.05)
+            else:
+                log.debug("Time out reached, page title was still blank.")
+
         if title in amazon_config["SIGN_IN_TITLES"]:
             self.login()
         elif title in amazon_config["CAPTCHA_PAGE_TITLES"]:
@@ -1073,7 +1077,7 @@ class Amazon:
                     self.driver.get(AMAZON_URLS["CART_URL"])
             except sel_exceptions.WebDriverException:
                 log.error(
-                    "failed to load cart URL, refreshing and returning to handler"
+                    "Failed to load cart URL, refreshing and returning to handler"
                 )
                 with self.wait_for_page_content_change(timeout=10):
                     self.driver.refresh()
@@ -1254,7 +1258,7 @@ class Amazon:
 
     @debug
     def handle_home_page(self):
-        log.info("On home page, trying to get back to checkout")
+        log.warning("On home page, trying to get back to checkout")
         button = None
         tries = 0
         maxTries = 10
@@ -1270,9 +1274,9 @@ class Amazon:
             if self.do_button_click(button=button):
                 return
             else:
-                log.info("Failed to click on cart button")
+                log.error("Failed to click on cart button")
         else:
-            log.info("Could not find cart button after " + str(maxTries) + " tries")
+            log.error("Could not find cart button after " + str(maxTries) + " tries")
 
         # no button found or could not interact with the button
         self.send_notification(
@@ -1284,7 +1288,7 @@ class Amazon:
         while self.driver.title == current_page:
             time.sleep(0.25)
             if time.time() > timeout:
-                log.info("user failed to intervene in time, returning to stock check")
+                log.error("user failed to intervene in time, returning to stock check")
                 self.try_to_checkout = False
                 break
 
@@ -1310,12 +1314,12 @@ class Amazon:
                     except sel_exceptions.NoSuchElementException:
                         pass
             if self.get_cart_count() == 0:
-                log.info("You have no items in cart. Going back to stock check.")
+                log.error("You have no items in cart. Going back to stock check.")
                 self.try_to_checkout = False
                 break
 
             if time.time() > timeout:
-                log.info("couldn't find buttons to proceed to checkout")
+                log.error("couldn't find buttons to proceed to checkout")
                 self.save_page_source("ptc-error")
                 self.send_notification(
                     "Proceed to Checkout Error Occurred",
@@ -1385,9 +1389,15 @@ class Amazon:
                 self.order_retry += 1
                 return
         if test:
+            self.end_time_atc = time.time()
             log.info(f"Found button {button.text}, but this is a test")
             log.info("will not try to complete order")
-            log.info(f"test time took {time.time() - self.start_time_atc} to check out")
+            log.info(
+                f"  From cart: took {self.end_time_atc - self.start_time_atc} to check out"
+            )
+            log.info(
+                f"  From check: took {self.end_time_atc - self.start_time_check} to check out"
+            )
             self.try_to_checkout = False
             self.great_success = True
             if self.single_shot:
@@ -1398,7 +1408,14 @@ class Amazon:
 
     @debug
     def handle_order_complete(self):
+        self.end_time_atc = time.time()
         log.info("Order Placed.")
+        log.info(
+            f"  From cart: took {self.end_time_atc - self.start_time_atc} to check out"
+        )
+        log.info(
+            f"  From check: took {self.end_time_atc - self.start_time_check} to check out"
+        )
         self.send_notification("Order placed.", "order-placed", self.take_screenshots)
         self.notification_handler.play_purchase_sound()
         self.great_success = True
@@ -1611,7 +1628,7 @@ class Amazon:
         try:
             self.driver.get(url=url)
         except sel_exceptions.WebDriverException or sel_exceptions.TimeoutException:
-            log.error(f"failed to load page at url: {url}")
+            log.error(f"Failed to load page at url: {url}")
             return False
         if check_cart_element:
             timeout = self.get_timeout()
