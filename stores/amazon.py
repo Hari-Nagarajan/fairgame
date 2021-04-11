@@ -179,10 +179,19 @@ class Amazon:
                         "amazon_website", "smile.amazon.com"
                     )
                     for x in range(self.asin_groups):
+                        if float(config[f"reserve_min_{x + 1}"]) > float(
+                            config[f"reserve_max_{x + 1}"]
+                        ):
+                            log.error("Minimum price must be <= maximum price")
+                            log.error(
+                                f"    {float(config[f'reserve_min_{x + 1}']):.2f} > {float(config[f'reserve_max_{x + 1}']):.2f}"
+                            )
+                            exit(0)
+
                         self.asin_list.append(config[f"asin_list_{x + 1}"])
                         self.reserve_min.append(float(config[f"reserve_min_{x + 1}"]))
                         self.reserve_max.append(float(config[f"reserve_max_{x + 1}"]))
-                    # assert isinstance(self.asin_list, list)
+
                 except Exception as e:
                     log.error(f"{e} is missing")
                     log.error(
@@ -887,6 +896,23 @@ class Amazon:
                             reserve_min=reserve_min,
                             retry=retry + 1,
                         )
+            elif reserve_min > (price_float + ship_float):
+                log.debug(
+                    f"  Min ({reserve_min}) > Price ({price_float} + {ship_float} shipping)"
+                )
+
+            elif reserve_max < (price_float + ship_float):
+                log.debug(
+                    f"  Max ({reserve_max}) < Price ({price_float} + {ship_float} shipping)"
+                )
+
+            else:
+                log.error("Serious problem with price comparison")
+                log.error(f"  Min:   {reserve_min}")
+                log.error(f"  Price: {price_float} + {ship_float} shipping")
+                log.error(f"  Max:   {reserve_max}")
+
+        log.info(f"Offers exceed price range ({reserve_min:.2f}-{reserve_max:.2f})")
         return in_stock
 
     def attempt_atc(self, offering_id, max_atc_retries=DEFAULT_MAX_ATC_TRIES):
@@ -1692,6 +1718,7 @@ class Amazon:
             log.info(
                 f"--Looking for {len(asins)} ASINs between {self.reserve_min[idx]:.2f} and {self.reserve_max[idx]:.2f}"
             )
+            log.info(f"-    {asins}")
         if not presence.enabled:
             log.info(f"--Discord Presence feature is disabled.")
         if self.no_image:
@@ -1805,7 +1832,7 @@ def get_shipping_costs(tree, free_shipping_string):
                 for free_message in amazon_config["FREE_SHIPPING"]
             ):
                 # We found some version of "free" inside the span.. but this relies on a match
-                log.info(
+                log.debug(
                     f"Assuming free shipping based on this message: '{shipping_span_text}'"
                 )
                 return FREE_SHIPPING_PRICE
