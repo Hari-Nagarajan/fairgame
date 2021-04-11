@@ -44,7 +44,7 @@ def get_credentials(credentials_file, encrypted_pass=None):
     else:
         log.info("No credential file found, let's make one")
         log.info("NOTE: DO NOT SAVE YOUR CREDENTIALS IN CHROME, CLICK NEVER!")
-        credential = await_credential_input()
+        credential =   await_credential_input()
         create_encrypted_config(credential, credentials_file)
         return credential["username"], credential["password"]
 
