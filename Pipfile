@@ -36,6 +36,7 @@ packaging = "*"
 config = "*"
 lxml = "*"
 dnspython = "*"
+fake-useragent = "*"
 
 [requires]
 python_version = "3.8"

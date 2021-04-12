@@ -9,6 +9,8 @@ import typing
 from contextlib import contextmanager
 from datetime import datetime
 from utils.debugger import debug
+import secrets
+from fake_useragent import UserAgent
 
 import re
 
@@ -145,6 +147,8 @@ class AmazonStoreHandler(BaseStoreHandler):
         self.wait_on_captcha_fail = wait_on_captcha_fail
         self.amazon_cookies = {}
         self.transfer_headers = transfer_headers
+
+        self.ua = UserAgent()
 
         from cli.cli import global_config
 
@@ -1119,11 +1123,15 @@ class AmazonStoreHandler(BaseStoreHandler):
         else:
             return False
 
-    def get_real_time_data(self, item):
+    def get_real_time_data(self, item: FGItem):
         log.debug(f"Calling {STORE_NAME} for {item.short_name} using {item.furl.url}")
         if self.proxies:
             log.debug(f"Using proxy: {self.proxies[0]}")
-        data, status = self.get_html(item.furl.url, s=self.session_stock_check)
+        params = {"anticache": str(secrets.token_urlsafe(32))}
+        item.furl.args.update(params)
+        data, status = self.get_html(
+            item.furl.url, s=self.session_stock_check, randomize_ua=True
+        )
 
         # rotate proxy, if it is being utilized
         if self.proxies:
@@ -1178,9 +1186,12 @@ class AmazonStoreHandler(BaseStoreHandler):
                 self.driver.refresh()
 
     @debug
-    def get_html(self, url, s: requests.Session):
+    def get_html(self, url, s: requests.Session, randomize_ua=False):
         """Unified mechanism to get content to make changing connection clients easier"""
         f = furl(url)
+        if randomize_ua:
+            user_agent = {"user-agent": self.ua.random}
+            s.headers.update(user_agent)
         if not f.scheme:
             f.set(scheme="https")
         try:
