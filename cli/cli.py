@@ -68,9 +68,9 @@ def notify_on_crash(func):
             log.info("Caught ctrl-c; Exiting...")
             return
 
-        except:
+        except Exception as e:
+            log.debug(e)
             notification_handler.send_notification(f"FairGame has crashed.")
-            raise
 
     return decorator
 
