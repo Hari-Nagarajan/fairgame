@@ -65,8 +65,7 @@ def notify_on_crash(func):
             func(*args, **kwargs)
 
         except KeyboardInterrupt:
-            log.info("Caught ctrl-c; Exiting...")
-            return
+            pass
 
         except Exception as e:
             log.debug(e)
