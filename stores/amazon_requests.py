@@ -892,7 +892,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                         0
                     ].value
                 except IndexError:
-                    find_merchant_id = re.search(r"merchantId = \"(.*?)\";", payload)
+                    find_merchant_id = re.search(r"merchantId = \"(\w+?)\";", payload)
                     if find_merchant_id:
                         merchant_id = find_merchant_id.group(1)
                     else:
