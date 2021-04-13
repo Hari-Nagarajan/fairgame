@@ -889,10 +889,10 @@ class AmazonStoreHandler(BaseStoreHandler):
                     ].value
                 except IndexError:
                     try:
-                        merchant_script = offer.xpath(".//script")[
-                            0
-                        ].text.strip()
-                        find_merchant_id = re.search(r"merchantId = \"(\w+?)\";", merchant_script)
+                        merchant_script = offer.xpath(".//script")[0].text.strip()
+                        find_merchant_id = re.search(
+                            r"merchantId = \"(\w+?)\";", merchant_script
+                        )
                         if find_merchant_id:
                             merchant_id = find_merchant_id.group(1)
                         else:
