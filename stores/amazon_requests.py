@@ -892,10 +892,17 @@ class AmazonStoreHandler(BaseStoreHandler):
                         0
                     ].value
                 except IndexError:
-                    find_merchant_id = re.search(r"merchantId = \"(\w+?)\";", payload)
-                    if find_merchant_id:
-                        merchant_id = find_merchant_id.group(1)
-                    else:
+                    try:
+                        merchant_script = offer.xpath(".//script")[0].text.strip()
+                        find_merchant_id = re.search(
+                            r"merchantId = \"(\w+?)\";", merchant_script
+                        )
+                        if find_merchant_id:
+                            merchant_id = find_merchant_id.group(1)
+                        else:
+                            log.debug("No Merchant ID found")
+                            merchant_id = ""
+                    except IndexError:
                         log.debug("No Merchant ID found")
                         merchant_id = ""
                 try:
