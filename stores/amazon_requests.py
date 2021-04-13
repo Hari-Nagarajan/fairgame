@@ -4,6 +4,7 @@ import os
 import pickle
 import platform
 import random
+import stdiomask
 import time
 import typing
 from contextlib import contextmanager
@@ -364,9 +365,29 @@ class AmazonStoreHandler(BaseStoreHandler):
 
         # Deal with 2FA
         if self.driver.title in amazon_config["TWOFA_TITLES"]:
-            log.info("enter in your two-step verification code in browser")
-            while self.driver.title in amazon_config["TWOFA_TITLES"]:
-                time.sleep(0.2)
+            log.warning("Encountered 2FA page")
+            otp_field = self.wait_get_amazon_element("OTP_FIELD")
+            if otp_field:
+                log.info("Setting OTP using CLI...")
+                otp_remember_me = self.wait_get_clickable_amazon_element(
+                    "OTP_REMEMBER_ME"
+                )
+                if otp_remember_me:
+                    otp_remember_me.click()
+                else:
+                    log.error("OTP Remember me checkbox did not exist")
+
+                otp = stdiomask.getpass(
+                    prompt="enter in your two-step verification code: ", mask="*"
+                )
+                otp_field.send_keys(otp + Keys.RETURN)
+                time.sleep(2)
+
+            else:
+                log.error("OTP entry box did not exist, please fill in OTP manually...")
+                while self.driver.title in amazon_config["TWOFA_TITLES"]:
+                    # Wait for the user to enter 2FA
+                    time.sleep(2)
 
         # Deal with Account Fix Up prompt
         if "accountfixup" in self.driver.current_url:
@@ -1329,7 +1350,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                             self.take_screenshots,
                         )
                         with self.wait_for_page_content_change():
-                            timeout = self.get_timeout(timeout=60)
+                            timeout = get_timeout(timeout=60)
                             current_page = self.driver.title
                             while (
                                 time.time() < timeout

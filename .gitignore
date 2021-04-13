@@ -10,7 +10,7 @@
 .profile
 .profile-amz*
 .vscode/
-/config/*_credentials.json
+/config/*.json
 /config/apprise.conf
 /config/apprise_config.json
 Pipfile.lock
@@ -21,3 +21,5 @@ geckodriver.log
 html_saves/*.html
 screenshots/*.png
 logs/*.log*
+tags
+stores/store_data/item_cache.p
