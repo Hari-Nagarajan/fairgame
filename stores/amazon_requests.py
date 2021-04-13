@@ -174,14 +174,19 @@ class AmazonStoreHandler(BaseStoreHandler):
         # self.conn20 = HTTP20Connection(self.amazon_domain)
 
         # Initialize proxies for stock check session:
+        # Assuming same username/password for all proxies
+        # username = [INSERT USERNAME HERE]
+        # password = [INSERT PASSWORD HERE]
+        #
+
         # self.proxies = [
         #     {
-        #       'http': 'http://X.X.X.X:XXXX',
-        #       'https': 'http://X.X.X.X:XXXX',
+        #       'http': f"http://{username}:{password}@X.X.X.X:XXXX",
+        #       'https': f"http://{username}:{password}@X.X.X.X:XXXX",
         #     },
         #     {
-        #       'http': 'http://X.X.X.X:XXXX',
-        #       'https': 'http://X.X.X.X:XXXX',
+        #       'http': f"http://{username}:{password}@X.X.X.X:XXXX",
+        #       'https': f"http://{username}:{password}@X.X.X.X:XXXX",
         #     },
         # ]
 
@@ -612,23 +617,24 @@ class AmazonStoreHandler(BaseStoreHandler):
             for seller in item_sellers:
                 if not self.check_shipping and not free_shipping_check(seller):
                     log.debug("Failed shipping hurdle.")
-                    return
+                    continue
                 log.debug("Passed shipping hurdle.")
                 if item.condition == AmazonItemCondition.Any:
                     log.debug("Skipping condition check")
                 elif not condition_check(item, seller):
                     log.debug("Failed item condition hurdle.")
-                    return
+                    continue
                 log.debug("Passed item condition hurdle.")
                 if not price_check(item, seller):
                     log.debug("Failed price condition hurdle.")
-                    return
+                    continue
                 log.debug("Passed price condition hurdle.")
                 if not merchant_check(item, seller):
                     log.debug("Failed merchant id condition hurdle.")
-                    return
+                    continue
                 log.debug("Passed merchant id condition hurdle.")
 
+                # Returns first seller that passes condition checks
                 return seller
 
     def parse_config(self):
