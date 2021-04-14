@@ -126,11 +126,11 @@ class AmazonStoreHandler(BaseStoreHandler):
         shipping_bypass=False,
         wait_on_captcha_fail=False,
         transfer_headers=False,
+        use_atc_mode=False,
     ) -> None:
         super().__init__()
 
         self.shuffle = True
-        self.buy_it_now = True
 
         self.notification_handler = notification_handler
         self.check_shipping = checkshipping
@@ -148,6 +148,10 @@ class AmazonStoreHandler(BaseStoreHandler):
         self.wait_on_captcha_fail = wait_on_captcha_fail
         self.amazon_cookies = {}
         self.transfer_headers = transfer_headers
+        self.buy_it_now = not use_atc_mode
+
+        if not self.buy_it_now:
+            log.warning("Using legacy add-to-cart mode instead of turbo_initiate")
 
         self.ua = UserAgent()
 
@@ -572,15 +576,21 @@ class AmazonStoreHandler(BaseStoreHandler):
                                 )
                                 # in Test mode, clear the list
                                 self.item_list.clear()
+
                             elif self.pyo(page=r):
                                 if self.single_shot:
                                     self.item_list.clear()
                                 else:
                                     self.item_list.remove(item)
-                while time.time() < delay_time:
-                    time.sleep(0.01)
+
                 if successful:
                     break
+
+                # sleep remainder of delay_time
+                time_left = delay_time - time.time()
+                if time_left:
+                    time.sleep(time_left)
+
             if self.shuffle:
                 random.shuffle(self.item_list)
 
