@@ -465,8 +465,10 @@ class AmazonStoreHandler(BaseStoreHandler):
                 if self.turbo_checkout(pid=pid, anti_csrf=anti_csrf):
                     break
 
-            while time.time() < delay_time:
-                time.sleep(0.01)
+            # sleep remainder of delay_time
+            time_left = delay_time - time.time()
+            if time_left > 0:
+                time.sleep(time_left)
 
         log.info("May have completed purchase, check orders!")
         log.info("Shutting down")
@@ -588,7 +590,7 @@ class AmazonStoreHandler(BaseStoreHandler):
 
                 # sleep remainder of delay_time
                 time_left = delay_time - time.time()
-                if time_left:
+                if time_left > 0:
                     time.sleep(time_left)
 
             if self.shuffle:
