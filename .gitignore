@@ -21,3 +21,4 @@ html_saves/*.html
 screenshots/*.png
 logs/*.log*
 tags
+.venv*

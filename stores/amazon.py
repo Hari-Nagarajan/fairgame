@@ -666,12 +666,12 @@ class Amazon:
                 )
 
             except sel_exceptions.TimeoutException as te:
-                log.error("Timed out waiting for offers to render.  Skipping...")
-                log.error(f"URL: {self.driver.current_url}")
-                log.exception(te)
+                log.warning("Timed out waiting for offers to render.  Skipping...")
+                log.warning(f"URL: {self.driver.current_url}")
+                log.debug(te)
                 return False
             except sel_exceptions.NoSuchElementException:
-                log.error("Unable to find any offers listing.  Skipping...")
+                log.warning("Unable to find any offers listing.  Skipping...")
                 return False
             except sel_exceptions.ElementClickInterceptedException as e:
                 log.debug(
