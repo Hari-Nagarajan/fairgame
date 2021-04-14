@@ -326,6 +326,12 @@ def amazon(
     default=False,
     help="Transfers headers from selenium session",
 )
+@click.option(
+    "--use-atc-mode",
+    is_flag=True,
+    default=False,
+    help="Use legacy add-to-cart mode",
+)
 @notify_on_crash
 def amazonrequests(
     headless,
@@ -347,6 +353,7 @@ def amazonrequests(
     offerid,
     all_cookies,
     transfer_headers,
+    use_atc_mode,
 ):
     log.warning(
         "Experimental test balloon.  Do not attempt to use.  Your computer could catch fire."
@@ -383,6 +390,7 @@ def amazonrequests(
         shipping_bypass=shipping_bypass,
         wait_on_captcha_fail=captcha_wait,
         transfer_headers=transfer_headers,
+        use_atc_mode=use_atc_mode,
     )
 
     try:
