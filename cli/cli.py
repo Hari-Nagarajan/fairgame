@@ -21,6 +21,7 @@ import os
 import platform
 import shutil
 import time
+import traceback
 from datetime import datetime
 from functools import wraps
 from pathlib import Path
@@ -68,7 +69,7 @@ def notify_on_crash(func):
             pass
 
         except Exception as e:
-            log.debug(e)
+            log.error(traceback.format_exc())
             notification_handler.send_notification(f"FairGame has crashed.")
 
     return decorator
