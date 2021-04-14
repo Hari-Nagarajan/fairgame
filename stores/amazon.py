@@ -750,99 +750,101 @@ class Amazon:
             if ship_float is None:
                 ship_float = 0
 
-        if (
-            (ship_float + price_float) <= reserve_max
-            or math.isclose((price_float + ship_float), reserve_max, abs_tol=0.01)
-        ) and (
-            (ship_float + price_float) >= reserve_min
-            or math.isclose((price_float + ship_float), reserve_min, abs_tol=0.01)
-        ):
-            log.info(
-                f"Item {asin} in stock and in reserve range: {price_float} + {ship_float} shipping <= {reserve_max}"
-            )
-            log.info("Adding to cart")
-            # Get the offering ID
-            offering_id_elements = atc_button.find_elements_by_xpath(
-                "./preceding::input[@name='offeringID.1'][1] | ./preceding::input[@id='offerListingID']"
-            )
-            if offering_id_elements:
-                log.info("Attempting Add To Cart with offer ID...")
-                offering_id = offering_id_elements[0].get_attribute("value")
-                if self.attempt_atc(offering_id, max_atc_retries=DEFAULT_MAX_ATC_TRIES):
-                    return True
-                else:
-                    self.send_notification(
-                        "Failed Add to Cart after {max-atc-retries}",
-                        "failed-atc",
-                        self.take_screenshots,
-                    )
-                    self.save_page_source("failed-atc")
-                    return False
-            else:
-                log.error(
-                    "Unable to find offering ID to add to cart.  Using legacy mode."
+            if (
+                (ship_float + price_float) <= reserve_max
+                or math.isclose((price_float + ship_float), reserve_max, abs_tol=0.01)
+            ) and (
+                (ship_float + price_float) >= reserve_min
+                or math.isclose((price_float + ship_float), reserve_min, abs_tol=0.01)
+            ):
+                log.info(
+                    f"Item {asin} in stock and in reserve range: {price_float} + {ship_float} shipping <= {reserve_max}"
                 )
-                self.notification_handler.play_notify_sound()
-                if self.detailed:
-                    self.send_notification(
-                        message=f"Found Stock ASIN:{asin}",
-                        page_name="Stock Alert",
-                        take_screenshot=self.take_screenshots,
-                    )
-
-                presence.buy_update()
-                current_title = self.driver.title
-                # log.info(f"current page title is {current_title}")
-                try:
-                    atc_button.click()
-                except IndexError:
-                    log.debug("Index Error")
-                    return False
-                self.wait_for_page_change(current_title)
-                # log.info(f"page title is {self.driver.title}")
-                emtpy_cart_elements = self.driver.find_elements_by_xpath(
-                    "//div[contains(@class, 'sc-your-amazon-cart-is-empty') or contains(@class, 'sc-empty-cart')]"
+                log.info("Adding to cart")
+                # Get the offering ID
+                offering_id_elements = atc_button.find_elements_by_xpath(
+                    "./preceding::input[@name='offeringID.1'][1] | ./preceding::input[@id='offerListingID']"
                 )
-
-                if (
-                    not emtpy_cart_elements
-                    and self.driver.title in amazon_config["SHOPPING_CART_TITLES"]
-                ):
-                    return True
-                else:
-                    log.warning("Did not add to cart, trying again")
-                    if emtpy_cart_elements:
-                        log.info(
-                            "Cart appeared empty after clicking Add To Cart button"
+                if offering_id_elements:
+                    log.info("Attempting Add To Cart with offer ID...")
+                    offering_id = offering_id_elements[0].get_attribute("value")
+                    if self.attempt_atc(
+                        offering_id, max_atc_retries=DEFAULT_MAX_ATC_TRIES
+                    ):
+                        return True
+                    else:
+                        self.send_notification(
+                            "Failed Add to Cart after {max-atc-retries}",
+                            "failed-atc",
+                            self.take_screenshots,
                         )
-                    log.debug(f"failed title was {self.driver.title}")
-                    self.send_notification(
-                        "Failed Add to Cart", "failed-atc", self.take_screenshots
+                        self.save_page_source("failed-atc")
+                        return False
+                else:
+                    log.error(
+                        "Unable to find offering ID to add to cart.  Using legacy mode."
                     )
-                    self.save_page_source("failed-atc")
-                    in_stock = self.check_stock(
-                        asin=asin,
-                        reserve_max=reserve_max,
-                        reserve_min=reserve_min,
-                        retry=retry + 1,
+                    self.notification_handler.play_notify_sound()
+                    if self.detailed:
+                        self.send_notification(
+                            message=f"Found Stock ASIN:{asin}",
+                            page_name="Stock Alert",
+                            take_screenshot=self.take_screenshots,
+                        )
+
+                    presence.buy_update()
+                    current_title = self.driver.title
+                    # log.info(f"current page title is {current_title}")
+                    try:
+                        atc_button.click()
+                    except IndexError:
+                        log.debug("Index Error")
+                        return False
+                    self.wait_for_page_change(current_title)
+                    # log.info(f"page title is {self.driver.title}")
+                    emtpy_cart_elements = self.driver.find_elements_by_xpath(
+                        "//div[contains(@class, 'sc-your-amazon-cart-is-empty') or contains(@class, 'sc-empty-cart')]"
                     )
-        elif reserve_min > (price_float + ship_float):
-            log.debug(
-                f"  Min ({reserve_min}) > Price ({price_float} + {ship_float} shipping)"
-            )
 
-        elif reserve_max < (price_float + ship_float):
-            log.debug(
-                f"  Max ({reserve_max}) < Price ({price_float} + {ship_float} shipping)"
-            )
+                    if (
+                        not emtpy_cart_elements
+                        and self.driver.title in amazon_config["SHOPPING_CART_TITLES"]
+                    ):
+                        return True
+                    else:
+                        log.warning("Did not add to cart, trying again")
+                        if emtpy_cart_elements:
+                            log.info(
+                                "Cart appeared empty after clicking Add To Cart button"
+                            )
+                        log.debug(f"failed title was {self.driver.title}")
+                        self.send_notification(
+                            "Failed Add to Cart", "failed-atc", self.take_screenshots
+                        )
+                        self.save_page_source("failed-atc")
+                        in_stock = self.check_stock(
+                            asin=asin,
+                            reserve_max=reserve_max,
+                            reserve_min=reserve_min,
+                            retry=retry + 1,
+                        )
+            elif reserve_min > (price_float + ship_float):
+                log.debug(
+                    f"  Min ({reserve_min}) > Price ({price_float} + {ship_float} shipping)"
+                )
 
-        else:
-            log.error("Serious problem with price comparison")
-            log.error(f"  Min:   {reserve_min}")
-            log.error(f"  Price: {price_float} + {ship_float} shipping")
-            log.error(f"  Max:   {reserve_max}")
+            elif reserve_max < (price_float + ship_float):
+                log.debug(
+                    f"  Max ({reserve_max}) < Price ({price_float} + {ship_float} shipping)"
+                )
 
-        log.info(f"Offers exceed price range ({reserve_min:.2f}-{reserve_max:.2f})")
+            else:
+                log.error("Serious problem with price comparison")
+                log.error(f"  Min:   {reserve_min}")
+                log.error(f"  Price: {price_float} + {ship_float} shipping")
+                log.error(f"  Max:   {reserve_max}")
+
+            log.info(f"Offers exceed price range ({reserve_min:.2f}-{reserve_max:.2f})")
         return in_stock
 
     def attempt_atc(self, offering_id, max_atc_retries=DEFAULT_MAX_ATC_TRIES):
