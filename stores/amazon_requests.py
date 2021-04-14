@@ -169,7 +169,7 @@ class AmazonStoreHandler(BaseStoreHandler):
             enable_headless()
 
         prefs = get_prefs(no_image=False)
-        set_options(prefs, slow_mode=slow_mode)
+        set_options(profile_path=self.profile_path, prefs=prefs, slow_mode=slow_mode)
         modify_browser_profile()
 
         # Initialize the Session we'll use for stock checking
@@ -1458,9 +1458,9 @@ def modify_browser_profile():
         pass
 
 
-def set_options(prefs, slow_mode):
+def set_options(profile_path, prefs, slow_mode):
     options.add_experimental_option("prefs", prefs)
-    options.add_argument(f"user-data-dir=.profile-amz")
+    options.add_argument(f"user-data-dir={profile_path}")
     if not slow_mode:
         options.set_capability("pageLoadStrategy", "none")
 
