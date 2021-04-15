@@ -676,7 +676,7 @@ class Amazon:
                 )
             else:
                 prices = self.driver.find_elements_by_xpath(
-                    "//div[@id='aod-pinned-offer' or @id='aod-offer']//div[contains(@id, 'aod-price')]//span[@class='a-price']//span[@class='a-offscreen']"
+                    "//div[@id='aod-pinned-offer' or @id='aod-offer']//span[@class='a-price']//span[@class='a-offscreen']"
                 )
             if prices:
                 break
@@ -844,7 +844,7 @@ class Amazon:
                 log.error(f"  Price: {price_float} + {ship_float} shipping")
                 log.error(f"  Max:   {reserve_max}")
 
-            log.info(f"Offers exceed price range ({reserve_min:.2f}-{reserve_max:.2f})")
+        log.info(f"Offers exceed price range ({reserve_min:.2f}-{reserve_max:.2f})")
         return in_stock
 
     def attempt_atc(self, offering_id, max_atc_retries=DEFAULT_MAX_ATC_TRIES):
