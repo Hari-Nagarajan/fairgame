@@ -1546,7 +1546,7 @@ def transfer_selenium_cookies(
             log.dev(f'Set Cookie {c["name"]} as value {c["value"]}')
 
 
-def save_html_response(self, filename, status, body):
+def save_html_response(filename, status, body):
     """Saves response body"""
     file_name = get_timestamp_filename(
         "html_saves/" + filename + "_" + status + "_requests_source", "html"
