@@ -1011,13 +1011,15 @@ class AmazonStoreHandler(BaseStoreHandler):
                 log.debug("turbo-initiate successful")
             else:
                 log.debug("turbo-initiate unsuccessful")
-                with open("atc-failed-response.html", "w", encoding="utf-8") as f:
-                    f.write(r.text)
+                save_html_response(
+                    filename="turbo_ini_unsuccessful", status=r.status_code, body=r.text
+                )
             return pid, anti_csrf
         else:
             log.debug("turbo-initiate unsuccessful")
-            with open("atc-failed-response.html", "w", encoding="utf-8") as f:
-                f.write(r.text)
+            save_html_response(
+                filename="turbo_ini_unsuccessful", status=r.status_code, body=r.text
+            )
             return None, None
 
     @debug
@@ -1542,3 +1544,14 @@ def transfer_selenium_cookies(
         if all_cookies or c["name"] in cookie_names:
             s.cookies.set(name=c["name"], value=c["value"])
             log.dev(f'Set Cookie {c["name"]} as value {c["value"]}')
+
+
+def save_html_response(self, filename, status, body):
+    """Saves response body"""
+    file_name = get_timestamp_filename(
+        "html_saves/" + filename + "_" + status + "_requests_source", "html"
+    )
+
+    page_source = body
+    with open(file_name, "w", encoding="utf-8") as f:
+        f.write(page_source)
