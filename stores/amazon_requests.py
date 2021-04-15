@@ -927,7 +927,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         else:
             for idx, offer in enumerate(offers):
                 try:
-                    merchant_id = offer.xpath(".//input[@id='ftSelectMerchant']")[
+                    merchant_id = offer.xpath(".//input[@id='ftSelectMerchant' or @id='ddmSelectMerchant']")[
                         0
                     ].value
                 except IndexError:
