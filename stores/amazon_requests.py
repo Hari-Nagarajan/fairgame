@@ -960,16 +960,21 @@ class AmazonStoreHandler(BaseStoreHandler):
                     )
                 else:
                     condition = AmazonItemCondition.Unknown
-                offers = offer.xpath(f".//input[@name='offeringID.1']")
+                offer_ids = offer.xpath(f".//input[@name='offeringID.1']")
                 offer_id = None
-                if len(offers) > 0:
-                    offer_id = offers[0].value
+                if len(offer_ids) > 0:
+                    offer_id = offer_ids[0].value
                 else:
-                    log.error("No offer ID found!")
-                atc_form = [
-                    offer.xpath(".//form[@method='post']")[0].action,
-                    offer.xpath(".//form//input"),
-                ]
+                    log.error("No offer ID found for this offer, skipping")
+                    continue
+                try:
+                    atc_form = [
+                        offer.xpath(".//form[@method='post']")[0].action,
+                        offer.xpath(".//form//input"),
+                    ]
+                except IndexError:
+                    log.error("ATC form items did not exist, skipping")
+                    continue
 
                 seller = SellerDetail(
                     merchant_id,

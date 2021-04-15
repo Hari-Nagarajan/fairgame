@@ -25,6 +25,15 @@ from logging import handlers
 from types import MethodType
 
 FORMAT = "%(asctime)s|{}|%(levelname)s| %(message)s".format(version)
+
+#   Level       Numeric value
+#   CRITICAL    50
+#   ERROR       40
+#   WARNING     30
+#   INFO        20
+#   DEBUG       10
+#   NOTSET      0
+
 DEV = 5
 
 LOG_DIR = "logs"
@@ -69,10 +78,11 @@ log = logging.getLogger("fairgame")
 log.setLevel(logging.DEBUG)
 log.dev = MethodType(dev, log)
 
-if version.is_devrelease or version.is_prerelease:
-    LOGLEVEL = DEV
-else:
-    LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
+# if version.is_devrelease or version.is_prerelease:
+#     LOGLEVEL = DEV
+# else:
+#     LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
+LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
 stream_handler = logging.StreamHandler()
 stream_handler.setFormatter(logging.Formatter(FORMAT))
 
