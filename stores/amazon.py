@@ -593,7 +593,7 @@ class Amazon:
                     # Use the Buy Box as an Offer as a last resort since it is not guaranteed to be a good offer
                     buy_box = True
                     offer_count = self.driver.find_elements_by_xpath(
-                        "//div[@id='qualifiedBuybox']//input[@id='add-to-cart-button']"
+                        "//div[contains(@id,'qualifiedBuyBox') or @id=qualifiedBuybox]//input[@id='add-to-cart-button']"
                     )
                 else:
                     log.warning(
