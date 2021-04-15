@@ -900,7 +900,7 @@ class AmazonStoreHandler(BaseStoreHandler):
             except (AttributeError, IndexError):
                 found_asin = "[NO ASIN FOUND ON PAGE]"
         else:
-            find_asin = re.search(r"asin = \"(.*?)\"", payload)
+            find_asin = re.search(r"asin\s?(?:=|\.)?\s?\"?([A-Z0-9]+)\"?", payload)
             if find_asin:
                 found_asin = find_asin.group(1)
             else:
