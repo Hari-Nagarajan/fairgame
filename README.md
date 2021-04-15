@@ -632,9 +632,9 @@ export PIPENV_VENV_IN_PROJECT=1 (Linux/Other)
   ```
 
 + **Error: ```selenium.common.exceptions.SessionNotCreatedException: Message: session not created: 
-  This version of ChromeDriver only supports Chrome version 89```**
+  This version of ChromeDriver only supports Chrome version 90```**
 
-  You are not running the proper version of Chrome this requires. As of this update, the current version is Chrome 89.
+  You are not running the proper version of Chrome this requires. As of this update, the current version is Chrome 90.
   Check your version by going to ```chrome://version/``` in your browser. We are going to be targeting the current stable
   build of chrome. If you are behind, please update, if you are on a beta or canary branch, you'll have to build your own
   version of chromedriver-py.
