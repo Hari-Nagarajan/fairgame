@@ -591,7 +591,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                         if r:
                             log.debug(r)
                             if test:
-                                print(
+                                log.info(
                                     "Proceeded to Checkout - Will not Place Order as this is a Test",
                                     end="\r",
                                 )
