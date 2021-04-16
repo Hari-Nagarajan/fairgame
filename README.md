@@ -153,7 +153,9 @@ dependencies in other operating systems:
 button to proceed to checkout and there are no items in your cart, or it has reached its maximum add to cart attempts,
 that means that it tried to add the product to cart, and it failed. This is exactly what happens if you were to try
 and and attempt to do this manually.
+
 ![image](https://user-images.githubusercontent.com/74267670/115074770-2832d580-9ec8-11eb-8475-864d00e91d50.png)
+
 ![image](https://user-images.githubusercontent.com/74267670/115074822-354fc480-9ec8-11eb-8cb6-075898ca20de.png)
 
 Furthermore, if the terminal indicates something about picking your address, and you did Step 8 above correctly (i.e.,
