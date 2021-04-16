@@ -412,8 +412,28 @@ class AmazonStoreHandler(BaseStoreHandler):
 
         log.info(f'Logged in as {amazon_config["username"]}')
 
+    def transfer_selenium_cookies(self):
+        # get cookies, might use these for checkout later, with no cookies on
+        # cookie_names = ["session-id", "ubid-main", "x-main", "at-main", "sess-at-main"]
+        # for c in self.driver.get_cookies():
+        #     if c["name"] in cookie_names:
+        #         self.amazon_cookies[c["name"]] = c["value"]
+
+        # update session with cookies from Selenium
+        cookie_names = [
+            "session-id",
+            f"ubid-{self.cookie_suffix}",
+            f"x-{self.cookie_suffix}",
+            f"at-{self.cookie_suffix}",
+            f"sess-at-{self.cookie_suffix}",
+        ]
+        for c in self.driver.get_cookies():
+            if c["name"] in cookie_names:
+                self.session_checkout.cookies.set(name=c["name"], value=c["value"])
+                log.dev(f'Set Cookie {c["name"]} as value {c["value"]}')
+
     # Test code, use at your own RISK
-    def run_offer_id(self, offerid, delay=5, all_cookies=False):
+    def run_offer_id(self, offerid, delay=5):
         # Load up the homepage
         with self.wait_for_page_change():
             self.driver.get(f"https://{self.amazon_domain}")
@@ -423,9 +443,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         if not self.is_logged_in():
             self.login()
 
-        transfer_selenium_cookies(
-            self.driver, self.session_checkout, all_cookies=all_cookies
-        )
+        self.transfer_selenium_cookies()
 
         message = f"Starting to hunt items at {STORE_NAME}"
         log.info(message)
@@ -473,7 +491,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         log.info("May have completed purchase, check orders!")
         log.info("Shutting down")
 
-    def run(self, delay=5, test=False, all_cookies=False):
+    def run(self, delay=5, test=False):
         # Load up the homepage
         with self.wait_for_page_change():
             self.driver.get(f"https://{self.amazon_domain}")
@@ -499,15 +517,12 @@ class AmazonStoreHandler(BaseStoreHandler):
         # Transfer cookies from selenium session.
         # Do not transfer cookies to stock check if using proxies
         if not self.proxies:
-            transfer_selenium_cookies(
-                self.driver, self.session_stock_check, all_cookies=all_cookies
-            )
+            self.transfer_selenium_cookies
             if self.transfer_headers:
                 for head in header:
                     self.session_stock_check.headers.update(head)
-        transfer_selenium_cookies(
-            self.driver, self.session_checkout, all_cookies=all_cookies
-        )
+
+        self.transfer_selenium_cookies()
         if self.transfer_headers:
             for head in header:
                 self.session_checkout.headers.update(head)
@@ -659,7 +674,9 @@ class AmazonStoreHandler(BaseStoreHandler):
                     continue
                 log.debug("Passed item condition hurdle.")
                 if not price_check(item, seller):
-                    log.debug("Failed price condition hurdle.")
+                    log.debug(
+                        f"Failed price condition hurdle ({seller.selling_price:2f} not in {item.min_price.amount:2f}-{item.max_price.amount:2f}"
+                    )
                     continue
                 log.debug("Passed price condition hurdle.")
                 if not merchant_check(item, seller):
@@ -685,6 +702,11 @@ class AmazonStoreHandler(BaseStoreHandler):
 
                 json_items = config.get("items")
                 self.parse_items(json_items)
+
+            if self.amazon_domain.endswith(".com"):
+                self.cookie_suffix = "main"
+            else:
+                self.cookie_suffix = "acb" + self.amazon_domain.split(".")[-1]
 
         except FileNotFoundError:
             log.error(
@@ -1527,23 +1549,6 @@ def get_timestamp_filename(name, extension):
         return name + "_" + date + extension
     else:
         return name + "_" + date + "." + extension
-
-
-def transfer_selenium_cookies(
-    d: webdriver.Chrome, s: requests.Session, all_cookies=False
-):
-    # get cookies, might use these for checkout later, with no cookies on
-    # cookie_names = ["session-id", "ubid-main", "x-main", "at-main", "sess-at-main"]
-    # for c in self.driver.get_cookies():
-    #     if c["name"] in cookie_names:
-    #         self.amazon_cookies[c["name"]] = c["value"]
-
-    # update session with cookies from Selenium
-    cookie_names = ["session-id", "ubid-main", "x-main", "at-main", "sess-at-main"]
-    for c in d.get_cookies():
-        if all_cookies or c["name"] in cookie_names:
-            s.cookies.set(name=c["name"], value=c["value"])
-            log.dev(f'Set Cookie {c["name"]} as value {c["value"]}')
 
 
 def save_html_response(filename, status, body):

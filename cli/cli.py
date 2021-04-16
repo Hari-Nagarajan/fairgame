@@ -315,12 +315,6 @@ def amazon(
     help="Pass in offer id and run offer id code. USE AT YOUR OWN RISK.",
 )
 @click.option(
-    "--all-cookies",
-    is_flag=True,
-    default=False,
-    help="Pulls all the cookies from selenium, rather than targeted ones. May help with login issues?",
-)
-@click.option(
     "--transfer-headers",
     is_flag=True,
     default=False,
@@ -351,7 +345,6 @@ def amazonrequests(
     clean_credentials,
     captcha_wait,
     offerid,
-    all_cookies,
     transfer_headers,
     use_atc_mode,
 ):
@@ -364,6 +357,11 @@ def amazonrequests(
     notification_handler.sound_enabled = not disable_sound
     if not notification_handler.sound_enabled:
         log.info("Local sounds have been disabled.")
+
+    # don't run if `--test` and not `--use-atc-mode`
+    if test and not use_atc_mode:
+        log.error("Cannot run TURBO INITIATE in test mode; Use ATC mode for testing")
+        sys.exit(0)
 
     if clean_profile and os.path.exists(global_config.get_browser_profile_path()):
         log.info(
@@ -395,11 +393,9 @@ def amazonrequests(
 
     try:
         if offerid:
-            amazon_requests_obj.run_offer_id(
-                offerid=offerid, delay=delay, all_cookies=all_cookies
-            )
+            amazon_requests_obj.run_offer_id(offerid=offerid, delay=delay)
         else:
-            amazon_requests_obj.run(delay=delay, test=test, all_cookies=all_cookies)
+            amazon_requests_obj.run(delay=delay, test=test)
     except RuntimeError:
         del amazon_requests_obj
         log.error("Exiting Program...")
