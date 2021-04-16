@@ -426,11 +426,15 @@ class AmazonStoreHandler(BaseStoreHandler):
             f"x-{self.cookie_suffix}",
             f"at-{self.cookie_suffix}",
             f"sess-at-{self.cookie_suffix}",
+            "x-amz-captcha-1",
+            "x-amz-captcha-2",
         ]
         for c in self.driver.get_cookies():
             if c["name"] in cookie_names:
                 self.session_checkout.cookies.set(name=c["name"], value=c["value"])
-                log.dev(f'Set Cookie {c["name"]} as value {c["value"]}')
+                log.debug(f'Set Cookie {c["name"]} as value {c["value"]}')
+            else:
+                log.dev(f'Ignoring Cookie {c["name"]} as value {c["value"]}')
 
     # Test code, use at your own RISK
     def run_offer_id(self, offerid, delay=5):
