@@ -441,9 +441,7 @@ class Amazon:
                     ).click()
                 except sel_exceptions.NoSuchElementException:
                     log.error("OTP TOTP choice not present!")
-                self.driver.find_element_by_xpath(
-                    '//*[@id="auth-send-code"]'
-                ).click()
+                self.driver.find_element_by_xpath('//*[@id="auth-send-code"]').click()
                 time.sleep(2)
 
             self.notification_handler.play_notify_sound()
