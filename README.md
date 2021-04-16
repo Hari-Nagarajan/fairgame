@@ -88,7 +88,9 @@ dependencies in other operating systems:
    ![Add Python 3.8 to PATH](https://github.com/Hari-Nagarajan/fairgame/blob/master/docs/images/PythonInstalltoPath.png)
    
 3. Download GitHub Desktop and Open the FairGame Repository with GitHub Desktop (or download the zip file). 
-   Again, make sure this installs to a location without spaces in the path. If you need help with this, look at Wiki.
+   Again, make sure this installs to a location without spaces in the path, but it is *STRONGLY* suggested that you install
+   to the root of the drive (e.g., C:\fairgame). If you need help with GitHub Desktop, look at the
+   [Wiki](https://github.com/Hari-Nagarajan/fairgame/wiki/How-to-use-GitHub-Desktop-App).
 4. Open the FairGame folder in File Explorer. Double click __INSTALL (RUN FIRST).bat ***DON'T USE ADMINISTRATIVE MODE***.
    
    ![Run Install RUN FIRST.bat](https://github.com/Hari-Nagarajan/fairgame/blob/master/docs/images/Step4.png)
@@ -147,6 +149,16 @@ dependencies in other operating systems:
    
 11. Run `_Amazon.bat` and wait
 
+**Note:** If the terminal indicates that it attempts to add to cart and proceed to checkout, but it can't find the
+button to proceed to checkout and there are no items in your cart, or it has reached its maximum add to cart attempts,
+that means that it tried to add the product to cart, and it failed. This is exactly what happens if you were to try
+and and attempt to do this manually.
+![image](https://user-images.githubusercontent.com/74267670/115074770-2832d580-9ec8-11eb-8475-864d00e91d50.png)
+![image](https://user-images.githubusercontent.com/74267670/115074822-354fc480-9ec8-11eb-8cb6-075898ca20de.png)
+
+Furthermore, if the terminal indicates something about picking your address, and you did Step 8 above correctly (i.e.,
+tested the bot and it does not normally ask you for your address when checking out), then it is **VERY LIKELY** the product
+was already out of stock and Amazon is sending you to a garbage page.
 
 Additional information about running FairGame can be found in the rest of the documentation.
 
@@ -161,15 +173,16 @@ To get started, there are two options:
 To get the latest release as a convenient package, download it directly from
 the [Releases](https://github.com/Hari-Nagarajan/fairgame/releases)
 page on GitHub. The "Source code" zip or tar file are what you'll want. This can be downloaded and extracted into a
-directory of your choice (e.g. C:\fairgame).
+directory of your choice, it is *STRONGLY* suggested that you install to the root of the drive (e.g., C:\fairgame).
 
 #### Git
 
 If you want to manage the code via Git, you'll first need to clone this repository. If you are unfamiliar with Git,
 follow the [guide](https://github.com/Hari-Nagarajan/fairgame/wiki/How-to-use-GitHub-Desktop-App) on how to do that on
-our Wiki . You *can* use the "Download Zip" button on the GitHub repository's homepage but this makes receiving updates
+our [Wiki](https://github.com/Hari-Nagarajan/fairgame/wiki/How-to-use-GitHub-Desktop-App). 
+You *can* use the "Download Zip" button on the GitHub repository's homepage but this makes receiving updates
 more difficult. If you can get setup with the GitHub Desktop app, updating to the latest version of the bot takes 1
-click.
+click. Regardless, it is *STRONGLY* suggested that you install to the root of the drive (e.g., C:\fairgame)
 
 ### Installing Dependencies
 If you are on Windows, use `INSTALL (RUN FIRST).bat`. ***Do NOT use administrative mode***
@@ -599,6 +612,7 @@ developers.
 # Issues Running FairGame 
 ## Known Issues
 * DO NOT change the zoom setting of the browser (it must be at 100%). Selenium doesn't work with the zoom at any other setting.
+* 
 * Pipenv does not like spaces in file paths, so you will either need to run from a place where you do not have spaces 
   in the file path, or set the option for pipenv to run locally in relation to the current file directory with:
 ```shell
@@ -610,6 +624,8 @@ export PIPENV_VENV_IN_PROJECT=1 (Linux/Other)
 
 * One time passcode (OTP) doesn't work in headless. Turn it off when starting up a headless instance, then turn 
   it back on afterwords.
+  
+* Avoid installing FairGame on OneDrive or similar cloud storage - some people have issues with this.
 
 ## Troubleshooting
 
