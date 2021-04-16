@@ -143,7 +143,8 @@ dependencies in other operating systems:
      * ALSO see notes regarding EU and [current functionality](#Other-Notes-on-Functionality)
 9. Edit the `amazon_config.json` file with the item(s) you want to look for. See [Configuration](#Configuration) 
    and [Configuration Examples](#Configuration-Examples) for additional information
-10. Remove `--test` from `_Amazon.bat`
+10. Remove `--test` from `_Amazon.bat`. 
+[How do I edit .bat files?](https://www.google.com/search?q=how+to+edit+bat+file+in+windows+10)
    
    ![Remove Test](https://github.com/Hari-Nagarajan/fairgame/blob/master/docs/images/Step10.png)
    
