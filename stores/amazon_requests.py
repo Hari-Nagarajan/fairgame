@@ -182,19 +182,23 @@ class AmazonStoreHandler(BaseStoreHandler):
         # Assuming same username/password for all proxies
 
         # load dictionary from the json
-        proxy_dict = json.load(open('config/amazon_requests_proxies.json'))
+        proxy_dict = json.load(open("config/amazon_requests_proxies.json"))
 
-        username = proxy_dict['user']
-        password = proxy_dict['pass']
-        enable_proxy = proxy_dict['enable']
+        username = proxy_dict["user"]
+        password = proxy_dict["pass"]
+        enable_proxy = proxy_dict["enable"]
 
         # build the proxies list
         self.proxies = []
-        for i in proxy_dict['ip_port']:
-            self.proxies.append({'http': f"http://{username}:{password}@{i}",
-                                 'https': f"http://{username}:{password}@{i}"})
+        for i in proxy_dict["ip_port"]:
+            self.proxies.append(
+                {
+                    "http": f"http://{username}:{password}@{i}",
+                    "https": f"http://{username}:{password}@{i}",
+                }
+            )
 
-        if enable_proxy == 'n':
+        if enable_proxy == "n":
             self.proxies = []
 
         if self.proxies:
