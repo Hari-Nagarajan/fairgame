@@ -17,10 +17,12 @@
 #      The author may be contacted through the project's GitHub, at:
 #      https://github.com/Hari-Nagarajan/fairgame
 
+import base64
 import os
 import platform
 import shutil
 import time
+import urllib
 from datetime import datetime
 from functools import wraps
 from pathlib import Path
@@ -361,6 +363,19 @@ def amazonrequests(
     log.warning(
         "Do not ask for help running this in Discord. Code is work in progress and is likely broken in many places."
     )
+
+    # validate offerid if provided
+    if offerid:
+        try:
+            base64.b64decode(urllib.parse.unquote(offerid))
+        except:
+            log.error(f"'{offerid}' does not appear to be a valid offer ID")
+            log.info(
+                'Offer IDs may fail from `.bat` files as all "%" characters must be escaped'
+            )
+            sys.exit(0)
+        log.info("Offer ID appears valid")
+
     notification_handler.sound_enabled = not disable_sound
     if not notification_handler.sound_enabled:
         log.info("Local sounds have been disabled.")
