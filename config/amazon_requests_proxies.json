@@ -1,7 +1,7 @@
 {
-      "enable": "y",
-      "user": "npodsiadlo",
-      "pass": "O11OkkS8Kw",
-      "ip_port": [{"http":"45.237.171.19:29762", "https": "45.237.171.19:29762"},
-                  {"http":"45.237.171.200:29762", "https": "45.237.171.200:29762"}]
+      "enable": "n",
+      "user": "user",
+      "pass": "pass",
+      "ip_port": [{"http":"XXX.XXX.XXX.XXX:XXXX", "https": "XXX.XXX.XXX.XXX:XXXX"},
+                  {"http":"XXX.XXX.XXX.XXX:XXXX", "https": "XXX.XXX.XXX.XXX:XXXX"}]
 }
