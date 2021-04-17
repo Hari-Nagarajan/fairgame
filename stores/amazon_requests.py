@@ -193,8 +193,8 @@ class AmazonStoreHandler(BaseStoreHandler):
         for i in proxy_dict["ip_port"]:
             self.proxies.append(
                 {
-                    "http": f"http://{username}:{password}@{i}",
-                    "https": f"http://{username}:{password}@{i}",
+                    "http": f"http://{username}:{password}@{i['http']}",
+                    "https": f"http://{username}:{password}@{i['https']}",
                 }
             )
 
