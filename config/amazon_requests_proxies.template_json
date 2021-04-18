@@ -1,0 +1,6 @@
+{
+      "user": "user",
+      "pass": "pass",
+      "ip_port": [{"http":"XXX.XXX.XXX.XXX:XXXX", "https": "XXX.XXX.XXX.XXX:XXXX"},
+                  {"http":"XXX.XXX.XXX.XXX:XXXX", "https": "XXX.XXX.XXX.XXX:XXXX"}]
+}
