@@ -23,6 +23,8 @@ When using ip authentication, user/pass values can be left default.
 
 **MAKE SURE YOU USE THE --proxy FLAG IN THE BAT FILE TO ENABLE PROXIES**
 
+**You must run "python -m pip install requests[socks]" in cmd prompt to get the dependency for socks**
+
 For ip_port enter the IP:PORT for each proxy you want to rotate between.
 EXAMPLE:
 {
