@@ -738,7 +738,12 @@ class Amazon:
                         continue
 
             try:
-                price = parse_price(re.sub(r'(?:\s+|(?:&nbsp;)+)', '', prices[idx].get_attribute("innerHTML").strip()))
+                price = parse_price(
+                    re.sub(
+                        r'(?:\s+|(?:&nbsp;)+)',
+                        '', prices[idx].get_attribute("innerHTML").strip()
+                    )
+                )
             except IndexError:
                 log.debug("Price index error")
                 return False
@@ -1771,7 +1776,9 @@ def get_shipping_costs(tree, free_shipping_string):
                 return FREE_SHIPPING_PRICE
             else:
                 # will it parse?
-                shipping_cost: Price = parse_price(re.sub(r'(?:\s+|(?:&nbsp;)+)', '', shipping_span_text))
+                shipping_cost: Price = parse_price(
+                    re.sub(r'(?:\s+|(?:&nbsp;)+)', '', shipping_span_text)
+                )
                 if shipping_cost.currency is not None:
                     log.debug(
                         f"Found parseable price with currency symbol: {shipping_cost.currency}"
@@ -1821,7 +1828,9 @@ def get_alt_shipping_costs(tree, free_shipping_string) -> Price:
             # Look for a price
             for shipping_span in shipping_spans:
                 if shipping_span.text and shipping_span.text != "+":
-                    shipping_cost: Price = parse_price(re.sub(r'(?:\s+|(?:&nbsp;)+)', '', shipping_span.text.strip()))
+                    shipping_cost: Price = parse_price(
+                        re.sub(r'(?:\s+|(?:&nbsp;)+)', '', shipping_span.text.strip())
+                    )
                     if shipping_cost.currency is not None:
                         log.debug(
                             f"Found parseable price with currency symbol: {shipping_cost.currency}"
@@ -1856,7 +1865,9 @@ def get_alt_shipping_costs(tree, free_shipping_string) -> Price:
                 # & Free Shipping message
                 log.debug("Found '& Free', assuming zero.")
             elif shipping_spans[0].text.startswith("+"):
-                return parse_price(re.sub(r'(?:\s+|(?:&nbsp;)+)', '', shipping_spans[0].text.strip()))
+                return parse_price(
+                    re.sub(r'(?:\s+|(?:&nbsp;)+)', '', shipping_spans[0].text.strip())
+                )
         elif len(shipping_bs) > 0:
             for message_node in shipping_bs:
 
