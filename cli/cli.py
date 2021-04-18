@@ -334,6 +334,12 @@ def amazon(
     default=False,
     help="Use legacy add-to-cart mode",
 )
+@click.option(
+    "--proxy",
+    is_flag=True,
+    default=False,
+    help="Enable proxies that are entered in config/amazon_requests.json",
+)
 @notify_on_crash
 def amazonrequests(
     headless,
@@ -356,6 +362,7 @@ def amazonrequests(
     all_cookies,
     transfer_headers,
     use_atc_mode,
+    proxy,
 ):
     log.warning(
         "Experimental test balloon.  Do not attempt to use.  Your computer could catch fire."
@@ -406,6 +413,7 @@ def amazonrequests(
         wait_on_captcha_fail=captcha_wait,
         transfer_headers=transfer_headers,
         use_atc_mode=use_atc_mode,
+        proxy=proxy,
     )
 
     try:
