@@ -189,12 +189,21 @@ class AmazonStoreHandler(BaseStoreHandler):
             ip_auth = proxy_dict["ip_auth"]
             username = proxy_dict["user"]
             password = proxy_dict["pass"]
+            socks = proxy_dict["socks"]
 
             if ip_auth == "y":
                 # build proxies list using ip_auth format
                 for i in proxy_dict["ip_port"]:
                     self.proxies.append(
                         {"http": f"http://{i['http']}", "https": f"http://{i['https']}"}
+                    )
+            elif socks == "y":
+                for i in proxy_dict["ip_port"]:
+                    self.proxies.append(
+                        {
+                            "http": f"socks5://{i['http']}",
+                            "https": f"socks5://{i['https']}",
+                        }
                     )
             else:
                 # build the proxies list using user/pass format
