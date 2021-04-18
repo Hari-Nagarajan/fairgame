@@ -742,7 +742,7 @@ class Amazon:
                     re.sub(
                         r"(?:\s+|(?:&nbsp;)+)",
                         "",
-                        prices[idx].get_attribute("innerHTML").strip()
+                        prices[idx].get_attribute("innerHTML").strip(),
                     )
                 )
             except IndexError:
