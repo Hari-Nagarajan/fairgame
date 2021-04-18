@@ -1,6 +1,30 @@
 {
-      "user": "user",
-      "pass": "pass",
-      "ip_port": [{"http":"XXX.XXX.XXX.XXX:XXXX", "https": "XXX.XXX.XXX.XXX:XXXX"},
-                  {"http":"XXX.XXX.XXX.XXX:XXXX", "https": "XXX.XXX.XXX.XXX:XXXX"}]
+   "ip_auth":"n",
+   "user":"user",
+   "pass":"pass",
+   "ip_port":[
+      {
+         "http":"XXX.XXX.XXX.XXX:XXXX",
+         "https":"XXX.XXX.XXX.XXX:XXXX"
+      },
+      {
+         "http":"XXX.XXX.XXX.XXX:XXXX",
+         "https":"XXX.XXX.XXX.XXX:XXXX"
+      }
+   ]
 }
+
+DELETE INSTRUCTIONS WHEN DONE
+\/\/\/\/\/\/\/\/\/\/\/
+If your proxies use ip authentication rather than user/pass enable the ip_auth key with "y".
+When using ip authentication user/pass values can be left at default values.
+
+For ip_port enter the IP:PORT for each proxy you want to rotate between.
+EXAMPLE:
+{
+   "http":"111.111.111.111:1234", 
+   "https": "111.111.111.111:1234"
+}
+
+/\/\/\/\/\/\/\/\/\/\/\
+DELETE INSTRUCTIONS WHEN DONE
