@@ -186,17 +186,25 @@ class AmazonStoreHandler(BaseStoreHandler):
             # load dictionary from the json
             proxy_dict = json.load(open("config/amazon_requests_proxies.json"))
 
+            ip_auth = proxy_dict["ip_auth"]
             username = proxy_dict["user"]
             password = proxy_dict["pass"]
 
-            # build the proxies list
-            for i in proxy_dict["ip_port"]:
-                self.proxies.append(
-                    {
-                        "http": f"http://{username}:{password}@{i['http']}",
-                        "https": f"http://{username}:{password}@{i['https']}",
-                    }
-                )
+            if ip_auth == "y":
+                # build proxies list using ip_auth format
+                for i in proxy_dict["ip_port"]:
+                    self.proxies.append(
+                        {"http": f"http://{i['http']}", "https": f"http://{i['https']}"}
+                    )
+            else:
+                # build the proxies list using user/pass format
+                for i in proxy_dict["ip_port"]:
+                    self.proxies.append(
+                        {
+                            "http": f"http://{username}:{password}@{i['http']}",
+                            "https": f"http://{username}:{password}@{i['https']}",
+                        }
+                    )
 
         if self.proxies:
             self.session_stock_check.proxies.update(self.proxies[0])
