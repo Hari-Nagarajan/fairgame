@@ -1,5 +1,6 @@
 {
    "ip_auth":"n",
+   "socks":"n",
    "user":"user",
    "pass":"pass",
    "ip_port":[
@@ -16,8 +17,11 @@
 
 DELETE INSTRUCTIONS WHEN DONE
 \/\/\/\/\/\/\/\/\/\/\/
-If your proxies use ip authentication rather than user/pass enable the ip_auth key with "y".
-When using ip authentication user/pass values can be left at default values.
+If your proxies use ip authentication rather than user/pass, enable the ip_auth key with "y".
+If your proxies use socks, enable the socks key with "y"
+When using ip authentication, user/pass values can be left default.
+
+**MAKE SURE YOU USE THE --proxy FLAG IN THE BAT FILE TO ENABLE PROXIES**
 
 For ip_port enter the IP:PORT for each proxy you want to rotate between.
 EXAMPLE:
