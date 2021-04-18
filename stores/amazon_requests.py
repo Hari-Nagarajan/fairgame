@@ -127,6 +127,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         wait_on_captcha_fail=False,
         transfer_headers=False,
         use_atc_mode=False,
+        proxy=False,
     ) -> None:
         super().__init__()
 
@@ -178,28 +179,24 @@ class AmazonStoreHandler(BaseStoreHandler):
         # self.conn = http.client.HTTPSConnection(self.amazon_domain)
         # self.conn20 = HTTP20Connection(self.amazon_domain)
 
+        self.proxies = []
         # Initialize proxies for stock check session:
         # Assuming same username/password for all proxies
+        if proxy:
+            # load dictionary from the json
+            proxy_dict = json.load(open("config/amazon_requests_proxies.json"))
 
-        # load dictionary from the json
-        proxy_dict = json.load(open("config/amazon_requests_proxies.json"))
+            username = proxy_dict["user"]
+            password = proxy_dict["pass"]
 
-        username = proxy_dict["user"]
-        password = proxy_dict["pass"]
-        enable_proxy = proxy_dict["enable"]
-
-        # build the proxies list
-        self.proxies = []
-        for i in proxy_dict["ip_port"]:
-            self.proxies.append(
-                {
-                    "http": f"http://{username}:{password}@{i['http']}",
-                    "https": f"http://{username}:{password}@{i['https']}",
-                }
-            )
-
-        if enable_proxy == "n":
-            self.proxies = []
+            # build the proxies list
+            for i in proxy_dict["ip_port"]:
+                self.proxies.append(
+                    {
+                        "http": f"http://{username}:{password}@{i['http']}",
+                        "https": f"http://{username}:{password}@{i['https']}",
+                    }
+                )
 
         if self.proxies:
             self.session_stock_check.proxies.update(self.proxies[0])
