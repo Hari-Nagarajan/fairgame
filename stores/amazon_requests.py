@@ -127,7 +127,6 @@ class AmazonStoreHandler(BaseStoreHandler):
         wait_on_captcha_fail=False,
         transfer_headers=False,
         use_atc_mode=False,
-        proxy=False,
     ) -> None:
         super().__init__()
 
