@@ -740,8 +740,9 @@ class Amazon:
             try:
                 price = parse_price(
                     re.sub(
-                        r'(?:\s+|(?:&nbsp;)+)',
-                        '', prices[idx].get_attribute("innerHTML").strip()
+                        r"(?:\s+|(?:&nbsp;)+)",
+                        "",
+                        prices[idx].get_attribute("innerHTML").strip()
                     )
                 )
             except IndexError:
@@ -1777,7 +1778,7 @@ def get_shipping_costs(tree, free_shipping_string):
             else:
                 # will it parse?
                 shipping_cost: Price = parse_price(
-                    re.sub(r'(?:\s+|(?:&nbsp;)+)', '', shipping_span_text)
+                    re.sub(r"(?:\s+|(?:&nbsp;)+)", "", shipping_span_text)
                 )
                 if shipping_cost.currency is not None:
                     log.debug(
@@ -1829,7 +1830,7 @@ def get_alt_shipping_costs(tree, free_shipping_string) -> Price:
             for shipping_span in shipping_spans:
                 if shipping_span.text and shipping_span.text != "+":
                     shipping_cost: Price = parse_price(
-                        re.sub(r'(?:\s+|(?:&nbsp;)+)', '', shipping_span.text.strip())
+                        re.sub(r"(?:\s+|(?:&nbsp;)+)", "", shipping_span.text.strip())
                     )
                     if shipping_cost.currency is not None:
                         log.debug(
@@ -1866,7 +1867,7 @@ def get_alt_shipping_costs(tree, free_shipping_string) -> Price:
                 log.debug("Found '& Free', assuming zero.")
             elif shipping_spans[0].text.startswith("+"):
                 return parse_price(
-                    re.sub(r'(?:\s+|(?:&nbsp;)+)', '', shipping_spans[0].text.strip())
+                    re.sub(r"(?:\s+|(?:&nbsp;)+)", "", shipping_spans[0].text.strip())
                 )
         elif len(shipping_bs) > 0:
             for message_node in shipping_bs:
