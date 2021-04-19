@@ -403,7 +403,7 @@ See [#asins](https://discord.gg/DuVXAN5FnN) channel on our Discord server, or lo
 These instructions are supplied by community members and any adjustments, corrections, improvements or clarifications
 are welcome. These are typically created during installation in a single environment, so there may be caveats or changes
 necessary for your environment. This isn't intended to be a definitive guide, but a starting point as validation that a
-platform can/does work. Please report back any suggestions to our [Discord](https://discord.gg/qDY2QBtAW6) feedback
+platform can/does work. Please report back any suggestions to our [Discord](https://discord.gg/wgCYBx9URn) feedback
 channel.
 
 #### Installation MacOS 
