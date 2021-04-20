@@ -19,6 +19,8 @@
 
 import requests
 from packaging.version import Version, parse, InvalidVersion
+import sys
+import os
 
 _LATEST_URL = "https://api.github.com/repos/Hari-Nagarajan/fairgame/releases/latest"
 
@@ -47,6 +49,11 @@ def get_latest_version():
         r = requests.get(_LATEST_URL)
         if r.status_code == 403:
             print("GitHub API rate limit reached")
+            print("Consider running fewer instances of the bot")
+            if sys.platform == "win32":
+                os.system("pause")
+            else:
+                input("Press enter key to continue...")
             # Return a safe, but wrong version
             latest_version = parse("0.0")
             return latest_version
