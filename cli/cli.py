@@ -334,6 +334,12 @@ def amazon(
     default=False,
     help="Use legacy add-to-cart mode",
 )
+@click.option(
+    "--ludicrous-mode",
+    is_flag=True,
+    default=False,
+    help="Goes back in time to buy cards from the past",
+)
 @notify_on_crash
 def amazonrequests(
     headless,
@@ -356,6 +362,7 @@ def amazonrequests(
     all_cookies,
     transfer_headers,
     use_atc_mode,
+    ludicrous_mode,
 ):
     log.warning(
         "Experimental test balloon.  Do not attempt to use.  Your computer could catch fire."
@@ -414,7 +421,13 @@ def amazonrequests(
                 offerid=offerid, delay=delay, all_cookies=all_cookies
             )
         else:
-            amazon_requests_obj.run(delay=delay, test=test, all_cookies=all_cookies)
+
+            amazon_requests_obj.run(
+                delay=delay,
+                test=test,
+                all_cookies=all_cookies,
+                ludicrous_mode=ludicrous_mode,
+            )
     except RuntimeError:
         del amazon_requests_obj
         log.error("Exiting Program...")
