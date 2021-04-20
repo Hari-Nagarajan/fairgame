@@ -45,6 +45,11 @@ def is_latest():
 def get_latest_version():
     try:
         r = requests.get(_LATEST_URL)
+        if(r.status_code == 403):
+            print("GitHub API rate limit reached")
+            # Return a safe, but wrong version
+            latest_version = parse("0.0")
+            return latest_version
         data = r.json()
         latest_version = parse(str(data["tag_name"]))
     except InvalidVersion:
