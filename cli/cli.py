@@ -20,6 +20,7 @@
 import os
 import platform
 import shutil
+import sys
 import time
 from datetime import datetime
 from functools import wraps
@@ -361,7 +362,10 @@ def amazonrequests(
     # don't run if `--test` and not `--use-atc-mode`
     if test and not use_atc_mode:
         log.error("Cannot run TURBO INITIATE in test mode; Use ATC mode for testing")
-        sys.exit(0)
+        if sys.platform == "win32":
+            os.system("pause")
+        else:
+            input("Press enter key to continue...")
 
     if clean_profile and os.path.exists(global_config.get_browser_profile_path()):
         log.info(
