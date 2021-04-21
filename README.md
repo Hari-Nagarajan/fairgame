@@ -661,22 +661,37 @@ export PIPENV_VENV_IN_PROJECT=1 (Linux/Other)
 ## Frequently Asked Questions
 
 To keep up with questions, the Discord channel [#FAQ](https://discord.gg/GEsarYKMAw) is where you'll find the latest
-answers. If you don't find it there, ask in #tech-support. 
+answers. If you don't find it there, ask in #tech-support.
 
+1. **Why didn't Fairgame buy this GPU that I can see in my browser?**
+   
+   If Fairgame didn't attempt to buy it, then Fairgame didn't ever see it as in stock. Many stock alert services are
+   sending out affiliate URLs that appear to cache offers for some period of time, regardless of whether or not the item
+   is still in-stock and purchaseable. Many people have reported that they can see an item as in stock in their browser
+   but Fairgame either didn't see it, failed to check out, or logged some weird error condition.
+   
+   If you are trying to purchase an Nvidia 30-series or an AMD 6000-series GPU in 2021 then this may happen frequently for you.
+   These items appear to sell out within fractions of a second and a large a mount of luck will be involved. Please do not
+   create issues or ask for help when Fairgame "misses" a drop or tries to checkout but can't find the item in your cart.
+   We know that it's hard to buy these things right now - that's why we're all here. Good luck!
+   
 1. **Can I run multiple instances of the bot?**
+   
    It is possible, however we do not support running multiple instances nor any issues that may be encountered while doing so.
-
-2. **Does Fairgame automatically bypass CAPTCHA's on the store sites?**
+   
+1. **Does Fairgame automatically bypass CAPTCHA's on the store sites?**
+   
    The bot will try and auto-solve CAPTCHA's during the checkout process.
-
-3. **Does `--headless` work?**
+   
+1. **Does `--headless` work?**
+   
    Yes!  A community user identified the issue with the headless option while running on a Raspberry Pi. This allowed
    the developers to update the codebase to consistently work correctly on headless server environments. Give it a try
    and let us know if you have any issues.
-
-4. **Does Fairgame run on a Raspberry Pi?**
+   
+1. **Does Fairgame run on a Raspberry Pi?**
+   
    Yes, with caveats. Most people seem to have success with Raspberry Pi 4. The 2 GB model may need to run the headless
    option due to the smaller memory footprint. Still awaiting community feedback on running on a Pi 3. CPU and memory
    capacity seem to be the limiting factor for older Pi models. The Pi is also much slower then even a semi-recent
    (5 years or less) laptop. 
-
