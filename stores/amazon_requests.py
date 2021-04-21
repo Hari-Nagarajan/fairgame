@@ -1009,7 +1009,12 @@ class AmazonStoreHandler(BaseStoreHandler):
             return None, None
         r = self.session_checkout.post(url=url, data=payload_inputs)
         if r.status_code == 200 and r.text:
-            find_pid = re.search(r"pid=(.*?)&amp;", r.text)
+            data = captcha_handler(
+                page_source=r.text,
+                session=self.session_checkout,
+                domain=f"https://{self.amazon_domain}",
+            )
+            find_pid = re.search(r"pid=(.*?)&amp;", data)
             if find_pid:
                 pid = find_pid.group(1)
             else:
@@ -1020,23 +1025,25 @@ class AmazonStoreHandler(BaseStoreHandler):
             else:
                 anti_csrf = None
             if pid and anti_csrf:
-                log.debug("turbo-initiate successful, verifying price")
-                tree = html.fromstring(r.text)
-                price_text = tree.xpath("//span[@class='a-color-price']")
-                if price_text:
-                    parsed_price = parse_price(price_text[0].text.strip())
-                    if (
-                        parsed_price.amount
-                        and item.min_price.amount
-                        <= parsed_price.amount
-                        <= item.max_price.amount
-                    ):
-                        log.debug("Price Check met, continuing to purchase")
-                else:
-                    # TODO: maybe have a flag here to decide whether to risk continuing or not?
-                    log.debug(
-                        "Price check not met, will try to continue purchase anyway"
-                    )
+                log.debug("turbo-initiate successful")
+                # Ludicrous mode price check
+                if item:
+                    tree = html.fromstring(r.text)
+                    price_text = tree.xpath("//span[@class='a-color-price']")
+                    if price_text:
+                        parsed_price = parse_price(price_text[0].text.strip())
+                        if (
+                            parsed_price.amount
+                            and item.min_price.amount
+                            <= parsed_price.amount
+                            <= item.max_price.amount
+                        ):
+                            log.debug("Price Check met, continuing to purchase")
+                    else:
+                        # TODO: maybe have a flag here to decide whether to risk continuing or not?
+                        log.debug(
+                            "Price check not met, will try to continue purchase anyway"
+                        )
             else:
                 log.debug("turbo-initiate unsuccessful")
                 save_html_response(
@@ -1583,3 +1590,24 @@ def save_html_response(filename, status, body):
     page_source = body
     with open(file_name, "w", encoding="utf-8") as f:
         f.write(page_source)
+
+
+def captcha_handler(session, page_source, domain):
+    tree = html.fromstring(page_source)
+    data = page_source
+    CAPTCHA_RETRY = 5
+    retry = 0
+    # loop until no captcha in return page, or max captcha tries reached
+    while (captcha_element := has_captcha(tree)) and (retry < CAPTCHA_RETRY):
+        data, status = solve_captcha(
+            session=session, form_element=captcha_element, domain=domain
+        )
+        tree = html.fromstring(data)
+        retry += 1
+    if captcha_element:
+        return None
+    return data
+
+
+def has_captcha(tree):
+    return tree.xpath("//form[contains(@action,'validateCaptcha')]")

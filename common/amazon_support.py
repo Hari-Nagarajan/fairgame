@@ -271,7 +271,7 @@ def get_item_condition(form_action) -> AmazonItemCondition:
         return AmazonItemCondition.Unknown
 
 
-def solve_captcha(session, form_element, pdp_url: str):
+def solve_captcha(session, form_element, domain: str):
     log.warning("Encountered CAPTCHA. Attempting to solve.")
     # Starting from the form, get the inputs and image
     captcha_images = form_element.xpath('//img[contains(@src, "amazon.com/captcha/")]')
@@ -290,7 +290,7 @@ def solve_captcha(session, form_element, pdp_url: str):
                     input_dict[form_input.name] = solution
                 else:
                     input_dict[form_input.name] = form_input.value
-            f = furl(pdp_url)  # Use the original URL to get the schema and host
+            f = furl(domain)  # Use the original URL to get the schema and host
             f = f.set(path=form_element.attrib["action"])
             f.add(args=input_dict)
             response = session.get(f.url)
