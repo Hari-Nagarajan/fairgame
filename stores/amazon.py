@@ -1415,7 +1415,12 @@ class Amazon:
             ):
                 try:
                     log.info("Stuck on a captcha... Lets try to solve it.")
-                    captcha = AmazonCaptcha.fromdriver(self.driver)
+                    captcha_link = self.driver.page_source.split('<img src="')[1].split(
+                        '">'
+                    )[
+                        0
+                    ]  # extract captcha link
+                    captcha = AmazonCaptcha.fromlink(captcha_link)
                     solution = captcha.solve()
                     log.info(f"The solution is: {solution}")
                     if solution == "Not solved":
