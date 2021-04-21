@@ -127,6 +127,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         wait_on_captcha_fail=False,
         transfer_headers=False,
         use_atc_mode=False,
+        proxy=False,
     ) -> None:
         super().__init__()
 
@@ -183,36 +184,48 @@ class AmazonStoreHandler(BaseStoreHandler):
         # Assuming same username/password for all proxies
         if proxy:
             # load dictionary from the json
-            proxy_dict = json.load(open("config/amazon_requests_proxies.json"))
+            with open("config/amazon_requests_proxies.json") as f:
+                proxy_dict = json.load(f)
 
-            ip_auth = proxy_dict["ip_auth"]
-            username = proxy_dict["user"]
-            password = proxy_dict["pass"]
-            socks = proxy_dict["socks"]
+                username = proxy_dict["user"]
+                password = proxy_dict["pass"]
 
-            if ip_auth == "y":
-                # build proxies list using ip_auth format
-                for i in proxy_dict["ip_port"]:
-                    self.proxies.append(
-                        {"http": f"http://{i['http']}", "https": f"http://{i['https']}"}
-                    )
-            elif socks == "y":
-                for i in proxy_dict["ip_port"]:
-                    self.proxies.append(
-                        {
-                            "http": f"socks5://{username}:{password}@{i['http']}",
-                            "https": f"socks5://{username}:{password}@{i['https']}",
-                        }
-                    )
-            else:
-                # build the proxies list using user/pass format
-                for i in proxy_dict["ip_port"]:
-                    self.proxies.append(
-                        {
-                            "http": f"http://{username}:{password}@{i['http']}",
-                            "https": f"http://{username}:{password}@{i['https']}",
-                        }
-                    )
+                if proxy_dict["ip_auth"]:
+                    # build proxies list using ip_auth format
+                    for i in proxy_dict["ip_port"]:
+                        self.proxies.append(
+                            {
+                                "http": f"http://{i['http']}",
+                                "https": f"http://{i['https']}",
+                            }
+                        )
+                elif proxy_dict["socks5"]:
+                    # build the proxies list using socks5
+                    for i in proxy_dict["ip_port"]:
+                        self.proxies.append(
+                            {
+                                "http": f"socks5://{username}:{password}@{i['http']}",
+                                "https": f"socks5://{username}:{password}@{i['https']}",
+                            }
+                        )
+                elif proxy_dict["socks5h"]:
+                    # build the proxies list using socks5h
+                    for i in proxy_dict["ip_port"]:
+                        self.proxies.append(
+                            {
+                                "http": f"socks5h://{username}:{password}@{i['http']}",
+                                "https": f"socks5h://{username}:{password}@{i['https']}",
+                            }
+                        )
+                else:
+                    # build the proxies list using user/pass format
+                    for i in proxy_dict["ip_port"]:
+                        self.proxies.append(
+                            {
+                                "http": f"http://{username}:{password}@{i['http']}",
+                                "https": f"http://{username}:{password}@{i['https']}",
+                            }
+                        )
 
         if self.proxies:
             self.session_stock_check.proxies.update(self.proxies[0])
@@ -490,7 +503,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         log.info("May have completed purchase, check orders!")
         log.info("Shutting down")
 
-    def run(self, delay=5, test=False, all_cookies=False):
+    def run(self, delay=5, test=False, all_cookies=False, ludicrous_mode=False):
         # Load up the homepage
         with self.wait_for_page_change():
             self.driver.get(f"https://{self.amazon_domain}")
@@ -514,14 +527,13 @@ class AmazonStoreHandler(BaseStoreHandler):
             header[h.split(": ")[0]] = h.split(": ")[1]
 
         # Transfer cookies from selenium session.
-        # Do not transfer cookies to stock check if using proxies
-        if not self.proxies:
-            transfer_selenium_cookies(
-                self.driver, self.session_stock_check, all_cookies=all_cookies
-            )
-            if self.transfer_headers:
-                for head in header:
-                    self.session_stock_check.headers.update(head)
+        # if not self.proxies:
+        #     transfer_selenium_cookies(
+        #         self.driver, self.session_stock_check, all_cookies=all_cookies
+        #     )
+        #     if self.transfer_headers:
+        #         for head in header:
+        #             self.session_stock_check.headers.update(head)
         transfer_selenium_cookies(
             self.driver, self.session_checkout, all_cookies=all_cookies
         )
@@ -565,45 +577,49 @@ class AmazonStoreHandler(BaseStoreHandler):
                     idx = 0
                 start_time = time.time()
                 delay_time = start_time + delay
-                successful = False
-                qualified_seller = self.find_qualified_seller(item)
-                log.debug(
-                    f"ASIN check for {item.id} took {time.time() - start_time} seconds."
-                )
-                if qualified_seller:
-                    if self.buy_it_now:
-                        pid, anti_csrf = self.turbo_initiate(
-                            qualified_seller=qualified_seller
-                        )
-                        if pid and anti_csrf:
-                            if self.turbo_checkout(pid=pid, anti_csrf=anti_csrf):
-                                if self.single_shot:
+                if not ludicrous_mode:
+                    qualified_seller = self.find_qualified_seller(item)
+                    log.debug(
+                        f"ASIN check for {item.id} took {time.time() - start_time} seconds."
+                    )
+                    if qualified_seller:
+                        if self.buy_it_now:
+                            pid, anti_csrf = self.turbo_initiate(
+                                qualified_seller=qualified_seller
+                            )
+                            if pid and anti_csrf:
+                                if self.turbo_checkout(pid=pid, anti_csrf=anti_csrf):
+                                    if self.single_shot:
+                                        self.item_list.clear()
+                                    else:
+                                        self.item_list.remove(item)
+                        elif self.atc(qualified_seller=qualified_seller, item=item):
+                            r = self.ptc()
+                            # with open("ptc-source.html", "w", encoding="utf-8") as f:
+                            #     f.write(r)
+                            if r:
+                                log.debug(r)
+                                if test:
+                                    print(
+                                        "Proceeded to Checkout - Will not Place Order as this is a Test",
+                                        end="\r",
+                                    )
+                                    # in Test mode, clear the list
                                     self.item_list.clear()
-                                else:
-                                    self.item_list.remove(item)
 
-                    elif self.atc(qualified_seller=qualified_seller, item=item):
-                        r = self.ptc()
-                        # with open("ptc-source.html", "w", encoding="utf-8") as f:
-                        #     f.write(r)
-                        if r:
-                            log.debug(r)
-                            if test:
-                                print(
-                                    "Proceeded to Checkout - Will not Place Order as this is a Test",
-                                    end="\r",
-                                )
-                                # in Test mode, clear the list
+                                elif self.pyo(page=r):
+                                    if self.single_shot:
+                                        self.item_list.clear()
+                                    else:
+                                        self.item_list.remove(item)
+                else:
+                    pid, anti_csrf = self.turbo_initiate(item=item)
+                    if pid and anti_csrf:
+                        if self.turbo_checkout(pid=pid, anti_csrf=anti_csrf):
+                            if self.single_shot:
                                 self.item_list.clear()
-
-                            elif self.pyo(page=r):
-                                if self.single_shot:
-                                    self.item_list.clear()
-                                else:
-                                    self.item_list.remove(item)
-
-                if successful:
-                    break
+                            else:
+                                self.item_list.remove(item)
 
                 # sleep remainder of delay_time
                 time_left = delay_time - time.time()
@@ -1005,13 +1021,22 @@ class AmazonStoreHandler(BaseStoreHandler):
         return sellers
 
     @debug
-    def turbo_initiate(self, qualified_seller):
+    def turbo_initiate(self, qualified_seller=None, item=None):
         url = f"https://{self.amazon_domain}/checkout/turbo-initiate?ref_=dp_start-bbf_1_glance_buyNow_2-1&pipelineType=turbo&weblab=RCX_CHECKOUT_TURBO_DESKTOP_NONPRIME_87784&temporaryAddToCart=1"
-        payload_inputs = {
-            "offerListing.1": qualified_seller.offering_id,
-            "quantity.1": "1",
-        }
-
+        if qualified_seller:
+            payload_inputs = {
+                "offerListing.1": qualified_seller.offering_id,
+                "quantity.1": "1",
+            }
+        elif item:
+            payload_inputs = {
+                "asin.1": item.id,
+                "quantity.1": "1",
+                "merchantId.1": item.merchant_id,
+            }
+        else:
+            log.debug("How did I get here??")
+            return None, None
         r = self.session_checkout.post(url=url, data=payload_inputs)
         if r.status_code == 200 and r.text:
             find_pid = re.search(r"pid=(.*?)&amp;", r.text)
@@ -1025,7 +1050,21 @@ class AmazonStoreHandler(BaseStoreHandler):
             else:
                 anti_csrf = None
             if pid and anti_csrf:
-                log.debug("turbo-initiate successful")
+                log.debug("turbo-initiate successful, verifying price")
+                tree = html.fromstring(r.text)
+                price_text = tree.xpath("//span[@class='a-color-price']")
+                if price_text:
+                    parsed_price = parse_price(price_text[0].text.strip())
+                    if (
+                        parsed_price.amount
+                        and item.min_price <= parsed_price.amount <= item.max_price
+                    ):
+                        log.debug("Price Check met, continuing to purchase")
+                else:
+                    # TODO: maybe have a flag here to decide whether to risk continuing or not?
+                    log.debug(
+                        "Price check not met, will try to continue purchase anyway"
+                    )
             else:
                 log.debug("turbo-initiate unsuccessful")
                 save_html_response(
@@ -1380,7 +1419,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                     log.info(f"Failed to solve {captcha.image_link}")
                     if self.wait_on_captcha_fail:
                         log.info("Will wait up to 60 seconds for user to solve captcha")
-                        self.send(
+                        self.send_notification(
                             "User Intervention Required - captcha check",
                             "captcha",
                             self.take_screenshots,
