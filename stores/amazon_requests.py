@@ -1027,7 +1027,9 @@ class AmazonStoreHandler(BaseStoreHandler):
                     parsed_price = parse_price(price_text[0].text.strip())
                     if (
                         parsed_price.amount
-                        and item.min_price <= parsed_price.amount <= item.max_price
+                        and item.min_price.amount
+                        <= parsed_price.amount
+                        <= item.max_price.amount
                     ):
                         log.debug("Price Check met, continuing to purchase")
                 else:
