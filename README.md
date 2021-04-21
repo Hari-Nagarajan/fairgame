@@ -651,7 +651,7 @@ answers. If you don't find it there, ask in #tech-support.
    is still in-stock and purchaseable. Many people have reported that they can see an item as in stock in their browser
    but Fairgame either didn't see it, failed to check out, or logged some weird error condition.
    
-   If you are trying to be an Nvidia 30-series or an AMD 6000-series GPU in 2021 then this may happen frequently for you.
+   If you are trying to purchase an Nvidia 30-series or an AMD 6000-series GPU in 2021 then this may happen frequently for you.
    These items appear to sell out within fractions of a second and a large a mount of luck will be involved. Please do not
    create issues or ask for help when Fairgame "misses" a drop or tries to checkout but can't find the item in your cart.
    We know that it's hard to buy these things right now - that's why we're all here. Good luck!
