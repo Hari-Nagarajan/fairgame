@@ -337,6 +337,11 @@ Options:
                       USE THIS OPTION AT YOUR OWN RISK!!!
                       NOTE: There is no functionality to choose payment
                       option, so bot may still fail during checkout
+
+  --amazon_config     Pass in a Amazon config file - by default looks for
+                        'config/amazon_config.json'.
+
+  --instance_name     Name for this instance of Fairgame.
                       
   --help              Show this message and exit.
 
@@ -360,6 +365,12 @@ pipenv run python app.py amazon --used --checkshipping
 Running Fairgame with delay of 4.5 seconds, and automatically putting in the credentials password of `abcd1234`
 ```shell
 pipenv run python app.py amazon --delay=4.5 --p=abcd1234
+```
+
+Running Fairgame with custom config and instance name - note this creates a new Chrome profile so it goes through
+ logging in - do a --test run before using and setup your one-click.
+```shell
+pipenv run python app.py amazon --amazon_config config/amazon_3080_config.json --instance_name 3080
 ```
 
 ### Start Up

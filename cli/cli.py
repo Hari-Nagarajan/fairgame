@@ -198,6 +198,18 @@ def main():
     default=False,
     help="Wait if captcha could not be solved. Only occurs if enters captcha handler during checkout.",
 )
+@click.option(
+    "--amazon_config",
+    type=str,
+    default=None,
+    help="Pass in a Amazon config file - by default looks for 'config/amazon_config.json'.",
+)
+@click.option(
+    "--instance_name",
+    type=str,
+    default="FairGame",
+    help="Name for this instance of Fairgame.",
+)
 @notify_on_crash
 def amazon(
     no_image,
@@ -219,17 +231,19 @@ def amazon(
     clean_credentials,
     alt_offers,
     captcha_wait,
+    amazon_config,
+    instance_name
 ):
     notification_handler.sound_enabled = not disable_sound
     if not notification_handler.sound_enabled:
         log.info("Local sounds have been disabled.")
 
-    if clean_profile and os.path.exists(global_config.get_browser_profile_path()):
+    if clean_profile and os.path.exists(global_config.get_browser_profile_path(instance_name)):
         log.info(
-            f"Removing existing profile at '{global_config.get_browser_profile_path()}'"
+            f"Removing existing profile at '{global_config.get_browser_profile_path(instance_name)}'"
         )
-        profile_size = get_folder_size(global_config.get_browser_profile_path())
-        shutil.rmtree(global_config.get_browser_profile_path())
+        profile_size = get_folder_size(global_config.get_browser_profile_path(instance_name))
+        shutil.rmtree(global_config.get_browser_profile_path(instance_name))
         log.info(f"Freed {profile_size}")
 
     if clean_credentials and os.path.exists(AMAZON_CREDENTIAL_FILE):
@@ -252,6 +266,8 @@ def amazon(
         shipping_bypass=shipping_bypass,
         alt_offers=alt_offers,
         wait_on_captcha_fail=captcha_wait,
+        config=amazon_config,
+        instance_name=instance_name,
     )
     try:
         amzn_obj.run(delay=delay, test=test)

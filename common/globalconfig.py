@@ -72,12 +72,14 @@ class GlobalConfig:
     def get_fairgame_config(self):
         return self.fairgame_config
 
-    def get_browser_profile_path(self):
-        if not self.profile_path:
-            self.profile_path = os.path.join(
-                os.path.dirname(os.path.abspath("__file__")),
-                self.global_config["FAIRGAME"].get("profile_name", ".profile-amz"),
-            )
+    def get_browser_profile_path(self, instance_name="FairGame"):
+
+        # Trying to avoid having a breaking change here, default instance name is 'FairGame'.
+        # Also better to rebuild path because instance_name isn't initialized until after GlobalConfig.
+        self.profile_path = os.path.join(
+            os.path.dirname(os.path.abspath("__file__")),
+            ".profile-amz" if instance_name == 'FairGame' else f".profile-amz-{instance_name}",
+        )
         return self.profile_path
 
     def get_property(self, property_name):

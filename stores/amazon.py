@@ -111,6 +111,8 @@ class Amazon:
         shipping_bypass=False,
         alt_offers=False,
         wait_on_captcha_fail=False,
+        config=None,
+        instance_name=None,
     ):
         self.notification_handler = notification_handler
         self.asin_list = []
@@ -143,6 +145,8 @@ class Amazon:
         self.unknown_title_notification_sent = False
         self.alt_offers = alt_offers
         self.wait_on_captcha_fail = wait_on_captcha_fail
+        self.config = config if config is not None else AUTOBUY_CONFIG_PATH
+        self.instance_name = instance_name
 
         presence.enabled = not disable_presence
 
@@ -150,7 +154,7 @@ class Amazon:
         from cli.cli import global_config
 
         amazon_config = global_config.get_amazon_config(encryption_pass)
-        self.profile_path = global_config.get_browser_profile_path()
+        self.profile_path = global_config.get_browser_profile_path(instance_name)
 
         try:
             presence.start_presence()
@@ -171,8 +175,9 @@ class Amazon:
             except:
                 raise
 
-        if os.path.exists(AUTOBUY_CONFIG_PATH):
-            with open(AUTOBUY_CONFIG_PATH) as json_file:
+        if os.path.exists(self.config):
+            log.info("Reading config from: %s" % self.config)
+            with open(self.config) as json_file:
                 try:
                     config = json.load(json_file)
                     self.asin_groups = int(config["asin_groups"])
@@ -247,7 +252,7 @@ class Amazon:
             self.login()
         self.notification_handler.play_notify_sound()
         self.send_notification(
-            "Bot Logged in and Starting up", "Start-Up", self.take_screenshots
+            "Bot logged in and starting up!", "Start-Up", self.take_screenshots
         )
         if self.get_cart_count() > 0:
             log.warning(f"Found {cart_quantity} item(s) in your cart.")
@@ -487,7 +492,7 @@ class Amazon:
                         log.error("Failed to delete chrome processes")
                         log.error("Please restart bot")
                         self.send_notification(
-                            message="Bot Failed, please restart bot",
+                            message="Bot failed, please restart bot",
                             page_name="Bot Failed",
                             take_screenshot=False,
                         )
@@ -794,7 +799,7 @@ class Amazon:
                     self.notification_handler.play_notify_sound()
                     if self.detailed:
                         self.send_notification(
-                            message=f"Found Stock ASIN:{asin}",
+                            message=f"Found Stock ASIN: {asin}",
                             page_name="Stock Alert",
                             take_screenshot=self.take_screenshots,
                         )
@@ -1565,6 +1570,7 @@ class Amazon:
         return DEFAULT_PAGE_WAIT_DELAY
 
     def send_notification(self, message, page_name, take_screenshot=True):
+        message = f"[{self.instance_name}] {message}"
         if take_screenshot:
             file_name = self.save_screenshot(page_name)
             self.notification_handler.send_notification(message, file_name)
