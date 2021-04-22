@@ -4,6 +4,8 @@ import os
 import pickle
 import platform
 import random
+
+import lxml.etree.ParserError
 import stdiomask
 import time
 import typing
@@ -1047,7 +1049,7 @@ class AmazonStoreHandler(BaseStoreHandler):
             log.debug("How did I get here??")
             return None, None
         r = self.session_checkout.post(url=url, data=payload_inputs)
-        if r.status_code == 200 and r.text:
+        if r.status_code == 200 and len(r.text) > 0:
             data, status = captcha_handler(
                 page_source=r.text,
                 session=self.session_checkout,
@@ -1055,7 +1057,7 @@ class AmazonStoreHandler(BaseStoreHandler):
             )
             pid = None
             anti_csrf = None
-            if not data:
+            if data is None or len(data) == 0:
                 return pid, anti_csrf
             find_pid = re.search(r"pid=(.*?)&amp;", data)
             if find_pid:
@@ -1634,7 +1636,12 @@ def save_html_response(filename, status, body):
 def captcha_handler(session, page_source, domain):
     data = page_source
     status = 200
-    tree = html.fromstring(data)
+    try:
+        tree = html.fromstring(data)
+    except lxml.etree.ParserError as e:
+        log.debug("lxml.etree.ParserError")
+        log.debug(e)
+        return None, None
     CAPTCHA_RETRY = 5
     retry = 0
     # loop until no captcha in return page, or max captcha tries reached
@@ -1642,10 +1649,15 @@ def captcha_handler(session, page_source, domain):
         data, status = solve_captcha(
             session=session, form_element=captcha_element[0], domain=domain
         )
-        tree = html.fromstring(data)
+        try:
+            tree = html.fromstring(data)
+        except lxml.etree.ParserError as e:
+            log.debug("lxml.etree.ParserError")
+            log.debug(e)
+            return None, None
         retry += 1
     if captcha_element:
-        return None
+        return None, None
     return data, status
 
 
