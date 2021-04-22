@@ -561,6 +561,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                     f"Checked {item.id}; Check Count: {check_count},",
                     f"Selenium Refresh in {round((selenium_refresh_time - time.time())/60)} minutes",
                     spinner[idx],
+                    "    ",
                     end="\r",
                 )
                 check_count += 1
