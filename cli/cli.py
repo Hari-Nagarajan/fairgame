@@ -72,6 +72,7 @@ def notify_on_crash(func):
         except Exception as e:
             log.debug(e)
             notification_handler.send_notification(f"FairGame has crashed.")
+            raise
 
     return decorator
 
@@ -380,7 +381,7 @@ def amazonrequests(
             log.info(
                 'Offer IDs may fail from `.bat` files as all "%" characters must be escaped'
             )
-            sys.exit(0)
+            return
         log.info("Offer ID appears valid")
 
     notification_handler.sound_enabled = not disable_sound
@@ -432,6 +433,7 @@ def amazonrequests(
         del amazon_requests_obj
         log.error("Exiting Program...")
         time.sleep(5)
+        return
 
 
 @click.option(
@@ -489,10 +491,10 @@ def show(w, c):
                 print(file.read())
             except FileNotFoundError:
                 log.error("License File Missing. Quitting Program")
-                exit(0)
+                return
     else:
         log.error("License File Missing. Quitting Program.")
-        exit(0)
+        return
 
 
 @click.command()

@@ -598,6 +598,7 @@ class AmazonStoreHandler(BaseStoreHandler):
 
             if self.shuffle:
                 random.shuffle(self.item_list)
+        return
 
     @contextmanager
     def wait_for_page_change(self, timeout=30):
