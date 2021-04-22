@@ -5,7 +5,6 @@ import pickle
 import platform
 import random
 
-import lxml.etree.ParserError
 import stdiomask
 import time
 import typing
@@ -1638,7 +1637,7 @@ def captcha_handler(session, page_source, domain):
     status = 200
     try:
         tree = html.fromstring(data)
-    except lxml.etree.ParserError as e:
+    except html.etree.ParserError as e:
         log.debug("lxml.etree.ParserError")
         log.debug(e)
         return None, None
@@ -1651,7 +1650,7 @@ def captcha_handler(session, page_source, domain):
         )
         try:
             tree = html.fromstring(data)
-        except lxml.etree.ParserError as e:
+        except html.etree.ParserError as e:
             log.debug("lxml.etree.ParserError")
             log.debug(e)
             return None, None
