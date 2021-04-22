@@ -106,6 +106,15 @@ def free_shipping_check(seller):
 amazon_config = {}
 
 
+def parse_html_source(data):
+    tree = None
+    try:
+        tree = html.fromstring(data)
+    except html.etree.ParserError:
+        log.debug("html parser error")
+    return tree
+
+
 class AmazonStoreHandler(BaseStoreHandler):
     http_client = False
     http_20_client = False
@@ -830,7 +839,9 @@ class AmazonStoreHandler(BaseStoreHandler):
                 continue
             if status == 503:
                 # Check for CAPTCHA
-                tree = html.fromstring(data)
+                tree = parse_html_source(data)
+                if not tree:
+                    continue
                 captcha_form_element = tree.xpath(
                     "//form[contains(@action,'validateCaptcha')]"
                 )
@@ -844,7 +855,9 @@ class AmazonStoreHandler(BaseStoreHandler):
                 item.furl = furl(
                     f"https://{self.amazon_domain}/{REALTIME_INVENTORY_PATH}{item.id}"
                 )
-                tree = html.fromstring(data)
+                tree = parse_html_source(data)
+                if not tree:
+                    continue
                 captcha_form_element = tree.xpath(
                     "//form[contains(@action,'validateCaptcha')]"
                 )
@@ -855,7 +868,9 @@ class AmazonStoreHandler(BaseStoreHandler):
                     if status != 200:
                         log.debug(f"ASIN {item.id} failed, skipping...")
                         continue
-                    tree = html.fromstring(data)
+                    tree = parse_html_source(data)
+                    if not tree:
+                        continue
 
                 title = tree.xpath('//*[@id="productTitle"]')
                 if len(title) > 0:
@@ -909,8 +924,9 @@ class AmazonStoreHandler(BaseStoreHandler):
         # This is where the parsing magic goes
         log.debug(f"payload is {len(payload)} bytes")
 
-        tree = html.fromstring(payload)
-
+        tree = parse_html_source(payload)
+        if not tree:
+            return sellers
         if item.status_code == 503:
             with open("503-page.html", "w", encoding="utf-8") as f:
                 f.write(payload)
@@ -928,7 +944,9 @@ class AmazonStoreHandler(BaseStoreHandler):
                 )
                 if status != 503:
                     payload = data
-                    tree = html.fromstring(payload)
+                    tree = parse_html_source(payload)
+                    if not tree:
+                        return sellers
                 else:
                     log.info(f"No valid page for ASIN {item.id}")
                     return sellers
@@ -1068,7 +1086,9 @@ class AmazonStoreHandler(BaseStoreHandler):
                 log.debug("turbo-initiate successful")
                 # Ludicrous mode price check
                 if item:
-                    tree = html.fromstring(data)
+                    tree = parse_html_source(data)
+                    if not tree:
+                        return pid, anti_csrf
                     price_text = tree.xpath("//span[@class='a-color-price']")
                     if price_text:
                         parsed_price = parse_price(price_text[0].text.strip())
@@ -1163,7 +1183,9 @@ class AmazonStoreHandler(BaseStoreHandler):
 
     @debug
     def pyo(self, page):
-        pyo_html = html.fromstring(page)
+        pyo_html = parse_html_source(page)
+        if not pyo_html:
+            return False
         pyo_params = {
             "submitFromSPC": "",
             "fasttrackExpiration": "",
@@ -1635,12 +1657,11 @@ def save_html_response(filename, status, body):
 def captcha_handler(session, page_source, domain):
     data = page_source
     status = 200
-    try:
-        tree = html.fromstring(data)
-    except html.etree.ParserError as e:
-        log.debug("lxml.etree.ParserError")
-        log.debug(e)
-        return None, None
+    tree = parse_html_source(data)
+    if not tree:
+        data = None
+        status = None
+        return data, status
     CAPTCHA_RETRY = 5
     retry = 0
     # loop until no captcha in return page, or max captcha tries reached
@@ -1648,15 +1669,15 @@ def captcha_handler(session, page_source, domain):
         data, status = solve_captcha(
             session=session, form_element=captcha_element[0], domain=domain
         )
-        try:
-            tree = html.fromstring(data)
-        except html.etree.ParserError as e:
-            log.debug("lxml.etree.ParserError")
-            log.debug(e)
-            return None, None
+        parse_html_source(data)
+        if not tree:
+            data = None
+            status = None
+            return data, status
         retry += 1
     if captcha_element:
-        return None, None
+        data = None
+        status = None
     return data, status
 
 
