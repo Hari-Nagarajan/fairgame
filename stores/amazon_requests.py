@@ -1009,26 +1009,26 @@ class AmazonStoreHandler(BaseStoreHandler):
             return None, None
         r = self.session_checkout.post(url=url, data=payload_inputs)
         if r.status_code == 200 and r.text:
-            data = captcha_handler(
+            data, status = captcha_handler(
                 page_source=r.text,
                 session=self.session_checkout,
                 domain=f"https://{self.amazon_domain}",
             )
+            pid = None
+            anti_csrf = None
+            if not data:
+                return pid, anti_csrf
             find_pid = re.search(r"pid=(.*?)&amp;", data)
             if find_pid:
                 pid = find_pid.group(1)
-            else:
-                pid = None
-            find_anti_csrf = re.search(r"'anti-csrftoken-a2z' value='(.*?)'", r.text)
+            find_anti_csrf = re.search(r"'anti-csrftoken-a2z' value='(.*?)'", data)
             if find_anti_csrf:
                 anti_csrf = find_anti_csrf.group(1)
-            else:
-                anti_csrf = None
             if pid and anti_csrf:
                 log.debug("turbo-initiate successful")
                 # Ludicrous mode price check
                 if item:
-                    tree = html.fromstring(r.text)
+                    tree = html.fromstring(data)
                     price_text = tree.xpath("//span[@class='a-color-price']")
                     if price_text:
                         parsed_price = parse_price(price_text[0].text.strip())
@@ -1047,7 +1047,7 @@ class AmazonStoreHandler(BaseStoreHandler):
             else:
                 log.debug("turbo-initiate unsuccessful")
                 save_html_response(
-                    filename="turbo_ini_unsuccessful", status=r.status_code, body=r.text
+                    filename="turbo_ini_unsuccessful", status=status, body=data
                 )
             return pid, anti_csrf
         else:
@@ -1593,20 +1593,20 @@ def save_html_response(filename, status, body):
 
 
 def captcha_handler(session, page_source, domain):
-    tree = html.fromstring(page_source)
     data = page_source
+    tree = html.fromstring(data)
     CAPTCHA_RETRY = 5
     retry = 0
     # loop until no captcha in return page, or max captcha tries reached
     while (captcha_element := has_captcha(tree)) and (retry < CAPTCHA_RETRY):
         data, status = solve_captcha(
-            session=session, form_element=captcha_element, domain=domain
+            session=session, form_element=captcha_element[0], domain=domain
         )
         tree = html.fromstring(data)
         retry += 1
     if captcha_element:
         return None
-    return data
+    return data, status
 
 
 def has_captcha(tree):
