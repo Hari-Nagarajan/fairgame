@@ -1595,6 +1595,7 @@ def save_html_response(filename, status, body):
 
 def captcha_handler(session, page_source, domain):
     data = page_source
+    status = 200
     tree = html.fromstring(data)
     CAPTCHA_RETRY = 5
     retry = 0
