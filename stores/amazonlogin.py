@@ -30,7 +30,8 @@ from contextlib import contextmanager
 from datetime import datetime
 import threading
 import queue
-
+import secrets
+from fake_useragent import UserAgent
 import re
 
 import psutil
@@ -54,16 +55,6 @@ from selenium.webdriver.support import expected_conditions as EC, wait
 from selenium.webdriver.support.expected_conditions import staleness_of
 from selenium.webdriver.support.ui import WebDriverWait
 
-from common.amazon_support import (
-    AmazonItemCondition,
-    condition_check,
-    FGItem,
-    get_shipping_costs,
-    price_check,
-    SellerDetail,
-    solve_captcha,
-    merchant_check,
-)
 from notifications.notifications import NotificationHandler
 from stores.basestore import BaseStoreHandler
 from utils.logger import log
@@ -101,7 +92,7 @@ HEADERS = {
 amazon_config = {}
 
 
-class AmazonLoginHandler:
+class AmazonLoginHandler(BaseStoreHandler):
     def __init__(
         self,
         notification_handler: NotificationHandler,
