@@ -4,6 +4,7 @@ import os
 import pickle
 import platform
 import random
+
 import stdiomask
 import time
 import typing
@@ -91,7 +92,6 @@ DEFAULT_MAX_TIMEOUT = 10
 HEADERS = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
     "Accept-Encoding": "gzip, deflate, sdch, br",
-    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36",
     "content-type": "application/x-www-form-urlencoded",
 }
 
@@ -104,6 +104,15 @@ def free_shipping_check(seller):
 
 
 amazon_config = {}
+
+
+def parse_html_source(data):
+    tree = None
+    try:
+        tree = html.fromstring(data)
+    except html.etree.ParserError:
+        log.debug("html parser error")
+    return tree
 
 
 class AmazonStoreHandler(BaseStoreHandler):
@@ -150,6 +159,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         self.amazon_cookies = {}
         self.transfer_headers = transfer_headers
         self.buy_it_now = not use_atc_mode
+        self.headless = headless
 
         if not self.buy_it_now:
             log.warning("Using legacy add-to-cart mode instead of turbo_initiate")
@@ -165,17 +175,10 @@ class AmazonStoreHandler(BaseStoreHandler):
         # Load up our configuration
         self.parse_config()
 
-        # Set up the Chrome options based on user flags
-        if headless:
-            enable_headless()
-
-        prefs = get_prefs(no_image=False)
-        set_options(profile_path=self.profile_path, prefs=prefs, slow_mode=slow_mode)
-        modify_browser_profile()
-
         # Initialize the Session we'll use for stock checking
         self.session_stock_check = requests.Session()
         self.session_stock_check.headers.update(HEADERS)
+        self.session_stock_check.headers.update({"user-agent": self.ua.random})
         # self.conn = http.client.HTTPSConnection(self.amazon_domain)
         # self.conn20 = HTTP20Connection(self.amazon_domain)
 
@@ -229,10 +232,6 @@ class AmazonStoreHandler(BaseStoreHandler):
 
         if self.proxies:
             self.session_stock_check.proxies.update(self.proxies[0])
-
-        # Spawn the web browser
-        self.driver = create_driver(options)
-        self.webdriver_child_pids = get_webdriver_pids(self.driver)
 
         # Initialize the checkout session
         self.session_checkout = requests.Session()
@@ -444,17 +443,18 @@ class AmazonStoreHandler(BaseStoreHandler):
 
     # Test code, use at your own RISK
     def run_offer_id(self, offerid, delay=5, all_cookies=False):
-        # Load up the homepage
-        with self.wait_for_page_change():
-            self.driver.get(f"https://{self.amazon_domain}")
+        # checkout_session_count = 1
+        checkout_sessions = [self.session_checkout]
+        # for x in range(checkout_session_count):
+        #     session = requests.Session()
+        #     session.headers.update(HEADERS)
+        #     session.headers.update({"user-agent": self.ua.random})
+        #     checkout_sessions.append(requests.Session())
 
-        self.handle_startup()
-        # Get a valid amazon session for our requests
-        if not self.is_logged_in():
-            self.login()
-
-        transfer_selenium_cookies(
-            self.driver, self.session_checkout, all_cookies=all_cookies
+        self.selenium_login_cookies(
+            session_list=checkout_sessions,
+            all_cookies=all_cookies,
+            transfer_headers=self.transfer_headers,
         )
 
         message = f"Starting to hunt items at {STORE_NAME}"
@@ -503,7 +503,21 @@ class AmazonStoreHandler(BaseStoreHandler):
         log.info("May have completed purchase, check orders!")
         log.info("Shutting down")
 
-    def run(self, delay=5, test=False, all_cookies=False, ludicrous_mode=False):
+    def selenium_login_cookies(
+        self, session_list, all_cookies=False, transfer_headers=False
+    ):
+        # Set up the Chrome options based on user flags
+        if self.headless:
+            enable_headless()
+
+        prefs = get_prefs(no_image=False)
+        set_options(profile_path=self.profile_path, prefs=prefs)
+        modify_browser_profile()
+
+        # Spawn the web browser
+        self.driver = create_driver(options)
+        self.webdriver_child_pids = get_webdriver_pids(self.driver)
+
         # Load up the homepage
         with self.wait_for_page_change():
             self.driver.get(f"https://{self.amazon_domain}")
@@ -519,27 +533,34 @@ class AmazonStoreHandler(BaseStoreHandler):
             "var req = new XMLHttpRequest();req.open('GET', document.location, false);req.send(null);return req.getAllResponseHeaders()"
         )
 
-        # type(headers) == str
-
         headers = sel_headers.splitlines()
         header = {}
         for h in headers:
             header[h.split(": ")[0]] = h.split(": ")[1]
 
-        # Transfer cookies from selenium session.
-        # if not self.proxies:
-        #     transfer_selenium_cookies(
-        #         self.driver, self.session_stock_check, all_cookies=all_cookies
-        #     )
-        #     if self.transfer_headers:
-        #         for head in header:
-        #             self.session_stock_check.headers.update(head)
-        transfer_selenium_cookies(
-            self.driver, self.session_checkout, all_cookies=all_cookies
+        for session in session_list:
+            transfer_selenium_cookies(self.driver, session, all_cookies=all_cookies)
+            if transfer_headers:
+                for head in header:
+                    session.headers.update(head)
+
+        self.delete_driver()
+
+    def run(self, delay=5, test=False, all_cookies=False, ludicrous_mode=False):
+        # checkout_session_count = 1
+        checkout_sessions = [self.session_checkout]
+        checkout_sessions[0].headers.update({"user-agent": self.ua.random})
+        # for x in range(checkout_session_count):
+        #     session = requests.Session()
+        #     session.headers.update(HEADERS)
+        #     session.headers.update({"user-agent": self.ua.random})
+        #     checkout_sessions.append(requests.Session())
+
+        self.selenium_login_cookies(
+            session_list=checkout_sessions,
+            all_cookies=all_cookies,
+            transfer_headers=self.transfer_headers,
         )
-        if self.transfer_headers:
-            for head in header:
-                self.session_checkout.headers.update(head)
 
         # Verify the configuration file
         if not self.verify():
@@ -553,22 +574,34 @@ class AmazonStoreHandler(BaseStoreHandler):
         # log.debug(f"Tetris URL: {uri}")
         # self.driver.get(uri)
 
+        selenium_refresh_offset = 7200
+        selenium_refresh_time = time.time() + selenium_refresh_offset
+
         message = f"Starting to hunt items at {STORE_NAME}"
         log.info(message)
         self.notification_handler.send_notification(message)
-        self.save_screenshot("logged-in")
+        # self.save_screenshot("logged-in")
         print("\n\n")
         recurring_message = "The hunt continues! "
         idx = 0
         spinner = ["-", "\\", "|", "/"]
         check_count = 1
         while self.item_list:
+            if time.time() > selenium_refresh_time:
+                self.selenium_login_cookies(
+                    session_list=[self.session_checkout],
+                    all_cookies=all_cookies,
+                    transfer_headers=self.transfer_headers,
+                )
+                selenium_refresh_time = time.time() + selenium_refresh_offset
 
             for item in self.item_list:
                 print(
                     recurring_message,
-                    f"Checked {item.id}; Check Count: {check_count} ,",
+                    f"Checked {item.id}; Check Count: {check_count},",
+                    f"Selenium Refresh in {round((selenium_refresh_time - time.time())/60)} minutes",
                     spinner[idx],
+                    "    ",
                     end="\r",
                 )
                 check_count += 1
@@ -583,35 +616,50 @@ class AmazonStoreHandler(BaseStoreHandler):
                         f"ASIN check for {item.id} took {time.time() - start_time} seconds."
                     )
                     if qualified_seller:
-                        if self.buy_it_now:
-                            pid, anti_csrf = self.turbo_initiate(
-                                qualified_seller=qualified_seller
-                            )
-                            if pid and anti_csrf:
-                                if self.turbo_checkout(pid=pid, anti_csrf=anti_csrf):
-                                    if self.single_shot:
+                        successful = False
+                        retry = 0
+                        max_retries = 50
+                        retry_time_offset = 300
+                        end_retry_time = time.time() + retry_time_offset
+                        while (
+                            not successful
+                            and retry < max_retries
+                            and time.time() < end_retry_time
+                        ):
+                            if self.buy_it_now:
+                                pid, anti_csrf = self.turbo_initiate(
+                                    qualified_seller=qualified_seller
+                                )
+                                if pid and anti_csrf:
+                                    if self.turbo_checkout(
+                                        pid=pid, anti_csrf=anti_csrf
+                                    ):
+                                        successful = True
+                                        if self.single_shot:
+                                            self.item_list.clear()
+                                        else:
+                                            self.item_list.remove(item)
+                            elif self.atc(qualified_seller=qualified_seller, item=item):
+                                r = self.ptc()
+                                # with open("ptc-source.html", "w", encoding="utf-8") as f:
+                                #     f.write(r)
+                                if r:
+                                    log.debug(r)
+                                    if test:
+                                        print(
+                                            "Proceeded to Checkout - Will not Place Order as this is a Test",
+                                            end="\r",
+                                        )
+                                        # in Test mode, clear the list
                                         self.item_list.clear()
-                                    else:
-                                        self.item_list.remove(item)
-                        elif self.atc(qualified_seller=qualified_seller, item=item):
-                            r = self.ptc()
-                            # with open("ptc-source.html", "w", encoding="utf-8") as f:
-                            #     f.write(r)
-                            if r:
-                                log.debug(r)
-                                if test:
-                                    print(
-                                        "Proceeded to Checkout - Will not Place Order as this is a Test",
-                                        end="\r",
-                                    )
-                                    # in Test mode, clear the list
-                                    self.item_list.clear()
 
-                                elif self.pyo(page=r):
-                                    if self.single_shot:
-                                        self.item_list.clear()
-                                    else:
-                                        self.item_list.remove(item)
+                                    elif self.pyo(page=r):
+                                        successful = True
+                                        if self.single_shot:
+                                            self.item_list.clear()
+                                        else:
+                                            self.item_list.remove(item)
+                            retry += 1
                 else:
                     pid, anti_csrf = self.turbo_initiate(item=item)
                     if pid and anti_csrf:
@@ -628,6 +676,7 @@ class AmazonStoreHandler(BaseStoreHandler):
 
             if self.shuffle:
                 random.shuffle(self.item_list)
+        return
 
     @contextmanager
     def wait_for_page_change(self, timeout=30):
@@ -820,7 +869,9 @@ class AmazonStoreHandler(BaseStoreHandler):
                 continue
             if status == 503:
                 # Check for CAPTCHA
-                tree = html.fromstring(data)
+                tree = parse_html_source(data)
+                if not tree:
+                    continue
                 captcha_form_element = tree.xpath(
                     "//form[contains(@action,'validateCaptcha')]"
                 )
@@ -834,7 +885,9 @@ class AmazonStoreHandler(BaseStoreHandler):
                 item.furl = furl(
                     f"https://{self.amazon_domain}/{REALTIME_INVENTORY_PATH}{item.id}"
                 )
-                tree = html.fromstring(data)
+                tree = parse_html_source(data)
+                if not tree:
+                    continue
                 captcha_form_element = tree.xpath(
                     "//form[contains(@action,'validateCaptcha')]"
                 )
@@ -845,7 +898,9 @@ class AmazonStoreHandler(BaseStoreHandler):
                     if status != 200:
                         log.debug(f"ASIN {item.id} failed, skipping...")
                         continue
-                    tree = html.fromstring(data)
+                    tree = parse_html_source(data)
+                    if not tree:
+                        continue
 
                 title = tree.xpath('//*[@id="productTitle"]')
                 if len(title) > 0:
@@ -899,8 +954,9 @@ class AmazonStoreHandler(BaseStoreHandler):
         # This is where the parsing magic goes
         log.debug(f"payload is {len(payload)} bytes")
 
-        tree = html.fromstring(payload)
-
+        tree = parse_html_source(payload)
+        if not tree:
+            return sellers
         if item.status_code == 503:
             with open("503-page.html", "w", encoding="utf-8") as f:
                 f.write(payload)
@@ -918,7 +974,9 @@ class AmazonStoreHandler(BaseStoreHandler):
                 )
                 if status != 503:
                     payload = data
-                    tree = html.fromstring(payload)
+                    tree = parse_html_source(payload)
+                    if not tree:
+                        return sellers
                 else:
                     log.info(f"No valid page for ASIN {item.id}")
                     return sellers
@@ -1038,37 +1096,48 @@ class AmazonStoreHandler(BaseStoreHandler):
             log.debug("How did I get here??")
             return None, None
         r = self.session_checkout.post(url=url, data=payload_inputs)
-        if r.status_code == 200 and r.text:
-            find_pid = re.search(r"pid=(.*?)&amp;", r.text)
+        if r.status_code == 200 and len(r.text) > 0:
+            data, status = captcha_handler(
+                page_source=r.text,
+                session=self.session_checkout,
+                domain=f"https://{self.amazon_domain}",
+            )
+            pid = None
+            anti_csrf = None
+            if data is None or len(data) == 0:
+                return pid, anti_csrf
+            find_pid = re.search(r"pid=(.*?)&amp;", data)
             if find_pid:
                 pid = find_pid.group(1)
-            else:
-                pid = None
-            find_anti_csrf = re.search(r"'anti-csrftoken-a2z' value='(.*?)'", r.text)
+            find_anti_csrf = re.search(r"'anti-csrftoken-a2z' value='(.*?)'", data)
             if find_anti_csrf:
                 anti_csrf = find_anti_csrf.group(1)
-            else:
-                anti_csrf = None
             if pid and anti_csrf:
-                log.debug("turbo-initiate successful, verifying price")
-                tree = html.fromstring(r.text)
-                price_text = tree.xpath("//span[@class='a-color-price']")
-                if price_text:
-                    parsed_price = parse_price(price_text[0].text.strip())
-                    if (
-                        parsed_price.amount
-                        and item.min_price <= parsed_price.amount <= item.max_price
-                    ):
-                        log.debug("Price Check met, continuing to purchase")
-                else:
-                    # TODO: maybe have a flag here to decide whether to risk continuing or not?
-                    log.debug(
-                        "Price check not met, will try to continue purchase anyway"
-                    )
+                log.debug("turbo-initiate successful")
+                # Ludicrous mode price check
+                if item:
+                    tree = parse_html_source(data)
+                    if not tree:
+                        return pid, anti_csrf
+                    price_text = tree.xpath("//span[@class='a-color-price']")
+                    if price_text:
+                        parsed_price = parse_price(price_text[0].text.strip())
+                        if (
+                            parsed_price.amount
+                            and item.min_price.amount
+                            <= parsed_price.amount
+                            <= item.max_price.amount
+                        ):
+                            log.debug("Price Check met, continuing to purchase")
+                    else:
+                        # TODO: maybe have a flag here to decide whether to risk continuing or not?
+                        log.debug(
+                            "Price check not met, will try to continue purchase anyway"
+                        )
             else:
                 log.debug("turbo-initiate unsuccessful")
                 save_html_response(
-                    filename="turbo_ini_unsuccessful", status=r.status_code, body=r.text
+                    filename="turbo_ini_unsuccessful", status=status, body=data
                 )
             return pid, anti_csrf
         else:
@@ -1144,7 +1213,9 @@ class AmazonStoreHandler(BaseStoreHandler):
 
     @debug
     def pyo(self, page):
-        pyo_html = html.fromstring(page)
+        pyo_html = parse_html_source(page)
+        if not pyo_html:
+            return False
         pyo_params = {
             "submitFromSPC": "",
             "fasttrackExpiration": "",
@@ -1521,7 +1592,7 @@ def modify_browser_profile():
         pass
 
 
-def set_options(profile_path, prefs, slow_mode):
+def set_options(profile_path, prefs, slow_mode=True):
     options.add_experimental_option("prefs", prefs)
     options.add_argument(f"user-data-dir={profile_path}")
     if not slow_mode:
@@ -1611,3 +1682,34 @@ def save_html_response(filename, status, body):
     page_source = body
     with open(file_name, "w", encoding="utf-8") as f:
         f.write(page_source)
+
+
+def captcha_handler(session, page_source, domain):
+    data = page_source
+    status = 200
+    tree = parse_html_source(data)
+    if not tree:
+        data = None
+        status = None
+        return data, status
+    CAPTCHA_RETRY = 5
+    retry = 0
+    # loop until no captcha in return page, or max captcha tries reached
+    while (captcha_element := has_captcha(tree)) and (retry < CAPTCHA_RETRY):
+        data, status = solve_captcha(
+            session=session, form_element=captcha_element[0], domain=domain
+        )
+        parse_html_source(data)
+        if not tree:
+            data = None
+            status = None
+            return data, status
+        retry += 1
+    if captcha_element:
+        data = None
+        status = None
+    return data, status
+
+
+def has_captcha(tree):
+    return tree.xpath("//form[contains(@action,'validateCaptcha')]")
