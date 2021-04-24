@@ -85,11 +85,13 @@ PDP_PATH = f"/dp/"
 REALTIME_INVENTORY_PATH = f"gp/aod/ajax?asin="
 
 CONFIG_FILE_PATH = "config/amazon_requests_config.json"
+PROXY_FILE_PATH = "config/proxies.json"
 STORE_NAME = "Amazon"
 DEFAULT_MAX_TIMEOUT = 10
 
 # Request
 HEADERS = {
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
     "Accept-Encoding": "gzip, deflate, sdch, br",
     "content-type": "application/x-www-form-urlencoded",
@@ -136,10 +138,14 @@ class AmazonStoreHandler(BaseStoreHandler):
         wait_on_captcha_fail=False,
         transfer_headers=False,
         use_atc_mode=False,
+        random_user_agent=False,
     ) -> None:
         super().__init__()
 
         self.shuffle = True
+        self.is_test = False
+        self.selenium_refresh_offset = 7200
+        self.selenium_refresh_time = 0
 
         self.notification_handler = notification_handler
         self.check_shipping = checkshipping
@@ -158,6 +164,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         self.amazon_cookies = {}
         self.transfer_headers = transfer_headers
         self.buy_it_now = not use_atc_mode
+        self.random_user_agent = random_user_agent
         self.headless = headless
 
         if not self.buy_it_now:
@@ -182,30 +189,63 @@ class AmazonStoreHandler(BaseStoreHandler):
         # self.conn20 = HTTP20Connection(self.amazon_domain)
 
         # Initialize proxies for stock check session:
-        # Assuming same username/password for all proxies
-        # username = [INSERT USERNAME HERE]
-        # password = [INSERT PASSWORD HERE]
-        #
-
-        # self.proxies = [
-        #     {
-        #       'http': f"http://{username}:{password}@X.X.X.X:XXXX",
-        #       'https': f"http://{username}:{password}@X.X.X.X:XXXX",
-        #     },
-        #     {
-        #       'http': f"http://{username}:{password}@X.X.X.X:XXXX",
-        #       'https': f"http://{username}:{password}@X.X.X.X:XXXX",
-        #     },
-        # ]
-
-        self.proxies = []
-
-        if self.proxies:
-            self.session_stock_check.proxies.update(self.proxies[0])
+        self.initialize_proxies()
 
         # Initialize the checkout session
         self.session_checkout = requests.Session()
         self.session_checkout.headers.update(HEADERS)
+
+    def initialize_proxies(self):
+        '''Initialize proxies from json configuration file'''
+        self.proxies = []
+        self.proxy_sessions = []
+        self.used_proxy_sessions = []
+
+        if os.path.exists(PROXY_FILE_PATH):
+            proxy_json = json.load(open(PROXY_FILE_PATH))
+            self.proxies = proxy_json.get('proxies', [])
+
+            # initialize sessions for each proxy
+            for proxy in self.proxies:
+                s = requests.Session()
+                s.headers.update(HEADERS)
+                if self.random_user_agent:
+                    s.headers.update({"user-agent": self.ua.random})
+                s.proxies.update(proxy)
+
+                self.proxy_sessions.append(s)
+
+            random.shuffle(self.proxy_sessions)
+
+            # initialize first 2 proxies with Amazon cookies
+            for s in self.proxy_sessions[:2]:
+                s.get(f'https://{self.amazon_domain}')
+                time.sleep(1)
+
+            log.info(f"Created {len(self.proxy_sessions)} proxy sessions")
+
+    def get_stock_check_session(self):
+        rval = self.session_stock_check
+        if self.proxies:
+            if not self.proxy_sessions:
+                self.proxy_sessions = self.used_proxy_sessions
+                self.used_proxy_sessions = []
+                log.debug('Shuffling proxies...')
+
+                # shuffle the two halves to maintain a large-ish delay
+                # between 2 consecutive uses of the same proxy
+                len_proxies = len(self.proxy_sessions)
+                a = self.proxy_sessions[:len_proxies//2]
+                b = self.proxy_sessions[len_proxies//2:]
+                random.shuffle(a)
+                random.shuffle(b)
+                self.proxy_sessions = a + b
+
+            if self.proxy_sessions:
+                rval = self.proxy_sessions.pop(0)
+                self.used_proxy_sessions.append(rval)
+
+        return rval
 
     def __del__(self):
         message = f"Shutting down {STORE_NAME} Store Handler."
@@ -413,6 +453,7 @@ class AmazonStoreHandler(BaseStoreHandler):
 
     # Test code, use at your own RISK
     def run_offer_id(self, offerid, delay=5, all_cookies=False):
+        self.all_cookies = all_cookies
         # checkout_session_count = 1
         checkout_sessions = [self.session_checkout]
         # for x in range(checkout_session_count):
@@ -423,7 +464,7 @@ class AmazonStoreHandler(BaseStoreHandler):
 
         self.selenium_login_cookies(
             session_list=checkout_sessions,
-            all_cookies=all_cookies,
+            all_cookies=self.all_cookies,
             transfer_headers=self.transfer_headers,
         )
 
@@ -517,6 +558,8 @@ class AmazonStoreHandler(BaseStoreHandler):
         self.delete_driver()
 
     def run(self, delay=5, test=False, all_cookies=False, ludicrous_mode=False):
+        self.is_test = test
+        self.all_cookies = all_cookies
         # checkout_session_count = 1
         checkout_sessions = [self.session_checkout]
         checkout_sessions[0].headers.update({"user-agent": self.ua.random})
@@ -528,7 +571,7 @@ class AmazonStoreHandler(BaseStoreHandler):
 
         self.selenium_login_cookies(
             session_list=checkout_sessions,
-            all_cookies=all_cookies,
+            all_cookies=self.all_cookies,
             transfer_headers=self.transfer_headers,
         )
 
@@ -544,8 +587,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         # log.debug(f"Tetris URL: {uri}")
         # self.driver.get(uri)
 
-        selenium_refresh_offset = 7200
-        selenium_refresh_time = time.time() + selenium_refresh_offset
+        self.selenium_refresh_time = time.time() + self.selenium_refresh_offset
 
         message = f"Starting to hunt items at {STORE_NAME}"
         log.info(message)
@@ -557,19 +599,11 @@ class AmazonStoreHandler(BaseStoreHandler):
         spinner = ["-", "\\", "|", "/"]
         check_count = 1
         while self.item_list:
-            if time.time() > selenium_refresh_time:
-                self.selenium_login_cookies(
-                    session_list=[self.session_checkout],
-                    all_cookies=all_cookies,
-                    transfer_headers=self.transfer_headers,
-                )
-                selenium_refresh_time = time.time() + selenium_refresh_offset
-
             for item in self.item_list:
                 print(
                     recurring_message,
                     f"Checked {item.id}; Check Count: {check_count},",
-                    f"Selenium Refresh in {round((selenium_refresh_time - time.time())/60)} minutes",
+                    f"Selenium Refresh in {round((self.selenium_refresh_time - time.time())/60)} minutes",
                     spinner[idx],
                     "    ",
                     end="\r",
@@ -615,7 +649,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                                 #     f.write(r)
                                 if r:
                                     log.debug(r)
-                                    if test:
+                                    if self.is_test:
                                         print(
                                             "Proceeded to Checkout - Will not Place Order as this is a Test",
                                             end="\r",
@@ -639,14 +673,36 @@ class AmazonStoreHandler(BaseStoreHandler):
                             else:
                                 self.item_list.remove(item)
 
-                # sleep remainder of delay_time
-                time_left = delay_time - time.time()
-                if time_left > 0:
-                    time.sleep(time_left)
+                self.wait_for_delay(delay_time)
 
             if self.shuffle:
                 random.shuffle(self.item_list)
         return
+
+    def wait_for_delay(self, delay_time):
+        '''wait until delay_time
+
+        Any checks or housekeeping should be done in this function in
+        order to group all delay between stock checkes'''
+        if time.time() > self.selenium_refresh_time:
+            self.selenium_login_cookies(
+                session_list=[self.session_checkout],
+                all_cookies=self.all_cookies,
+                transfer_headers=self.transfer_headers,
+            )
+            self.selenium_refresh_time = time.time() + self.selenium_refresh_offset
+
+
+        # initialize amazon session cookie, if missing from _next_ proxy
+        if self.proxy_sessions \
+                and len(self.proxy_sessions) > 1 \
+                and not self.proxy_sessions[1].cookies:
+            self.proxy_sessions[1].get(f'https://{self.amazon_domain}')
+
+        # sleep remainder of delay_time
+        time_left = delay_time - time.time()
+        if time_left > 0:
+            time.sleep(time_left)
 
     @contextmanager
     def wait_for_page_change(self, timeout=30):
@@ -818,6 +874,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                 cached_item = item_cache[item.id]
                 log.debug(f"Verifying ASIN {cached_item.id} via cache  ...")
                 # Update attributes that may have been changed in the config file
+                cached_item.pdp_url = item.pdp_url
                 cached_item.condition = item.condition
                 cached_item.min_price = item.min_price
                 cached_item.max_price = item.max_price
@@ -830,17 +887,18 @@ class AmazonStoreHandler(BaseStoreHandler):
                 continue
 
             # Verify that the ASIN hits and that we have a valid inventory URL
-            pdp_url = f"https://{self.amazon_domain}{PDP_PATH}{item.id}"
-            log.debug(f"Verifying at {pdp_url} ...")
+            item.pdp_url = f"https://{self.amazon_domain}{PDP_PATH}{item.id}"
+            log.debug(f"Verifying at {item.pdp_url} ...")
 
-            data, status = self.get_html(pdp_url, s=self.session_stock_check)
+            session = self.session_checkout
+            data, status = self.get_html(item.pdp_url, s=session)
             if not data and not status:
                 log.debug("Response empty, skipping item")
                 continue
             if status == 503:
                 # Check for CAPTCHA
                 tree = parse_html_source(data)
-                if not tree:
+                if tree is None:
                     continue
                 captcha_form_element = tree.xpath(
                     "//form[contains(@action,'validateCaptcha')]"
@@ -848,7 +906,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                 if captcha_form_element:
                     # Solving captcha and resetting data
                     data, status = solve_captcha(
-                        self.session_stock_check, captcha_form_element[0], pdp_url
+                        session, captcha_form_element[0], item.pdp_url
                     )
 
             if status == 200:
@@ -856,20 +914,20 @@ class AmazonStoreHandler(BaseStoreHandler):
                     f"https://{self.amazon_domain}/{REALTIME_INVENTORY_PATH}{item.id}"
                 )
                 tree = parse_html_source(data)
-                if not tree:
+                if tree is None:
                     continue
                 captcha_form_element = tree.xpath(
                     "//form[contains(@action,'validateCaptcha')]"
                 )
                 if captcha_form_element:
                     data, status = solve_captcha(
-                        self.session_stock_check, captcha_form_element[0], pdp_url
+                        session, captcha_form_element[0], item.pdp_url
                     )
                     if status != 200:
                         log.debug(f"ASIN {item.id} failed, skipping...")
                         continue
                     tree = parse_html_source(data)
-                    if not tree:
+                    if tree is None:
                         continue
 
                 title = tree.xpath('//*[@id="productTitle"]')
@@ -898,7 +956,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                         )
             else:
                 log.error(
-                    f"Unable to locate details for {item.id} at {pdp_url}.  Removing from hunt."
+                    f"Unable to locate details for {item.id} at {item.pdp_url}.  Removing from hunt."
                 )
                 items_to_purge.append(item)
 
@@ -916,7 +974,8 @@ class AmazonStoreHandler(BaseStoreHandler):
     @debug
     def get_item_sellers(self, item, free_shipping_strings):
         """Parse out information to from the aod-offer nodes populate ItemDetail instances for each item """
-        payload = self.get_real_time_data(item)
+        session = self.get_stock_check_session()
+        payload = self.get_real_time_data(item, session)
         sellers = []
         if payload is None or len(payload) == 0:
             log.error("Empty Response.  Skipping...")
@@ -925,7 +984,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         log.debug(f"payload is {len(payload)} bytes")
 
         tree = parse_html_source(payload)
-        if not tree:
+        if tree is None:
             return sellers
         if item.status_code == 503:
             with open("503-page.html", "w", encoding="utf-8") as f:
@@ -940,12 +999,12 @@ class AmazonStoreHandler(BaseStoreHandler):
                 url = f"https://{self.amazon_domain}/{REALTIME_INVENTORY_PATH}{item.id}"
                 # Solving captcha and resetting data
                 data, status = solve_captcha(
-                    self.session_stock_check, captcha_form_element[0], url
+                    session, captcha_form_element[0], url
                 )
                 if status != 503:
                     payload = data
                     tree = parse_html_source(payload)
-                    if not tree:
+                    if tree is None:
                         return sellers
                 else:
                     log.info(f"No valid page for ASIN {item.id}")
@@ -1087,7 +1146,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                 # Ludicrous mode price check
                 if item:
                     tree = parse_html_source(data)
-                    if not tree:
+                    if tree is None:
                         return pid, anti_csrf
                     price_text = tree.xpath("//span[@class='a-color-price']")
                     if price_text:
@@ -1121,17 +1180,21 @@ class AmazonStoreHandler(BaseStoreHandler):
     def turbo_checkout(self, pid, anti_csrf):
         log.debug("trying to checkout")
         url = f"https://{self.amazon_domain}/checkout/spc/place-order?ref_=chk_spc_placeOrder&clientId=retailwebsite&pipelineType=turbo&pid={pid}"
-
         header_update = {"anti-csrftoken-a2z": anti_csrf}
         self.session_checkout.headers.update(header_update)
+
+        if self.is_test:
+            log.warning("This was just a test; no purchase made")
+            return True
+
         r = self.session_checkout.post(url=url)
         if r.status_code == 200 or r.status_code == 500:
             log.debug("Checkout maybe successful, check order page!")
             # TODO: Implement GET request to confirm checkout
             return True
-        else:
-            log.debug(f"Status Code: {r.status_code} was returned")
-            return False
+
+        log.debug(f"Status Code: {r.status_code} was returned")
+        return False
 
     @debug
     def atc(self, qualified_seller, item):
@@ -1273,20 +1336,15 @@ class AmazonStoreHandler(BaseStoreHandler):
         else:
             return False
 
-    def get_real_time_data(self, item: FGItem):
+    def get_real_time_data(self, item: FGItem, session: requests.Session):
         log.debug(f"Calling {STORE_NAME} for {item.short_name} using {item.furl.url}")
         if self.proxies:
             log.debug(f"Using proxy: {self.proxies[0]}")
         params = {"anticache": str(secrets.token_urlsafe(32))}
         item.furl.args.update(params)
         data, status = self.get_html(
-            item.furl.url, s=self.session_stock_check, randomize_ua=True
+            item.furl.url, s=session
         )
-
-        # rotate proxy, if it is being utilized
-        if self.proxies:
-            self.proxies.append(self.proxies.pop(0))
-            self.session_stock_check.proxies.update(self.proxies[0])
 
         if item.status_code != status:
             # Track when we flip-flop between status codes.  200 -> 204 may be intelligent caching at Amazon.
@@ -1336,12 +1394,9 @@ class AmazonStoreHandler(BaseStoreHandler):
                 self.driver.refresh()
 
     @debug
-    def get_html(self, url, s: requests.Session, randomize_ua=False):
+    def get_html(self, url, s: requests.Session):
         """Unified mechanism to get content to make changing connection clients easier"""
         f = furl(url)
-        if randomize_ua:
-            user_agent = {"user-agent": self.ua.random}
-            s.headers.update(user_agent)
         if not f.scheme:
             f.set(scheme="https")
         try:
@@ -1658,7 +1713,7 @@ def captcha_handler(session, page_source, domain):
     data = page_source
     status = 200
     tree = parse_html_source(data)
-    if not tree:
+    if tree is None:
         data = None
         status = None
         return data, status
@@ -1669,8 +1724,8 @@ def captcha_handler(session, page_source, domain):
         data, status = solve_captcha(
             session=session, form_element=captcha_element[0], domain=domain
         )
-        parse_html_source(data)
-        if not tree:
+        tree = parse_html_source(data)
+        if tree is None:
             data = None
             status = None
             return data, status

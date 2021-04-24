@@ -122,6 +122,7 @@ class FGItem:
     name: str = None
     short_name: str = None
     furl: furl = None
+    pdp_url: pdp_url = None
     condition: AmazonItemCondition = AmazonItemCondition.New
     status_code: int = 200
     merchant_id: str = "any"
