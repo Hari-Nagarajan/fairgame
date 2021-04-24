@@ -336,6 +336,12 @@ def amazon(
     help="Use legacy add-to-cart mode",
 )
 @click.option(
+    "--random-user-agent",
+    is_flag=True,
+    default=False,
+    help="Use random user agent with each proxy session",
+)
+@click.option(
     "--ludicrous-mode",
     is_flag=True,
     default=False,
@@ -363,6 +369,7 @@ def amazonrequests(
     all_cookies,
     transfer_headers,
     use_atc_mode,
+    random_user_agent,
     ludicrous_mode,
 ):
     log.warning(
@@ -414,6 +421,7 @@ def amazonrequests(
         wait_on_captcha_fail=captcha_wait,
         transfer_headers=transfer_headers,
         use_atc_mode=use_atc_mode,
+        random_user_agent=random_user_agent,
     )
 
     try:
