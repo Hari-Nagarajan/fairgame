@@ -205,6 +205,8 @@ class AmazonStoreHandler(BaseStoreHandler):
             proxy_json = json.load(open(PROXY_FILE_PATH))
             self.proxies = proxy_json.get("proxies", [])
 
+            # TODO: verify format of json?
+
             # initialize sessions for each proxy
             for proxy in self.proxies:
                 s = requests.Session()
