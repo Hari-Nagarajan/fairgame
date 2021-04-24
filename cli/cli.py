@@ -72,6 +72,7 @@ def notify_on_crash(func):
         except Exception as e:
             log.debug(e)
             notification_handler.send_notification(f"FairGame has crashed.")
+            raise
 
     return decorator
 
@@ -335,6 +336,12 @@ def amazon(
     help="Use legacy add-to-cart mode",
 )
 @click.option(
+    "--ludicrous-mode",
+    is_flag=True,
+    default=False,
+    help="Goes back in time to buy cards from the past",
+)
+@click.option(
     "--proxy",
     is_flag=True,
     default=False,
@@ -362,6 +369,7 @@ def amazonrequests(
     all_cookies,
     transfer_headers,
     use_atc_mode,
+    ludicrous_mode,
     proxy,
 ):
     log.warning(
@@ -380,7 +388,7 @@ def amazonrequests(
             log.info(
                 'Offer IDs may fail from `.bat` files as all "%" characters must be escaped'
             )
-            sys.exit(0)
+            return
         log.info("Offer ID appears valid")
 
     notification_handler.sound_enabled = not disable_sound
@@ -422,11 +430,18 @@ def amazonrequests(
                 offerid=offerid, delay=delay, all_cookies=all_cookies
             )
         else:
-            amazon_requests_obj.run(delay=delay, test=test, all_cookies=all_cookies)
+
+            amazon_requests_obj.run(
+                delay=delay,
+                test=test,
+                all_cookies=all_cookies,
+                ludicrous_mode=ludicrous_mode,
+            )
     except RuntimeError:
         del amazon_requests_obj
         log.error("Exiting Program...")
         time.sleep(5)
+        return
 
 
 @click.option(
@@ -484,10 +499,10 @@ def show(w, c):
                 print(file.read())
             except FileNotFoundError:
                 log.error("License File Missing. Quitting Program")
-                exit(0)
+                return
     else:
         log.error("License File Missing. Quitting Program.")
-        exit(0)
+        return
 
 
 @click.command()
