@@ -7,7 +7,7 @@ verify_ssl = true
 pyinstaller = "*"
 
 [packages]
-requests = "==2.24.0"
+requests = {extras = ["socks"], version = "*"}
 click = "*"
 selenium = "*"
 chromedriver-py = "~=89.0.4389.23"
@@ -37,6 +37,7 @@ config = "*"
 lxml = "*"
 dnspython = "*"
 fake-useragent = "*"
+pysocks = "*"
 
 [requires]
 python_version = "3.8"
