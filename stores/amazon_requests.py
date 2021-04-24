@@ -196,14 +196,14 @@ class AmazonStoreHandler(BaseStoreHandler):
         self.session_checkout.headers.update(HEADERS)
 
     def initialize_proxies(self):
-        '''Initialize proxies from json configuration file'''
+        """Initialize proxies from json configuration file"""
         self.proxies = []
         self.proxy_sessions = []
         self.used_proxy_sessions = []
 
         if os.path.exists(PROXY_FILE_PATH):
             proxy_json = json.load(open(PROXY_FILE_PATH))
-            self.proxies = proxy_json.get('proxies', [])
+            self.proxies = proxy_json.get("proxies", [])
 
             # initialize sessions for each proxy
             for proxy in self.proxies:
@@ -219,7 +219,7 @@ class AmazonStoreHandler(BaseStoreHandler):
 
             # initialize first 2 proxies with Amazon cookies
             for s in self.proxy_sessions[:2]:
-                s.get(f'https://{self.amazon_domain}')
+                s.get(f"https://{self.amazon_domain}")
                 time.sleep(1)
 
             log.info(f"Created {len(self.proxy_sessions)} proxy sessions")
@@ -230,13 +230,13 @@ class AmazonStoreHandler(BaseStoreHandler):
             if not self.proxy_sessions:
                 self.proxy_sessions = self.used_proxy_sessions
                 self.used_proxy_sessions = []
-                log.debug('Shuffling proxies...')
+                log.debug("Shuffling proxies...")
 
                 # shuffle the two halves to maintain a large-ish delay
                 # between 2 consecutive uses of the same proxy
                 len_proxies = len(self.proxy_sessions)
-                a = self.proxy_sessions[:len_proxies//2]
-                b = self.proxy_sessions[len_proxies//2:]
+                a = self.proxy_sessions[: len_proxies // 2]
+                b = self.proxy_sessions[len_proxies // 2 :]
                 random.shuffle(a)
                 random.shuffle(b)
                 self.proxy_sessions = a + b
@@ -680,10 +680,10 @@ class AmazonStoreHandler(BaseStoreHandler):
         return
 
     def wait_for_delay(self, delay_time):
-        '''wait until delay_time
+        """wait until delay_time
 
         Any checks or housekeeping should be done in this function in
-        order to group all delay between stock checkes'''
+        order to group all delay between stock checkes"""
         if time.time() > self.selenium_refresh_time:
             self.selenium_login_cookies(
                 session_list=[self.session_checkout],
@@ -692,12 +692,13 @@ class AmazonStoreHandler(BaseStoreHandler):
             )
             self.selenium_refresh_time = time.time() + self.selenium_refresh_offset
 
-
         # initialize amazon session cookie, if missing from _next_ proxy
-        if self.proxy_sessions \
-                and len(self.proxy_sessions) > 1 \
-                and not self.proxy_sessions[1].cookies:
-            self.proxy_sessions[1].get(f'https://{self.amazon_domain}')
+        if (
+            self.proxy_sessions
+            and len(self.proxy_sessions) > 1
+            and not self.proxy_sessions[1].cookies
+        ):
+            self.proxy_sessions[1].get(f"https://{self.amazon_domain}")
 
         # sleep remainder of delay_time
         time_left = delay_time - time.time()
@@ -998,9 +999,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                 log.info("captcha found")
                 url = f"https://{self.amazon_domain}/{REALTIME_INVENTORY_PATH}{item.id}"
                 # Solving captcha and resetting data
-                data, status = solve_captcha(
-                    session, captcha_form_element[0], url
-                )
+                data, status = solve_captcha(session, captcha_form_element[0], url)
                 if status != 503:
                     payload = data
                     tree = parse_html_source(payload)
@@ -1342,9 +1341,7 @@ class AmazonStoreHandler(BaseStoreHandler):
             log.debug(f"Using proxy: {self.proxies[0]}")
         params = {"anticache": str(secrets.token_urlsafe(32))}
         item.furl.args.update(params)
-        data, status = self.get_html(
-            item.furl.url, s=session
-        )
+        data, status = self.get_html(item.furl.url, s=session)
 
         if item.status_code != status:
             # Track when we flip-flop between status codes.  200 -> 204 may be intelligent caching at Amazon.
