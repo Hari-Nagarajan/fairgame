@@ -2,7 +2,8 @@
 
 # Table of Contents:
 * [About FairGame](#About-FairGame)
-    * [Current Functionality](#Current-Functionality)  
+    * [Current Functionality](#Current-Functionality)
+    * [Disclaimer](#Disclaimer) 
 * [Installation](#Installation)
     * [Requirements](#Requirements)
     * [Quick Start](#Quick-Start)
@@ -45,18 +46,6 @@ for MSRP.
 
 **If everyone is botting, then no one is botting.**
 
-### DISCLAIMER (Amazon Account Risks) 
-
-WARNING: The (mis)use of this software can result in a soft-ban of your Amazon account or worse. By using this software, you acknowledge these risks and agree to its use at your own discretion. Soft-bans cannot be troubleshooted by the developer(s), nor can they be detected/resolved by the standard Amazon Customer Support*. If this happens, the only resolution is to stop all Amazon monitors (Fair Game or other bots, e.g., Distill.io), wait, and hope the limits are lifted within a few days. If this is a major issue consider  using a burner Amazon account or avoid this software altogether.  
-
-Amazon has discrete anti-bot counter-measures that may be triggered by (*but not limited to*): 1) running multiple instances on one device, 2) running multiple instances on different devices, regardless of their IP, proxy, or location (it is based on you Amazon account), 3) configuring an instance to check stock too frequently/aggressively (default settings not guaranteed to be safe), or 4**) you monitor certain high-demand items, fail to make the initial purchase, and cause the bot to make several quick consecutive attempts to purchase it. 
-
-Side-effects of a soft-ban include: 1) Fly-out window is missing/completely blank, even if there are listings for the ASIN, 2) frequent CAPTCHA checks, 3) you cannot access the My Account page, add items to your cart, or complete purchases; usually displayed as a 503 error (Amazon Dogs & “SORRY we couldn’t find that page” message). You’ll likely have to sit-out a few days of drops to resolve the throttle. 
-
-*As far as we know. 
-***This is not confirmed but seems to be a trend.
-
-
 ## Current Functionality
 
 FairGame only works on Amazon and can automatically place an order.
@@ -74,6 +63,20 @@ FairGame only works on Amazon and can automatically place an order.
   * If you want to set purchase price ranges for several different products, but only want FairGame to purchase
     one of any of the products you've included in the configuration file, use the `--single-shot` option, see
     [Running the program](#Running-the-program)    
+
+### Disclaimer 
+
+WARNING: The use of this software can result in a Amazon restricting access to your account and make it difficult 
+for you to purchase products, with or without the bot. By using this software, you acknowledge these risks. These restrictions
+cannot and will not be resolved by the developer(s), nor can they be detected/resolved by the standard Amazon Customer Support,
+as far as we are aware. If this happens, the only resolution is to stop all Amazon monitors (e.g., FairGame, Distill.io,
+or other bots, etc.), wait, and hope the limits are lifted within a few days. If this is a major issue you should
+consider avoiding use of this software. 
+
+Account restrictions may be triggered by any of the following: 1) running multiple instances on one device, 2) running multiple instances on different devices, using the same account, regardless of their IP, proxy, or location, 3) configuring an instance to check stock too frequently/aggressively (default settings not guaranteed to be safe). 
+
+Symptoms of account restrictions include: 1) Fly-out (offers) window is missing/completely blank, even if there are listings for the ASIN, 2) frequent CAPTCHA checks, 3) inability to access the My Account page, add items to your cart, or complete purchases; usually displayed as a 503 error (Amazon Dogs & “SORRY we couldn’t find that page” message). You’ll likely have to sit-out a few days of drops to resolve the throttle.
+
 # Installation
 
 ## Requirements
