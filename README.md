@@ -404,8 +404,8 @@ Open terminal. Either right click desktop and go to Open In Terminal, or search 
 Install Google Chrome:
 `wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && sudo dpkg -i google-chrome-stable_current_amd64.deb`
 
-Add Python3 repo:
-`sudo add-apt-repository universe && sudo apt-get update`
+Add Universe repo (this might be optional depending on your distro):
+`sudo add-apt-repository universe && sudo apt update`
 
 Install Pip:
 `sudo apt install python3-pip`
@@ -657,5 +657,4 @@ answers. If you don't find it there, ask in #tech-support.
    option due to the smaller memory footprint. Still awaiting community feedback on running on a Pi 3. CPU and memory
    capacity seem to be the limiting factor for older Pi models. The Pi is also much slower then even a semi-recent
    (5 years or less) laptop. 
-
 
