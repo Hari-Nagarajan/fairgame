@@ -10,9 +10,8 @@
 .profile
 .profile-amz*
 .vscode/
-/config/*_credentials.json
+/config/*.json
 /config/apprise.conf
-/config/apprise_config.json
 Pipfile.lock
 __pycache__/
 build/
@@ -21,3 +20,5 @@ geckodriver.log
 html_saves/*.html
 screenshots/*.png
 logs/*.log*
+tags
+.venv*
