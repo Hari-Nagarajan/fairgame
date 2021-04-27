@@ -41,6 +41,7 @@ import requests
 from furl import furl
 from lxml import html
 from price_parser import parse_price, Price
+from typing import Optional
 
 from common.amazon_support import (
     AmazonItemCondition,
@@ -55,6 +56,9 @@ from common.amazon_support import (
 from notifications.notifications import NotificationHandler
 from stores.basestore import BaseStoreHandler
 from utils.logger import log
+from typing import NamedTuple
+import asyncio
+import aiohttp
 
 from functools import wraps
 
@@ -103,67 +107,47 @@ HEADERS = {
 amazon_config = {}
 
 
-class AmazonMonitor(BaseStoreHandler):
+class AmazonMonitoring(BaseStoreHandler):
     http_client = False
     http_20_client = False
     http_session = True
 
     def __init__(
         self,
+        asin_list,
         notification_handler: NotificationHandler,
-        headless=False,
+        loop: asyncio.BaseEventLoop,
+        domain="smile.amazon.com",
+        tasks=1,
         checkshipping=False,
-        detailed=False,
-        single_shot=False,
-        no_screenshots=False,
-        disable_presence=False,
-        slow_mode=False,
-        encryption_pass=None,
-        log_stock_check=False,
-        shipping_bypass=False,
-        wait_on_captcha_fail=False,
-        transfer_headers=False,
-        use_atc_mode=False,
         random_user_agent=False,
     ) -> None:
         super().__init__()
 
         self.shuffle = True
-        self.is_test = False
-        self.selenium_refresh_offset = 7200
-        self.selenium_refresh_time = 0
 
         self.notification_handler = notification_handler
         self.check_shipping = checkshipping
         self.item_list: typing.List[FGItem] = []
         self.stock_checks = 0
         self.start_time = int(time.time())
-        self.amazon_domain = "smile.amazon.com"
+        self.amazon_domain = domain
         self.webdriver_child_pids = []
-        self.take_screenshots = not no_screenshots
-        self.shipping_bypass = shipping_bypass
-        self.single_shot = single_shot
-        self.detailed = detailed
-        self.disable_presence = disable_presence
-        self.log_stock_check = log_stock_check
-        self.wait_on_captcha_fail = wait_on_captcha_fail
         self.amazon_cookies = {}
-        self.transfer_headers = transfer_headers
-        self.buy_it_now = not use_atc_mode
         self.random_user_agent = random_user_agent
+
+        if type(asin_list) != list:
+            self.asin_list = [asin_list]
+        else:
+            self.asin_list = asin_list
 
         self.ua = UserAgent()
 
-        from cli.cli import global_config
-
-        global amazon_config
-        amazon_config = global_config.get_amazon_config(encryption_pass)
-        self.profile_path = global_config.get_browser_profile_path()
-
-        # Load up our configuration
-        self.parse_config()
-
         # Initialize the Session we'll use for stock checking
+        sessions_list = []
+        for idx in range(tasks):
+            sessions_list = requests.Session()
+
         self.session_stock_check = requests.Session()
         self.session_stock_check.headers.update(HEADERS)
         self.session_stock_check.headers.update({"user-agent": self.ua.random})
@@ -253,29 +237,6 @@ class AmazonMonitor(BaseStoreHandler):
 
                 # Returns first seller that passes condition checks
                 return seller
-
-    def parse_config(self):
-        log.debug(f"Processing config file from {CONFIG_FILE_PATH}")
-        # Parse the configuration file to get our hunt list
-        try:
-            with open(CONFIG_FILE_PATH) as json_file:
-                config = json.load(json_file)
-                self.amazon_domain = config.get("amazon_domain", "smile.amazon.com")
-
-                for key in AMAZON_URLS.keys():
-                    AMAZON_URLS[key] = AMAZON_URLS[key].format(
-                        domain=self.amazon_domain
-                    )
-
-                json_items = config.get("items")
-                self.parse_items(json_items)
-
-        except FileNotFoundError:
-            log.error(
-                f"Configuration file not found at {CONFIG_FILE_PATH}.  Please see {CONFIG_FILE_PATH}_template."
-            )
-            exit(1)
-        log.debug(f"Found {len(self.item_list)} items to track at {STORE_NAME}.")
 
     def parse_items(self, json_items):
         for json_item in json_items:
@@ -577,3 +538,246 @@ def get_html(url, s: requests.Session):
         log.debug(e)
         return None, None
     return response.text, response.status_code
+
+
+class Offers(NamedTuple):
+    asin: str
+    offerlistingid: str
+    merchantid: str
+    price: float
+    timestamp: float
+    __slots__ = ()
+
+    def __str__(self):
+        return f"ASIN: {self.asin}; offerListingId: {self.offerlistingid}; merchantId: {self.merchantid}; price: {self.price}"
+
+
+class AmazonMonitor(aiohttp.ClientSession):
+    def __init__(self, *args, **kwargs):
+        super(self.__class__, self).__init__(*args, **kwargs)
+        self.response: Optional[aiohttp.ClientResponse] = None
+
+    async def stock_check(self, item: FGItem, check_furl: furl, delay: float = 5):
+        # Do first response outside of while loop, so we can continue on captcha checks
+        # and return to start of while loop with that response. Requires the next response
+        # to be grabbed at end of while loop
+        start_time = time.time()
+        self.response = await self.get(url=check_furl.url)
+        # Loop will only exit if a qualified seller is returned.
+        while True:
+            if tree := check_response(self.response):
+                if captcha_element := has_captcha(tree):
+                    # wait a second so it doesn't continuously hit captchas very quickly
+                    # TODO: maybe track captcha hits so that it aborts after several?
+                    await asyncio.sleep(1)
+                    # get the next response after solving captcha and then continue to next loop iteration
+                    self.response = await self.async_captcha_solve(captcha_element)
+                    await wait_timer(start_time=start_time)
+                    continue
+                if tree is not None and (sellers := get_item_sellers(tree)):
+                    qualified_seller = get_qualified_seller(item=item, sellers=sellers)
+                    if qualified_seller:
+                        return qualified_seller
+            # failed to find seller. Wait a delay period then check again
+            await wait_timer(start_time=start_time)
+            self.response = await self.get(url=check_furl.url)
+
+    async def async_captcha_solve(self, captcha_element):
+        data = page_source
+        status = 200
+        tree = parse_html_source(data)
+        if tree is None:
+            data = None
+            status = None
+            return data, status
+        CAPTCHA_RETRY = 5
+        retry = 0
+        # loop until no captcha in return page, or max captcha tries reached
+        while (captcha_element := has_captcha(tree)) and (retry < CAPTCHA_RETRY):
+            data, status = solve_captcha(
+                session=session, form_element=captcha_element[0], domain=domain
+            )
+            tree = parse_html_source(data)
+            if tree is None:
+                data = None
+                status = None
+                return data, status
+            retry += 1
+        if captcha_element:
+            data = None
+            status = None
+        return data, status
+
+
+async def wait_timer(start_time):
+    if (wait_delay := time.time() - start_time) > 0:
+        await asyncio.sleep(wait_delay)
+
+
+def check_response(response: aiohttp.ClientResponse):
+    # Check response text is valid
+    payload = str(response.text())
+    if payload is None or len(payload) == 0:
+        log.debug("Empty response")
+        return None
+    log.debug(f"payload is {len(payload)} bytes")
+    # Get parsed html, if there is an error during parsing, it will return None.
+    return parse_html_source(payload)
+
+
+@debug
+def get_item_sellers(tree, item, free_shipping_strings):
+    """Parse out information to from the aod-offer nodes populate ItemDetail instances for each item """
+    response = response
+    sellers = []
+    if response.text() is None or len(response.text()) == 0:
+        log.error("Empty Response.  Skipping...")
+        return sellers
+    # This is where the parsing magic goes
+    log.debug(f"payload is {len(str(payload))} bytes")
+
+    tree = parse_html_source(payload)
+    if tree is None:
+        return sellers
+    if item.status_code == 503:
+        with open("503-page.html", "w", encoding="utf-8") as f:
+            f.write(payload)
+        log.info("Status Code 503, Checking for Captcha")
+        # Check for CAPTCHA
+        captcha_form_element = tree.xpath("//form[contains(@action,'validateCaptcha')]")
+        if captcha_form_element:
+            log.info("captcha found")
+            url = f"https://{self.amazon_domain}/{REALTIME_INVENTORY_PATH}{item.id}"
+            # Solving captcha and resetting data
+            data, status = solve_captcha(session, captcha_form_element[0], url)
+            if status != 503:
+                payload = data
+                tree = parse_html_source(payload)
+                if tree is None:
+                    return sellers
+            else:
+                log.info(f"No valid page for ASIN {item.id}")
+                return sellers
+        else:
+            log.info("captcha not found")
+
+    # look for product ASIN
+    page_asin = tree.xpath("//input[@id='ftSelectAsin']")
+    if page_asin:
+        try:
+            found_asin = page_asin[0].value.strip()
+        except (AttributeError, IndexError):
+            found_asin = "[NO ASIN FOUND ON PAGE]"
+    else:
+        find_asin = re.search(r"asin\s?(?:=|\.)?\s?\"?([A-Z0-9]+)\"?", payload)
+        if find_asin:
+            found_asin = find_asin.group(1)
+        else:
+            found_asin = "[NO ASIN FOUND ON PAGE]"
+
+    if found_asin != item.id:
+        log.debug(
+            f"Aborting Check, ASINs do not match. Found {found_asin}; Searching for {item.id}."
+        )
+        return None
+
+    # Get all the offers (pinned and others)
+    offers = tree.xpath("//div[@id='aod-sticky-pinned-offer'] | //div[@id='aod-offer']")
+
+    # I don't really get the OR part of this, how could the first part fail, but the second part not fail?
+    # if not pinned_offer or not tree.xpath(
+    #     "//div[@id='aod-sticky-pinned-offer']//input[@name='submit.addToCart'] | //div[@id='aod-offer']//input[@name='submit.addToCart']"
+    # ):
+    #
+    if not offers:
+        log.debug(f"No offers for {item.id} = {item.short_name}")
+    else:
+        for idx, offer in enumerate(offers):
+            try:
+                merchant_id = offer.xpath(
+                    ".//input[@id='ftSelectMerchant' or @id='ddmSelectMerchant']"
+                )[0].value
+            except IndexError:
+                try:
+                    merchant_script = offer.xpath(".//script")[0].text.strip()
+                    find_merchant_id = re.search(
+                        r"merchantId = \"(\w+?)\";", merchant_script
+                    )
+                    if find_merchant_id:
+                        merchant_id = find_merchant_id.group(1)
+                    else:
+                        log.debug("No Merchant ID found")
+                        merchant_id = ""
+                except IndexError:
+                    log.debug("No Merchant ID found")
+                    merchant_id = ""
+            try:
+                price_text = offer.xpath(".//span[@class='a-price-whole']")[
+                    0
+                ].text.strip()
+            except IndexError:
+                log.debug("No price found for this offer, skipping")
+                continue
+            price = parse_price(price_text)
+            shipping_cost = get_shipping_costs(offer, free_shipping_strings)
+            condition_heading = offer.xpath(".//div[@id='aod-offer-heading']/h5")
+            if condition_heading:
+                condition = AmazonItemCondition.from_str(
+                    condition_heading[0].text.strip()
+                )
+            else:
+                condition = AmazonItemCondition.Unknown
+            offer_ids = offer.xpath(f".//input[@name='offeringID.1']")
+            offer_id = None
+            if len(offer_ids) > 0:
+                offer_id = offer_ids[0].value
+            else:
+                log.error("No offer ID found for this offer, skipping")
+                continue
+            try:
+                atc_form = [
+                    offer.xpath(".//form[@method='post']")[0].action,
+                    offer.xpath(".//form//input"),
+                ]
+            except IndexError:
+                log.error("ATC form items did not exist, skipping")
+                continue
+
+            seller = SellerDetail(
+                merchant_id,
+                price,
+                shipping_cost,
+                condition,
+                offer_id,
+                atc_form=atc_form,
+            )
+            sellers.append(seller)
+    return sellers
+
+
+@debug
+def get_qualified_seller(item, sellers, check_shipping=False) -> SellerDetail or None:
+    item_sellers = sellers
+    if item_sellers:
+        for seller in item_sellers:
+            if not check_shipping and not free_shipping_check(seller):
+                log.debug("Failed shipping hurdle.")
+                continue
+            log.debug("Passed shipping hurdle.")
+            if item.condition == AmazonItemCondition.Any:
+                log.debug("Skipping condition check")
+            elif not condition_check(item, seller):
+                log.debug("Failed item condition hurdle.")
+                continue
+            log.debug("Passed item condition hurdle.")
+            if not price_check(item, seller):
+                log.debug("Failed price condition hurdle.")
+                continue
+            log.debug("Passed price condition hurdle.")
+            if not merchant_check(item, seller):
+                log.debug("Failed merchant id condition hurdle.")
+                continue
+            log.debug("Passed merchant id condition hurdle.")
+
+            # Returns first seller that passes condition checks
+            return seller
