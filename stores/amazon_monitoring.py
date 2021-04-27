@@ -33,6 +33,10 @@ from datetime import datetime
 from utils.debugger import debug
 import secrets
 from fake_useragent import UserAgent
+from amazoncaptcha import AmazonCaptcha
+
+from urllib.parse import urlparse
+
 
 import re
 
@@ -556,13 +560,18 @@ class AmazonMonitor(aiohttp.ClientSession):
     def __init__(self, *args, **kwargs):
         super(self.__class__, self).__init__(*args, **kwargs)
         self.response: Optional[aiohttp.ClientResponse] = None
+        self.check_furl: Optional[furl] = None
+        self.domain: str = ""
 
     async def stock_check(self, item: FGItem, check_furl: furl, delay: float = 5):
         # Do first response outside of while loop, so we can continue on captcha checks
         # and return to start of while loop with that response. Requires the next response
         # to be grabbed at end of while loop
+        self.check_furl = check_furl
+        self.domain = urlparse(check_furl.url).netloc
         start_time = time.time()
         self.response = await self.get(url=check_furl.url)
+
         # Loop will only exit if a qualified seller is returned.
         while True:
             if tree := check_response(self.response):
@@ -571,7 +580,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                     # TODO: maybe track captcha hits so that it aborts after several?
                     await asyncio.sleep(1)
                     # get the next response after solving captcha and then continue to next loop iteration
-                    self.response = await self.async_captcha_solve(captcha_element)
+                    self.response = await self.async_captcha_solve(captcha_element[0])
                     await wait_timer(start_time=start_time)
                     continue
                 if tree is not None and (sellers := get_item_sellers(tree)):
@@ -583,30 +592,31 @@ class AmazonMonitor(aiohttp.ClientSession):
             self.response = await self.get(url=check_furl.url)
 
     async def async_captcha_solve(self, captcha_element):
-        data = page_source
-        status = 200
-        tree = parse_html_source(data)
-        if tree is None:
-            data = None
-            status = None
-            return data, status
-        CAPTCHA_RETRY = 5
-        retry = 0
-        # loop until no captcha in return page, or max captcha tries reached
-        while (captcha_element := has_captcha(tree)) and (retry < CAPTCHA_RETRY):
-            data, status = solve_captcha(
-                session=session, form_element=captcha_element[0], domain=domain
-            )
-            tree = parse_html_source(data)
-            if tree is None:
-                data = None
-                status = None
-                return data, status
-            retry += 1
-        if captcha_element:
-            data = None
-            status = None
-        return data, status
+        log.debug("Encountered CAPTCHA. Attempting to solve.")
+        # Starting from the form, get the inputs and image
+        captcha_images = captcha_element.xpath(
+            '//img[contains(@src, "amazon.com/captcha/")]'
+        )
+        if captcha_images:
+            link = captcha_images[0].attrib["src"]
+            # link = 'https://images-na.ssl-images-amazon.com/captcha/usvmgloq/Captcha_kwrrnqwkph.jpg'
+            captcha = AmazonCaptcha.fromlink(link)
+            solution = captcha.solve()
+            if solution:
+                log.info(f"solution is:{solution} ")
+                form_inputs = captcha_element.xpath(".//input")
+                input_dict = {}
+                for form_input in form_inputs:
+                    if form_input.type == "text":
+                        input_dict[form_input.name] = solution
+                    else:
+                        input_dict[form_input.name] = form_input.value
+                f = furl(self.domain)  # Use the original URL to get the schema and host
+                f = f.set(path=captcha_element.attrib["action"])
+                f.add(args=input_dict)
+                response = await self.get(f.url)
+                return response
+        return None
 
 
 async def wait_timer(start_time):
@@ -615,6 +625,8 @@ async def wait_timer(start_time):
 
 
 def check_response(response: aiohttp.ClientResponse):
+    if response is None:
+        return None
     # Check response text is valid
     payload = str(response.text())
     if payload is None or len(payload) == 0:
