@@ -352,6 +352,8 @@ Options:
                       USE THIS OPTION AT YOUR OWN RISK!!!
                       NOTE: There is no functionality to choose payment
                       option, so bot may still fail during checkout
+
+  --clear-cache       Clears the browser cache and cookies on startup. Default is false.
                       
   --help              Show this message and exit.
 
