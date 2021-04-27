@@ -64,18 +64,38 @@ FairGame only works on Amazon and can automatically place an order.
     one of any of the products you've included in the configuration file, use the `--single-shot` option, see
     [Running the program](#Running-the-program)    
 
-### Disclaimer 
+## Disclaimer 
 
-WARNING: The use of this software can result in a Amazon restricting access to your account and make it difficult 
-for you to purchase products, with or without the bot. By using this software, you acknowledge these risks. These restrictions
-cannot and will not be resolved by the developer(s), nor can they be detected/resolved by the standard Amazon Customer Support,
-as far as we are aware. If this happens, the only resolution is to stop all Amazon monitors (e.g., FairGame, Distill.io,
-or other bots, etc.), wait, and hope the limits are lifted within a few days. If this is a major issue you should
-consider avoiding use of this software. 
+WARNING: The use of this software can result in Amazon restricting access to (i.e., "shadow ban") your account and make it 
+temporarily difficult for you to purchase products, with or without the bot. These restrictions cannot be resolved by the 
+FairGame developer(s), nor can they be detected or resolved by the standard Amazon Customer Support (no need to call/chat). 
 
-Account restrictions may be triggered by any of the following: 1) running multiple instances on one device, 2) running multiple instances on different devices, using the same account, regardless of their IP, proxy, or location, 3) configuring an instance to check stock too frequently/aggressively (default settings not guaranteed to be safe). 
+**By using this software, you acknowledge these risks and agree to be solely responsible for any consequenses thereof.** 
+**This free software offers no guarantee of success, and its developer(s) cannont be held liable for any personal damages resulting from its use.**
 
-Symptoms of account restrictions include: 1) Fly-out (offers) window is missing/completely blank, even if there are listings for the ASIN, 2) frequent CAPTCHA checks, 3) inability to access the My Account page, add items to your cart, or complete purchases; usually displayed as a 503 error (Amazon Dogs & “SORRY we couldn’t find that page” message). You’ll likely have to sit-out a few days of drops to resolve the throttle.
+### About Amazon Account Restrictions
+If your Amazon account is restricted then the only resolution is to **stop all Amazon monitors** (e.g., *FairGame*, *Distill.io*, or other 
+bots), **wait patiently**, and hope that the limits are lifted within a few days. If this is a major issue you should consider avoiding use of this software. 
+
+***Most restrictions will self-resolve within 24-48 hours after all botting is ceased.***
+
+Account restrictions can be triggered by any of the following: 
+* Configuring any instance to check stock too frequently/aggressively (default settings *not guaranteed* to be safe) 
+* Running multiple instances on a single device, regardless of the Amazon account(s) used
+* Running multiple instances on different devices using the same Amazon account, regardless of their IP, proxy, or location
+* Logging in to your Amazon account from a different device or location while bots are running elsewhere
+
+The developer(s) **do not** support running multiple instances of FairGame nor any issues that may be encountered while doing so. 
+
+Symptoms of account restrictions include: 
+* Inability to access the My Account page (*Amazon Dogs* and “SORRY we couldn’t find that page” message) 
+* Difficulty adding certain items to cart or completing purchases
+* Missing or Blank fly-out (i.e., "offers") window , even if there *are* listings for the ASIN
+* Frequent CAPTCHA checks
+
+Many "*sudden*" issues encountered with FairGame are a just consequense of anti-bot account restrictions. If you have a 
+problem, please stop all bots/monitors on your Amazon account and wait **at least 48 hours** before opening an issue. You
+may still use Amazon organically during this intermission. 
 
 # Installation
 
