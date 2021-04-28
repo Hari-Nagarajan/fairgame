@@ -38,7 +38,25 @@ def debug(func):
             f"{func.__name__!r} returned {value!r}. Function ran for {time.time()-start_time} seconds.".encode(
                 "utf-8"
             )
-        )  # 4
+        )
         return value
 
     return wrapper_debug
+
+
+def timer(func):
+    """Time the function"""
+
+    @functools.wraps(func)
+    def wrapper_timer(*args, **kwargs):
+        log.debug(f"Calling {func.__name__}")
+        start_time = time.time()
+        value = func(*args, **kwargs)
+        log.debug(
+            f"{func.__name__!r} ran for {time.time() - start_time} seconds.".encode(
+                "utf-8"
+            )
+        )
+        return value
+
+    return wrapper_timer

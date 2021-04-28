@@ -35,6 +35,7 @@ from notifications.notifications import NotificationHandler, TIME_FORMAT
 
 from stores.amazon import Amazon
 from stores.amazon_requests import AmazonStoreHandler
+from stores.amazon_handler import AmazonStoreHandler as AIO_AmazonStoreHandler
 from utils.logger import log
 from utils.version import is_latest, version, get_latest_version
 
@@ -442,6 +443,12 @@ def amazonrequests(
         log.error("Exiting Program...")
         time.sleep(5)
         return
+
+
+@click.command()
+def aio_amazon():
+    aio_amazon_obj = AIO_AmazonStoreHandler(notification_handler=notification_handler)
+    tasks = aio_amazon_obj.run_async()
 
 
 @click.option(
