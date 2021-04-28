@@ -18,14 +18,18 @@
 #      https://github.com/Hari-Nagarajan/fairgame
 
 import requests
+from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.remote.remote_connection import LOGGER as selenium_logger
+from selenium.common.exceptions import TimeoutException
 from urllib3.connectionpool import log as urllib_logger
 from logging import WARNING as logging_WARNING
+from utils.misc import get_timestamp_filename
+from utils.logger import log
 
 options = Options()
 options.add_experimental_option(
@@ -159,3 +163,25 @@ def enable_headless():
 
 def disable_gpu():
     options.add_argument("--disable-gpu")
+
+
+def get_cookies(d: webdriver.Chrome, cookie_list=None):
+    cookies = {}
+    for c in d.get_cookies():
+        if cookie_list is None or c["name"] in cookie_list:
+            cookies[c["name"]] = c["value"]
+    return cookies
+
+
+def save_screenshot(d, page):
+    file_name = get_timestamp_filename("screenshots/screenshot-" + page, ".png")
+    try:
+        d.save_screenshot(file_name)
+        return file_name
+    except TimeoutException:
+        log.info("Timed out taking screenshot, trying to continue anyway")
+        pass
+    except Exception as e:
+        log.error(f"Trying to recover from error: {e}")
+        pass
+    return None

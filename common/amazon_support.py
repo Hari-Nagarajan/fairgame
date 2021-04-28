@@ -325,3 +325,26 @@ def merchant_check(item, seller):
         return True
     else:
         return False
+
+
+def parse_condition(condition: str) -> AmazonItemCondition:
+    return AmazonItemCondition[condition]
+
+
+def min_total_price(seller: SellerDetail):
+    return seller.selling_price
+
+
+def new_first(seller: SellerDetail):
+    return seller.condition
+
+
+def has_captcha(tree):
+    return tree.xpath("//form[contains(@action,'validateCaptcha')]")
+
+
+def free_shipping_check(seller):
+    if seller.shipping_cost.amount > 0:
+        return False
+    else:
+        return True

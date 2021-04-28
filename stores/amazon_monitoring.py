@@ -22,14 +22,12 @@ import os
 
 import time
 import typing
-from typing import Optional, Iterable, NamedTuple, List
-from datetime import datetime
+from typing import Optional, Iterable, NamedTuple, List, Dict
 from utils.debugger import debug, timer
 from fake_useragent import UserAgent
 from amazoncaptcha import AmazonCaptcha
 
 from urllib.parse import urlparse
-
 
 import re
 
@@ -53,14 +51,14 @@ from common.amazon_support import (
     SellerDetail,
     solve_captcha,
     merchant_check,
+    has_captcha,
+    free_shipping_check,
 )
 from notifications.notifications import NotificationHandler
 from stores.basestore import BaseStoreHandler
 from utils.logger import log
 import asyncio
 import aiohttp
-
-from functools import wraps
 
 # PDP_URL = "https://smile.amazon.com/gp/product/"
 # AMAZON_DOMAIN = "www.amazon.com.au"
@@ -146,81 +144,6 @@ class AmazonMonitoringHandler(BaseStoreHandler):
             self.sessions_list[idx].assign_item(item_list[idx])
             self.sessions_list[idx].assign_config(self.amazon_config)
 
-    def run_async(self, queue: asyncio.Queue):
-        tasks = []
-        for session in self.sessions_list:
-            task = asyncio.create_task(session.stock_check(queue))
-            tasks.append(task)
-        return tasks
-
-
-def parse_condition(condition: str) -> AmazonItemCondition:
-    return AmazonItemCondition[condition]
-
-
-def min_total_price(seller: SellerDetail):
-    return seller.selling_price
-
-
-def new_first(seller: SellerDetail):
-    return seller.condition
-
-
-def captcha_handler(session, page_source, domain):
-    data = page_source
-    status = 200
-    tree = parse_html_source(data)
-    if tree is None:
-        data = None
-        status = None
-        return data, status
-    CAPTCHA_RETRY = 5
-    retry = 0
-    # loop until no captcha in return page, or max captcha tries reached
-    while (captcha_element := has_captcha(tree)) and (retry < CAPTCHA_RETRY):
-        data, status = solve_captcha(
-            session=session, form_element=captcha_element[0], domain=domain
-        )
-        tree = parse_html_source(data)
-        if tree is None:
-            data = None
-            status = None
-            return data, status
-        retry += 1
-    if captcha_element:
-        data = None
-        status = None
-    return data, status
-
-
-def has_captcha(tree):
-    return tree.xpath("//form[contains(@action,'validateCaptcha')]")
-
-
-def free_shipping_check(seller):
-    if seller.shipping_cost.amount > 0:
-        return False
-    else:
-        return True
-
-
-@debug
-def get_html(url, s: requests.Session):
-    """Unified mechanism to get content to make changing connection clients easier"""
-    f = furl(url)
-    if not f.scheme:
-        f.set(scheme="https")
-    try:
-        response = s.get(f.url, timeout=5)
-    except requests.exceptions.RequestException as e:
-        log.debug(e)
-        log.debug("timeout on get_html")
-        return None, None
-    except Exception as e:
-        log.debug(e)
-        return None, None
-    return response.text, response.status_code
-
 
 # class Offers(NamedTuple):
 #     asin: str
@@ -243,7 +166,7 @@ class AmazonMonitor(aiohttp.ClientSession):
         self.proxy: str = ""
         self.delay: float = 5
         self.item: Optional[FGItem] = None
-        self.amazon_config: dict() = {}
+        self.amazon_config: Dict = {}
 
     def assign_config(self, azn_config):
         self.amazon_config = azn_config
@@ -266,7 +189,7 @@ class AmazonMonitor(aiohttp.ClientSession):
         self.domain = urlparse(self.item_furl.url).netloc
         delay = 5
         end_time = time.time() + delay
-        r = await self.fetch(url=self.item_furl.url)
+        r = await self.aio_get(url=self.item_furl.url)
         check_count = 1
         # Loop will only exit if a qualified seller is returned.
         while True:
@@ -302,10 +225,10 @@ class AmazonMonitor(aiohttp.ClientSession):
             log.debug("No offers found which meet product criteria")
             await wait_timer(end_time)
             end_time = time.time() + delay
-            r = await self.fetch(url=self.item_furl.url)
+            r = await self.aio_get(url=self.item_furl.url)
             check_count += 1
 
-    async def fetch(self, url):
+    async def aio_get(self, url):
         async with self.get(url) as resp:
             return await resp.text()
 
@@ -332,7 +255,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                 f = furl(domain)  # Use the original URL to get the schema and host
                 f = f.set(path=captcha_element.attrib["action"])
                 f.add(args=input_dict)
-                response = await self.fetch(f.url)
+                response = await self.aio_get(f.url)
                 return response
         return None
 
@@ -508,3 +431,122 @@ def get_proxies(path=PROXY_FILE_PATH):
         proxies = proxy_json.get("proxies", [])
 
     return proxies
+
+    # def verify(self):
+    #     log.debug("Verifying item list...")
+    #     items_to_purge = []
+    #     verified = 0
+    #     item_cache_file = os.path.join(
+    #         os.path.dirname(os.path.abspath("__file__")),
+    #         "stores",
+    #         "store_data",
+    #         "item_cache.p",
+    #     )
+    #
+    #     if os.path.exists(item_cache_file) and os.path.getsize(item_cache_file) > 0:
+    #         item_cache = pickle.load(open(item_cache_file, "rb"))
+    #     else:
+    #         item_cache = {}
+    #
+    #     for idx, item in enumerate(self.item_list):
+    #         # Check the cache first to save the scraping...
+    #         if item.id in item_cache.keys():
+    #             cached_item = item_cache[item.id]
+    #             log.debug(f"Verifying ASIN {cached_item.id} via cache  ...")
+    #             # Update attributes that may have been changed in the config file
+    #             cached_item.pdp_url = item.pdp_url
+    #             cached_item.condition = item.condition
+    #             cached_item.min_price = item.min_price
+    #             cached_item.max_price = item.max_price
+    #             cached_item.merchant_id = item.merchant_id
+    #             self.item_list[idx] = cached_item
+    #             log.debug(
+    #                 f"Verified ASIN {cached_item.id} as '{cached_item.short_name}'"
+    #             )
+    #             verified += 1
+    #             continue
+    #
+    #         # Verify that the ASIN hits and that we have a valid inventory URL
+    #         item.pdp_url = f"https://{self.amazon_domain}{PDP_PATH}{item.id}"
+    #         log.debug(f"Verifying at {item.pdp_url} ...")
+    #
+    #         session = self.session_checkout
+    #         data, status = self.get_html(item.pdp_url, s=session)
+    #         if not data and not status:
+    #             log.debug("Response empty, skipping item")
+    #             continue
+    #         if status == 503:
+    #             # Check for CAPTCHA
+    #             tree = parse_html_source(data)
+    #             if tree is None:
+    #                 continue
+    #             captcha_form_element = tree.xpath(
+    #                 "//form[contains(@action,'validateCaptcha')]"
+    #             )
+    #             if captcha_form_element:
+    #                 # Solving captcha and resetting data
+    #                 data, status = solve_captcha(
+    #                     session, captcha_form_element[0], item.pdp_url
+    #                 )
+    #
+    #         if status == 200:
+    #             item.furl = furl(
+    #                 f"https://{self.amazon_domain}/{REALTIME_INVENTORY_PATH}{item.id}"
+    #             )
+    #             tree = parse_html_source(data)
+    #             if tree is None:
+    #                 continue
+    #             captcha_form_element = tree.xpath(
+    #                 "//form[contains(@action,'validateCaptcha')]"
+    #             )
+    #             if captcha_form_element:
+    #                 data, status = solve_captcha(
+    #                     session, captcha_form_element[0], item.pdp_url
+    #                 )
+    #                 if status != 200:
+    #                     log.debug(f"ASIN {item.id} failed, skipping...")
+    #                     continue
+    #                 tree = parse_html_source(data)
+    #                 if tree is None:
+    #                     continue
+    #
+    #             title = tree.xpath('//*[@id="productTitle"]')
+    #             if len(title) > 0:
+    #                 item.name = title[0].text.strip()
+    #                 item.short_name = (
+    #                     item.name[:40].strip() + "..."
+    #                     if len(item.name) > 40
+    #                     else item.name
+    #                 )
+    #                 log.debug(f"Verified ASIN {item.id} as '{item.short_name}'")
+    #                 item_cache[item.id] = item
+    #                 verified += 1
+    #             else:
+    #                 # TODO: Evaluate if this happens with a 200 code
+    #                 doggo = tree.xpath("//img[@alt='Dogs of Amazon']")
+    #                 if doggo:
+    #                     # Bad ASIN or URL... dump it
+    #                     log.error(
+    #                         f"Bad ASIN {item.id} for the domain or related failure.  Removing from hunt."
+    #                     )
+    #                     items_to_purge.append(item)
+    #                 else:
+    #                     log.debug(
+    #                         f"Unable to verify ASIN {item.id}.  Continuing without verification."
+    #                     )
+    #         else:
+    #             log.error(
+    #                 f"Unable to locate details for {item.id} at {item.pdp_url}.  Removing from hunt."
+    #             )
+    #             items_to_purge.append(item)
+    #
+    #     # Purge any items we didn't find while verifying
+    #     for item in items_to_purge:
+    #         self.item_list.remove(item)
+    #
+    #     log.debug(
+    #         f"Verified {verified} out of {len(self.item_list)} items on {STORE_NAME}"
+    #     )
+    #     pickle.dump(item_cache, open(item_cache_file, "wb"))
+    #
+    #     return True

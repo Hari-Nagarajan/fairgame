@@ -60,7 +60,7 @@ from stores.basestore import BaseStoreHandler
 from utils.logger import log
 from utils.selenium_utils import enable_headless, options
 
-from common.amazon_support import SellerDetail
+from common.amazon_support import SellerDetail, has_captcha
 from utils.misc import (
     check_response,
     parse_html_source,
@@ -68,6 +68,9 @@ from utils.misc import (
     join_xpaths,
     wait_for_element_by_xpath,
     save_html_response,
+    get_timestamp_filename,
+    create_driver,
+    get_webdriver_pids,
 )
 
 from functools import wraps
@@ -389,30 +392,18 @@ class AmazonCheckoutHandler(BaseStoreHandler):
         except Exception as e:
             log.debug(f"Other error encountered while loading page: {e}")
 
-    # def run_async(self, queue: asyncio.Queue):
-    #     tasks = []
-    #     return tasks
-
     async def checkout_worker(self, queue: asyncio.Queue, login_interval=7200):
         print("Checkout Task Started")
         cookies = self.pull_cookies()
-        log.info("Cookies from Selenium:")
+        log.debug("Cookies from Selenium:")
         for cookie in cookies:
-            log.info(f"{cookie}: {cookies[cookie]}")
+            log.debug(f"{cookie}: {cookies[cookie]}")
         session = aiohttp.ClientSession(
             headers=HEADERS, cookies={cookie: cookies[cookie] for cookie in cookies}
         )
         resp = await session.get("https://smile.amazon.com")
-        html = await resp.text()
-        save_html_response("session-get", resp.status, html)
-        # session.headers.update(HEADERS)
-        # session.cookie_jar.update_cookies(cookies=cookies)
-        cookies = session.cookie_jar
-        for cookie in cookies:
-            # log.info(f"{cookie['name']}: {cookie['value']}")
-            log.info(cookie)
-        input("Press Enter to Continue")
-        time.sleep(5)
+        html_text = await resp.text()
+        save_html_response("session-get", resp.status, html_text)
         selenium_refresh_time = time.time() + login_interval  # not used yet
         while True:
             qualified_seller = await queue.get()
@@ -432,7 +423,7 @@ class AmazonCheckoutHandler(BaseStoreHandler):
             if pid and anti_csrf:
                 if await turbo_checkout(s=session, pid=pid, anti_csrf=anti_csrf):
                     log.info("Maybe completed checkout")
-                    time_difference = time.time - start_time
+                    time_difference = time.time() - start_time
                     log.info(
                         f"Time from stock found to checkout: {round(time_difference,2)} seconds."
                     )
@@ -545,104 +536,6 @@ async def turbo_checkout(s: aiohttp.ClientSession, pid, anti_csrf):
 
     log.debug(f"Status Code: {status} was returned")
     return False
-
-
-def save_screenshot(d, page):
-    file_name = get_timestamp_filename("screenshots/screenshot-" + page, ".png")
-    try:
-        d.save_screenshot(file_name)
-        return file_name
-    except TimeoutException:
-        log.info("Timed out taking screenshot, trying to continue anyway")
-        pass
-    except Exception as e:
-        log.error(f"Trying to recover from error: {e}")
-        pass
-    return None
-
-
-def get_timestamp_filename(name, extension):
-    """Utility method to create a filename with a timestamp appended to the root and before
-    the provided file extension"""
-    now = datetime.now()
-    date = now.strftime("%m-%d-%Y_%H_%M_%S")
-    if extension.startswith("."):
-        return name + "_" + date + extension
-    else:
-        return name + "_" + date + "." + extension
-
-
-def create_driver(options):
-    try:
-        return webdriver.Chrome(executable_path=binary_path, options=options)
-    except Exception as e:
-        log.error(e)
-        log.error(
-            "If you have a JSON warning above, try deleting your .profile-amz folder"
-        )
-        log.error(
-            "If that's not it, you probably have a previous Chrome window open. You should close it."
-        )
-        exit(1)
-
-
-def get_webdriver_pids(driver):
-    pid = driver.service.process.pid
-    driver_process = psutil.Process(pid)
-    children = driver_process.children(recursive=True)
-    webdriver_child_pids = []
-    for child in children:
-        webdriver_child_pids.append(child.pid)
-    return webdriver_child_pids
-
-
-def modify_browser_profile():
-    # Delete crashed, so restore pop-up doesn't happen
-    path_to_prefs = os.path.join(
-        os.path.dirname(os.path.abspath("__file__")),
-        ".profile-amz",
-        "Default",
-        "Preferences",
-    )
-    try:
-        with fileinput.FileInput(path_to_prefs, inplace=True) as file:
-            for line in file:
-                print(line.replace("Crashed", "none"), end="")
-    except FileNotFoundError:
-        pass
-
-
-def set_options(prefs):
-    options.add_experimental_option("prefs", prefs)
-    options.add_argument(f"user-data-dir=.profile-amz")
-
-
-def get_prefs(no_image):
-    prefs = {
-        "profile.password_manager_enabled": False,
-        "credentials_enable_service": False,
-    }
-    if no_image:
-        prefs["profile.managed_default_content_settings.images"] = 2
-    else:
-        prefs["profile.managed_default_content_settings.images"] = 0
-    return prefs
-
-
-def create_webdriver_wait(driver, wait_time=10):
-    return WebDriverWait(driver, wait_time)
-
-
-def get_cookies(d: webdriver.Chrome, cookie_list=None):
-    cookies = {}
-    for c in d.get_cookies():
-        if cookie_list is None or c["name"] in cookie_list:
-            cookies[c["name"]] = c["value"]
-    return cookies
-
-
-def has_captcha(tree):
-    return tree.xpath("//form[contains(@action,'validateCaptcha')]")
 
 
 async def async_captcha_solve(s: aiohttp.ClientSession, captcha_element, domain):
