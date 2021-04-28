@@ -127,7 +127,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
 
         self.notification_handler = notification_handler
         self.check_shipping = checkshipping
-        self.item_list: typing.List[FGItem] = []
+        self.item_list: typing.List[FGItem] = item_list
         self.stock_checks = 0
         self.start_time = int(time.time())
         self.amazon_config = amazon_config
@@ -137,13 +137,13 @@ class AmazonMonitoringHandler(BaseStoreHandler):
 
         # Initialize the Session we'll use for stock checking
         self.sessions_list: Optional[List[AmazonMonitor]] = []
-        for idx in range(tasks):
+        for idx in range(len(item_list)):
             self.sessions_list.append(AmazonMonitor())
             self.sessions_list[idx].headers.update(HEADERS)
             self.sessions_list[idx].headers.update({"user-agent": self.ua.random})
             if self.proxies and idx < len(self.proxies):
                 self.sessions_list[idx].assign_proxy(self.proxies[idx]["https"])
-            self.sessions_list[idx].assign_item(item_list[idx % len(item_list)])
+            self.sessions_list[idx].assign_item(item_list[idx])
             self.sessions_list[idx].assign_config(self.amazon_config)
 
     def run_async(self, queue: asyncio.Queue):
