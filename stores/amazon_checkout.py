@@ -102,15 +102,15 @@ class AmazonCheckoutHandler(BaseStoreHandler):
     def __init__(
         self,
         notification_handler: NotificationHandler,
-        homepage_titles,
         amazon_config,
+        profile_path,
         headless=False,
         username=None,
         password=None,
         timer=7200,
         cookie_list=None,
     ):
-
+        self.profile_path = profile_path
         # Set up the Chrome options based on user flags
         if headless:
             enable_headless()
@@ -118,7 +118,7 @@ class AmazonCheckoutHandler(BaseStoreHandler):
         self.notification_handler = notification_handler
 
         # Selenium setup
-        selenium_initialization()
+        selenium_initialization(options=options, profile_path=self.profile_path)
         self.homepage_titles = amazon_config["HOME_PAGE_TITLES"]
         self.time_interval = timer
         self.cookie_list = cookie_list
@@ -366,9 +366,12 @@ class AmazonCheckoutHandler(BaseStoreHandler):
             return None
 
     def get_amazon_element(self, key):
-        return self.driver.find_element_by_xpath(
-            join_xpaths(self.amazon_config["XPATHS"][key])
-        )
+        try:
+            return self.driver.find_element_by_xpath(
+                join_xpaths(self.amazon_config["XPATHS"][key])
+            )
+        except NoSuchElementException:
+            return None
 
     def get_amazon_elements(self, key):
         return self.driver.find_elements_by_xpath(

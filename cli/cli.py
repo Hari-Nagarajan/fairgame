@@ -27,6 +27,7 @@ from datetime import datetime
 from functools import wraps
 from pathlib import Path
 from signal import SIGINT, signal
+import asyncio
 
 import click
 
@@ -448,7 +449,7 @@ def amazonrequests(
 @click.command()
 def aio_amazon():
     aio_amazon_obj = AIO_AmazonStoreHandler(notification_handler=notification_handler)
-    tasks = aio_amazon_obj.run_async()
+    asyncio.run(aio_amazon_obj.run_async())
 
 
 @click.option(
@@ -614,6 +615,7 @@ main.add_command(show)
 main.add_command(find_endpoints)
 main.add_command(show_traceroutes)
 main.add_command(test_logging)
+main.add_command(aio_amazon)
 
 # Global scope stuff here
 if is_latest():

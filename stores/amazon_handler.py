@@ -340,7 +340,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                 random.shuffle(self.item_list)
         return
 
-    def run_async(self, tasks=1):
+    async def run_async(self, tasks=1):
         tasks = []
         queue = asyncio.Queue()
         amazon_monitoring = AmazonMonitoringHandler(
@@ -350,7 +350,18 @@ class AmazonStoreHandler(BaseStoreHandler):
         )
         tasks.extend(amazon_monitoring.run_async(queue=queue))
         amazon_checkout = AmazonCheckoutHandler(
-            notification_handler=self.notification_handler
+            notification_handler=self.notification_handler,
+            amazon_config=amazon_config,
+            cookie_list=[
+                "session-id",
+                "x-amz-captcha-1",
+                "x-amz-captcha-2",
+                "ubid-main",
+                "x-main",
+                "at-main",
+                "sess-at-main",
+            ],
+            profile_path=self.profile_path,
         )
         task = await amazon_checkout.checkout_worker(queue=queue)
         tasks.extend(task)

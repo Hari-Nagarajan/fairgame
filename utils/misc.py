@@ -47,6 +47,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from utils.logger import log
 from utils.selenium_utils import enable_headless
 
+DEFAULT_MAX_TIMEOUT = 5
+
 
 def create_driver(options):
     try:
@@ -63,12 +65,12 @@ def create_driver(options):
 
 
 def selenium_initialization(
-    options, profile_path, prefs, no_image=False, slow_mode=True, headless=False
+    options, profile_path, no_image=False, slow_mode=True, headless=False
 ):
     if headless:
         enable_headless()
     prefs = get_prefs()
-    set_options(options=options, profile_path=profile_path)
+    set_options(options=options, profile_path=profile_path, prefs=prefs)
     modify_browser_profile()
 
 

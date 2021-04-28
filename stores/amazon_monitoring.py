@@ -220,16 +220,16 @@ def get_html(url, s: requests.Session):
     return response.text, response.status_code
 
 
-class Offers(NamedTuple):
-    asin: str
-    offerlistingid: str
-    merchantid: str
-    price: float
-    timestamp: float
-    __slots__ = ()
-
-    def __str__(self):
-        return f"ASIN: {self.asin}; offerListingId: {self.offerlistingid}; merchantId: {self.merchantid}; price: {self.price}"
+# class Offers(NamedTuple):
+#     asin: str
+#     offerlistingid: str
+#     merchantid: str
+#     price: float
+#     timestamp: float
+#     __slots__ = ()
+#
+#     def __str__(self):
+#         return f"ASIN: {self.asin}; offerListingId: {self.offerlistingid}; merchantId: {self.merchantid}; price: {self.price}"
 
 
 class AmazonMonitor(aiohttp.ClientSession):
