@@ -64,7 +64,7 @@ if os.path.isfile(LOG_FILE_PATH):
 
 logging.basicConfig(
     filename=LOG_FILE_PATH,
-    level=logging.DEBUG if version.release else DEV,
+    level=logging.INFO if version.release else DEV,
     format=FORMAT,
 )
 
@@ -78,11 +78,11 @@ log = logging.getLogger("fairgame")
 log.setLevel(logging.DEBUG)
 log.dev = MethodType(dev, log)
 
-# if version.is_devrelease or version.is_prerelease:
-#     LOGLEVEL = DEV
-# else:
-#     LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
-LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
+if version.is_devrelease or version.is_prerelease:
+    LOGLEVEL = logging.DEBUG
+else:
+    LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
+# LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
 stream_handler = logging.StreamHandler()
 stream_handler.setFormatter(logging.Formatter(FORMAT))
 

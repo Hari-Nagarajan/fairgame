@@ -396,24 +396,47 @@ class AmazonCheckoutHandler(BaseStoreHandler):
     async def checkout_worker(self, queue: asyncio.Queue, login_interval=7200):
         print("Checkout Task Started")
         cookies = self.pull_cookies()
-        session = aiohttp.ClientSession()
-        session.headers.update(HEADERS)
-        session.cookie_jar.update_cookies(cookies=cookies)
+        log.info("Cookies from Selenium:")
+        for cookie in cookies:
+            log.info(f"{cookie}: {cookies[cookie]}")
+        session = aiohttp.ClientSession(
+            headers=HEADERS, cookies={cookie: cookies[cookie] for cookie in cookies}
+        )
+        resp = await session.get("https://smile.amazon.com")
+        html = await resp.text()
+        save_html_response("session-get", resp.status, html)
+        # session.headers.update(HEADERS)
+        # session.cookie_jar.update_cookies(cookies=cookies)
+        cookies = session.cookie_jar
+        for cookie in cookies:
+            # log.info(f"{cookie['name']}: {cookie['value']}")
+            log.info(cookie)
+        input("Press Enter to Continue")
+        time.sleep(5)
         selenium_refresh_time = time.time() + login_interval  # not used yet
         while True:
             qualified_seller = await queue.get()
             queue.task_done()
+            if not qualified_seller:
+                continue
+            start_time = time.time()
             TURBO_INITIATE_MAX_RETRY = 50
             retry = 0
             pid = None
             anti_csrf = None
-            while not (pid and anti_csrf) and retry < TURBO_INITIATE_MAX_RETRY:
+            while (not (pid and anti_csrf)) and retry < TURBO_INITIATE_MAX_RETRY:
                 pid, anti_csrf = await turbo_initiate(
                     s=session, qualified_seller=qualified_seller
                 )
                 retry += 1
             if pid and anti_csrf:
                 if await turbo_checkout(s=session, pid=pid, anti_csrf=anti_csrf):
+                    log.info("Maybe completed checkout")
+                    time_difference = time.time - start_time
+                    log.info(
+                        f"Time from stock found to checkout: {round(time_difference,2)} seconds."
+                    )
+                    await session.close()
                     break
 
     @contextmanager
@@ -444,6 +467,20 @@ class AmazonCheckoutHandler(BaseStoreHandler):
 
 
 @timer
+async def aio_post(client, url, data=None):
+    async with client.post(url=url, data=data) as resp:
+        text = await resp.text()
+        return resp.status, text
+
+
+@timer
+async def aio_get(client, url, data=None):
+    async with client.get(url=url, data=data) as resp:
+        text = await resp.text()
+        return await resp.status, text
+
+
+@timer
 async def turbo_initiate(
     s: aiohttp.ClientSession, qualified_seller: Optional[SellerDetail] = None
 ):
@@ -453,6 +490,7 @@ async def turbo_initiate(
     anti_csrf = None
 
     if not qualified_seller:
+        log.info("qualified seller not provided")
         return pid, anti_csrf
     payload_inputs = {
         "offerListing.1": qualified_seller.offering_id,
@@ -461,22 +499,24 @@ async def turbo_initiate(
     retry = 0
     MAX_RETRY = 5
     captcha_element = True  # to initialize loop
-    text = await aio_post(client=s, url=url, data=payload_inputs)
+    status, text = await aio_post(client=s, url=url, data=payload_inputs)
+    save_html_response("turbo-initiate", status, text)
     tree: Optional[html.HtmlElement] = None
     while retry < MAX_RETRY and captcha_element:
         tree = check_response(text)
         if tree is None:
             return pid, anti_csrf
         if captcha_element := has_captcha(tree):
+            log.debug("Found captcha")
             text = await async_captcha_solve(s, captcha_element, domain)
+            if text is None:
+                return pid, anti_csrf
             retry += 1
 
-    find_pid = re.search(r"pid=(.*?)&amp;", tree.text_content())
+    find_pid = re.search(r"pid=(.*?)&amp;", text)
     if find_pid:
         pid = find_pid.group(1)
-    find_anti_csrf = re.search(
-        r"'anti-csrftoken-a2z' value='(.*?)'", tree.text_content()
-    )
+    find_anti_csrf = re.search(r"'anti-csrftoken-a2z' value='(.*?)'", text)
     if find_anti_csrf:
         anti_csrf = find_anti_csrf.group(1)
     if pid and anti_csrf:
@@ -489,16 +529,6 @@ async def turbo_initiate(
     return pid, anti_csrf
 
 
-async def aio_post(client, url, data):
-    async with client.post(url=url, data=data) as resp:
-        return await resp.text()
-
-
-async def aio_get(client, url, data=None):
-    async with client.get(url=url, data=data) as resp:
-        return await resp.text()
-
-
 @timer
 async def turbo_checkout(s: aiohttp.ClientSession, pid, anti_csrf):
     domain = "smile.amazon.com"
@@ -507,13 +537,13 @@ async def turbo_checkout(s: aiohttp.ClientSession, pid, anti_csrf):
     header_update = {"anti-csrftoken-a2z": anti_csrf}
     s.headers.update(header_update)
 
-    r = await s.post(url=url)
-    if r.status == 200 or r.status == 500:
+    status, text = await aio_post(client=s, url=url)
+    if status == 200 or status == 500:
         log.debug("Checkout maybe successful, check order page!")
         # TODO: Implement GET request to confirm checkout
         return True
 
-    log.debug(f"Status Code: {r.status} was returned")
+    log.debug(f"Status Code: {status} was returned")
     return False
 
 
@@ -621,7 +651,7 @@ async def async_captcha_solve(s: aiohttp.ClientSession, captcha_element, domain)
     captcha_images = captcha_element.xpath(
         '//img[contains(@src, "amazon.com/captcha/")]'
     )
-    response = None
+    text = None
     if captcha_images:
         link = captcha_images[0].attrib["src"]
         # link = 'https://images-na.ssl-images-amazon.com/captcha/usvmgloq/Captcha_kwrrnqwkph.jpg'
@@ -639,5 +669,5 @@ async def async_captcha_solve(s: aiohttp.ClientSession, captcha_element, domain)
             f = furl(domain)  # Use the original URL to get the schema and host
             f = f.set(path=captcha_element.attrib["action"])
             f.add(args=input_dict)
-            response = await aio_get(client=s, url=f.url)
-    return response
+            status, text = await aio_get(client=s, url=f.url)
+    return text

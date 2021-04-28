@@ -28,6 +28,7 @@ from functools import wraps
 from pathlib import Path
 from signal import SIGINT, signal
 import asyncio
+from typing import Optional, List
 
 import click
 
@@ -45,6 +46,8 @@ LICENSE_PATH = os.path.join(
     "license",
 )
 
+tasks: List[asyncio.Task] = []
+
 
 def get_folder_size(folder):
     return sizeof_fmt(sum(file.stat().st_size for file in Path(folder).rglob("*")))
@@ -61,6 +64,11 @@ def sizeof_fmt(num, suffix="B"):
 # see https://docs.python.org/3/library/signal.html
 def interrupt_handler(signal_num, frame):
     log.info(f"Caught the interrupt signal.  Exiting.")
+    global tasks
+    if tasks:
+        log.debug(f"Canceling {len(tasks)} tasks")
+        for task in tasks:
+            task.cancel()
     exit(0)
 
 
@@ -74,6 +82,10 @@ def notify_on_crash(func):
         except Exception as e:
             log.debug(e)
             notification_handler.send_notification(f"FairGame has crashed.")
+            global tasks
+            if tasks:
+                for task in tasks:
+                    task.cancel()
             raise
 
     return decorator
@@ -448,8 +460,24 @@ def amazonrequests(
 
 @click.command()
 def aio_amazon():
+    log.debug("Creating AIO Amazon Store Handler")
     aio_amazon_obj = AIO_AmazonStoreHandler(notification_handler=notification_handler)
-    asyncio.run(aio_amazon_obj.run_async())
+    global tasks
+    log.debug("Creating AIO Amazon Store Tasks")
+    tasks = asyncio.run(aio_amazon_obj.run_async())
+    if tasks:
+        for task in tasks:
+            task.cancel()
+    log.info("All tasks complete, exiting program")
+
+
+# async def task_handler(tasks: List[asyncio.Task]):
+#     while tasks:
+#         for task in tasks:
+#             if task.done():
+#                 task.cancel()
+#     await asyncio.sleep(5)
+#     return
 
 
 @click.option(

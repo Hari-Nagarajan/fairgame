@@ -155,201 +155,10 @@ class AmazonStoreHandler(BaseStoreHandler):
         log.info(message)
         self.notification_handler.send_notification(message)
 
-    # Test code, use at your own RISK
-    def run_offer_id(self, offerid, delay=5, all_cookies=False):
-        self.all_cookies = all_cookies
-        # checkout_session_count = 1
-        checkout_sessions = [self.session_checkout]
-        # for x in range(checkout_session_count):
-        #     session = requests.Session()
-        #     session.headers.update(HEADERS)
-        #     session.headers.update({"user-agent": self.ua.random})
-        #     checkout_sessions.append(requests.Session())
-
-        self.selenium_login_cookies(
-            session_list=checkout_sessions,
-            all_cookies=self.all_cookies,
-            transfer_headers=self.transfer_headers,
-        )
-
-        message = f"Starting to hunt items at {STORE_NAME}"
-        log.info(message)
-        self.notification_handler.send_notification(message)
-        self.save_screenshot("logged-in")
-        print("\n\n")
-        recurring_message = "The hunt continues! "
-        idx = 0
-        spinner = ["-", "\\", "|", "/"]
-        check_count = 1
-        print(
-            "Do not ask in Discord what to do if your account gets banned running this code!"
-        )
-        print(f"Checking OfferID: {offerid}\n")
-
-        item = SellerDetail(
-            offering_id=offerid,
-            merchant_id="",
-            price=parse_price("0"),
-            shipping_cost=parse_price("0"),
-        )
-        while True:
-            print(
-                recurring_message,
-                f"Check Count: {check_count} ,",
-                spinner[idx],
-                end="\r",
-            )
-            check_count += 1
-            idx += 1
-            if idx == len(spinner):
-                idx = 0
-            delay_time = time.time() + delay
-
-            pid, anti_csrf = self.turbo_initiate(qualified_seller=item)
-            if pid and anti_csrf:
-                if self.turbo_checkout(pid=pid, anti_csrf=anti_csrf):
-                    break
-
-            # sleep remainder of delay_time
-            time_left = delay_time - time.time()
-            if time_left > 0:
-                time.sleep(time_left)
-
-        log.info("May have completed purchase, check orders!")
-        log.info("Shutting down")
-
-    def run(self, delay=5, test=False, all_cookies=False, ludicrous_mode=False):
-        self.is_test = test
-        self.all_cookies = all_cookies
-        # checkout_session_count = 1
-        checkout_sessions = [self.session_checkout]
-        checkout_sessions[0].headers.update({"user-agent": self.ua.random})
-        # for x in range(checkout_session_count):
-        #     session = requests.Session()
-        #     session.headers.update(HEADERS)
-        #     session.headers.update({"user-agent": self.ua.random})
-        #     checkout_sessions.append(requests.Session())
-
-        self.selenium_login_cookies(
-            session_list=checkout_sessions,
-            all_cookies=self.all_cookies,
-            transfer_headers=self.transfer_headers,
-        )
-
-        # Verify the configuration file
-        if not self.verify():
-            # try one more time
-            log.debug("Failed to verify... trying more more time")
-            self.verify()
-
-        # To keep the user busy https://github.com/jakesgordon/javascript-tetris
-        # ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-        # uri = pathlib.Path(f"{ROOT_DIR}/../tetris/index.html").as_uri()
-        # log.debug(f"Tetris URL: {uri}")
-        # self.driver.get(uri)
-
-        self.selenium_refresh_time = time.time() + self.selenium_refresh_offset
-
-        message = f"Starting to hunt items at {STORE_NAME}"
-        log.info(message)
-        self.notification_handler.send_notification(message)
-        # self.save_screenshot("logged-in")
-        print("\n\n")
-        recurring_message = "The hunt continues! "
-        idx = 0
-        spinner = ["-", "\\", "|", "/"]
-        check_count = 1
-        while self.item_list:
-            for item in self.item_list:
-                print(
-                    recurring_message,
-                    f"Checked {item.id}; Check Count: {check_count},",
-                    f"Selenium Refresh in {round((self.selenium_refresh_time - time.time())/60)} minutes",
-                    spinner[idx],
-                    "    ",
-                    end="\r",
-                )
-                check_count += 1
-                idx += 1
-                if idx == len(spinner):
-                    idx = 0
-                start_time = time.time()
-                delay_time = start_time + delay
-                if not ludicrous_mode:
-                    qualified_seller = self.find_qualified_seller(item)
-                    log.debug(
-                        f"ASIN check for {item.id} took {time.time() - start_time} seconds."
-                    )
-                    if qualified_seller:
-                        successful = False
-                        retry = 0
-                        max_retries = 50
-                        retry_time_offset = 300
-                        end_retry_time = time.time() + retry_time_offset
-                        while (
-                            not successful
-                            and retry < max_retries
-                            and time.time() < end_retry_time
-                        ):
-                            if self.buy_it_now:
-                                pid, anti_csrf = self.turbo_initiate(
-                                    qualified_seller=qualified_seller
-                                )
-                                if pid and anti_csrf:
-                                    if self.turbo_checkout(
-                                        pid=pid, anti_csrf=anti_csrf
-                                    ):
-                                        successful = True
-                                        if self.single_shot:
-                                            self.item_list.clear()
-                                        else:
-                                            self.item_list.remove(item)
-                            elif self.atc(qualified_seller=qualified_seller, item=item):
-                                r = self.ptc()
-                                # with open("ptc-source.html", "w", encoding="utf-8") as f:
-                                #     f.write(r)
-                                if r:
-                                    log.debug(r)
-                                    if self.is_test:
-                                        print(
-                                            "Proceeded to Checkout - Will not Place Order as this is a Test",
-                                            end="\r",
-                                        )
-                                        # in Test mode, clear the list
-                                        self.item_list.clear()
-
-                                    elif self.pyo(page=r):
-                                        successful = True
-                                        if self.single_shot:
-                                            self.item_list.clear()
-                                        else:
-                                            self.item_list.remove(item)
-                            retry += 1
-                else:
-                    pid, anti_csrf = self.turbo_initiate(item=item)
-                    if pid and anti_csrf:
-                        if self.turbo_checkout(pid=pid, anti_csrf=anti_csrf):
-                            if self.single_shot:
-                                self.item_list.clear()
-                            else:
-                                self.item_list.remove(item)
-
-                self.wait_for_delay(delay_time)
-
-            if self.shuffle:
-                random.shuffle(self.item_list)
-        return
-
-    async def run_async(self, tasks=1):
-        tasks = []
+    async def run_async(self, checkout_tasks=1):
+        log.debug("Creating checkout queue")
         queue = asyncio.Queue()
-        amazon_monitoring = AmazonMonitoringHandler(
-            notification_handler=self.notification_handler,
-            loop=self.loop,
-            item_list=self.item_list,
-            amazon_config=amazon_config,
-        )
-        tasks.extend(amazon_monitoring.run_async(queue=queue))
+        log.debug("Creating checkout handler")
         amazon_checkout = AmazonCheckoutHandler(
             notification_handler=self.notification_handler,
             amazon_config=amazon_config,
@@ -364,9 +173,24 @@ class AmazonStoreHandler(BaseStoreHandler):
             ],
             profile_path=self.profile_path,
         )
-        task = await amazon_checkout.checkout_worker(queue=queue)
-        tasks.extend(task)
-        return tasks
+        log.debug("Creating monitoring handler")
+        amazon_monitoring = AmazonMonitoringHandler(
+            notification_handler=self.notification_handler,
+            loop=self.loop,
+            item_list=self.item_list,
+            amazon_config=amazon_config,
+            tasks=checkout_tasks,
+        )
+        log.debug("Creating checkout worker and monitoring task(s)")
+        await asyncio.gather(
+            amazon_checkout.checkout_worker(queue=queue),
+            *[
+                session.stock_check(queue)
+                for session in amazon_monitoring.sessions_list
+            ],
+        )
+
+        return
 
     def wait_for_delay(self, delay_time):
         """wait until delay_time

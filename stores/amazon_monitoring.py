@@ -274,6 +274,7 @@ class AmazonMonitor(aiohttp.ClientSession):
             tree = check_response(r)
             if tree is not None:
                 if captcha_element := has_captcha(tree):
+                    log.debug("Captcha found during monitoring task")
                     # wait a second so it doesn't continuously hit captchas very quickly
                     # TODO: maybe track captcha hits so that it aborts after several?
                     await asyncio.sleep(1)
@@ -293,9 +294,12 @@ class AmazonMonitor(aiohttp.ClientSession):
                         item=self.item, sellers=sellers
                     )
                     if qualified_seller:
-                        queue.put_nowait(qualified_seller)
+                        log.debug("Found an offer which meets criteria")
+                        await queue.put(qualified_seller)
+                        log.debug("Offer placed in queue")
                         return
             # failed to find seller. Wait a delay period then check again
+            log.debug("No offers found which meet product criteria")
             await wait_timer(end_time)
             end_time = time.time() + delay
             r = await self.fetch(url=self.item_furl.url)
