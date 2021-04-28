@@ -186,11 +186,11 @@ def save_html_response(filename, status, body):
         f.write(page_source)
 
 
-def check_response(response: aiohttp.ClientResponse):
-    if response is None:
+def check_response(response_text):
+    if response_text is None:
         return None
     # Check response text is valid
-    payload = str(response.text())
+    payload = str(response_text)
     if payload is None or len(payload) == 0:
         log.debug("Empty response")
         return None

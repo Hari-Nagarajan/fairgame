@@ -117,6 +117,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         notification_handler: NotificationHandler,
         loop: asyncio.AbstractEventLoop,
         item_list: List[FGItem],
+        amazon_config,
         tasks=1,
         checkshipping=False,
     ) -> None:
@@ -129,7 +130,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         self.item_list: typing.List[FGItem] = []
         self.stock_checks = 0
         self.start_time = int(time.time())
-
+        self.amazon_config = amazon_config
         self.ua = UserAgent()
 
         self.proxies = get_proxies(path=PROXY_FILE_PATH)
@@ -143,6 +144,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
             if self.proxies and idx < len(self.proxies):
                 self.sessions_list[idx].assign_proxy(self.proxies[idx]["https"])
             self.sessions_list[idx].assign_item(item_list[idx % len(item_list)])
+            self.sessions_list[idx].assign_config(self.amazon_config)
 
     def run_async(self, queue: asyncio.Queue):
         tasks = []
@@ -235,12 +237,16 @@ def get_html(url, s: requests.Session):
 class AmazonMonitor(aiohttp.ClientSession):
     def __init__(self, *args, **kwargs):
         super(self.__class__, self).__init__(*args, **kwargs)
-        self.response: Optional[aiohttp.ClientResponse] = None
+        self.response = None
         self.item_furl: Optional[furl] = None
         self.domain: str = ""
         self.proxy: str = ""
         self.delay: float = 5
         self.item: Optional[FGItem] = None
+        self.amazon_config: dict() = {}
+
+    def assign_config(self, azn_config):
+        self.amazon_config = azn_config
 
     def assign_proxy(self, proxy: str = ""):
         self.proxy = proxy
@@ -255,25 +261,33 @@ class AmazonMonitor(aiohttp.ClientSession):
         # Do first response outside of while loop, so we can continue on captcha checks
         # and return to start of while loop with that response. Requires the next response
         # to be grabbed at end of while loop
+        print("Monitoring Task Started")
         self.item_furl = self.item.furl
         self.domain = urlparse(self.item_furl.url).netloc
-        start_time = time.time()
-        self.response = await self.get(url=self.item_furl.url, proxy=self.proxy)
-
+        delay = 5
+        end_time = time.time() + delay
+        r = await self.fetch(url=self.item_furl.url)
+        check_count = 1
         # Loop will only exit if a qualified seller is returned.
         while True:
-            if tree := check_response(self.response):
+            print(f"Stock Check Count: {check_count}")
+            tree = check_response(r)
+            if tree is not None:
                 if captcha_element := has_captcha(tree):
                     # wait a second so it doesn't continuously hit captchas very quickly
                     # TODO: maybe track captcha hits so that it aborts after several?
                     await asyncio.sleep(1)
                     # get the next response after solving captcha and then continue to next loop iteration
-                    self.response = await self.async_captcha_solve(
-                        captcha_element[0], self.domain
-                    )
+                    r = await self.async_captcha_solve(captcha_element[0], self.domain)
                     await wait_timer(start_time=start_time)
                     continue
-                if tree is not None and (sellers := get_item_sellers(tree)):
+                if tree is not None and (
+                    sellers := get_item_sellers(
+                        tree,
+                        item=self.item,
+                        free_shipping_strings=self.amazon_config["FREE_SHIPPING"],
+                    )
+                ):
                     qualified_seller = get_qualified_seller(
                         item=self.item, sellers=sellers
                     )
@@ -281,8 +295,14 @@ class AmazonMonitor(aiohttp.ClientSession):
                         queue.put_nowait(qualified_seller)
                         return
             # failed to find seller. Wait a delay period then check again
-            await wait_timer(start_time=start_time)
-            self.response = await self.get(url=self.item_furl.url)
+            await wait_timer(end_time)
+            end_time = time.time() + delay
+            r = await self.fetch(url=self.item_furl.url)
+            check_count += 1
+
+    async def fetch(self, url):
+        async with self.get(url) as resp:
+            return await resp.text()
 
     async def async_captcha_solve(self, captcha_element, domain):
         log.debug("Encountered CAPTCHA. Attempting to solve.")
@@ -307,13 +327,13 @@ class AmazonMonitor(aiohttp.ClientSession):
                 f = furl(domain)  # Use the original URL to get the schema and host
                 f = f.set(path=captcha_element.attrib["action"])
                 f.add(args=input_dict)
-                response = await self.get(f.url)
+                response = await self.fetch(f.url)
                 return response
         return None
 
 
-async def wait_timer(start_time):
-    if (wait_delay := time.time() - start_time) > 0:
+async def wait_timer(end_time):
+    if (wait_delay := end_time - time.time()) > 0:
         await asyncio.sleep(wait_delay)
 
 

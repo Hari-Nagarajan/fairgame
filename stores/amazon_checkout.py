@@ -156,7 +156,7 @@ class AmazonCheckoutHandler(BaseStoreHandler):
         self.driver.get(url=url)
 
         log.debug("Inputting email...")
-        email_field = self.wait_get_amazon_element("EMAIL_TEXT_FIELD")
+        email_field = self.get_amazon_element("EMAIL_TEXT_FIELD")
         if not email_field:
             log.debug("email field not found")
         else:
@@ -394,6 +394,7 @@ class AmazonCheckoutHandler(BaseStoreHandler):
     #     return tasks
 
     async def checkout_worker(self, queue: asyncio.Queue, login_interval=7200):
+        print("Checkout Task Started")
         cookies = self.pull_cookies()
         session = aiohttp.ClientSession()
         session.cookie_jar.update_cookies(cookies=cookies)
@@ -462,7 +463,7 @@ async def turbo_initiate(
     r = await s.post(url=url, data=payload_inputs)
     tree: Optional[html.HtmlElement] = None
     while retry < MAX_RETRY and captcha_element:
-        tree = check_response(r)
+        tree = check_response(r.text())
         if tree is None:
             return pid, anti_csrf
         if captcha_element := has_captcha(tree):

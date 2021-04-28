@@ -347,6 +347,7 @@ class AmazonStoreHandler(BaseStoreHandler):
             notification_handler=self.notification_handler,
             loop=self.loop,
             item_list=self.item_list,
+            amazon_config=amazon_config,
         )
         tasks.extend(amazon_monitoring.run_async(queue=queue))
         amazon_checkout = AmazonCheckoutHandler(
@@ -460,6 +461,9 @@ class AmazonStoreHandler(BaseStoreHandler):
                             max_price,
                             condition=condition,
                             merchant_id=merchant_id,
+                            furl=furl(
+                                url=f"https://smile.amazon.com/gp/aod/ajax?asin={asin}"
+                            ),
                         )
                     )
             else:
