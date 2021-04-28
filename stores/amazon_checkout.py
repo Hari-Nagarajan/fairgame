@@ -58,7 +58,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from notifications.notifications import NotificationHandler
 from stores.basestore import BaseStoreHandler
 from utils.logger import log
-from utils.selenium_utils import enable_headless, options
+from utils.selenium_utils import enable_headless, options, get_cookies, save_screenshot
 
 from common.amazon_support import SellerDetail, has_captcha
 from utils.misc import (
