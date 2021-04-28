@@ -119,6 +119,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         tasks=1,
         checkshipping=False,
     ) -> None:
+        log.debug("Initializing AmazonMonitoringHandler")
         super().__init__()
 
         self.shuffle = True
@@ -134,6 +135,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         self.proxies = get_proxies(path=PROXY_FILE_PATH)
 
         # Initialize the Session we'll use for stock checking
+        log.debug("Initializing Monitoring Sessions")
         self.sessions_list: Optional[List[AmazonMonitor]] = []
         for idx in range(len(item_list)):
             self.sessions_list.append(AmazonMonitor())
@@ -167,6 +169,7 @@ class AmazonMonitor(aiohttp.ClientSession):
         self.delay: float = 5
         self.item: Optional[FGItem] = None
         self.amazon_config: Dict = {}
+        log.debug("Initializing Monitoring Task")
 
     def assign_config(self, azn_config):
         self.amazon_config = azn_config
@@ -184,7 +187,7 @@ class AmazonMonitor(aiohttp.ClientSession):
         # Do first response outside of while loop, so we can continue on captcha checks
         # and return to start of while loop with that response. Requires the next response
         # to be grabbed at end of while loop
-        print("Monitoring Task Started")
+        log.debug("Monitoring Task Started")
         self.item_furl = self.item.furl
         self.domain = urlparse(self.item_furl.url).netloc
         delay = 5
@@ -193,7 +196,7 @@ class AmazonMonitor(aiohttp.ClientSession):
         check_count = 1
         # Loop will only exit if a qualified seller is returned.
         while True:
-            print(f"Stock Check Count: {check_count}")
+            log.debug(f"{self.item.id} Stock Check Count: {check_count}")
             tree = check_response(r)
             if tree is not None:
                 if captcha_element := has_captcha(tree):
@@ -220,6 +223,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                         log.debug("Found an offer which meets criteria")
                         await queue.put(qualified_seller)
                         log.debug("Offer placed in queue")
+                        log.debug("Quitting monitoring task")
                         return
             # failed to find seller. Wait a delay period then check again
             log.debug("No offers found which meet product criteria")

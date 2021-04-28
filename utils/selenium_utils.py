@@ -16,7 +16,9 @@
 #
 #      The author may be contacted through the project's GitHub, at:
 #      https://github.com/Hari-Nagarajan/fairgame
-
+import fileinput
+import os
+from chromedriver_py import binary_path
 import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -185,3 +187,62 @@ def save_screenshot(d, page):
         log.error(f"Trying to recover from error: {e}")
         pass
     return None
+
+
+def create_driver(options):
+    try:
+        return webdriver.Chrome(executable_path=binary_path, options=options)
+    except Exception as e:
+        log.error(e)
+        log.error(
+            "If you have a JSON warning above, try deleting your .profile-amz folder"
+        )
+        log.error(
+            "If that's not it, you probably have a previous Chrome window open. You should close it."
+        )
+        exit(1)
+
+
+def selenium_initialization(
+    options, profile_path, no_image=False, slow_mode=True, headless=False
+):
+    if headless:
+        enable_headless()
+    prefs = get_prefs()
+    set_options(options=options, profile_path=profile_path, prefs=prefs)
+    modify_browser_profile()
+
+
+def modify_browser_profile():
+    # Delete crashed, so restore pop-up doesn't happen
+    path_to_prefs = os.path.join(
+        os.path.dirname(os.path.abspath("__file__")),
+        ".profile-amz",
+        "Default",
+        "Preferences",
+    )
+    try:
+        with fileinput.FileInput(path_to_prefs, inplace=True) as file:
+            for line in file:
+                print(line.replace("Crashed", "none"), end="")
+    except FileNotFoundError:
+        pass
+
+
+def set_options(options, profile_path, prefs, slow_mode=True):
+    options.add_experimental_option("prefs", prefs)
+    options.add_argument(f"user-data-dir={profile_path}")
+    if not slow_mode:
+        options.set_capability("pageLoadStrategy", "none")
+
+
+def get_prefs(no_image=False):
+    prefs = {
+        "profile.password_manager_enabled": False,
+        "credentials_enable_service": False,
+    }
+    if no_image:
+        prefs["profile.managed_default_content_settings.images"] = 2
+    else:
+        prefs["profile.managed_default_content_settings.images"] = 0
+    return prefs

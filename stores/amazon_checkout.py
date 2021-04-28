@@ -58,18 +58,23 @@ from selenium.webdriver.support.ui import WebDriverWait
 from notifications.notifications import NotificationHandler
 from stores.basestore import BaseStoreHandler
 from utils.logger import log
-from utils.selenium_utils import enable_headless, options, get_cookies, save_screenshot
+from utils.selenium_utils import (
+    enable_headless,
+    options,
+    get_cookies,
+    save_screenshot,
+    selenium_initialization,
+    create_driver,
+)
 
 from common.amazon_support import SellerDetail, has_captcha
 from utils.misc import (
     check_response,
     parse_html_source,
-    selenium_initialization,
     join_xpaths,
     wait_for_element_by_xpath,
     save_html_response,
     get_timestamp_filename,
-    create_driver,
     get_webdriver_pids,
 )
 
@@ -113,6 +118,7 @@ class AmazonCheckoutHandler(BaseStoreHandler):
         timer=7200,
         cookie_list=None,
     ):
+        log.debug("Initializing AmazonCheckoutHandler")
         self.profile_path = profile_path
         # Set up the Chrome options based on user flags
         if headless:
@@ -393,7 +399,8 @@ class AmazonCheckoutHandler(BaseStoreHandler):
             log.debug(f"Other error encountered while loading page: {e}")
 
     async def checkout_worker(self, queue: asyncio.Queue, login_interval=7200):
-        print("Checkout Task Started")
+        log.debug("Checkout Task Started")
+        log.debug("Logging in and pulling cookies from Selenium")
         cookies = self.pull_cookies()
         log.debug("Cookies from Selenium:")
         for cookie in cookies:
@@ -406,6 +413,7 @@ class AmazonCheckoutHandler(BaseStoreHandler):
         save_html_response("session-get", resp.status, html_text)
         selenium_refresh_time = time.time() + login_interval  # not used yet
         while True:
+            log.debug("Checkout task waiting for item in queue")
             qualified_seller = await queue.get()
             queue.task_done()
             if not qualified_seller:
