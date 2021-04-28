@@ -397,6 +397,7 @@ class AmazonCheckoutHandler(BaseStoreHandler):
         print("Checkout Task Started")
         cookies = self.pull_cookies()
         session = aiohttp.ClientSession()
+        session.headers.update(HEADERS)
         session.cookie_jar.update_cookies(cookies=cookies)
         selenium_refresh_time = time.time() + login_interval  # not used yet
         while True:
@@ -444,7 +445,7 @@ class AmazonCheckoutHandler(BaseStoreHandler):
 
 @timer
 async def turbo_initiate(
-    self, s: aiohttp.ClientSession, qualified_seller: Optional[SellerDetail] = None
+    s: aiohttp.ClientSession, qualified_seller: Optional[SellerDetail] = None
 ):
     domain = "smile.amazon.com"
     url = f"https://{domain}/checkout/turbo-initiate?ref_=dp_start-bbf_1_glance_buyNow_2-1&pipelineType=turbo&weblab=RCX_CHECKOUT_TURBO_DESKTOP_NONPRIME_87784&temporaryAddToCart=1"
@@ -460,14 +461,14 @@ async def turbo_initiate(
     retry = 0
     MAX_RETRY = 5
     captcha_element = True  # to initialize loop
-    r = await s.post(url=url, data=payload_inputs)
+    text = await aio_post(client=s, url=url, data=payload_inputs)
     tree: Optional[html.HtmlElement] = None
     while retry < MAX_RETRY and captcha_element:
-        tree = check_response(r.text())
+        tree = check_response(text)
         if tree is None:
             return pid, anti_csrf
         if captcha_element := has_captcha(tree):
-            r = await async_captcha_solve(s, captcha_element, domain)
+            text = await async_captcha_solve(s, captcha_element, domain)
             retry += 1
 
     find_pid = re.search(r"pid=(.*?)&amp;", tree.text_content())
@@ -483,9 +484,19 @@ async def turbo_initiate(
         return pid, anti_csrf
     log.debug("turbo-initiate unsuccessful")
     save_html_response(
-        filename="turbo_ini_unsuccessful", status=r.status, body=tree.text_content()
+        filename="turbo_ini_unsuccessful", status=000, body=tree.text_content()
     )
     return pid, anti_csrf
+
+
+async def aio_post(client, url, data):
+    async with client.post(url=url, data=data) as resp:
+        return await resp.text()
+
+
+async def aio_get(client, url, data=None):
+    async with client.get(url=url, data=data) as resp:
+        return await resp.text()
 
 
 @timer
@@ -628,5 +639,5 @@ async def async_captcha_solve(s: aiohttp.ClientSession, captcha_element, domain)
             f = furl(domain)  # Use the original URL to get the schema and host
             f = f.set(path=captcha_element.attrib["action"])
             f.add(args=input_dict)
-            response = await s.get(f.url)
+            response = await aio_get(client=s, url=f.url)
     return response

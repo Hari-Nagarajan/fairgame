@@ -279,7 +279,8 @@ class AmazonMonitor(aiohttp.ClientSession):
                     await asyncio.sleep(1)
                     # get the next response after solving captcha and then continue to next loop iteration
                     r = await self.async_captcha_solve(captcha_element[0], self.domain)
-                    await wait_timer(start_time=start_time)
+                    await wait_timer(end_time)
+                    end_time = time.time() + delay
                     continue
                 if tree is not None and (
                     sellers := get_item_sellers(
@@ -384,7 +385,7 @@ def get_item_sellers(
     return sellers
 
 
-@timer
+@debug
 def parse_offers(offers: html.HtmlElement, free_shipping_strings, atc_method=False):
     sellers: Optional[List[SellerDetail]] = []
     for idx, offer in enumerate(offers):
@@ -407,6 +408,7 @@ def parse_offers(offers: html.HtmlElement, free_shipping_strings, atc_method=Fal
                     merchant_id = find_merchant_id.group(1)
             except IndexError:
                 pass
+        log.info(f"merchant_id: {merchant_id}")
         # log failure to find merchant ID
         if not merchant_id:
             log.debug("No Merchant ID found")
@@ -418,16 +420,17 @@ def parse_offers(offers: html.HtmlElement, free_shipping_strings, atc_method=Fal
             log.debug("No price found for this offer, skipping")
             continue
         price = parse_price(price_text)
-
+        log.info(f"price: {price.amount_text}")
         # Get Seller shipping cost
         shipping_cost = get_shipping_costs(offer, free_shipping_strings)
-
+        log.info(f"shipping: {shipping_cost.amount_text}")
         # Get Seller product condition
         condition_heading = offer.xpath(".//div[@id='aod-offer-heading']/h5")
         if condition_heading:
             condition = AmazonItemCondition.from_str(condition_heading[0].text.strip())
         else:
             condition = AmazonItemCondition.Unknown
+        log.info(f"condition: {str(condition)}")
 
         # Get Seller item offerListingId
         offer_ids = offer.xpath(f".//input[@name='offeringID.1']")
@@ -436,6 +439,7 @@ def parse_offers(offers: html.HtmlElement, free_shipping_strings, atc_method=Fal
         else:
             log.error("No offer ID found for this offer, skipping")
             continue
+        log.info(f"offer id: {offer_id}")
 
         # get info for ATC post
         # only use if doing ATC method
@@ -459,6 +463,7 @@ def parse_offers(offers: html.HtmlElement, free_shipping_strings, atc_method=Fal
             atc_form=atc_form,
         )
         sellers.append(seller)
+    return sellers
 
 
 @timer
