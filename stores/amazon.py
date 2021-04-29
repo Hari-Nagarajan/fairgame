@@ -2004,7 +2004,7 @@ class AmazonItemCondition(Enum):
 
 
 def get_item_condition(form_action) -> AmazonItemCondition:
-    """ Attempts to determine the Item Condition from the Add To Cart form action """
+    """Attempts to determine the Item Condition from the Add To Cart form action"""
     if "_new_" in form_action:
         # log.debug(f"Item condition is new")
         return AmazonItemCondition.New
