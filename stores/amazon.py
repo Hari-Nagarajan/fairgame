@@ -112,6 +112,7 @@ class Amazon:
         shipping_bypass=False,
         alt_offers=False,
         wait_on_captcha_fail=False,
+        alt_checkout=False,
     ):
         self.notification_handler = notification_handler
         self.asin_list = []
@@ -144,6 +145,7 @@ class Amazon:
         self.unknown_title_notification_sent = False
         self.alt_offers = alt_offers
         self.wait_on_captcha_fail = wait_on_captcha_fail
+        self.alt_checkout = alt_checkout
 
         presence.enabled = not disable_presence
 
@@ -265,43 +267,46 @@ class Amazon:
         while continue_stock_check:
             self.unknown_title_notification_sent = False
             asin = self.run_asins(delay)
-            self.remove_asin_list(asin)
-            if not self.asin_list or self.single_shot:
-                continue_stock_check = False
-            # # found something in stock and under reserve
-            # # initialize loop limiter variables
-            # self.try_to_checkout = True
-            # self.checkout_retry = 0
-            # self.order_retry = 0
-            # loop_iterations = 0
-            # self.great_success = False
-            # while self.try_to_checkout:
-            #     try:
-            #         self.navigate_pages(test)
-            #     # if for some reason page transitions in the middle of checking elements, don't break the program
-            #     except sel_exceptions.StaleElementReferenceException:
-            #         pass
-            #     # if successful after running navigate pages, remove the asin_list from the list
-            #     if (
-            #         not self.try_to_checkout
-            #         and not self.single_shot
-            #         and self.great_success
-            #     ):
-            #         self.remove_asin_list(asin)
-            #     # checkout loop limiters
-            #     elif self.checkout_retry > DEFAULT_MAX_PTC_TRIES:
-            #         self.try_to_checkout = False
-            #         self.fail_to_checkout_note()
-            #     elif self.order_retry > DEFAULT_MAX_PYO_TRIES:
-            #         self.try_to_checkout = False
-            #         self.fail_to_checkout_note()
-            #     loop_iterations += 1
-            #     if loop_iterations > DEFAULT_MAX_CHECKOUT_LOOPS:
-            #         self.fail_to_checkout_note()
-            #         self.try_to_checkout = False
-            # # if no items left it list, let loop end
-            # if not self.asin_list:
-            #     continue_stock_check = False
+            # New normal (buy it now)
+            if not self.alt_checkout:
+                self.remove_asin_list(asin)
+                if not self.asin_list or self.single_shot:
+                    continue_stock_check = False
+            else:
+                # found something in stock and under reserve
+                # initialize loop limiter variables
+                self.try_to_checkout = True
+                self.checkout_retry = 0
+                self.order_retry = 0
+                loop_iterations = 0
+                self.great_success = False
+                while self.try_to_checkout:
+                    try:
+                        self.navigate_pages(test)
+                    # if for some reason page transitions in the middle of checking elements, don't break the program
+                    except sel_exceptions.StaleElementReferenceException:
+                        pass
+                    # if successful after running navigate pages, remove the asin_list from the list
+                    if (
+                        not self.try_to_checkout
+                        and not self.single_shot
+                        and self.great_success
+                    ):
+                        self.remove_asin_list(asin)
+                    # checkout loop limiters
+                    elif self.checkout_retry > DEFAULT_MAX_PTC_TRIES:
+                        self.try_to_checkout = False
+                        self.fail_to_checkout_note()
+                    elif self.order_retry > DEFAULT_MAX_PYO_TRIES:
+                        self.try_to_checkout = False
+                        self.fail_to_checkout_note()
+                    loop_iterations += 1
+                    if loop_iterations > DEFAULT_MAX_CHECKOUT_LOOPS:
+                        self.fail_to_checkout_note()
+                        self.try_to_checkout = False
+                # if no items left it list, let loop end
+                if not self.asin_list:
+                    continue_stock_check = False
         runtime = time.time() - self.start_time
         log.info(f"FairGame bot ran for {runtime} seconds.")
         time.sleep(10)  # add a delay to shut stuff done
@@ -779,16 +784,28 @@ class Amazon:
                 if offering_id_elements:
                     log.info("Attempting Add To Cart with offer ID...")
                     offering_id = offering_id_elements[0].get_attribute("value")
-                    if self.buy_it_now(offering_id, max_atc_retries=20):
-                        return True
+                    if not self.alt_checkout:
+                        if self.buy_it_now(offering_id, max_atc_retries=20):
+                            return True
+                        else:
+                            self.send_notification(
+                                "Failed Buy it Now ",
+                                "failed-BIN",
+                                self.take_screenshots,
+                            )
+                            self.save_page_source("failed-atc")
+                            return False
                     else:
-                        self.send_notification(
-                            "Failed Buy it Now ",
-                            "failed-BIN",
-                            self.take_screenshots,
-                        )
-                        self.save_page_source("failed-atc")
-                        return False
+                        if self.attempt_atc(offering_id):
+                            return True
+                        else:
+                            self.send_notification(
+                                "Failed ATC ",
+                                "failed-ATC",
+                                self.take_screenshots,
+                            )
+                            self.save_page_source("failed-atc")
+                            return False
                 else:
                     log.error(
                         "Unable to find offering ID to add to cart.  Using legacy mode."
