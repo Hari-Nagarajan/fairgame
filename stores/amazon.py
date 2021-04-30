@@ -557,6 +557,13 @@ class Amazon:
                     if open_offers_link:
                         log.debug("Attempting to click the open offers link...")
                         try:
+                         cookie_button = self.driver.find_element_by_xpath("//input[@id='sp-cc-accept']")
+                        except:
+                         cookie_button = None
+                        if cookie_button:
+                         cookie_button.click()
+                         log.info("Cookies accepted!")
+                        try:
                             open_offers_link.click()
                         except sel_exceptions.WebDriverException as e:
                             log.error("Problem clicking open offers link")
