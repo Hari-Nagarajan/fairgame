@@ -33,7 +33,7 @@
 
 # Quick Links
  * [Discord](https://discord.gg/4rfbNKrmnC) **DO NOT ASK QUESTIONS IN DISCORD BEFORE READING THIS DOCUMENT**
- * [Python Download (3.8.8)](https://www.python.org/downloads/release/python-388/)
+ * [Python Download (3.8.9)](https://www.python.org/downloads/release/python-389/)
 
 # About FairGame
 
@@ -84,7 +84,7 @@ Symptoms of account restrictions include: 1) Fly-out (offers) window is missing/
 ***!!! YOU WILL NEED TO USE THE 3.8 BRANCH OF PYTHON, ANY OTHER BRANCH/VERSION (Anaconda, 2.7, 3.9.x, 3.10, 4.0,
 toaster, etc.) BREAKS DEPENDENCIES !!!***
 
-It is best if you use the newest version of **3.8** (at this time, 3.8.8) but 3.8.5, 3.8.6, and 3.8.7 should also work. 
+It is best if you use the newest version of **3.8** (at this time, 3.8.9) but 3.8.5, 3.8.6, 3.8.7, and 3.8.8 should also work. 
 
 It also requires a working Chrome installation. 
 Running it on a potato (<2GB of RAM) is not suggested. 
@@ -96,7 +96,7 @@ regardless of your OS (obviously you aren't running .bat files if you aren't on 
 available on your OS). See [Platform Specific](#Platform-Specific) instructions for help installing Python and
 dependencies in other operating systems:
 1. [Turn on your computer](https://www.google.com/search?q=how+do+I+turn+on+my+computer)
-2. Install Python 3.8.5, 3.8.6, 3.8.7 or 3.8.8. Install to some location that does not include spaces in the path 
+2. [Install Python 3.8.9](https://www.python.org/downloads/release/python-389/). Install to some location that does not include spaces in the path 
    (we suggest C:\Python38). Click the checkbox that says Add Python 3.8 to PATH (or something similar) 
    during the installation.
    
