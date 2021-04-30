@@ -145,7 +145,7 @@ dependencies in other operating systems:
    
    ![Run Amazon.bat](https://github.com/Hari-Nagarajan/fairgame/blob/master/docs/images/Step7.png)
    
-8. Verify that the bot successfully makes it to the place your order page with the item you put in the config file. 
+8. Verify that the bot successfully places an order with the item you put in the config file. **NOTE: WITH 0.6.6 TEST MODE NO LONGER FUNCTIONS THE SAME WAY. YOU SHOULD TRY AND BUY SOMETHING TO VERIFY THE BOT WORKS FOR YOU!**
    If it does not, then:
    * You messed something up above, and need to fix it; or,
    * If it is asking you for your address and payment info, you need to do all of the following in a separate
@@ -318,7 +318,9 @@ pipenv run python app.py amazon [Options]
 Options:
   --headless          Runs Chrome in headless mode.
   
-  --test              Run the checkout flow but do not actually purchase the item[s]
+  --test              Run the checkout flow but do not actually purchase the item[s]. Only functional with `--alt-checkout` mode.
+  
+  --alt-checkout      Utilize the old add to cart method of checkout.
 
   --delay FLOAT       Time to wait between the end of one stock check and the beginning of the next stock check.
   
