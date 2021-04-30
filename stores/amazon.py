@@ -883,7 +883,7 @@ class Amazon:
             timeout = self.get_timeout(5)
             while self.driver.title == "" and time.time() < timeout:
                 time.sleep(0.5)
-            if self.driver.title != "Place Your Order - AmazonSmile Checkout":
+            if self.driver.title not in amazon_config["CHECKOUT_TITLES"]:
                 retry += 1
                 if retry > max_atc_retries:
                     return False
