@@ -408,7 +408,8 @@ class AmazonCheckoutHandler(BaseStoreHandler):
         session = aiohttp.ClientSession(
             headers=HEADERS, cookies={cookie: cookies[cookie] for cookie in cookies}
         )
-        resp = await session.get("https://smile.amazon.com")
+        domain = "smile.amazon.com"
+        resp = await session.get(f"https://{domain}")
         html_text = await resp.text()
         save_html_response("session-get", resp.status, html_text)
         selenium_refresh_time = time.time() + login_interval  # not used yet
@@ -435,6 +436,14 @@ class AmazonCheckoutHandler(BaseStoreHandler):
                     log.info(
                         f"Time from stock found to checkout: {round(time_difference,2)} seconds."
                     )
+                    try:
+                        status, text = await aio_get(
+                            session,
+                            f"https://{domain}/gp/buy/thankyou/handlers/display.html?_from=cheetah&checkMFA=1&purchaseId={pid}&referrer=yield&pid={pid}&pipelineType=turbo&clientId=retailwebsite&temporaryAddToCart=1&hostPage=detail&weblab=RCX_CHECKOUT_TURBO_DESKTOP_PRIME_87783",
+                        )
+                        save_html_response("order-confirm", status, text)
+                    except aiohttp.ClientError:
+                        log.debug("could not save order confirmation page")
                     await session.close()
                     break
 
@@ -476,7 +485,7 @@ async def aio_post(client, url, data=None):
 async def aio_get(client, url, data=None):
     async with client.get(url=url, data=data) as resp:
         text = await resp.text()
-        return await resp.status, text
+        return resp.status, text
 
 
 @timer
@@ -537,6 +546,7 @@ async def turbo_checkout(s: aiohttp.ClientSession, pid, anti_csrf):
     s.headers.update(header_update)
 
     status, text = await aio_post(client=s, url=url)
+    save_html_response("turbo_checkout", status, text)
     if status == 200 or status == 500:
         log.debug("Checkout maybe successful, check order page!")
         # TODO: Implement GET request to confirm checkout

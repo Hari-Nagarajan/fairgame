@@ -210,6 +210,8 @@ class AmazonMonitor(aiohttp.ClientSession):
         end_time = time.time() + delay
         status, response_text = await self.aio_get(url=self.item.furl.url)
 
+        save_html_response("stock-check", status, response_text)
+
         # do this after each request
         fail_counter = check_fail(status=status, fail_counter=fail_counter)
         if fail_counter == -1:
@@ -265,7 +267,7 @@ class AmazonMonitor(aiohttp.ClientSession):
             await wait_timer(end_time)
             end_time = time.time() + delay
             status, response_text = await self.aio_get(url=self.item.furl.url)
-
+            save_html_response("stock-check", status, response_text)
             # do this after each request
             fail_counter = check_fail(status=status, fail_counter=fail_counter)
             if fail_counter == -1:
@@ -321,7 +323,7 @@ def check_fail(status, fail_counter, fail_list=None) -> int:
     n, where n is the current consecutive failure count"""
 
     if fail_list is None:
-        fail_list = [999]
+        fail_list = [503, 999]
     MAX_FAILS = 5
     n = fail_counter
     if status in fail_list:
