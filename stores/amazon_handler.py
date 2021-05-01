@@ -4,6 +4,7 @@ import typing
 import asyncio
 from furl import furl
 from price_parser import parse_price, Price
+import inspect
 
 from common.amazon_support import (
     AmazonItemCondition,
@@ -21,13 +22,15 @@ from notifications.notifications import NotificationHandler
 from stores.basestore import BaseStoreHandler
 from utils.logger import log
 
-from stores.amazon_monitoring import AmazonMonitoringHandler
+from stores.amazon_monitoring import AmazonMonitoringHandler, AmazonMonitor
 from stores.amazon_checkout import AmazonCheckoutHandler
 
 CONFIG_FILE_PATH = "config/amazon_requests_config.json"
 STORE_NAME = "Amazon"
 
 amazon_config = {}
+
+queue: asyncio.Queue
 
 
 class AmazonStoreHandler(BaseStoreHandler):
@@ -42,7 +45,6 @@ class AmazonStoreHandler(BaseStoreHandler):
         encryption_pass=None,
     ) -> None:
         super().__init__()
-
         self.shuffle = True
         self.is_test = False
         self.selenium_refresh_offset = 7200
@@ -55,7 +57,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         self.amazon_domain = "smile.amazon.com"
         self.webdriver_child_pids = []
         self.single_shot = single_shot
-        self.loop = asyncio.get_event_loop()
+        # self.loop = asyncio.get_event_loop()
 
         from cli.cli import global_config
 
@@ -74,6 +76,7 @@ class AmazonStoreHandler(BaseStoreHandler):
 
     async def run_async(self, checkout_tasks=1):
         log.debug("Creating checkout queue")
+        global queue
         queue = asyncio.Queue()
         log.debug("Creating checkout handler")
         amazon_checkout = AmazonCheckoutHandler(
@@ -93,17 +96,21 @@ class AmazonStoreHandler(BaseStoreHandler):
         log.debug("Creating monitoring handler")
         amazon_monitoring = AmazonMonitoringHandler(
             notification_handler=self.notification_handler,
-            loop=self.loop,
             item_list=self.item_list,
             amazon_config=amazon_config,
             tasks=checkout_tasks,
         )
         log.debug("Creating checkout worker and monitoring task(s)")
+        future = []
+        for idx in range(len(amazon_monitoring.sessions_list)):
+            future.append(asyncio.Future())
+            future[idx].add_done_callback(recreate_session_callback)
+
         await asyncio.gather(
             amazon_checkout.checkout_worker(queue=queue),
             *[
-                session.stock_check(queue)
-                for session in amazon_monitoring.sessions_list
+                amazon_monitoring.sessions_list[idx].stock_check(queue, future[idx])
+                for idx in range(len(amazon_monitoring.sessions_list))
             ],
         )
         return
@@ -179,3 +186,15 @@ class AmazonStoreHandler(BaseStoreHandler):
                 log.error(
                     f"Item isn't fully qualified.  Please include asin, min-price and max-price. {json_item}"
                 )
+
+
+def recreate_session_callback(future: asyncio.Future):
+    log.debug("Checking session result")
+    global queue
+    if isinstance(future.result(), AmazonMonitor):
+        log.debug("session result is a monitoring class, recreating monitor")
+        session: AmazonMonitor = future.result()
+        future = asyncio.Future()
+        future.add_done_callback(recreate_session_callback)
+        asyncio.create_task(session.stock_check(queue=queue, future=future))
+        log.debug("New monitor task create")

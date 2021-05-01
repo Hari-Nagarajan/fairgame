@@ -113,7 +113,6 @@ class AmazonMonitoringHandler(BaseStoreHandler):
     def __init__(
         self,
         notification_handler: NotificationHandler,
-        loop: asyncio.AbstractEventLoop,
         item_list: List[FGItem],
         amazon_config,
         tasks=1,
@@ -130,7 +129,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         self.stock_checks = 0
         self.start_time = int(time.time())
         self.amazon_config = amazon_config
-        self.ua = UserAgent()
+        ua = UserAgent()
 
         self.proxies = get_proxies(path=PROXY_FILE_PATH)
 
@@ -138,13 +137,16 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         log.debug("Initializing Monitoring Sessions")
         self.sessions_list: Optional[List[AmazonMonitor]] = []
         for idx in range(len(item_list)):
-            self.sessions_list.append(AmazonMonitor())
-            self.sessions_list[idx].headers.update(HEADERS)
-            self.sessions_list[idx].headers.update({"user-agent": self.ua.random})
+            self.sessions_list.append(
+                AmazonMonitor(
+                    headers=HEADERS,
+                    item=item_list[idx],
+                    amazon_config=self.amazon_config,
+                )
+            )
+            self.sessions_list[idx].headers.update({"user-agent": ua.random})
             if self.proxies and idx < len(self.proxies):
                 self.sessions_list[idx].assign_proxy(self.proxies[idx]["https"])
-            self.sessions_list[idx].assign_item(item_list[idx])
-            self.sessions_list[idx].assign_config(self.amazon_config)
 
 
 # class Offers(NamedTuple):
@@ -160,15 +162,16 @@ class AmazonMonitoringHandler(BaseStoreHandler):
 
 
 class AmazonMonitor(aiohttp.ClientSession):
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self, item: FGItem, amazon_config: Dict, proxy: str = "", *args, **kwargs
+    ):
         super(self.__class__, self).__init__(*args, **kwargs)
-        self.response = None
-        self.item_furl: Optional[furl] = None
-        self.domain: str = ""
-        self.proxy: str = ""
+        self.item = item
+        self.amazon_config = amazon_config
+        self.proxy = proxy
+        self.domain = urlparse(self.item.furl.url).netloc
+
         self.delay: float = 5
-        self.item: Optional[FGItem] = None
-        self.amazon_config: Dict = {}
         log.debug("Initializing Monitoring Task")
 
     def assign_config(self, azn_config):
@@ -183,21 +186,42 @@ class AmazonMonitor(aiohttp.ClientSession):
     def assign_item(self, item: FGItem):
         self.item = item
 
-    async def stock_check(self, queue: asyncio.Queue):
+    def fail_recreate(self):
+        # Something wrong, start a new task then kill this one
+        log.debug("Max consecutive request fails reached. Restarting session")
+        session = AmazonMonitor(
+            headers=HEADERS,
+            item=self.item,
+            amazon_config=self.amazon_config,
+            proxy=self.proxy,
+        )
+        session.headers.update({"user-agent": UserAgent().random})
+        log.debug("Sesssion Created")
+        return session
+
+    async def stock_check(self, queue: asyncio.Queue, future: asyncio.Future):
         # Do first response outside of while loop, so we can continue on captcha checks
         # and return to start of while loop with that response. Requires the next response
         # to be grabbed at end of while loop
-        log.debug("Monitoring Task Started")
-        self.item_furl = self.item.furl
-        self.domain = urlparse(self.item_furl.url).netloc
+        log.debug(f"Monitoring Task Started for {self.item.id}")
+
+        fail_counter = 0  # Count sequential get fails
         delay = 5
         end_time = time.time() + delay
-        r = await self.aio_get(url=self.item_furl.url)
+        status, response_text = await self.aio_get(url=self.item.furl.url)
+
+        # do this after each request
+        fail_counter = check_fail(status=status, fail_counter=fail_counter)
+        if fail_counter == -1:
+            session = self.fail_recreate()
+            future.set_result(session)
+            return
+
         check_count = 1
         # Loop will only exit if a qualified seller is returned.
         while True:
             log.debug(f"{self.item.id} Stock Check Count: {check_count}")
-            tree = check_response(r)
+            tree = check_response(response_text)
             if tree is not None:
                 if captcha_element := has_captcha(tree):
                     log.debug("Captcha found during monitoring task")
@@ -205,7 +229,17 @@ class AmazonMonitor(aiohttp.ClientSession):
                     # TODO: maybe track captcha hits so that it aborts after several?
                     await asyncio.sleep(1)
                     # get the next response after solving captcha and then continue to next loop iteration
-                    r = await self.async_captcha_solve(captcha_element[0], self.domain)
+                    status, response_text = await self.async_captcha_solve(
+                        captcha_element[0], self.domain
+                    )
+
+                    # do this after each request
+                    fail_counter = check_fail(status=status, fail_counter=fail_counter)
+                    if fail_counter == -1:
+                        session = self.fail_recreate()
+                        future.set_result(session)
+                        return
+
                     await wait_timer(end_time)
                     end_time = time.time() + delay
                     continue
@@ -224,17 +258,34 @@ class AmazonMonitor(aiohttp.ClientSession):
                         await queue.put(qualified_seller)
                         log.debug("Offer placed in queue")
                         log.debug("Quitting monitoring task")
-                        return
+                        future.set_result(None)
+                        return None
             # failed to find seller. Wait a delay period then check again
             log.debug("No offers found which meet product criteria")
             await wait_timer(end_time)
             end_time = time.time() + delay
-            r = await self.aio_get(url=self.item_furl.url)
+            status, response_text = await self.aio_get(url=self.item.furl.url)
+
+            # do this after each request
+            fail_counter = check_fail(status=status, fail_counter=fail_counter)
+            if fail_counter == -1:
+                session = self.fail_recreate()
+                future.set_result(session)
+                return
+
             check_count += 1
 
     async def aio_get(self, url):
-        async with self.get(url) as resp:
-            return await resp.text()
+        status = 404
+        text = None
+        try:
+            async with self.get(url) as resp:
+                status = resp.status
+                text = await resp.text()
+        except aiohttp.ClientError as e:
+            log.debug(e)
+            status = 999
+        return status, text
 
     async def async_captcha_solve(self, captcha_element, domain):
         log.debug("Encountered CAPTCHA. Attempting to solve.")
@@ -259,9 +310,27 @@ class AmazonMonitor(aiohttp.ClientSession):
                 f = furl(domain)  # Use the original URL to get the schema and host
                 f = f.set(path=captcha_element.attrib["action"])
                 f.add(args=input_dict)
-                response = await self.aio_get(f.url)
-                return response
+                status, response = await self.aio_get(f.url)
+                return status, response
         return None
+
+
+def check_fail(status, fail_counter, fail_list=None) -> int:
+    """Checks status against failure status codes. Checks consecurite failure count.
+    Returns -1 if maximum failure count reached. Otherwise returns 0 for not a failure, or
+    n, where n is the current consecutive failure count"""
+
+    if fail_list is None:
+        fail_list = [999]
+    MAX_FAILS = 5
+    n = fail_counter
+    if status in fail_list:
+        n += 1
+        if n >= MAX_FAILS:
+            return -1
+        return n
+    else:
+        return 0
 
 
 async def wait_timer(end_time):
