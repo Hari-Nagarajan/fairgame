@@ -459,7 +459,7 @@ def amazonrequests(
 
 
 @click.command()
-def aio_amazon():
+def amazon_aio():
     log.debug("Creating AIO Amazon Store Handler")
     aio_amazon_obj = AIO_AmazonStoreHandler(notification_handler=notification_handler)
     global tasks
@@ -643,7 +643,7 @@ main.add_command(show)
 main.add_command(find_endpoints)
 main.add_command(show_traceroutes)
 main.add_command(test_logging)
-main.add_command(aio_amazon)
+main.add_command(amazon_aio)
 
 # Global scope stuff here
 if is_latest():

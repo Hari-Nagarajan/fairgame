@@ -1,0 +1,19 @@
+{
+  "items": [
+    {
+      "asins": ["B08WT47L8B", "B07MFBLN7K", "B07MBQPQ62", "B0088PUEPK"],
+      "min-price": 500,
+      "max-price": 600,
+      "condition": "New",
+      "merchant_id": "amazon"
+    },
+    {
+      "asins": ["B07TXBRRGT", "B011F7W3LU", "B08J6F174Z"],
+      "min-price": 400,
+      "max-price": 401,
+      "condition": "Used",
+      "merchant_id": "any"
+    }
+  ],
+  "amazon_domain": "smile.amazon.com"
+}
