@@ -25,7 +25,7 @@ from utils.logger import log
 from stores.amazon_monitoring import AmazonMonitoringHandler, AmazonMonitor
 from stores.amazon_checkout import AmazonCheckoutHandler
 
-CONFIG_FILE_PATH = "config/amazon_requests_config.json"
+CONFIG_FILE_PATH = "config/amazon_aio_config.json"
 STORE_NAME = "Amazon"
 
 amazon_config = {}
