@@ -95,6 +95,7 @@ def main():
 
 
 @click.command()
+@notify_on_crash
 def amazon_aio():
     log.debug("Creating AIO Amazon Store Handler")
     aio_amazon_obj = AIO_AmazonStoreHandler(notification_handler=notification_handler)
