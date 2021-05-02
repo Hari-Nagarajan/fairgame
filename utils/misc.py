@@ -121,7 +121,8 @@ def save_html_response(filename, status, body):
     file_name = get_timestamp_filename(
         "html_saves/" + filename + "_" + str(status) + "_requests_source", "html"
     )
-
+    if body is None:
+        body = ""
     page_source = body
     with open(file_name, "w", encoding="utf-8") as f:
         f.write(page_source)
