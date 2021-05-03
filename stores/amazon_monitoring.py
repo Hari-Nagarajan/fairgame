@@ -169,7 +169,6 @@ class AmazonMonitor(aiohttp.ClientSession):
         self,
         item: FGItem,
         amazon_config: Dict,
-        proxy: Optional[str] = None,
         *args,
         **kwargs,
     ):
@@ -177,20 +176,12 @@ class AmazonMonitor(aiohttp.ClientSession):
         self.item = item
         self.amazon_config = amazon_config
         self.domain = urlparse(self.item.furl.url).netloc
-        self.proxy = proxy
-        self.proxy_connector = None
-
-        if proxy is not None:
-            self.proxy_connector = ProxyConnector.from_url(self.proxy)
 
         self.delay: float = 5
         log.debug("Initializing Monitoring Task")
 
     def assign_config(self, azn_config):
         self.amazon_config = azn_config
-
-    # def assign_proxy(self, proxy: Optional[str] = None):
-    #     self.proxy = proxy
 
     def assign_delay(self, delay: float = 5):
         self.delay = delay
@@ -205,7 +196,7 @@ class AmazonMonitor(aiohttp.ClientSession):
             headers=HEADERS,
             item=self.item,
             amazon_config=self.amazon_config,
-            proxy=self.proxy,
+            connector=self.connector,
         )
         session.headers.update({"user-agent": UserAgent().random})
         log.debug("Sesssion Created")
@@ -293,14 +284,9 @@ class AmazonMonitor(aiohttp.ClientSession):
         status = 404
         text = None
         try:
-            # if self.proxy_connector is None:
             async with self.get(url) as resp:
                 status = resp.status
                 text = await resp.text()
-        # else:
-        #     async with self.get(url, connector=self.proxy_connector) as resp:
-        #         status = resp.status
-        #         text = await resp.text()
         except aiohttp.ClientError as e:
             log.debug(e)
             status = 999
