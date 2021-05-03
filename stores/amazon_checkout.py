@@ -138,6 +138,7 @@ class AmazonCheckoutHandler(BaseStoreHandler):
         self.cookie_list = cookie_list
 
         self.checkout_session = aiohttp.ClientSession()
+        self.backup_atc_session = True
 
         self.webdriver_child_pids = None
 
