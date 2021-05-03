@@ -38,6 +38,7 @@ lxml = "*"
 dnspython = "*"
 fake-useragent = "*"
 pysocks = "*"
+aiohttp-proxy = "*"
 
 [requires]
 python_version = "3.8"

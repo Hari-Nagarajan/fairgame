@@ -59,6 +59,7 @@ from stores.basestore import BaseStoreHandler
 from utils.logger import log
 import asyncio
 import aiohttp
+from aiohttp_proxy import ProxyConnector, ProxyType
 
 # PDP_URL = "https://smile.amazon.com/gp/product/"
 # AMAZON_DOMAIN = "www.amazon.com.au"
@@ -173,8 +174,12 @@ class AmazonMonitor(aiohttp.ClientSession):
         super(self.__class__, self).__init__(*args, **kwargs)
         self.item = item
         self.amazon_config = amazon_config
-        self.proxy = proxy
         self.domain = urlparse(self.item.furl.url).netloc
+        self.proxy = proxy
+        self.proxy_connector = None
+
+        if proxy is not None:
+            self.proxy_connector = ProxyConnector.from_url(self.proxy)
 
         self.delay: float = 5
         log.debug("Initializing Monitoring Task")
@@ -286,12 +291,12 @@ class AmazonMonitor(aiohttp.ClientSession):
         status = 404
         text = None
         try:
-            if self.proxy is None:
+            if self.proxy_connector is None:
                 async with self.get(url) as resp:
                     status = resp.status
                     text = await resp.text()
             else:
-                async with self.get(url, proxy=self.proxy) as resp:
+                async with self.get(url, connector=self.proxy_connector) as resp:
                     status = resp.status
                     text = await resp.text()
         except aiohttp.ClientError as e:
