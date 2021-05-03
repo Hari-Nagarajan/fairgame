@@ -619,8 +619,7 @@ class Amazon:
                     upper_case = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
                     lower_case = 'abcdefghijklmnopqrstuvwxyz'
                     offer_count = self.driver.find_elements_by_xpath(
-                        "//div[@id='qualifiedBuybox']//input[@id='add-to-cart-button'] |"
-                        "//div[contains(translate(@id, upper_case, lower_case), 'qualifiedbuybox')]//input[@id='add-to-cart-button']"
+                        "//div[@id='qualifiedBuybox']//input[@id='add-to-cart-button'] | //div[contains(translate(@id, upper_case, lower_case), 'qualifiedbuybox')]//input[@id='add-to-cart-button']"
                     )
                 else:
                     log.warning(
