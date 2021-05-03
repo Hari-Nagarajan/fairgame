@@ -143,11 +143,12 @@ class AmazonMonitoringHandler(BaseStoreHandler):
                     headers=HEADERS,
                     item=item_list[idx],
                     amazon_config=self.amazon_config,
+                    proxy=self.proxies[idx]["https"]
+                    if self.proxies and idx < len(self.proxies)
+                    else None,
                 )
             )
             self.sessions_list[idx].headers.update({"user-agent": ua.random})
-            if self.proxies and idx < len(self.proxies):
-                self.sessions_list[idx].assign_proxy(self.proxies[idx]["https"])
 
 
 # class Offers(NamedTuple):
