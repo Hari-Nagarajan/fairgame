@@ -163,7 +163,12 @@ class AmazonMonitoringHandler(BaseStoreHandler):
 
 class AmazonMonitor(aiohttp.ClientSession):
     def __init__(
-        self, item: FGItem, amazon_config: Dict, proxy: str = "", *args, **kwargs
+        self,
+        item: FGItem,
+        amazon_config: Dict,
+        proxy: Optional[str] = None,
+        *args,
+        **kwargs,
     ):
         super(self.__class__, self).__init__(*args, **kwargs)
         self.item = item
@@ -177,7 +182,7 @@ class AmazonMonitor(aiohttp.ClientSession):
     def assign_config(self, azn_config):
         self.amazon_config = azn_config
 
-    def assign_proxy(self, proxy: str = ""):
+    def assign_proxy(self, proxy: Optional[str] = None):
         self.proxy = proxy
 
     def assign_delay(self, delay: float = 5):
@@ -281,9 +286,14 @@ class AmazonMonitor(aiohttp.ClientSession):
         status = 404
         text = None
         try:
-            async with self.get(url) as resp:
-                status = resp.status
-                text = await resp.text()
+            if self.proxy is None:
+                async with self.get(url) as resp:
+                    status = resp.status
+                    text = await resp.text()
+            else:
+                async with self.get(url, proxy=self.proxy) as resp:
+                    status = resp.status
+                    text = await resp.text()
         except aiohttp.ClientError as e:
             log.debug(e)
             status = 999
@@ -318,7 +328,7 @@ class AmazonMonitor(aiohttp.ClientSession):
 
 
 def check_fail(status, fail_counter, fail_list=None) -> int:
-    """Checks status against failure status codes. Checks consecurite failure count.
+    """Checks status against failure status codes. Checks consecutive failure count.
     Returns -1 if maximum failure count reached. Otherwise returns 0 for not a failure, or
     n, where n is the current consecutive failure count"""
 
