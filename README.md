@@ -64,28 +64,17 @@ FairGame only works on Amazon and can automatically place an order.
     one of any of the products you've included in the configuration file, use the `--single-shot` option, see
     [Running the program](#Running-the-program)    
 
-## Disclaimer 
+# Disclaimer 
 
-WARNING: The use of this software can result in Amazon restricting access to (i.e., "shadow ban") your account and make it 
-temporarily difficult for you to purchase products, with or without the bot. These restrictions cannot be resolved by the 
-FairGame developer(s), nor can they be detected or resolved by the standard Amazon Customer Support (no need to call/chat). 
+WARNING: The use of this software can result in Amazon temporarily restricting access to (i.e., "shadow ban") your Amazon account, making it 
+difficult for you to purchase certain products, with or without the bot (discussed in the next section). This open-source software offers no guarantees of success, and its developer(s) cannont be held responsible for any personal damages resulting from its use.*
 
-**By using this software, you acknowledge these risks and agree to be solely responsible for any consequenses thereof.** 
-**This free software offers no guarantee of success, and its developer(s) cannont be held liable for any personal damages resulting from its use.**
+### ***By using this software, you acknowledge these risks and are solely liable for any consequnces therein.***
 
-### About Amazon Account Restrictions
-If your Amazon account is restricted then the only resolution is to **stop all Amazon monitors** (e.g., *FairGame*, *Distill.io*, or other 
-bots), **wait patiently**, and hope that the limits are lifted within a few days. If this is a major issue you should consider avoiding use of this software. 
 
-***Most restrictions will self-resolve within 24-48 hours after all botting is ceased.***
+## About Amazon Account Restrictions
 
-Account restrictions can be triggered by any of the following: 
-* Configuring any instance to check stock too frequently/aggressively (default settings *not guaranteed* to be safe) 
-* Running multiple instances on a single device, regardless of the Amazon account(s) used
-* Running multiple instances on different devices using the same Amazon account, regardless of their IP, proxy, or location
-* Logging in to your Amazon account from a different device or location while bots are running elsewhere
-
-The developer(s) **do not** support running multiple instances of FairGame nor any issues that may be encountered while doing so. 
+The majority of issues FairGame may encounter are simply a consequense of Amazon's anti-botting measures. Firstly, *don't pacnic.*
 
 Symptoms of account restrictions include: 
 * Inability to access the My Account page (*Amazon Dogs* and “SORRY we couldn’t find that page” message) 
@@ -93,9 +82,25 @@ Symptoms of account restrictions include:
 * Missing or Blank fly-out (i.e., "offers") window , even if there *are* listings for the ASIN
 * Frequent CAPTCHA checks
 
-Many "*sudden*" issues encountered with FairGame are a just consequense of anti-bot account restrictions. If you have a 
-problem, please stop all bots/monitors on your Amazon account and wait **at least 48 hours** before opening an issue. You
-may still use Amazon organically during this intermission. 
+If your Amazon account is restricted then the only solution is to **stop all Amazon monitors** (e.g., *FairGame*, *Distill.io*, or other 
+bots), **wait patiently**, and hope that the limits are lifted within a day or so. These restrictions cannot be resolved by the 
+FairGame developer(s), nor can they be detected/resolved by Amazon Customer Support (please do not waste their time). 
+
+**Most restrictions will self-resolve within 24-48 hours *after* all botting has ceased.** 
+
+You may still use your Amazon account organically during this intermission, albeit with limited functionality. If this is a critical issue then avoid use of this software. 
+
+Account restrictions can be triggered by several factors, including: 
+* Configuring any FairGame instance(s) to poll too frequently/aggressively (even the default settings are *not guaranteed* to be safe) 
+* Running multiple FairGame instances on one device, regardless of the Amazon account(s) used
+* Running multiple FairGame instances on different devices using one Amazon account, regardless of IP, proxy, or geo-location filter
+* Accessing your Amazon account from a different device or location while bots are running elsewhere
+* Using other bots concurrently with FairGame
+
+For this reason and others, the developer(s) **DO NOT** support running multiple FairGame instances nor any issues you may encountered when doing so. 
+
+Before opening an issue on GitHub or Discord, please stop all Amazon bots/monitors on your account and wait **at least 48 hours** to see if the problem self-resolves. *Issues raised matching this description will be ignored because you neglected to read the README and have no respect for others' time.* 
+
 
 # Installation
 
