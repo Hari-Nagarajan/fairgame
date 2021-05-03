@@ -39,6 +39,8 @@ dnspython = "*"
 fake-useragent = "*"
 pysocks = "*"
 aiohttp-proxy = "*"
+arsenic = "*"
+aioconsole = "*"
 
 [requires]
 python_version = "3.8"

@@ -28,6 +28,11 @@ from datetime import datetime
 import queue
 import asyncio
 import aiohttp
+from arsenic import start_session, keys, browsers, services, session
+from arsenic.session import SelectorType, Element
+from arsenic.errors import ArsenicError
+from aioconsole import ainput
+
 from typing import Optional, List
 
 import secrets
@@ -133,6 +138,249 @@ class AmazonCheckoutHandler(BaseStoreHandler):
         self.cookie_list = cookie_list
 
         self.checkout_session = aiohttp.ClientSession()
+
+        self.webdriver_child_pids = None
+
+        # self.session_atc: Optional[session.Session] = None
+        selenium_initialization(options, profile_path)
+
+        if self.backup_atc_session:
+            service_atc = services.Chromedriver(binary=binary_path)
+            browser_atc = browsers.Chrome(chromeOptions=options)
+            self.queue_atc = asyncio.Queue()
+            self.session_atc: Optional[session.Session] = None
+
+    async def backup_atc(self):
+        # Spawn the web browser
+        service_atc = services.Chromedriver(binary=binary_path)
+        browser_atc = browsers.Chrome(chromeOptions=options)
+
+        # Start session
+        self.session_atc = await start_session(service_atc, browser_atc)
+
+        # Get a valid amazon session for our requests
+        await self.login_aio()
+        time.sleep(2)
+
+    async def get_element_by_xpath(self, selector: str):
+        element = None
+        try:
+            element = await self.session_atc.get_element(
+                selector, selector_type=SelectorType.xpath
+            )
+        except ArsenicError:
+            pass
+        return element
+
+    async def get_elements_by_xpath(self, selector: str):
+        elements = await self.session_atc.get_elements(
+            selector, selector_type=SelectorType.xpath
+        )
+        return elements
+
+    async def login_aio(self):
+        domain = "smile.amazon.com"
+        log.info(f"Logging in to {domain}...")
+
+        amazonsmile_url = "https://smile.amazon.com/ap/signin/ref=smi_ge2_ul_si_rl?_encoding=UTF8&ie=UTF8&openid.assoc_handle=amzn_smile&openid.claimed_id=http://specs.openid.net/auth/2.0/identifier_select&openid.identity=http://specs.openid.net/auth/2.0/identifier_select&openid.mode=checkid_setup&openid.ns=http://specs.openid.net/auth/2.0&openid.ns.pape=http://specs.openid.net/extensions/pape/1.0&openid.pape.max_auth_age=0&openid.return_to=https://smile.amazon.com/gp/charity/homepage.html?ie=UTF8&newts=1&orig=%2F"
+        amazoncom_url = "https://www.amazon.com/ap/signin?openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2Fwww.amazon.com%2F%3Fref_%3Dnav_signin&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.assoc_handle=usflex&openid.mode=checkid_setup&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&"
+        email_field: Optional[Element] = None
+        remember_me: Optional[Element] = None
+        password_field: Optional[Element] = None
+
+        if "smile" in domain:
+            url = amazonsmile_url
+        else:
+            url = amazoncom_url
+
+        await self.session_atc.get(url=url, timeout=10)
+
+        log.debug("Inputting email...")
+
+        email_field = await self.get_element_by_xpath(
+            self.amazon_config["EMAIL_TEXT_FIELD"]
+        )
+        if not email_field:
+            log.debug("email field not found")
+        else:
+            # Entering in email field
+            await email_field.clear()
+            await email_field.send_keys(self.amazon_config["username"])
+            await email_field.send_keys(keys.RETURN)
+
+            if self.get_elements_by_xpath('//input[@id="auth-error-message-box"]'):
+                log.error("Login failed, delete your credentials file")
+                time.sleep(240)
+                exit(1)
+
+        log.debug("Checking 'rememberMe' checkbox...")
+        remember_me = await self.get_element_by_xpath(
+            self.amazon_config["LOGIN_REMEMBER_ME"]
+        )
+        if remember_me:
+            try:
+                await remember_me.click()
+            except ArsenicError as e:
+                log.debug("Could not click remember me checkbox")
+                log.debug(e)
+        else:
+            log.error("Remember me checkbox did not exist")
+
+        log.info("Inputting Password")
+        captcha_entry: Optional[Element] = None
+        password_field = await self.get_element_by_xpath(
+            self.amazon_config["PASSWORD_TEXT_FIELD"]
+        )
+
+        if not password_field:
+            log.debug("No password field")
+
+        try:
+            await password_field.clear()
+            await password_field.send_keys(self.amazon_config["password"])
+        except ArsenicError as e:
+            log.debug("Password field entry error")
+            log.debug(e)
+
+        captcha_entry = await self.get_element_by_xpath(
+            self.amazon_config["LOGIN_CAPTCHA_TEXT_FIELD"]
+        )
+        if captcha_entry:
+            try:
+                log.debug("Stuck on a captcha... Lets try to solve it.")
+                page_source = await self.session_atc.get_page_source()
+                captcha_link = page_source.split('<img src="')[1].split('">')[
+                    0
+                ]  # extract captcha link
+                captcha = AmazonCaptcha.fromlink(captcha_link)
+                solution = captcha.solve()
+                log.debug(f"The solution is: {solution}")
+                if solution == "Not solved":
+                    log.debug(
+                        f"Failed to solve {captcha.image_link}, lets reload and get a new captcha."
+                    )
+                    self.send_notification("Unsolved Captcha", "unsolved_captcha")
+                    self.driver.refresh()
+                else:
+                    self.send_notification("Solving catpcha", "captcha")
+                    await captcha_entry.clear()
+                    await captcha_entry.send_keys(solution)
+            except Exception as e:
+                log.debug(e)
+                log.debug("Error trying to solve captcha. User Intervention Required.")
+                title_element = await self.get_element_by_xpath("//title")
+                title = await title_element.get_text()
+                current_title = title
+                while current_title == title:
+                    await asyncio.sleep(2)
+                    title_element = await self.get_element_by_xpath("//title")
+                    current_title = await title_element.get_text()
+
+        try:
+            await password_field.send_keys(keys.RETURN)
+        except ArsenicError as e:
+            log.debug(e)
+            try:
+                await captcha_entry.send_keys(keys.RETURN)
+            except ArsenicError as e:
+                log.debug(e)
+
+        # Deal with 2FA
+        title_element = await self.get_element_by_xpath("//title")
+        title = await title_element.get_text()
+
+        if title in self.amazon_config["TWOFA_TITLES"]:
+            otp_select = await self.get_element_by_xpath(
+                self.amazon_config["OTP_DEVICE"]
+            )
+            if otp_select:
+                log.info("OTP choice selection, trying to check TOTP (app) option")
+                totp_select = await self.get_element_by_xpath(
+                    self.amazon_config["OTP_TOTP"]
+                )
+                if totp_select:
+                    try:
+                        await totp_select.click()
+                    except ArsenicError:
+                        log.debug("Could not click totp selection")
+
+                topt_advance = await self.get_element_by_xpath(
+                    self.amazon_config["OTP_DEVICE_SELECT"]
+                )
+                if topt_advance:
+                    try:
+                        await topt_advance.click()
+                    except ArsenicError as e:
+                        log.debug(e)
+                        log.warning("USER INTERVENTION REQUIRED")
+                        title_element = await self.get_element_by_xpath("//title")
+                        title = await title_element.get_text()
+                        current_title = title
+                        while current_title == title:
+                            await asyncio.sleep(2)
+                            title_element = await self.get_element_by_xpath("//title")
+                            current_title = await title_element.get_text()
+
+            self.notification_handler.play_notify_sound()
+            self.send_notification(
+                "Bot requires OTP input, please see console and/or browser window!",
+                "otp-page",
+            )
+            otp_field = await self.get_element_by_xpath(self.amazon_config["OTP_FIELD"])
+            if otp_field:
+                log.info("OTP Remember me checkbox")
+                remember_device = await self.get_element_by_xpath(
+                    self.amazon_config["OTP_REMEMBER_ME"]
+                )
+                if remember_device:
+                    try:
+                        await remember_device.click()
+                    except ArsenicError:
+                        log.error("OTP Remember me checkbox could not be clicked")
+                otp = await ainput(prompt="enter in your two-step verification code: ")
+                await otp_field.send_keys(otp)
+                await otp_field.send_keys(keys.RETURN)
+                await asyncio.sleep(2)
+                title_element = await self.get_element_by_xpath("//title")
+                title = await title_element.get_text()
+
+                if title in self.amazon_config["TWOFA_TITLES"]:
+                    log.error("Something went wrong, please check browser manually...")
+                    while title in self.amazon_config["TWOFA_TITLES"]:
+                        await asyncio.sleep(2)
+                        title_element = await self.get_element_by_xpath("//title")
+                        title = await title_element.get_text()
+
+            else:
+                log.error("OTP entry box did not exist, please fill in OTP manually...")
+                title_element = await self.get_element_by_xpath("//title")
+                title = await title_element.get_text()
+                while title in self.amazon_config["TWOFA_TITLES"]:
+                    # Wait for the user to enter 2FA
+                    await asyncio.sleep(2)
+                    title_element = await self.get_element_by_xpath("//title")
+                    title = await title_element.get_text()
+
+        # Should be on home page now, if not, there is a problem
+        title_element = await self.get_element_by_xpath("//title")
+        title = await title_element.get_text()
+        if title not in self.amazon_config["HOME_PAGE_TITLES"]:
+            log.warning("Problem With Login, User Intervention Required")
+            self.send_notification("Problem with login", "login-issue")
+            DOTS = [".", "..", "..."]
+            idx = 0
+            while title not in self.amazon_config["HOME_PAGE_TITLES"]:
+                print(
+                    "Waiting for homepage, user input may be required",
+                    DOTS[idx],
+                    end="\r",
+                )
+                idx = (idx + 1) % len(DOTS)
+                await asyncio.sleep(2)
+                title_element = await self.get_element_by_xpath("//title")
+                title = await title_element.get_text()
+            print("", end="\r")
+        log.info(f'Logged in as {self.amazon_config["username"]}')
 
     def pull_cookies(self):
         # Spawn the web browser
