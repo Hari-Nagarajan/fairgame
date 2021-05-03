@@ -140,7 +140,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         for idx in range(len(item_list)):
             connector = None
             if self.proxies and idx < len(self.proxies):
-                connector = ProxyConnector.from_url(self.proxies[idx])
+                connector = ProxyConnector.from_url(self.proxies[idx]["https"])
             self.sessions_list.append(
                 AmazonMonitor(
                     headers=HEADERS,
