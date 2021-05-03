@@ -138,14 +138,15 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         log.debug("Initializing Monitoring Sessions")
         self.sessions_list: Optional[List[AmazonMonitor]] = []
         for idx in range(len(item_list)):
+            connector = None
+            if self.proxies and idx < len(self.proxies):
+                connector = ProxyConnector.from_url(self.proxies[idx])
             self.sessions_list.append(
                 AmazonMonitor(
                     headers=HEADERS,
                     item=item_list[idx],
                     amazon_config=self.amazon_config,
-                    proxy=self.proxies[idx]["https"]
-                    if self.proxies and idx < len(self.proxies)
-                    else None,
+                    connector=connector,
                 )
             )
             self.sessions_list[idx].headers.update({"user-agent": ua.random})
@@ -188,8 +189,8 @@ class AmazonMonitor(aiohttp.ClientSession):
     def assign_config(self, azn_config):
         self.amazon_config = azn_config
 
-    def assign_proxy(self, proxy: Optional[str] = None):
-        self.proxy = proxy
+    # def assign_proxy(self, proxy: Optional[str] = None):
+    #     self.proxy = proxy
 
     def assign_delay(self, delay: float = 5):
         self.delay = delay
@@ -292,14 +293,14 @@ class AmazonMonitor(aiohttp.ClientSession):
         status = 404
         text = None
         try:
-            if self.proxy_connector is None:
-                async with self.get(url) as resp:
-                    status = resp.status
-                    text = await resp.text()
-            else:
-                async with self.get(url, connector=self.proxy_connector) as resp:
-                    status = resp.status
-                    text = await resp.text()
+            # if self.proxy_connector is None:
+            async with self.get(url) as resp:
+                status = resp.status
+                text = await resp.text()
+        # else:
+        #     async with self.get(url, connector=self.proxy_connector) as resp:
+        #         status = resp.status
+        #         text = await resp.text()
         except aiohttp.ClientError as e:
             log.debug(e)
             status = 999
