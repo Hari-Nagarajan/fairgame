@@ -209,7 +209,7 @@ class AmazonMonitor(aiohttp.ClientSession):
         log.debug(f"Monitoring Task Started for {self.item.id}")
 
         fail_counter = 0  # Count sequential get fails
-        delay = 5
+        delay = self.delay
         end_time = time.time() + delay
         status, response_text = await self.aio_get(url=self.item.furl.url)
 

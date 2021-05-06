@@ -134,6 +134,7 @@ class AmazonCheckoutHandler(BaseStoreHandler):
 
         self.checkout_session = aiohttp.ClientSession()
 
+    #TODO make this async
     def pull_cookies(self):
         # Spawn the web browser
         self.driver = create_driver(options)
@@ -398,21 +399,25 @@ class AmazonCheckoutHandler(BaseStoreHandler):
         except Exception as e:
             log.debug(f"Other error encountered while loading page: {e}")
 
-    async def checkout_worker(self, queue: asyncio.Queue, login_interval=7200):
+    async def refresh_session(self, interval):
+        while True:
+            log.debug("Logging in and pulling cookies from Selenium")
+            cookies = self.pull_cookies()
+            log.debug("Cookies from Selenium:")
+            for cookie in cookies:
+                log.debug(f"{cookie}: {cookies[cookie]}")
+            session = aiohttp.ClientSession(
+                headers=HEADERS, cookies={cookie: cookies[cookie] for cookie in cookies}
+            )
+            domain = "smile.amazon.com"
+            resp = await session.get(f"https://{domain}")
+            html_text = await resp.text()
+            save_html_response("session-get", resp.status, html_text)
+            self.checkout_session = session
+            await asyncio.sleep(interval)
+
+    async def checkout_worker(self, queue: asyncio.Queue):
         log.debug("Checkout Task Started")
-        log.debug("Logging in and pulling cookies from Selenium")
-        cookies = self.pull_cookies()
-        log.debug("Cookies from Selenium:")
-        for cookie in cookies:
-            log.debug(f"{cookie}: {cookies[cookie]}")
-        session = aiohttp.ClientSession(
-            headers=HEADERS, cookies={cookie: cookies[cookie] for cookie in cookies}
-        )
-        domain = "smile.amazon.com"
-        resp = await session.get(f"https://{domain}")
-        html_text = await resp.text()
-        save_html_response("session-get", resp.status, html_text)
-        selenium_refresh_time = time.time() + login_interval  # not used yet
         while True:
             log.debug("Checkout task waiting for item in queue")
             qualified_seller = await queue.get()
@@ -420,6 +425,7 @@ class AmazonCheckoutHandler(BaseStoreHandler):
             if not qualified_seller:
                 continue
             start_time = time.time()
+            session = self.checkout_session # grab the currently active session to use for this attempt
             TURBO_INITIATE_MAX_RETRY = 50
             retry = 0
             pid = None
