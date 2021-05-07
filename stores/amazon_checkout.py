@@ -132,9 +132,8 @@ class AmazonCheckoutHandler(BaseStoreHandler):
         self.time_interval = timer
         self.cookie_list = cookie_list
 
-        self.checkout_session: aiohttp.ClientSession = aiohttp.ClientSession()
+        self.checkout_session: aiohttp.ClientSession = aiohttp.ClientSession(headers=HEADERS)
 
-    #TODO make this async
     def pull_cookies(self):
         # Spawn the web browser
         self.driver = create_driver(options)
@@ -399,29 +398,21 @@ class AmazonCheckoutHandler(BaseStoreHandler):
         except Exception as e:
             log.debug(f"Other error encountered while loading page: {e}")
 
-    async def refresh_session(self, interval):
-        while True:
-            log.debug("Logging in and pulling cookies from Selenium")
-            cookies = self.pull_cookies()
-            log.debug("Cookies from Selenium:")
-            for cookie in cookies:
-                log.debug(f"{cookie}: {cookies[cookie]}")
-            session_id = cookies['session-id']
-            headers = HEADERS
-            headers['x-amz-checkout-csrf-token'] = session_id
-            session = aiohttp.ClientSession(
-                headers=headers, cookies={cookie: cookies[cookie] for cookie in cookies}
-            )
-            domain = "smile.amazon.com"
-            resp = await session.get(f"https://{domain}")
-            html_text = await resp.text()
-            save_html_response("session-get", resp.status, html_text)
-            self.checkout_session = session
-            await asyncio.sleep(interval)
-
     async def checkout_worker(self, queue: asyncio.Queue):
         log.debug("Checkout Task Started")
+        log.debug("Logging in and pulling cookies from Selenium")
+        cookies = self.pull_cookies()
+        log.debug("Cookies from Selenium:")
+        for cookie in cookies:
+            log.debug(f"{cookie}: {cookies[cookie]}")
+        if session_id := cookies.get('session-id'):
+            self.checkout_session.headers['x-amz-checkout-csrf-token'] = session_id
+        self.checkout_session.cookie_jar.update_cookies(cookies)
+        # It appears the amazon session is valid for 366 days.
         domain = "smile.amazon.com"
+        resp = await self.checkout_session.get(f"https://{domain}")
+        html_text = await resp.text()
+        save_html_response("session-get", resp.status, html_text)
         while True:
             log.debug("Checkout task waiting for item in queue")
             qualified_seller = await queue.get()

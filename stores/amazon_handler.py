@@ -57,7 +57,6 @@ class AmazonStoreHandler(BaseStoreHandler):
         self.amazon_domain = "smile.amazon.com"
         self.webdriver_child_pids = []
         self.single_shot = single_shot
-        # self.loop = asyncio.get_event_loop()
 
         from cli.cli import global_config
 
@@ -107,7 +106,6 @@ class AmazonStoreHandler(BaseStoreHandler):
             future[idx].add_done_callback(recreate_session_callback)
 
         await asyncio.gather(
-            amazon_checkout.refresh_session(interval=3500),  # wild guess that sessions are good for an hour
             amazon_checkout.checkout_worker(queue=queue),
             *[
                 amazon_monitoring.sessions_list[idx].stock_check(queue, future[idx])
