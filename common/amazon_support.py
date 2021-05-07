@@ -120,6 +120,7 @@ class FGItem:
     id: str
     min_price: Price
     max_price: Price
+    purchase_delay: int = 0
     name: str = None
     short_name: str = None
     furl: furl = None

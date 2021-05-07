@@ -178,6 +178,9 @@ class AmazonMonitor(aiohttp.ClientSession):
         self.domain = urlparse(self.item.furl.url).netloc
 
         self.delay: float = 5
+        if item.purchase_delay > 0:
+            self.delay = 20
+        self.block_purchase_until = time.time() + item.purchase_delay
         log.debug("Initializing Monitoring Task")
 
     def assign_config(self, azn_config):
@@ -260,11 +263,14 @@ class AmazonMonitor(aiohttp.ClientSession):
                     )
                     if qualified_seller:
                         log.debug("Found an offer which meets criteria")
-                        await queue.put(qualified_seller)
-                        log.debug("Offer placed in queue")
-                        log.debug("Quitting monitoring task")
-                        future.set_result(None)
-                        return None
+                        if (time.time() > self.block_purchase_until):
+                            await queue.put(qualified_seller)
+                            log.debug("Offer placed in queue")
+                            log.debug("Quitting monitoring task")
+                            future.set_result(None)
+                            return None
+                        else:
+                            log.debug(f"Purchasing is blocked until {self.block_purchase_until}. It is now {time.time()}.")
             # failed to find seller. Wait a delay period then check again
             log.debug("No offers found which meet product criteria")
             await wait_timer(end_time)
@@ -281,7 +287,6 @@ class AmazonMonitor(aiohttp.ClientSession):
             check_count += 1
 
     async def aio_get(self, url):
-        status = 404
         text = None
         try:
             async with self.get(url) as resp:

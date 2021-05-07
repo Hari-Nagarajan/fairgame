@@ -107,7 +107,7 @@ class AmazonStoreHandler(BaseStoreHandler):
             future[idx].add_done_callback(recreate_session_callback)
 
         await asyncio.gather(
-            amazon_checkout.refresh_session(interval=3500), # wild guess that sessions are good for an hour
+            amazon_checkout.refresh_session(interval=3500),  # wild guess that sessions are good for an hour
             amazon_checkout.checkout_worker(queue=queue),
             *[
                 amazon_monitoring.sessions_list[idx].stock_check(queue, future[idx])
@@ -176,6 +176,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                             asin,
                             min_price,
                             max_price,
+                            purchase_delay=json_item.get("purchase_delay", 0),
                             condition=condition,
                             merchant_id=merchant_id,
                             furl=furl(

@@ -132,7 +132,7 @@ class AmazonCheckoutHandler(BaseStoreHandler):
         self.time_interval = timer
         self.cookie_list = cookie_list
 
-        self.checkout_session = aiohttp.ClientSession()
+        self.checkout_session: aiohttp.ClientSession = aiohttp.ClientSession()
 
     #TODO make this async
     def pull_cookies(self):
@@ -406,8 +406,11 @@ class AmazonCheckoutHandler(BaseStoreHandler):
             log.debug("Cookies from Selenium:")
             for cookie in cookies:
                 log.debug(f"{cookie}: {cookies[cookie]}")
+            session_id = cookies['session-id']
+            headers = HEADERS
+            headers['x-amz-checkout-csrf-token'] = session_id
             session = aiohttp.ClientSession(
-                headers=HEADERS, cookies={cookie: cookies[cookie] for cookie in cookies}
+                headers=headers, cookies={cookie: cookies[cookie] for cookie in cookies}
             )
             domain = "smile.amazon.com"
             resp = await session.get(f"https://{domain}")
@@ -418,6 +421,7 @@ class AmazonCheckoutHandler(BaseStoreHandler):
 
     async def checkout_worker(self, queue: asyncio.Queue):
         log.debug("Checkout Task Started")
+        domain = "smile.amazon.com"
         while True:
             log.debug("Checkout task waiting for item in queue")
             qualified_seller = await queue.get()
@@ -482,6 +486,7 @@ class AmazonCheckoutHandler(BaseStoreHandler):
 
 @timer
 async def aio_post(client, url, data=None):
+    # log.debug(f"calling POST {url} with {data} and {client.cookie_jar.filter_cookies()}")
     async with client.post(url=url, data=data) as resp:
         text = await resp.text()
         return resp.status, text
