@@ -19,6 +19,7 @@
 
 import json
 import os
+import platform
 
 import time
 import typing
@@ -60,6 +61,10 @@ from utils.logger import log
 import asyncio
 import aiohttp
 from aiohttp_proxy import ProxyConnector, ProxyType
+
+if platform.system() == "Windows":
+    policy = asyncio.WindowsSelectorEventLoopPolicy()
+    asyncio.set_event_loop_policy(policy)
 
 # PDP_URL = "https://smile.amazon.com/gp/product/"
 # AMAZON_DOMAIN = "www.amazon.com.au"
