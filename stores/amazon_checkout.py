@@ -420,18 +420,17 @@ class AmazonCheckoutHandler(BaseStoreHandler):
             if not qualified_seller:
                 continue
             start_time = time.time()
-            session = self.checkout_session # grab the currently active session to use for this attempt
             TURBO_INITIATE_MAX_RETRY = 50
             retry = 0
             pid = None
             anti_csrf = None
             while (not (pid and anti_csrf)) and retry < TURBO_INITIATE_MAX_RETRY:
                 pid, anti_csrf = await turbo_initiate(
-                    s=session, qualified_seller=qualified_seller
+                    s=self.checkout_session, qualified_seller=qualified_seller
                 )
                 retry += 1
             if pid and anti_csrf:
-                if await turbo_checkout(s=session, pid=pid, anti_csrf=anti_csrf):
+                if await turbo_checkout(s=self.checkout_session, pid=pid, anti_csrf=anti_csrf):
                     log.info("Maybe completed checkout")
                     time_difference = time.time() - start_time
                     log.info(
@@ -439,13 +438,13 @@ class AmazonCheckoutHandler(BaseStoreHandler):
                     )
                     try:
                         status, text = await aio_get(
-                            session,
+                            self.checkout_session,
                             f"https://{domain}/gp/buy/thankyou/handlers/display.html?_from=cheetah&checkMFA=1&purchaseId={pid}&referrer=yield&pid={pid}&pipelineType=turbo&clientId=retailwebsite&temporaryAddToCart=1&hostPage=detail&weblab=RCX_CHECKOUT_TURBO_DESKTOP_PRIME_87783",
                         )
                         save_html_response("order-confirm", status, text)
                     except aiohttp.ClientError:
                         log.debug("could not save order confirmation page")
-                    await session.close()
+                    await self.checkout_session.close()
                     break
 
     @contextmanager
