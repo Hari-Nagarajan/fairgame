@@ -89,7 +89,7 @@ AMAZON_URLS = {
 }
 
 PDP_PATH = "/dp/"
-REALTIME_INVENTORY_PATH = f"gp/aod/ajax?asin="
+REALTIME_INVENTORY_PATH = "gp/aod/ajax?asin="
 
 CONFIG_FILE_PATH = "config/amazon_requests_config.json"
 PROXY_FILE_PATH = "config/proxies.json"
