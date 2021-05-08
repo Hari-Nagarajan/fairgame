@@ -104,7 +104,9 @@ def main():
 @notify_on_crash
 def amazon_aio(p):
     log.debug("Creating AIO Amazon Store Handler")
-    aio_amazon_obj = AIO_AmazonStoreHandler(notification_handler=notification_handler, encryption_pass=p)
+    aio_amazon_obj = AIO_AmazonStoreHandler(
+        notification_handler=notification_handler, encryption_pass=p
+    )
     global tasks
     log.debug("Creating AIO Amazon Store Tasks")
     tasks = asyncio.run(aio_amazon_obj.run_async())

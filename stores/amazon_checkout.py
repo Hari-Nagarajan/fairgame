@@ -132,7 +132,9 @@ class AmazonCheckoutHandler(BaseStoreHandler):
         self.time_interval = timer
         self.cookie_list = cookie_list
 
-        self.checkout_session: aiohttp.ClientSession = aiohttp.ClientSession(headers=HEADERS)
+        self.checkout_session: aiohttp.ClientSession = aiohttp.ClientSession(
+            headers=HEADERS
+        )
 
     def pull_cookies(self):
         # Spawn the web browser
@@ -405,8 +407,8 @@ class AmazonCheckoutHandler(BaseStoreHandler):
         log.debug("Cookies from Selenium:")
         for cookie in cookies:
             log.debug(f"{cookie}: {cookies[cookie]}")
-        if session_id := cookies.get('session-id'):
-            self.checkout_session.headers['x-amz-checkout-csrf-token'] = session_id
+        if session_id := cookies.get("session-id"):
+            self.checkout_session.headers["x-amz-checkout-csrf-token"] = session_id
         self.checkout_session.cookie_jar.update_cookies(cookies)
         # It appears the amazon session is valid for 366 days.
         domain = "smile.amazon.com"
@@ -430,7 +432,9 @@ class AmazonCheckoutHandler(BaseStoreHandler):
                 )
                 retry += 1
             if pid and anti_csrf:
-                if await turbo_checkout(s=self.checkout_session, pid=pid, anti_csrf=anti_csrf):
+                if await turbo_checkout(
+                    s=self.checkout_session, pid=pid, anti_csrf=anti_csrf
+                ):
                     log.info("Maybe completed checkout")
                     time_difference = time.time() - start_time
                     log.info(
