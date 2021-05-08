@@ -57,7 +57,6 @@ class AmazonStoreHandler(BaseStoreHandler):
         self.amazon_domain = "smile.amazon.com"
         self.webdriver_child_pids = []
         self.single_shot = single_shot
-        # self.loop = asyncio.get_event_loop()
 
         from cli.cli import global_config
 
@@ -175,6 +174,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                             asin,
                             min_price,
                             max_price,
+                            purchase_delay=json_item.get("purchase_delay", 0),
                             condition=condition,
                             merchant_id=merchant_id,
                             furl=furl(

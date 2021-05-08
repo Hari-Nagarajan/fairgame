@@ -90,8 +90,8 @@ AMAZON_URLS = {
     "PYO_POST": "https://{domain}/gp/buy/spc/handlers/static-submit-decoupled.html/ref=ox_spc_place_order?",
 }
 
-PDP_PATH = f"/dp/"
-REALTIME_INVENTORY_PATH = f"gp/aod/ajax?asin="
+PDP_PATH = "/dp/"
+REALTIME_INVENTORY_PATH = "gp/aod/ajax?asin="
 
 CONFIG_FILE_PATH = "config/amazon_requests_config.json"
 STORE_NAME = "Amazon"
@@ -132,7 +132,9 @@ class AmazonCheckoutHandler(BaseStoreHandler):
         self.time_interval = timer
         self.cookie_list = cookie_list
 
-        self.checkout_session = aiohttp.ClientSession()
+        self.checkout_session: aiohttp.ClientSession = aiohttp.ClientSession(
+            headers=HEADERS
+        )
 
     def pull_cookies(self):
         # Spawn the web browser
@@ -398,21 +400,21 @@ class AmazonCheckoutHandler(BaseStoreHandler):
         except Exception as e:
             log.debug(f"Other error encountered while loading page: {e}")
 
-    async def checkout_worker(self, queue: asyncio.Queue, login_interval=7200):
+    async def checkout_worker(self, queue: asyncio.Queue):
         log.debug("Checkout Task Started")
         log.debug("Logging in and pulling cookies from Selenium")
         cookies = self.pull_cookies()
         log.debug("Cookies from Selenium:")
         for cookie in cookies:
             log.debug(f"{cookie}: {cookies[cookie]}")
-        session = aiohttp.ClientSession(
-            headers=HEADERS, cookies={cookie: cookies[cookie] for cookie in cookies}
-        )
+        if session_id := cookies.get("session-id"):
+            self.checkout_session.headers["x-amz-checkout-csrf-token"] = session_id
+        self.checkout_session.cookie_jar.update_cookies(cookies)
+        # It appears the amazon session is valid for 366 days.
         domain = "smile.amazon.com"
-        resp = await session.get(f"https://{domain}")
+        resp = await self.checkout_session.get(f"https://{domain}")
         html_text = await resp.text()
         save_html_response("session-get", resp.status, html_text)
-        selenium_refresh_time = time.time() + login_interval  # not used yet
         while True:
             log.debug("Checkout task waiting for item in queue")
             qualified_seller = await queue.get()
@@ -426,11 +428,13 @@ class AmazonCheckoutHandler(BaseStoreHandler):
             anti_csrf = None
             while (not (pid and anti_csrf)) and retry < TURBO_INITIATE_MAX_RETRY:
                 pid, anti_csrf = await turbo_initiate(
-                    s=session, qualified_seller=qualified_seller
+                    s=self.checkout_session, qualified_seller=qualified_seller
                 )
                 retry += 1
             if pid and anti_csrf:
-                if await turbo_checkout(s=session, pid=pid, anti_csrf=anti_csrf):
+                if await turbo_checkout(
+                    s=self.checkout_session, pid=pid, anti_csrf=anti_csrf
+                ):
                     log.info("Maybe completed checkout")
                     time_difference = time.time() - start_time
                     log.info(
@@ -438,13 +442,13 @@ class AmazonCheckoutHandler(BaseStoreHandler):
                     )
                     try:
                         status, text = await aio_get(
-                            session,
+                            self.checkout_session,
                             f"https://{domain}/gp/buy/thankyou/handlers/display.html?_from=cheetah&checkMFA=1&purchaseId={pid}&referrer=yield&pid={pid}&pipelineType=turbo&clientId=retailwebsite&temporaryAddToCart=1&hostPage=detail&weblab=RCX_CHECKOUT_TURBO_DESKTOP_PRIME_87783",
                         )
                         save_html_response("order-confirm", status, text)
                     except aiohttp.ClientError:
                         log.debug("could not save order confirmation page")
-                    await session.close()
+                    await self.checkout_session.close()
                     break
 
     @contextmanager
@@ -476,6 +480,7 @@ class AmazonCheckoutHandler(BaseStoreHandler):
 
 @timer
 async def aio_post(client, url, data=None):
+    # log.debug(f"calling POST {url} with {data} and {client.cookie_jar.filter_cookies()}")
     async with client.post(url=url, data=data) as resp:
         text = await resp.text()
         return resp.status, text

@@ -169,9 +169,13 @@ def disable_gpu():
 
 def get_cookies(d: webdriver.Chrome, cookie_list=None):
     cookies = {}
-    for c in d.get_cookies():
+    selenium_cookies = d.get_cookies()
+    for c in selenium_cookies:
         if cookie_list is None or c["name"] in cookie_list:
             cookies[c["name"]] = c["value"]
+    expiration = min(map(lambda c: c["expiry"], selenium_cookies))
+    # It appears that for the session cookies, they don't expire for an entire year. So we don't need to do anything
+    # with the expiration time.
     return cookies
 
 
