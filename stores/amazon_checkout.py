@@ -90,7 +90,7 @@ AMAZON_URLS = {
     "PYO_POST": "https://{domain}/gp/buy/spc/handlers/static-submit-decoupled.html/ref=ox_spc_place_order?",
 }
 
-PDP_PATH = f"/dp/"
+PDP_PATH = "/dp/"
 REALTIME_INVENTORY_PATH = f"gp/aod/ajax?asin="
 
 CONFIG_FILE_PATH = "config/amazon_requests_config.json"
