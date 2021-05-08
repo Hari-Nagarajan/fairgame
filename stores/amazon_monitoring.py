@@ -147,6 +147,8 @@ class AmazonMonitoringHandler(BaseStoreHandler):
                     item=item_list[idx],
                     amazon_config=self.amazon_config,
                     connector=connector,
+                    proxy_index = idx,
+                    proxy_length = len(self.proxies)
                 )
             )
             self.sessions_list[idx].headers.update({"user-agent": ua.random})
@@ -179,6 +181,12 @@ class AmazonMonitor(aiohttp.ClientSession):
 
         self.delay: float = 5
         log.debug("Initializing Monitoring Task")
+
+    def change_proxy(self):
+        if self.proxy_index < self.proxy_length:
+            self.connector = ProxyConnector.from_url(self.proxies[self.proxy_index + 1]["https"])
+        else:
+            self.connector = ProxyConnector.from_url(self.proxies[0]["https"])
 
     def assign_config(self, azn_config):
         self.amazon_config = azn_config
@@ -279,6 +287,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                 return
 
             check_count += 1
+            self.change_proxy()
 
     async def aio_get(self, url):
         status = 404
