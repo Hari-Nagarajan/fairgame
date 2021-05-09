@@ -1,7 +1,6 @@
 *.code-workspace
 *.html
 *.pkl
-*.png
 *.py[cod]
 *_config.json
 *_credentials.json
