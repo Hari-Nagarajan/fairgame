@@ -69,3 +69,36 @@ write_csv(drops, file = "config/drops.csv")
 
 tb <- table(drops$category)
 
+
+
+drops <- read_csv("config/drops.csv")
+drops
+
+prices <- data.frame(
+  category = names(table(drops$category)),
+  low = c(300, 300, 400, 550, 1100, 300, 650, 700, 700),
+  high = c(600, 800, 950, 1350, 2400, 950, 1100, 1250, 1650)
+)
+
+drops %>%
+  left_join(prices, by = "category") -> drops_and_price
+
+resl <- lapply(rownames(drops_and_price), function (row) {
+  rownow <- drops_and_price[row,]
+  list(
+    asins = c(rownow$asin),
+    "min-price" = rownow$low,
+    "max-price" = rownow$high
+  )
+})
+
+resl2 <- list(
+  "items" = resl,
+  "amazon_domain" = "smile.amazon.com"
+)
+
+jsonlite::write_json(x = resl2, pretty = T, path = "config/amazon_aio_config.json")
+
+
+
+

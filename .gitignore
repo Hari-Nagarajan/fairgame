@@ -2,16 +2,12 @@
 *.html
 *.pkl
 *.py[cod]
-*_config.json
 *_credentials.json
 .github
 .idea/
 .profile
 .profile-amz*
 .vscode/
-/config/*.json
-/config/apprise.conf
-/config/apprise_config.json
 Pipfile.lock
 __pycache__/
 build/
