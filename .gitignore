@@ -18,3 +18,4 @@ screenshots/*.png
 logs/*.log*
 tags
 stores/store_data/item_cache.p
+Amazon_aio.bat
