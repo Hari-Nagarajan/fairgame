@@ -1,0 +1,6903 @@
+==============================================================
+Guild: InStockAlert_DataLover
+Channel: 🔔USA-DROPS / rtx3080
+==============================================================
+
+[04-Dec-20 02:07 PM] DataBot#0000
+@3080_US gigabyte 3080 bundle newegg
+
+{Embed}
+Stock Notification
+Product Page
+https://www.newegg.com/Product/ComboDealDetails?ItemList=Combo.4190467
+Store
+newegg
+Brand
+gigabyte
+Series
+3080
+Model
+bundle
+
+{Reactions}
+🇳 (52) 🇴 (48) 😡 (32) 3090 (38) ❓ (16) 💢 (8) 🤡 (29) 😩 (12) 🤣 (12) 🖕 (10) 🥶 (4) 🤦‍♂️ (6) 💩 (15) 
+
+[04-Dec-20 02:07 PM] DataBot#0000
+
+{Attachments}
+https://cdn.discordapp.com/attachments/783835699312328724/784511169250721822/success-lastdrop.png
+
+{Reactions}
+💩 (130) 3090 (72) 🅱️ (12) 🇷 (11) 😤 (20) 😆 (12) 🇴 (12) 🇰 (12) 3080 (21) 🤦‍♂️ (19) 👎 (24) 🇳 (10) 😀 (8) 🖕 (25) 😃 (6) 😄 (7) 😁 (8) 🤬 (18) 🥵 (9) 😻 (6) 
+
+[07-Dec-20 11:26 AM] DataBot#0000
+@3080_US msi 3080 gaming x trio newegg-ca
+
+{Embed}
+Stock Notification
+Product Page
+https://www.newegg.ca/msi-geforce-rtx-3080-rtx-3080-gaming-x-trio-10g/p/N82E16814137597
+Store
+newegg-ca
+Brand
+msi
+Series
+3080
+Model
+gaming x trio
+
+
+[07-Dec-20 11:26 AM] DataBot#0000
+
+{Attachments}
+https://cdn.discordapp.com/attachments/783835699312328724/785557844543275059/success-lastdrop.png
+
+
+[08-Dec-20 09:32 AM] DataBot#0000
+@3080_US nvidia 3080 founders edition bestbuy
+
+{Embed}
+Stock Notification
+Product Page
+https://www.bestbuy.com/site/nvidia-geforce-rtx-3080-10gb-gddr6x-pci-express-4-0-graphics-card-titanium-and-black/6429440.p?skuId=6429440&intl=nosplash
+Store
+bestbuy
+Brand
+nvidia
+Series
+3080
+Model
+founders edition
+
+{Reactions}
+😩 (3) 
+
+[08-Dec-20 09:32 AM] DataBot#0000
+
+{Attachments}
+https://cdn.discordapp.com/attachments/783835699312328724/785891499186978856/success-lastdrop.png
+
+
+[08-Dec-20 09:32 AM] DataBot#0000
+@3080_US asus 3080 strix bestbuy
+
+{Embed}
+Stock Notification
+Product Page
+https://www.bestbuy.com/site/asus-geforce-rtx-3080-10gb-gddr6x-pci-express-4-0-strix-graphics-card-black/6432445.p?skuId=6432445&intl=nosplash
+Store
+bestbuy
+Brand
+asus
+Series
+3080
+Model
+strix
+
+
+[08-Dec-20 09:32 AM] DataBot#0000
+
+{Attachments}
+https://cdn.discordapp.com/attachments/783835699312328724/785891545244631040/success-lastdrop.png
+
+
+[08-Dec-20 09:32 AM] DataBot#0000
+@3080_US evga 3080 xc3 ultra bestbuy
+
+{Embed}
+Stock Notification
+Product Page
+https://www.bestbuy.com/site/evga-geforce-rtx-3080-10gb-gddr6x-pci-express-4-0-graphics-card/6432400.p?skuId=6432400&intl=nosplash
+Store
+bestbuy
+Brand
+evga
+Series
+3080
+Model
+xc3 ultra
+
+
+[08-Dec-20 09:32 AM] DataBot#0000
+
+{Attachments}
+https://cdn.discordapp.com/attachments/783835699312328724/785891656883896320/success-lastdrop.png
+
+
+[08-Dec-20 09:33 AM] DataBot#0000
+@3080_US gigabyte 3080 gaming oc bestbuy
+
+{Embed}
+Stock Notification
+Product Page
+https://www.bestbuy.com/site/gigabyte-geforce-rtx-3080-10g-gddr6x-pci-express-4-0-graphics-card-black/6430620.p?acampID=0&cmp=RMX&loc=Hatch&ref=198&skuId=6430620&intl=nosplash
+Store
+bestbuy
+Brand
+gigabyte
+Series
+3080
+Model
+gaming oc
+
+{Reactions}
+3080 (2) 
+
+[08-Dec-20 09:33 AM] DataBot#0000
+
+{Attachments}
+https://cdn.discordapp.com/attachments/783835699312328724/785891773611507762/success-lastdrop.png
+
+
+[08-Dec-20 09:33 AM] DataBot#0000
+@3080_US gigabyte 3080 vision oc bestbuy
+
+{Embed}
+Stock Notification
+Product Page
+https://www.bestbuy.com/site/gigabyte-geforce-rtx-3080-10g-gddr6x-pci-express-4-0-graphics-card-white/6436219.p?skuId=6436219&intl=nosplash
+Store
+bestbuy
+Brand
+gigabyte
+Series
+3080
+Model
+vision oc
+
+
+[08-Dec-20 09:33 AM] DataBot#0000
+
+{Attachments}
+https://cdn.discordapp.com/attachments/783835699312328724/785891853299220521/success-lastdrop.png
+
+
+[08-Dec-20 09:33 AM] DataBot#0000
+@3080_US gigabyte 3080 aorus master bestbuy
+
+{Embed}
+Stock Notification
+Product Page
+https://www.bestbuy.com/site/gigabyte-geforce-rtx-3080-10g-gddr6x-pci-express-4-0-graphics-card-black/6436223.p?skuId=6436223&intl=nosplash
+Store
+bestbuy
+Brand
+gigabyte
+Series
+3080
+Model
+aorus master
+
+
+[08-Dec-20 09:33 AM] DataBot#0000
+
+{Attachments}
+https://cdn.discordapp.com/attachments/783835699312328724/785891898741096478/success-lastdrop.png
+
+
+[08-Dec-20 09:33 AM] DataBot#0000
+@3080_US msi 3080 ventus 3x oc bestbuy
+
+{Embed}
+Stock Notification
+Product Page
+https://www.bestbuy.com/site/msi-geforce-rtx-3080-ventus-3x-10g-oc-bv-gddr6x-pci-express-4-0-graphic-card-black-silver/6430175.p?skuId=6430175&intl=nosplash
+Store
+bestbuy
+Brand
+msi
+Series
+3080
+Model
+ventus 3x oc
+
+{Reactions}
+KEKW (3) 
+
+[08-Dec-20 09:34 AM] DataBot#0000
+
+{Attachments}
+https://cdn.discordapp.com/attachments/783835699312328724/785891942969770054/success-lastdrop.png
+
+{Reactions}
+KEKW (2) 
+
+[08-Dec-20 12:36 PM] DataBot#0000
+@3080_US gigabyte 3080 gaming oc bestbuy
+
+{Embed}
+Stock Notification
+Product Page
+https://www.bestbuy.com/site/gigabyte-geforce-rtx-3080-10g-gddr6x-pci-express-4-0-graphics-card-black/6430620.p?acampID=0&cmp=RMX&loc=Hatch&ref=198&skuId=6430620&intl=nosplash
+Store
+bestbuy
+Brand
+gigabyte
+Series
+3080
+Model
+gaming oc
+
+
+[08-Dec-20 12:36 PM] DataBot#0000
+
+{Attachments}
+https://cdn.discordapp.com/attachments/783835699312328724/785937838806007868/success-lastdrop.png
+
+{Reactions}
+😳 (3) 
+
+[09-Dec-20 05:28 PM] DataBot#0000
+@3080_US zotac 3080 gaming trinity 320bit gbps oc amazon-uk
+
+{Embed}
+Stock Notification
+Product Page
+https://www.amazon.co.uk/dp/B08HVV2P4Z/
+Store
+amazon-uk
+Brand
+zotac
+Series
+3080
+Model
+gaming trinity 320bit gbps oc
+
+
+[09-Dec-20 05:28 PM] DataBot#0000
+
+{Attachments}
+https://cdn.discordapp.com/attachments/783835699312328724/786373642161225738/success-lastdrop.png
+
+{Reactions}
+💩 (65) 👎🏻 (46) 🤛 (8) 9791_pepe (13) 🤦‍♂️ (17) 🇳 (8) 🇴 (8) 1038_Among_Us_Pepe (4) catjam (6) 🇵 (2) 🇪 (2) 
+
+[17-Dec-20 02:34 PM] DataBot#0000
+@3080_US asus 3080 strix oc amazon
+
+{Embed}
+_**Stock alert!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Price
+$849.99
+Product Page
+https://www.amazon.com/dp/B08J6F174Z
+Add to Cart
+https://www.amazon.com/gp/aws/cart/add.html?ASIN.1=B08J6F174Z&Quantity.1=1
+Brand
+asus
+Model
+strix oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+3080 (39) 😩 (20) 😭 (18) 🇬 (19) 🇴 (19) 🇳 (19) 🇪 (19) 👲 (4) KEKW (5) 
+
+[17-Dec-20 02:34 PM] DataBot#0000
+
+{Attachments}
+https://cdn.discordapp.com/attachments/783835699312328724/789229014463676416/success-lastdrop.png
+
+{Reactions}
+💩 (216) 🤔 (44) 4766_pepegod (26) 2161_AmongUs_Angy (24) 🇸 (56) 🇭 (55) 🇮 (56) 6800xt (24) 🇹 (53) 🇵 (14) 7756_AmongUsLazy (19) 🤮 (33) 5604_SadSupremePepe (23) 3080 (49) 1540_PeePeeHands (36) 🇫 (22) 😫 (41) 🇱 (20) 🇺 (16) 1349_Pepe_Comfy (21) 
+
+[20-Jan-21 01:02 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**Stock alert!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+bandh
+Price
+$859.99
+Product Page
+https://www.bhphotovideo.com/c/product/1593650-REG/asus_tuf_rtx3080_o10g_gaming_tuf_gaming_geforce_rtx.html
+Streaming
+https://www.youtube.com/watch?v=o3UlT5UDRC8
+Brand
+asus
+Model
+tuf oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+😐 (34) 🇬 (40) 🇴 (40) 🇳 (40) 🇪 (40) 💩 (17) 9294_Pepepunch (4) KEKW (12) 😫 (9) 🇦 (4) 🇸 (5) 1038_Among_Us_Pepe (3) 🤥 (7) 🇿 (2) 🤡 (4) 1349_Pepe_Comfy (3) 1540_PeePeeHands (2) 👀 (2) 
+
+[20-Jan-21 01:02 PM] DataBot#0000
+
+{Attachments}
+https://cdn.discordapp.com/attachments/783835699312328724/801527084857294890/success-lastdrop.png
+
+{Reactions}
+3080 (70) 🧢 (39) 🐒 (10) 9791_pepe (9) 1907_Pepe_Box (9) 💩 (39) 👨🏿 (4) KEKW (37) PepeGrill (11) 🇸 (42) 🇴 (45) 🇱 (43) 🇩 (43) SagiriShy (6) 🤡 (19) 1540_PeePeeHands (21) 1349_Pepe_Comfy (5) 6340_amongus_sus (10) 5604_SadSupremePepe (8) 🖕 (25) 
+
+[25-Jan-21 04:00 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+adorama
+Product Page
+https://www.adorama.com/ev10g53885kr.html
+Streaming
+https://youtu.be/o3UlT5UDRC8
+Brand
+evga
+Model
+xc3 ultra
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+💩 (123) 👎 (102) KEKW (34) 🇳 (36) ⭕ (39) 🇵 (34) 🇪 (34) 🧢 (22) 1540_PeePeeHands (20) 6️⃣ (9) 1907_Pepe_Box (9) 🔌 (7) 🚰 (6) 🛁 (7) 🌩️ (7) 🙁 (13) 👍 (6) 🇫 (11) 🇺 (12) 🇨 (11) 
+
+[25-Jan-21 05:43 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+adorama
+Product Page
+https://www.adorama.com/ev10g53885kr.html
+Streaming
+https://youtu.be/o3UlT5UDRC8
+Brand
+evga
+Model
+xc3 ultra
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+6340_amongus_sus (56) 💩 (99) 👍 (11) 😐 (19) 🚫 (28) 🇳 (16) 👎 (49) 😫 (16) 🥶 (12) 🇴 (13) 😩 (11) 3080 (12) 👎🏼 (27) 1540_PeePeeHands (21) KEKW (24) 🇧 (6) 🇬 (7) 🆘 (7) 3070 (5) 👺 (10) 
+
+[25-Jan-21 06:13 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+newegg
+Product Page
+https://www.newegg.com/asus-geforce-rtx-3080-rog-strix-rtx3080-o10g-gaming/p/N82E16814126457?Item=N82E16814126457&Description=RTX 3080&cm_re=RTX_3080-_-14-126-457-_-Product
+Streaming
+https://youtu.be/o3UlT5UDRC8
+Brand
+asus
+Model
+rog strix di
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+❌ (189) 3080 (12) 1540_PeePeeHands (22) KEKW (38) 🧢 (18) catjam (7) 🇦 (6) 💩 (14) 🇷 (5) 🇭 (4) 👏 (4) 9294_Pepepunch (7) 🤣 (7) 🇳 (10) 🇴 (9) xboxss (2) SagiriShy (2) tachi_smile (3) remVV (3) 3090 (2) 
+
+[25-Jan-21 07:03 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+newegg
+Product Page
+https://www.newegg.com/gigabyte-geforce-rtx-3080-gv-n3080aorusx-wb-10gd/p/N82E16814932371?Item=N82E16814932371&Description=RTX 3080&cm_re=RTX_3080-_-14-932-371-_-Product
+Streaming
+https://youtu.be/o3UlT5UDRC8
+Brand
+gigabyte
+Model
+aorus xtreme
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (74) 💩 (78) 😂 (28) 🧢 (17) 🇪 (9) 3060ti (10) 🛑 (13) 9294_Pepepunch (13) 🇳 (8) ❓ (11) 🇰 (7) 6340_amongus_sus (13) 1540_PeePeeHands (11) 02smug (7) 🇸 (7) 🤽 (8) ❌ (18) 🇬 (6) 🖕 (13) 9751_feelssickman (5) 
+
+[25-Jan-21 07:08 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+adorama
+Product Page
+https://www.adorama.com/ev10g53885kr.html
+Streaming
+https://youtu.be/o3UlT5UDRC8
+Brand
+evga
+Model
+xc3 ultra
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+😫 (62) 🧢 (26) 5604_SadSupremePepe (12) 💩 (35) KEKW (18) 1540_PeePeeHands (12) 🛑 (9) ❌ (31) catjam (12) KannaWhat (6) 7974_rimuru_lewd_hearteyes (6) 6340_amongus_sus (8) 🇧 (8) 👨‍🦲 (5) 🇦 (9) xboxss (6) 🇩 (8) tachi_smile (5) Hehe (4) KannaSip (10) 
+
+[25-Jan-21 07:12 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+adorama
+Product Page
+https://www.adorama.com/ev10g53885kr.html
+Streaming
+https://youtu.be/o3UlT5UDRC8
+Brand
+evga
+Model
+xc3 ultra
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🤡 (88) 8934_Pepe_King (10) 😋 (8) ❌ (24) 1540_PeePeeHands (7) tachi_smile (5) KEKW (14) 9791_pepe (5) 👎 (13) 💩 (17) 🧢 (6) 🇫 (10) 🇼 (6) 😔 (10) 🇭 (6) 🇦 (5) 🗿 (5) 3040_suspepe (4) 🇹 (4) 🅰️ (3) 
+
+[25-Jan-21 07:30 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+adorama
+Product Page
+https://www.adorama.com/ev10g53885kr.html
+Streaming
+https://youtu.be/o3UlT5UDRC8
+Brand
+evga
+Model
+xc3 ultra
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🤡 (110) KEKW (49) 🧢 (16) 💩 (27) 🤥 (14) 🇸 (13) 🇴 (10) 👹 (8) 7974_rimuru_lewd_hearteyes (9) 🇹 (11) ❌ (22) 9294_Pepepunch (6) remVV (9) 3080 (7) 9751_feelssickman (5) 😡 (5) tachi_smile (4) ❓ (7) 😫 (8) 5950 (2) 
+
+[25-Jan-21 07:45 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+adorama
+Product Page
+https://www.adorama.com/ev10g53885kr.html
+Streaming
+https://youtu.be/o3UlT5UDRC8
+Brand
+evga
+Model
+xc3 ultra
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (98) 🤡 (56) 3080 (8) 💩 (35) 🤮 (19) 🇳 (7) 5604_SadSupremePepe (6) 🇮 (5) 😁 (4) 🇸 (3) 🇬 (4) 9294_Pepepunch (4) 3060ti (5) 🥱 (9) 😤 (8) LewdMegumin (4) 🇼 (3) KannaSip (4) SagiriShy (5) 🇹 (4) 
+
+[25-Jan-21 07:52 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+zotac
+Product Page
+https://www.zotacstore.com/us/zotac-gaming-geforce-rtx-3080-trinity-oc-zt-a30800j-10p
+Streaming
+https://youtu.be/o3UlT5UDRC8
+Brand
+zotac
+Model
+gaming trini
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🤡 (43) KEKW (32) 1540_PeePeeHands (6) 🤢 (17) 1038_Among_Us_Pepe (4) 🇳 (6) ℹ️ (6) 🇬 (8) 3070 (5) 😐 (5) 9294_Pepepunch (2) 1349_Pepe_Comfy (4) ❌ (16) 7756_AmongUsLazy (3) 5604_SadSupremePepe (3) 😩 (8) 💧 (2) 🤨 (4) 3080 (3) 🌎 (2) 
+
+[25-Jan-21 08:11 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+newegg
+Product Page
+https://www.newegg.com/asus-geforce-rtx-3080-rog-strix-rtx3080-o10g-gaming/p/N82E16814126457?Item=N82E16814126457&Description=RTX 3080&cm_re=RTX_3080-_-14-126-457-_-Product
+Streaming
+https://youtu.be/o3UlT5UDRC8
+Brand
+asus
+Model
+rog strix di
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🤡 (68) KEKW (29) 💩 (34) 🤢 (9) 1349_Pepe_Comfy (6) 🧢 (9) ❓ (7) 🥺 (4) 👉 (5) 👎 (9) 👈 (5) 🧐 (3) ❌ (8) 9294_Pepepunch (3) 🙄 (5) 💸 (2) AwOo 
+
+[25-Jan-21 08:12 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+adorama
+Product Page
+https://www.adorama.com/ev10g53885kr.html
+Streaming
+https://youtu.be/o3UlT5UDRC8
+Brand
+evga
+Model
+xc3 ultra
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🤢 (60) 🤡 (43) 🥺 (14) KEKW (22) 👉 (15) 💩 (35) 👈 (16) PepeGrill (7) 🥱 (10) 👍 (3) 🤨 (4) 👎 (12) 1907_Pepe_Box (3) 1540_PeePeeHands (3) 5604_SadSupremePepe (2) 😳 (2) 
+
+[25-Jan-21 08:16 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+adorama
+Product Page
+https://www.adorama.com/ev10g53885kr.html
+Streaming
+https://youtu.be/o3UlT5UDRC8
+Brand
+evga
+Model
+xc3 ultra
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🤢 (56) 💩 (60) 5604_SadSupremePepe (8) 🇳 (8) 🥺 (7) KEKW (19) 😩 (8) 🇮 (7) 🙄 (10) 🎲 (7) 🤡 (15) 👍 (5) 😳 (9) 🥱 (8) 🇸 (4) 🖕 (6) 🇹 (5) 👎 (11) 🤮 (5) 🇩 (5) 
+
+[25-Jan-21 08:28 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+adorama
+Product Page
+https://www.adorama.com/ev10g53885kr.html
+Streaming
+https://youtu.be/o3UlT5UDRC8
+Brand
+evga
+Model
+xc3 ultra
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+1540_PeePeeHands (85) 😳 (17) 🦃 (13) KEKW (44) 3080 (12) 🛑 (20) 🤢 (21) 5900 (9) 🔫 (13) 🙄 (11) 🖕🏼 (34) 🥫 (11) 💩 (37) 🥱 (18) ☠️ (16) 💀 (18) 9751_feelssickman (11) 👎 (29) ☣️ (13) SagiriShy (11) 
+
+[26-Jan-21 02:10 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+zotac
+Product Page
+https://www.zotacstore.com/us/zotac-gaming-geforce-rtx-3080-trinity-oc-zt-a30800j-10p
+Streaming
+https://youtu.be/o3UlT5UDRC8
+Brand
+zotac
+Model
+gaming trini
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+9294_Pepepunch (7) 💩 (23) 💯 5604_SadSupremePepe 😩 (3) 6340_amongus_sus (3) 3080 (4) KEKW (15) 🇨 (2) 🇫 (3) 🇷 (2) 7974_rimuru_lewd_hearteyes (2) 🇬 (2) LewdMegumin (3) 🇮 remVV (2) 🇦 (3) 🇾 (2) SagiriShy (2) 🇳 (3) 
+
+[26-Jan-21 02:30 PM] livenow#3490
+@3080_US https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+
+{Embed}
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+GeForce RTX 3080 10GB GDDR6X PCI E Video Card - Office Depot
+Whether you prefer FPS RPG or action adventure titles the PNY GeForce RTX 3080 XLR8 Gaming Edition Video Card delivers the performance gamers crave. The 10GB of GDDR6X memory combines with the 760 Gbps memory bandwidth to deliver striking visual realism. The nVidia Ampere architecture uses 2nd generation Ray Tracing Cores and 3rd generation Tens...
+https://media.officedepot.com/images/t_large,f_auto/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X
+
+{Reactions}
+KEKW (147) 🤡 (68) 🤢 (29) KannaWhat (13) 😢 (18) 💩 (39) 💸 (12) 🚫 (23) 1038_Among_Us_Pepe (6) 5604_SadSupremePepe (6) 🙃 (13) 1540_PeePeeHands (11) 😆 (8) catjam (17) 6340_amongus_sus (5) 👺 (3) 🔕 (8) 🇧 (20) 🇷 (19) 🇺 (18) 
+
+[28-Jan-21 04:25 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+newegg
+Product Page
+https://www.newegg.com/gigabyte-geforce-rtx-3080-gv-n3080aorusx-wb-10gd/p/N82E16814932371?Item=N82E16814932371&Description=RTX 3080&cm_re=RTX_3080-_-14-932-371-_-Product
+Streaming
+https://youtu.be/o3UlT5UDRC8
+Brand
+gigabyte
+Model
+aorus xtreme
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+💩 (82) KEKW (42) 😆 (16) 3080 (6) 🚰 (7) 🤮 (9) 👺 (4) 5604_SadSupremePepe (5) catjam (3) 🅰️ (3) 💧 (4) 9294_Pepepunch (3) remVV (3) 😰 (5) 🇬 (5) 🇦 (5) 🇾 (4) 😩 (2) 😳 (4) 🇫 (3) 
+
+[03-Feb-21 11:47 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**NEW ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart: *** As an Amazon Associate I earn from qualifying purchases.
+Store
+amazon
+Price
+$864
+Product Page
+https://www.amazon.com/dp/B08HR3Y5GQ/?tag=data20-20
+Offer Page
+https://www.amazon.com/dp/B08HR3Y5GQ/?tag=data20-20#aod
+Add to Cart
+https://www.amazon.com/gp/aws/cart/add.html?ASIN.1=B08HR3Y5GQ&Quantity.1=1&AssociateTag=data20-20
+Streaming
+https://youtu.be/o3UlT5UDRC8
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (69) 🇬 (2) 🇼 (2) 🤮 (9) 🇴 (3) catjam (8) Hahaa (12) KEKWait (8) 🇷 💩 (15) PLEASENO (3) 1540_PeePeeHands (8) 🧢 (5) 🖕 (14) 3070 (4) 3080 (4) 3090 (3) 5600 (4) 5800 (4) 5900 (4) 
+
+[03-Feb-21 03:18 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**USED
+
+- LIKE ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart: *** As an Amazon Associate I earn from qualifying purchases.
+Store
+amazon
+Price
+$755
+Product Page
+https://www.amazon.com/dp/B08HH5WF97/?tag=data20-20
+Offer Page
+https://www.amazon.com/dp/B08HH5WF97/?tag=data20-20#aod
+Add to Cart
+https://www.amazon.com/gp/aws/cart/add.html?ASIN.1=B08HH5WF97&Quantity.1=1&AssociateTag=data20-20
+Streaming
+https://youtu.be/o3UlT5UDRC8
+Brand
+asus
+Model
+tuf oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (66) 💩 (70) 🤡 (33) ❓ (14) 😫 (19) Hahaa (13) PLEASENO (12) 🇬 (10) 🇴 (8) KEKWait (10) 🇳 (9) 🥸 (4) 🇪 (8) 🇷 (4) 1540_PeePeeHands (8) 🇺 (3) 🇸 (3) 🇮 (3) 3080 (2) 🇵 (2) 
+
+[03-Feb-21 08:17 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**Offer: NEW ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Price
+$839
+Offer Page
+https://www.amazon.com/dp/B08HJTH61J/?tag=data20-20#aod
+Streaming
+https://youtu.be/o3UlT5UDRC8
+Brand
+gigabyte
+Model
+gaming oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases.
+
+{Reactions}
+KEKW (56) 😫 (19) 💩 (28) 🇬 (11) 🤡 (12) 🇴 (12) 🇳 (12) 🇪 (10) 🇸 (12) 🇨 (11) 🇦 (10) 🇱 (10) 🇵 (10) 🇷 (7) FacePalm (5) Hahaa (7) okiRIP (3) 3080 (3) 1540_PeePeeHands (5) 
+
+[03-Feb-21 08:41 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**Offer: NEW ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Price
+$751
+Offer Page
+https://www.amazon.com/dp/B08HR5SXPS/?tag=data20-20#aod
+Streaming
+https://youtu.be/o3UlT5UDRC8
+Brand
+msi
+Model
+ventus 3x oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases.
+
+{Reactions}
+KEKW (39) 💩 (24) 5604_SadSupremePepe (4) 🇬 (9) 🇴 (8) 🇳 (9) 🇪 (10) Hahaa (4) 🇫 (10) 🇺 (10) 🇨 (10) 🇰 (10) 🇧 (4) 🇮 (7) 🇹 (6) 😩 
+
+[03-Feb-21 08:59 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**Offer: NEW ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Price
+$751
+Offer Page
+https://www.amazon.com/dp/B08HR5SXPS/?tag=data20-20#aod
+Streaming
+https://youtu.be/o3UlT5UDRC8
+Brand
+msi
+Model
+ventus 3x oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases.
+
+{Reactions}
+KEKW (47) 👀 (7) 🤡 (17) okiRIP (19) Hahaa (10) 🤢 (7) 🥺 (6) 👉 (7) 👈 (7) KannaSip 👍 02smug 🤮 (6) 🥁 7756_AmongUsLazy FacePalm (2) 
+
+[04-Feb-21 10:15 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**Offer: NEW ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Price
+$751
+Offer Page
+https://www.amazon.com/dp/B08HR5SXPS/?tag=data20-20#aod
+Streaming
+https://youtu.be/o3UlT5UDRC8
+Brand
+msi
+Model
+ventus 3x oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases.
+
+{Reactions}
+👍 (31) KEKWait (53) KEKW (67) 😆 (18) 💩 (55) 😩 (22) 🇫 (26) 🙁 (17) 🇦 (19) 💁🏻 (7) 1038_Among_Us_Pepe (9) 🇰 (19) FacePalm (13) 02smug (6) 🇪 (14) 🍞 (6) 🪠 (8) 🥔 (12) okiRIP (15) 1235_wojak_pepe_hoodie (6) 
+
+[05-Feb-21 08:12 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+zotac
+Price
+$889.99
+Product Page
+https://www.zotacstore.com/us/zotac-gaming-geforce-rtx-3080-trinity-oc-zt-a30800j-10p
+Streaming
+https://youtu.be/o3UlT5UDRC8
+Brand
+zotac
+Model
+gaming trini
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (20) 🇧 (5) 💩 (10) 🅰️ (4) GotEm (5) 🇦 (6) 🇩 (4) 🤷‍♂️ (4) 🤢 (3) 
+
+[05-Feb-21 08:17 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+zotac
+Price
+$889.99
+Product Page
+https://www.zotacstore.com/us/zotac-gaming-geforce-rtx-3080-trinity-oc-zt-a30800j-10p
+Streaming
+https://youtu.be/o3UlT5UDRC8
+Brand
+zotac
+Model
+gaming trini
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (25) 6340_amongus_sus (6) 💩 (17) 😳 (3) KEKWait (5) 🕵️‍♂️ (2) 🇿 (16) 🇴 (17) 🇹 (16) 🇦 (16) 🇨 (16) okiRIP (10) 🤬 (10) KannaWhat (5) 😍 (3) 🤡 (4) 9791_pepe (3) 
+
+[08-Feb-21 09:33 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+zotac
+Price
+$889.99
+Product Page
+https://www.zotacstore.com/us/zotac-gaming-geforce-rtx-3080-trinity-oc-zt-a30800j-10p
+Streaming
+https://youtu.be/o3UlT5UDRC8
+Brand
+zotac
+Model
+gaming trini
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🇿 (20) 🇴 (19) 🇹 (18) 🅰️ (18) 🇨 (16) 🇮 (14) 🇸 (16) 🇧 (14) 🇦 (15) 🇩 (13) 1540_PeePeeHands (9) KEKW (13) 💩 (17) ✊ (2) 👎 (5) 3070 
+
+[08-Feb-21 09:42 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+zotac
+Price
+$889.99
+Product Page
+https://www.zotacstore.com/us/zotac-gaming-geforce-rtx-3080-trinity-oc-zt-a30800j-10p
+Streaming
+https://youtu.be/o3UlT5UDRC8
+Brand
+zotac
+Model
+gaming trini
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (42) FacePalm (13) 🤑 (10) 🇪 (11) KannaWhat (8) 🇼 (11) 🤔 (7) 🤫 (7) 🛐 (9) 🇨 (21) 🇷 (20) 🇦 (21) 🇸 (22) 🇭 (21) 😫 (8) 1540_PeePeeHands (5) 😔 (4) 😢 (7) 
+
+[09-Feb-21 10:23 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+bestbuy
+Price
+$929.99
+Product Page
+https://api.bestbuy.com/click/-/6432445/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6432445/cart
+Streaming
+https://youtu.be/o3UlT5UDRC8
+Brand
+asus
+Model
+strix
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+😫 (8) 👍 (3) 💯 (3) 💩 (11) KEKW 
+
+[09-Feb-21 10:27 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+bestbuy
+Price
+$839.99
+Product Page
+https://api.bestbuy.com/click/-/6430620/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6430620/cart
+Streaming
+https://youtu.be/o3UlT5UDRC8
+Brand
+gigabyte
+Model
+gaming oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (13) 🇪 (5) 🇼 (2) 😭 (7) 💩 (10) 🇬 (2) 🇴 (2) FacePalm (2) 🇳 (2) 🚀 (2) 1349_Pepe_Comfy Hahaa 
+
+[09-Feb-21 10:53 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+bestbuy
+Price
+$839.99
+Product Page
+https://api.bestbuy.com/click/-/6430620/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6430620/cart
+Streaming
+https://youtu.be/o3UlT5UDRC8
+Brand
+gigabyte
+Model
+gaming oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+FacePalm (12) KEKW (13) Hahaa (5) 👍 (6) 😭 (3) 
+
+[09-Feb-21 10:59 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+bestbuy
+Price
+$879.99
+Product Page
+https://api.bestbuy.com/click/-/6436196/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6436196/cart
+Streaming
+https://youtu.be/o3UlT5UDRC8
+Brand
+evga
+Model
+ftw3 ultra
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+FacePalm (5) KEKW (3) KEKWait (2) 🇬 (4) 🇴 (2) 😭 KannaWhat 
+
+[09-Feb-21 11:00 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+bestbuy
+Price
+$959.99
+Product Page
+https://api.bestbuy.com/click/-/6430175/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6430175/cart
+Streaming
+https://youtu.be/o3UlT5UDRC8
+Brand
+msi
+Model
+ventus 3x oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (18) 🇳 (5) KEKWait (8) 🇴 (5) ℹ️ (2) 0️⃣ (2) 🇵 (4) 🇪 (2) FacePalm (2) Hahaa (2) PepeGrill 
+
+[09-Feb-21 11:02 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+bestbuy
+Price
+$699.99
+Product Page
+https://api.bestbuy.com/click/-/6429440/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6429440/cart
+Streaming
+https://youtu.be/o3UlT5UDRC8
+Brand
+nvidia
+Model
+founders edition
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+FacePalm (16) KEKW (12) 💀 (7) 💩 (6) 3080 (2) 😭 
+
+[09-Feb-21 11:02 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+bestbuy
+Price
+$839.99
+Product Page
+https://api.bestbuy.com/click/-/6432400/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6432400/cart
+Streaming
+https://youtu.be/o3UlT5UDRC8
+Brand
+evga
+Model
+xc3 ultra
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (21) KEKWait (15) 💀 (14) 💩 (12) Hahaa (9) 🇧 (7) 🇴 (8) 🇹 (7) 5604_SadSupremePepe (5) 🇸 (6) 3080 (7) 💯 (3) 1038_Among_Us_Pepe (3) 
+
+[09-Feb-21 11:06 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+bestbuy
+Price
+$899.99
+Product Page
+https://api.bestbuy.com/click/-/6436223/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6436223/cart
+Streaming
+https://youtu.be/o3UlT5UDRC8
+Brand
+gigabyte
+Model
+aorus master
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+👎 (58) 🇫 (9) 👍 (7) 📈 (5) okiRIP (12) 🇵 (5) 🇴 (4) 🅾️ (5) 🇷 (5) KEKW (8) 💢 (6) Hahaa 
+
+[09-Feb-21 08:11 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**Offer: IN STOCK ON  ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Price
+$870
+Offer Page #ad
+https://amazon.com/dp/B08HR3Y5GQ?smid=ATVPDKIKX0DER&tag=data20-20#aod
+Streaming
+https://youtu.be/o3UlT5UDRC8
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases.
+
+{Reactions}
+KEKW (126) 👍 (29) 💢 (33) AwOo (14) 😫 (37) Hahaa (28) 🍴 (13) 💩 (51) 🇳 (29) 😞 (20) 🇴 (29) 🇵 (29) 🇪 (28) 1349_Pepe_Comfy (14) 🖕 (25) 🇧 (15) 🇸 (14) 3080 (33) 6340_amongus_sus (16) okiRIP (34) 
+
+[20-Feb-21 07:37 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**Offer: USED ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Price
+$755.02
+Offer Page #ad
+https://amazon.com/dp/B08HH5WF97?smid=ATVPDKIKX0DER&tag=data20-20#aod
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+tuf oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases.
+
+{Reactions}
+KEKW (390) 🙄 (90) 🤷 (65) KEKWait (73) 😴 (48) 💩 (130) 🚫 (104) 🇬 (34) 🤡 (57) 🇧 (34) 🇴 (33) 🇱 (34) 🤱 (32) KannaWhat (31) 👎 (96) 🇹 (27) PLEASENO (48) tachi_smile (30) catjam (53) Hahaa (48) 
+
+[25-Feb-21 07:44 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**Offer: NEW ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Price
+$929.99
+Offer Page #ad
+https://amazon.com/dp/B08J6F174Z?smid=ATVPDKIKX0DER&tag=data20-20#aod
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+strix oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases.
+
+{Reactions}
+🤮 (107) okiRIP (99) 😆 (22) KEKW (47) KEKWait (26) 9791_pepe (19) PLEASENO (26) 💩 (48) Hahaa (19) 🇬 (11) 😡 (24) 6340_amongus_sus (11) AwOo (7) 💃 (6) PepeGrill (8) 👺 (8) 🕺 (6) 👍 (9) 🙈 (9) 🖕 (19) 
+
+[25-Feb-21 07:45 AM] DataLover#9406
+it's gone or it's glitch
+
+{Reactions}
+KEKW (129) 🤰 (14) 💩 (40) KannaWhat (10) 😩 (22) 🙄 (18) okiRIP (31) xboxsx (10) 🇳 (12) 💔 (20) 🆔 (12) KEKWait (16) tachi_smile (15) ⁉️ (12) 🇬 (11) 😦 (11) 🎊 (9) 🖕 (20) 🍆 (16) NICE (12) 
+
+[25-Feb-21 11:19 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+bestbuy
+Price
+$699.99
+Product Page
+https://api.bestbuy.com/click/-/6429440/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6429440/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+nvidia
+Model
+founders edition
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+💩 (85) KEKW (41) 😂 (13) 👍 (14) okiRIP (22) 3080 (11) 🤣 (10) 🥴 (10) 😾 (8) 🐧 (5) GotEm (6) 😿 (12) 😞 (9) 🥲 (16) 🤔 (5) 👨‍❤️‍💋‍👨 (6) 🖕 (21) 😀 (5) NICE (5) FacePalm (3) 
+
+[25-Feb-21 11:31 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+bestbuy
+Price
+$699.99
+Product Page
+https://api.bestbuy.com/click/-/6429440/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6429440/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+nvidia
+Model
+founders edition
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKWait (40) KEKW (25) 🇸 (8) 💩 (18) 🇴 (7) 🇱 (8) 🥲 (6) 😭 (10) 🇩 (6) 😡 (5) okiRIP (5) 😂 (3) 👌 (3) ⭕ 🇺 🇹 
+
+[25-Feb-21 11:32 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+bestbuy
+Price
+$699.99
+Product Page
+https://api.bestbuy.com/click/-/6429440/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6429440/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+nvidia
+Model
+founders edition
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (75) okiRIP (42) 🤡 (26) 🇸 (8) 🇳 (11) 🤔 (7) KEKWait (11) 🇴 (14) 🇫 (12) NICE (7) 🇮 (8) 😭 (23) 🇩 (7) 👎 (16) 🖕 (17) 1038_Among_Us_Pepe (7) 6900xt (5) 6800xt (4) 6800 (5) 5900 (6) 
+
+[25-Feb-21 11:53 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+bestbuy
+Price
+$839.99
+Product Page
+https://api.bestbuy.com/click/-/6432400/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6432400/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+xc3 ultra
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+okiRIP (71) 😤 (29) 🤡 (16) 🇮🇱 (10) KEKW (18) FacePalm (11) 🖕 (18) PLEASENO (8) Hahaa (5) KEKWait (5) 🇹 (5) 🇫 (14) 1540_PeePeeHands (8) 
+
+[25-Feb-21 12:07 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+bestbuy
+Price
+$699.99
+Product Page
+https://api.bestbuy.com/click/-/6429440/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6429440/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+nvidia
+Model
+founders edition
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (141) KEKWait (32) FacePalm (33) 🇨 (29) okiRIP (41) 🇺 (29) 💩 (34) Hahaa (17) 🇳 (29) 👀 (10) 🇹 (29) 3080 (18) 🔫 (14) 🇸🇦 (11) 🥵 (13) 😒 (17) 1907_Pepe_Box (10) 😭 (20) 1540_PeePeeHands (14) catjam (28) 
+
+[26-Feb-21 11:39 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+zotac
+Price
+$939.99
+Product Page
+https://www.zotacstore.com/us/zotac-gaming-geforce-rtx-3080-trinity-oc-white-edition-zt-a30800k-10p
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+zotac
+Model
+gaming trini
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🖕 (21) KEKW (13) 🤢 (7) FacePalm (6) 💣 (3) 😠 (4) okiRIP (2) xboxsx (3) NICE (3) 3080 (2) KannaWhat (2) ps5de (2) 5600 (2) 5800 (2) 😫 (2) 5950 (2) GotEm (2) ↪️ (3) tachi_smile (2) 😋 (3) 
+
+[26-Feb-21 11:39 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+zotac
+Price
+$969.99
+Product Page
+https://www.zotacstore.com/us/zotac-gaming-geforce-rtx-3080-amp-holo-zt-a30800f-10p
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+zotac
+Model
+gaming amp h
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (98) 💩 (81) KEKWait (20) catjam (23) KannaWhat (7) 1907_Pepe_Box (7) PLEASENO (16) 🇫 (23) 🇺 (17) 🇨 (15) xboxsx (6) 🇮🇶 (6) 🇱 (6) 🇰 (18) 🤡 (11) 👍 (8) 😱 (8) 🗿 (6) PepeGrill (7) FacePalm (7) 
+
+[27-Feb-21 12:05 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**Offer: USED
+
+- ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Price
+$710
+Offer Page #ad
+https://amazon.com/dp/B08HR7SV3M?smid=ATVPDKIKX0DER&tag=data20-20#aod
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+msi
+Model
+gaming x trio
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases.
+
+{Reactions}
+🖕 (154) 😩 (52) KEKWait (46) KEKW (61) 💯 (15) 🇺 (27) 🇸 (29) 🇪 (29) okiRIP (22) 🇩 (29) 6340_amongus_sus (14) 🇬 (13) 🇴 (14) 🇹 (10) 🇮 (10) 💩 (20) 🇫 (10) 1540_PeePeeHands (14) Hahaa (18) catjam (25) 
+
+[02-Mar-21 09:47 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+zotac
+Product Page
+https://www.zotacstore.com/us/zotac-gaming-geforce-rtx-3080-amp-holo-zt-a30800f-10p
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+zotac
+Model
+gaming amp h
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (94) KEKWait (24) 🅱️ (18) 🅰️ (17) 👇 (17) okiRIP (25) 😭 (16) 😂 (9) 🇩 (16) 👎 (17) 🤡 (13) 😤 (9) Hahaa (6) 🇫 (9) 🤮 (10) 😩 (6) 🇺 (7) 👎🏿 (9) FacePalm (12) 🇨 (6) 
+
+[03-Mar-21 03:49 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**Offer: USED
+
+- ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Price
+$734
+Offer Page #ad
+https://amazon.com/dp/B08HH5WF97?smid=ATVPDKIKX0DER&tag=data20-20#aod
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+tuf oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases.
+
+{Reactions}
+💩 (115) 🇳 (29) 🇴 (26) KEKW (44) 🤦‍♂️ (14) 🇵 (18) 🇪 (17) 🔫 (8) catjam (22) 👺 (9) 🌚 (7) 🖕 (39) 🍆 (14) 😩 (21) 💦 (9) 😏 (4) Hahaa (11) 9791_pepe (5) 🧢 (6) 🧑‍🦽 (5) 
+
+[04-Mar-21 01:05 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**Offer: ONLY ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Price
+$715
+Offer Page #ad
+https://amazon.com/dp/B08HR5SXPS?smid=ATVPDKIKX0DER&tag=data20-20#aod
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+msi
+Model
+ventus 3x oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases.
+
+{Reactions}
+KEKW (230) 😭 (132) 🤡 (68) 🇫 (45) 6340_amongus_sus (28) 🇺 (39) 🤷 (16) 🇰 (31) FacePalm (20) 🇸 (19) 🇨 (28) 💩 (38) 🅰️ (15) ♿ (25) Ⓜ️ (15) 😂 (19) KannaWhat (12) 🖕 (48) AwOo (11) 9791_pepe (16) 
+
+[05-Mar-21 11:10 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**Offer: NEW ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Price
+$1099
+Offer Page #ad
+https://amazon.com/dp/B08HR3Y5GQ?smid=ATVPDKIKX0DER&tag=data20-20#aod
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases.
+
+{Reactions}
+🤡 (28) 1540_PeePeeHands (7) 👎 (20) KEKW (10) 🦈 (3) 👹 (3) 👺 (3) 6340_amongus_sus (2) 😋 (2) 1038_Among_Us_Pepe (2) 
+
+[05-Mar-21 11:10 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**Offer: NEW ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Price
+$1099
+Offer Page #ad
+https://amazon.com/dp/B08HR3Y5GQ?smid=ATVPDKIKX0DER&tag=data20-20#aod
+Streaming
+https://www.#twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases.
+
+{Reactions}
+KEKW (168) 🖕 (127) 😔 (25) okiRIP (29) 1907_Pepe_Box (15) PLEASENO (23) 👎 (42) 6340_amongus_sus (16) 😭 (29) KannaWhat (11) tachi_smile (9) 👹 (8) 💩 (25) KEKWait (19) 🛑 (14) 🦙 (8) Hahaa (12) 🧢 (9) 🦊 (8) 🤡 (22) 
+
+[06-Mar-21 02:35 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+zotac
+Price
+$969.99
+Product Page
+https://www.zotacstore.com/us/zotac-gaming-geforce-rtx-3080-amp-holo-zt-a30800f-10p
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+zotac
+Model
+gaming amp h
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+1540_PeePeeHands (80) 👍 (22) KEKW (48) 🇮🇱 (12) 🇿 (14) 🇴 (9) 🖕 (27) 🇹 (11) 🇦 (9) 🤮 (18) 🇨 (11) 🇮🇶 (10) 🧑‍🦽 (6) FacePalm (10) 💩 (17) 👎 (32) 1038_Among_Us_Pepe (7) blush_eoto_002 (5) 🦘 (6) 🍆 (12) 
+
+[06-Mar-21 08:14 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**Offer: NEW ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Price
+$1095
+Offer Page #ad
+https://amazon.com/dp/B08HR3Y5GQ?smid=ATVPDKIKX0DER&tag=data20-20#aod
+Streaming
+https://www.#twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases.
+
+{Reactions}
+PLEASENO (109) KEKW (131) 👎 (106) 😐 (34) 💩 (66) 🖕 (69) 🇫 (24) 👺 (18) 🤡 (29) FacePalm (22) 🇺 (19) 😆 (12) 🍴 (9) 😂 (18) 🅰️ (12) 🇿 (11) ☠️ (20) okiRIP (21) 9520_Amongus_pog (15) KEKWait (16) 
+
+[09-Mar-21 10:17 PM] DataLover#9406
+good luck with zotac guys https://www.zotacstore.com/us/graphics-cards/geforce-rtx-30-series?__cf_chl_jschl_tk__=6e95d2638f46d73190bd762dffaec43560d4631e-1615349684-0-ATBAQAnOela0snz9kRIP0TCQnua_s2OsawvC2s_E8SODfM3tmKzDQvhMEBe4mL-P6h355pb0KvzIeijylkJjwOaV2dvoGdTmzNDF7lHgnT_PKo1ArdesOkCFGWfSylRrY7d9-KilyiscaNZiyol7JdqeWXdsp4Su66GitIhPePPHUF8sHvAGrTd2ZBE3zPaaWGgut4EbvzoFm0mvHorkA3fhNuHxq49pHy5598VSKYkcMaXN-AOfS3KLs4Az3Gc-U3e1BUYVIPOsLz3ujJch6OSLm1bI4c50VvHMqgWnA-nlo7uE33p40Z_Bhv2v7GrsbRqHaif1NUYSONoqGNssJZHiLoLWieb_100XzBjlBAsuw7FhblplN9GN3gneP9YgkQ
+
+{Reactions}
+KEKW (50) KannaWhat (10) 1540_PeePeeHands (15) 🇫 (19) 😆 (10) okiRIP (16) 🇱 (8) 🇴 (6) 🆖 (7) 3080 (9) KEKWait (7) 💩 (8) PepeGrill (4) 02smug (5) 5️⃣ (4) 2️⃣ (4) 🙅‍♂️ (8) Hahaa (5) 😂 (6) 🤬 (7) 
+
+[10-Mar-21 02:44 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+zotac
+Price
+$969.99
+Product Page
+https://www.zotacstore.com/us/zotac-gaming-geforce-rtx-3080-amp-holo-zt-a30800f-10p
+Streaming
+https://www.#twitch.tv/datalovertv
+Brand
+zotac
+Model
+gaming amp h
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (92) 🖕 (99) 😬 (16) 🇧 (35) 🇷 (35) 🇺 (36) 🇭 (35) 🤮 (17) 💩 (13) 🇬 (9) 🇫 (8) 🇴 (7) 💸 (6) 🇪 (4) 🇹 (9) 🗿 (5) GotEm (4) 3080 (9) 🧟‍♂️ (5) FacePalm (8) 
+
+[10-Mar-21 08:58 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+zotac
+Price
+$939.99
+Product Page
+https://www.zotacstore.com/us/zotac-gaming-geforce-rtx-3080-trinity-oc-white-edition-zt-a30800k-10p
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+zotac
+Model
+gaming trini
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+😱 (51) KEKW (50) 😳 (11) KEKWait (17) 3080 (16) 6340_amongus_sus (5) 💩 (23) 😆 (6) Hahaa (9) 😋 (4) 🇵 (6) 🏳️‍🌈 (5) 🇴 (6) ⭕ (5) 💄 (4) 🅿️ (6) 👰‍♀️ (5) okiRIP (13) 😭 (11) PLEASENO (11) 
+
+[12-Mar-21 11:03 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+bestbuy
+Product Page
+https://api.bestbuy.com/click/-/6429440/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6429440/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+nvidia
+Model
+founders edition
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🇦 (7) 😫 (7) 🇾 (5) 🇪 (4) KEKW (6) 🤨 (2) 👍 (4) 🖕 (4) 9520_Amongus_pog (2) okiRIP (3) 3080 (2) 🇯🇲 
+
+[12-Mar-21 11:05 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+bestbuy
+Product Page
+https://api.bestbuy.com/click/-/6430175/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6430175/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+msi
+Model
+ventus 3x oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🖕🏻 (16) 🤮 (8) 🇫 (7) 🇺 (6) 🇨 (6) 🇰 (4) 🇳 (2) 🇯🇲 (2) 🛑 
+
+[12-Mar-21 11:06 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+bestbuy
+Product Page
+https://api.bestbuy.com/click/-/6432445/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6432445/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+strix
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🇬 (6) 🇱 (7) KEKW (8) 🇺 (5) 🇨 (4) 🖕 (6) 🇰 (4) 🅰️ (3) Ⓜ️ (3) 🇿 (3) okiRIP (7) 🇭 (2) 🇯 (2) 🇪 (2) 🇼 (2) 🇯🇲 (2) 
+
+[12-Mar-21 11:08 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+bestbuy
+Product Page
+https://api.bestbuy.com/click/-/6429440/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6429440/cart
+Streaming
+https://www.#twitch.tv/datalovertv
+Brand
+nvidia
+Model
+founders edition
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+Hahaa (38) okiRIP (37) ✊🏿 (4) 🇬 (21) 🇴 (22) 🇳 (21) 🇪 (22) 🇯 (3) catjam (8) FacePalm (8) 🇼 (5) 🅰️ (5) 🇮 (5) 🤔 (6) 🇹 (5) 4766_pepegod (4) NICE (3) 😭 (19) 🇫 (6) 🇺 (4) 
+
+[12-Mar-21 01:06 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+antonline
+Product Page
+https://www.antonline.com/Lenovo/Computers/Computer_Displays/Monitors/1422918
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+lenovo
+Model
+g27q qhd ips
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+💩 (104) KEKW (53) 🤮 (24) 🖕 (27) Hahaa (13) KEKWait (11) KannaWhat (5) 🤡 (9) 💵 (6) 🤨 (6) 3080 (5) 🍉 (3) 💰 (4) 🐯 (4) FacePalm (5) ❓ (5) 🇼 (4) 🤌 (3) 😋 (3) ®️ (3) 
+
+[12-Mar-21 01:07 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+antonline
+Product Page
+https://www.antonline.com/Lenovo/Computers/Computer_Displays/Monitors/1422919
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+lenovo
+Model
+g27q qhd ips
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (76) 4766_pepegod (20) 🤮 (42) Hahaa (11) ☠️ (6) KEKWait (14) 😫 (8) 🖕 (26) catjam (11) 🤪 (7) 💩 (21) 😆 (10) 👻 (6) 🇱 (11) 🤌 (6) 💯 (6) 🗑️ (7) 🤓 (7) 6340_amongus_sus (12) 🇴 (8) 
+
+[13-Mar-21 12:33 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+zotac
+Price
+$969.99
+Product Page
+https://www.zotacstore.com/us/zotac-gaming-geforce-rtx-3080-amp-holo-zt-a30800f-10p
+Streaming
+https://www.#twitch.tv/datalovertv
+Brand
+zotac
+Model
+gaming amp h
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (80) KEKWait (18) 😭 (21) 😐 (14) KannaWhat (7) Hahaa (8) 3080 (11) 1907_Pepe_Box (6) 🇫 (12) 3060 (5) catjam (12) 1038_Among_Us_Pepe (5) 1349_Pepe_Comfy (4) okiRIP (10) 💰 (5) NICE (3) 1540_PeePeeHands (3) 🇸 (3) 🇺 (3) 🕋 (5) 
+
+[13-Mar-21 12:38 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+zotac
+Price
+$939.99
+Product Page
+https://www.zotacstore.com/us/zotac-gaming-geforce-rtx-3080-trinity-oc-white-edition-zt-a30800k-10p
+Streaming
+https://www.#twitch.tv/datalovertv
+Brand
+zotac
+Model
+gaming trini
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (67) 🇳 (7) 💰 (10) 1907_Pepe_Box (8) 💯 (5) KannaWhat (4) 😭 (9) 👌 (6) 💩 (10) catjam (13) NICE (5) 2161_AmongUs_Angy (4) 🧂 (4) okiRIP (17) 👎 (15) 🖕 (8) 🇱 (3) 6340_amongus_sus (6) Hahaa (4) 🥶 (3) 
+
+[13-Mar-21 08:54 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**Offer: CURRENTLY ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Price
+$675
+Offer Page #ad
+https://amazon.com/dp/B08HR55YB5?smid=ATVPDKIKX0DER&tag=data20-20#aod
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+xc3 ultra
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases.
+
+{Reactions}
+KEKW (101) 🇸 (15) okiRIP (31) 🇨 (16) 💩 (27) 🔫 (10) 🇦 (18) 🇱 (12) 🇲 (16) 😆 (7) 🍉 (7) 🇵 (10) 🇴 (9) 👀 (10) 🖕 (25) ⭕ (9) 🧑‍💻 (8) 🇼 (7) 3060ti (9) FacePalm (15) 
+
+[14-Mar-21 12:41 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Price
+$655.82
+Product Page
+https://amazon.com/dp/B08HR5SXPS?smid=ATVPDKIKX0DER&tag=data20-20#aod
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+msi
+Model
+ventus 3x oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases.
+
+{Reactions}
+🤡 (198) okiRIP (76) 💩 (60) 🇳 (21) KEKW (51) 3080 (26) 👎 (53) 😭 (35) PLEASENO (19) 🇱 (15) 😡 (23) Hahaa (20) 🇬 (16) 🚫 (17) 9751_feelssickman (17) 🇴 (20) overpriced (8) 🖕 (44) 🇪 (12) NICE (10) 
+
+[15-Mar-21 11:09 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Price
+$704.87
+Product Page
+https://amazon.com/dp/B08HR7SV3M?smid=ATVPDKIKX0DER&tag=data20-20#aod
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+msi
+Model
+gaming x trio
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases.
+
+{Reactions}
+KEKW (178) Hahaa (34) 6340_amongus_sus (24) 🖕 (99) okiRIP (45) 🗑️ (23) 💩 (49) 3080 (15) 💢 (21) 🇬 (20) 🤮 (20) 1540_PeePeeHands (21) 5900 (12) xboxsx (11) 😎 (12) 🇴 (20) AwOo (11) 🇮🇱 (18) 🇳 (18) soldout (15) 
+
+[15-Mar-21 11:13 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**Offer: USED
+
+- ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Price
+$704
+Offer Page #ad
+https://amazon.com/dp/B08HR7SV3M?smid=ATVPDKIKX0DER&tag=data20-20#aod
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+msi
+Model
+gaming x trio
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases.
+
+{Reactions}
+💩 (72) 🖕 (61) KEKW (30) 🇮🇱 (10) okiRIP (20) 6340_amongus_sus (7) 1540_PeePeeHands (6) 🤡 (9) 🇱 (4) 🛑 (5) catjam (8) 😩 (5) 🧢 (2) tachi_smile (2) 🇺 (10) 🇸 (10) 🇪 (10) 🤨 (4) 🇩 (10) ⛏️ (8) 
+
+[15-Mar-21 11:14 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**Offer: USED
+
+- ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Price
+$704
+Offer Page #ad
+https://amazon.com/dp/B08HR7SV3M?smid=ATVPDKIKX0DER&tag=data20-20#aod
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+msi
+Model
+gaming x trio
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases.
+
+{Reactions}
+💩 (123) 🇮🇱 (16) okiRIP (22) KEKW (31) 🖕 (44) 1540_PeePeeHands (7) 🇫 (24) 🇺 (22) 🇨 (18) 6340_amongus_sus (9) 🇰 (19) 😆 (7) 💀 (2) 👺 (7) 🇺🇸 (8) 🤡 (17) ⚕️ (4) 1038_Among_Us_Pepe (7) 🛐 (4) 🪔 (3) 
+
+[15-Mar-21 10:59 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**Offer: NEW ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Price
+$929
+Offer Page #ad
+https://amazon.com/dp/B08J6F174Z?smid=ATVPDKIKX0DER&tag=data20-20#aod
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+strix oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases.
+
+{Reactions}
+KEKW (93) 😵 (12) PLEASENO (12) 🥶 (7) okiRIP (27) 🇱 (6) ❌ (16) 🇫 (8) 🤣 (8) 🤬 (13) 🖕 (31) catjam (6) 1349_Pepe_Comfy (4) Hahaa (5) 💩 (8) 🇸 (6) 🇨 (7) 🇦 (5) 🪀 (2) Ⓜ️ (5) 
+
+[15-Mar-21 11:01 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**Offer: NEW ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Price
+$929
+Offer Page #ad
+https://amazon.com/dp/B08J6F174Z?smid=ATVPDKIKX0DER&tag=data20-20#aod
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+strix oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases.
+
+{Reactions}
+PLEASENO (39) KEKWait (36) okiRIP (23) KEKW (36) 3080 (8) 🖕 (25) 🥵 (5) 👍 (4) 🛑 (5) 💩 (6) 🐦 (4) 🧢 (5) 🤬 (10) 🇸 (8) 🇨 (8) 🇦 (8) GotEm (3) Ⓜ️ (9) FacePalm (4) 1235_wojak_pepe_hoodie (2) 
+
+[15-Mar-21 11:03 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**Offer: IN ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Price
+$929
+Offer Page #ad
+https://amazon.com/dp/B08J6F174Z?smid=ATVPDKIKX0DER&tag=data20-20#aod
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+strix oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases.
+
+{Reactions}
+KEKW (147) 9791_pepe (18) 🤡 (39) 🐦 (7) 1540_PeePeeHands (16) 😋 (9) KEKWait (15) 🖕 (60) 😩 (17) Hahaa (11) okiRIP (18) PLEASENO (14) 🥜 (9) FacePalm (10) 💩 (19) 6340_amongus_sus (8) soldout (5) 🇱 (8) 3080 (13) 🐸 (8) 
+
+[17-Mar-21 01:00 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**Offer: ONLY ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Price
+$675
+Offer Page #ad
+https://amazon.com/dp/B08HR5SXPS?smid=ATVPDKIKX0DER&tag=data20-20#aod
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+msi
+Model
+ventus 3x oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases.
+
+{Reactions}
+KEKW (133) okiRIP (83) FacePalm (27) 🇮🇱 (15) 🖕 (49) 🤡 (27) catjam (22) 🇵 (11) AwOo (13) ⭕ (11) 🇫 (18) 🇰 (17) 🤮 (12) 🇦 (14) 🇴 (12) 💩 (20) 🥵 (12) 😆 (11) Hahaa (13) 🇸 (12) 
+
+[18-Mar-21 07:15 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**Offer: NEW ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Price
+$929
+Offer Page #ad
+https://amazon.com/dp/B08J6F174Z?smid=ATVPDKIKX0DER&tag=data20-20#aod
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+strix oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases.
+
+{Reactions}
+KEKW (39) tachi_smile (5) FacePalm (5) PLEASENO (5) 3070 (4) KEKWait (4) 😭 (3) okiRIP (10) 💩 (6) 🇳 (2) 🇱 (2) 😩 🇧 (3) 🇸 (3) 🇬 🇴 🤖 
+
+[18-Mar-21 07:17 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**Offer: IN ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Price
+$929
+Offer Page #ad
+https://amazon.com/dp/B08J6F174Z?smid=ATVPDKIKX0DER&tag=data20-20#aod
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+strix oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases.
+
+{Reactions}
+FacePalm (26) 📦 (3) KEKW (15) okiRIP (10) 🤖 (3) 😳 (3) 💸 (2) 👎 (8) 🇬 (9) 🇴 (7) 🖕 (5) 🇳 (7) 🇪 (7) 🤡 💩 (4) 😭 (2) 😱 (2) 🍴 
+
+[18-Mar-21 07:19 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**Offer: NEW ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Price
+$929
+Offer Page #ad
+https://amazon.com/dp/B08J6F174Z?smid=ATVPDKIKX0DER&tag=data20-20#aod
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+strix oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases.
+
+{Reactions}
+FacePalm (41) remVV (16) KEKW (44) 6340_amongus_sus (12) 🤬 (21) 😭 (29) 🤖 (5) 💩 (9) 🇬 (4) 🇴 (7) 🇹 (4) 🍨 (5) PLEASENO (6) 🇸 (4) okiRIP (11) 🛑 (5) 🇷 (12) 🇮 (12) 🇵 (11) NICE (2) 
+
+[19-Mar-21 05:42 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+asus
+Product Page
+https://store.asus.com/us/item/202012AM220000002
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+strix oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🙃 (63) KEKW (60) 💩 (42) 🚨 (7) 🇫 (15) Hahaa (9) 🇺 (10) KannaWhat (5) okiRIP (14) 🇰 (10) 🅱️ (5) 🅰️ (6) 🇩 (6) 6340_amongus_sus (6) 🇳 (7) 9751_feelssickman (7) 🗿 (4) 🇮 (6) 👶 (5) 🇬 (6) 
+
+[19-Mar-21 07:29 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**Offer: NEW ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Price
+$99
+Offer Page #ad
+https://amazon.com/dp/B08J6F174Z?smid=ATVPDKIKX0DER&tag=data20-20#aod
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+strix oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases.
+
+{Reactions}
+KEKW (325) 🇸 (35) 6340_amongus_sus (56) 🇨 (35) KannaWhat (28) ❔ (74) okiRIP (26) 🅰️ (37) 👎 (46) 🇱🇾 (12) ❓ (29) 😩 (19) Ⓜ️ (34) 👍 (16) 🤤 (16) soldout (13) 💩 (40) Hahaa (25) 😫 (20) 3080 (22) 
+
+[20-Mar-21 04:02 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Product Page
+http://instockalert.io/P/US/B08HH5WF97
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+tuf oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+💩 (24) 🇵 (4) 🇴 (4) okiRIP (7) 😢 (6) 🅾️ (5) KEKW (8) 🅿️ (3) 9791_pepe (3) 🖕 (7) KannaWhat (2) ❤️ (3) tachi_smile (2) GotEm (2) 1038_Among_Us_Pepe (3) 👍 (2) 🪑 (2) dopefrog 
+
+[20-Mar-21 04:02 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Product Page
+http://instockalert.io/P/US/B08HH5WF97
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+tuf oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+KEKW (208) 1349_Pepe_Comfy (42) 🥳 (38) 🏳️‍🌈 (40) okiRIP (72) 🐸 (37) 💩 (63) FacePalm (36) 🤖 (34) 🖕 (91) 🇸 (38) 9791_pepe (24) 🇨 (36) catjam (44) 3080 (35) 6340_amongus_sus (25) 🤡 (32) KEKWait (31) 🅰️ (35) 🇲 (34) 
+
+[25-Mar-21 04:58 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+zotac
+Price
+$909.99
+Product Page
+https://www.zotacstore.com/us/zotac-gaming-geforce-rtx-3080-trinity-zt-a30800d-10p
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+zotac
+Model
+trinity
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🇳 (49) 🇴 (46) FacePalm (24) KEKW (46) 🇵 (12) 🇿 (10) 🇪 (11) ⭕ (11) 🇹 (11) 🇦 (11) 🇨 (11) 🤣 (19) 🇧 (13) 🇷 (11) 💩 (16) 🅾️ (13) 🇰 (11) 3️⃣ (11) PLEASENO (15) 5️⃣ (9) 
+
+[25-Mar-21 04:18 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Product Page
+http://instockalert.io/P/US/B08HH5WF97
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+tuf oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+okiRIP (73) Hahaa (18) KEKW (41) 🇳 (8) 🇸 (7) 🤡 (11) 🙄 (7) soldout (7) 🇫 (16) ⭕ (6) 🇺 (11) KannaWhat (9) 🖕 (26) ℹ️ (7) 🇱 (10) 6340_amongus_sus (6) PLEASENO (10) 🍆 (9) 🤬 (11) 🇨 (8) 
+
+[26-Mar-21 09:32 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+staples
+Price
+$1193.99
+Product Page
+https://www.staples.com/msi-g3080gxt10-geforce-rtx-3080-gaming-x-trio-hdmi-pci-express-4-0-x16-10gb-video/product_IM18JB725
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+msi
+Model
+gaming x trio
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🥲 (39) KEKW (86) 🇸 (15) 🇹 (12) 😎 (5) PLEASENO (14) 🇦 (15) 🚀 (4) 🇵 (13) 🇱 (12) 🤬 (7) 💩 (13) 🇪 (11) PepeGrill (4) 9791_pepe (4) 👮‍♂️ (4) 😈 (4) 1907_Pepe_Box (4) 9751_feelssickman (4) 🤡 (12) 
+
+[26-Mar-21 04:54 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Product Page
+http://instockalert.io/P/US/B08J6F174Z
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+strix oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+KEKW (93) 🇸 (10) 🇳 (13) 🇭 (9) 🖕 (41) 🇮 (7) okiRIP (26) 🇴 (10) 🇹 (11) 💩 (22) 😳 (6) 🇪 (7) 9520_Amongus_pog (11) 3060ti (5) 🇨 (8) Hahaa (9) 🅰️ (6) KannaWhat (6) 🤮 (13) 9791_pepe (7) 
+
+[27-Mar-21 12:12 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$679.99
+Product Page
+https://www.officedepot.com/a/products/9297832/PNY-GeForce-RTX-3070-8GB-GDDR6/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 gaming
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🇫 (35) 🕌 (5) 🇺 (19) 🕋 (5) ☪️ (6) 🇨 (15) 🇵🇸 (4) 🇰 (14) 🇮🇱 (6) 🇵🇰 (4) KEKW (23) 💩 (11) 3070 (17) KannaWhat (5) 🇦🇲 (3) ❓ (6) 🖕 (7) 9791_pepe (5) okiRIP (6) 💸 (4) 
+
+[27-Mar-21 12:13 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$949.99
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+☪️ (6) 🇫 (24) 🇮🇱 (6) KEKW (28) 6340_amongus_sus (5) 🇺 (11) 🕋 (3) 🇨 (9) 🕌 (3) 🇰 (10) 1235_wojak_pepe_hoodie (3) 🤏 (6) 🛑 (4) okiRIP (12) Hahaa dopefrog (8) 🍉 (2) KannaWhat (2) 👌 (3) 1038_Among_Us_Pepe (3) 
+
+[27-Mar-21 12:14 AM] DataLover#9406
+​Bot see it online, not sure what's wrong
+
+{Reactions}
+KEKW (89) 😆 (19) Hahaa (18) 😔 (11) PepeGrill (10) 👍 (10) dopefrog (14) 🤢 (8) 🇼 (7) 🇬 (7) 🙊 (6) 🇽 (5) okiRIP (14) 🇦 (8) 🇴 (7) 🔥 (6) 🍑 (8) catjam (10) 😎 (6) 🕌 (8) 
+
+[27-Mar-21 12:42 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$1099.99
+Product Page
+https://www.officedepot.com/a/products/7791294/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+👍 remVV (2) 💸 💰 (2) 💩 (2) 
+
+[27-Mar-21 12:42 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$949.99
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+okiRIP (19) 👍 (4) remVV (3) 💀 (10) 🅱️ (5) 🅰️ (3) 1038_Among_Us_Pepe (3) 🇩 (4) 🍉 dopefrog (4) 🦊 😈 🛌 (2) KEKW (12) PLEASENO (5) Hahaa (2) KEKWait (3) 🍿 😭 (3) 4766_pepegod (2) 
+
+[27-Mar-21 01:12 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$949.99
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+😭 (21) KEKW (17) 🦊 (2) okiRIP (9) 💤 (4) 🐒 catjam (4) 💩 (4) 🍪 👺 🇮🇱 🇬 (5) 🇦 (5) 🇾 (5) 💯 1349_Pepe_Comfy (2) 🇺🇸 (2) 
+
+[27-Mar-21 01:43 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$949.99
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+1540_PeePeeHands (5) KEKW (16) 🙀 🇬 (4) okiRIP (5) 🇴 (5) 🇳 (4) 🇪 (4) 🍞 🍆 🐴 KannaWhat (2) 🦊 🖕 (4) 🌞 👎 🐒 🇫 🇦 🇰 
+
+[27-Mar-21 01:51 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$949.99
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+1540_PeePeeHands (22) PLEASENO (6) KEKW (12) catjam (4) KannaWhat 🛑 (4) dopefrog (3) 8934_Pepe_King (3) 🇼 (2) 6340_amongus_sus 🇭 zerotwodance (2) 6900xt 
+
+[27-Mar-21 01:56 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$1099.99
+Product Page
+https://www.officedepot.com/a/products/7791294/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (18) 1540_PeePeeHands (2) zerotwodance (3) dopefrog (2) 🇭 🇪 (2) catjam (3) 6340_amongus_sus (3) KannaWhat (2) 1️⃣ (2) 🇱 🤡 okiRIP (2) 🇵 🇧 🇸 🦊 🐴 6900xt 6800 
+
+[27-Mar-21 02:02 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$1099.99
+Product Page
+https://www.officedepot.com/a/products/7791294/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+PLEASENO (10) 🇸 (19) 🇹 (19) 🇴 (19) 🇵 (19) 👺 (4) KEKW (8) 🛏️ (3) 💤 🦊 🇦 🍞 3080 🐒 🇱 🙀 🇮 🐱 🌞 catjam (4) 
+
+[27-Mar-21 02:13 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$949.99
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+😳 (3) KEKW (2) 🚫 (2) 
+
+[27-Mar-21 02:13 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$1099.99
+Product Page
+https://www.officedepot.com/a/products/7791294/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+😳 (4) PLEASENO (2) 💩 (7) 🇸 (2) 1540_PeePeeHands (2) 🇹 (2) soldout (2) 🇴 (2) 🇵 (2) 🦊 (2) KEKW (3) 🚫 (2) 
+
+[27-Mar-21 02:14 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$949.99
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🇸 (9) KEKW (11) 🦊 (2) 1540_PeePeeHands (2) 🇹 (9) 🇴 (9) 🇵 (8) dopefrog (3) KEKWait 👍 3080 (3) 🚫 👨‍❤️‍👨 catjam (3) 🛑 (2) okiRIP whereamongus dogemine 1235_wojak_pepe_hoodie 
+
+[27-Mar-21 02:21 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$1099.99
+Product Page
+https://www.officedepot.com/a/products/7791294/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🇸 (18) 🇹 (18) ⭕ (18) 🇵 (18) 🛑 (7) 🦊 🐒 🐴 6340_amongus_sus 🙀 👺 KEKW (4) PLEASENO (2) KannaWhat 
+
+[27-Mar-21 02:32 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$1099.99
+Product Page
+https://www.officedepot.com/a/products/7791294/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🇸 (4) 🇹 (4) 🇴 (4) 🇵 (4) 
+
+[27-Mar-21 02:33 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$949.99
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (8) 💩 (4) 🇱 (3) 🇪 (3) 🦊 🇸 (3) 🇬 (3) 3080 🇴 (3) 🐒 🏓 🚗 
+
+[27-Mar-21 02:54 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$949.99
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (4) okiRIP (4) 💩 (4) 🇵 (4) 🇱 (4) 🇪 (4) 🅰️ (4) 🖕 (3) 🇸 (4) 🦊 😋 Hahaa GotEm 8934_Pepe_King 1349_Pepe_Comfy 
+
+[27-Mar-21 03:12 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$949.99
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (4) 🚫 (6) 🧢 (2) 🙅‍♂️ (2) PepeGrill 🛑 (2) 🇸 (5) 🇹 (5) 🇴 (5) 🇵 (5) PLEASENO (2) 🦊 catjam 
+
+[27-Mar-21 03:14 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$1099.99
+Product Page
+https://www.officedepot.com/a/products/7791294/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🇸 (11) 🇹 (11) KEKW (3) 🇫 (12) 🇺 (12) 9520_Amongus_pog 🦊 ⁉️ (3) 
+
+[27-Mar-21 03:21 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$949.99
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+😐 (6) 🏳️ (8) 1540_PeePeeHands (4) 🇱 (6) KEKW (4) 🖕 (5) 🇮 (5) KannaWhat (2) 🇦 (5) catjam (3) dopefrog (2) 🇷 (5) ⏹️ (2) okiRIP 
+
+[27-Mar-21 03:47 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$949.99
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🇸 (7) 🇹 (7) 🤮 (5) 🇴 (7) PLEASENO (4) 🇵 (8) KannaWhat (4) 🖕🏻 (4) KEKW (2) 
+
+[27-Mar-21 03:50 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$949.99
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (5) dopefrog (3) PLEASENO (3) KannaWhat (3) catjam (2) 1907_Pepe_Box (2) 9791_pepe (2) 🙄 (3) 
+
+[27-Mar-21 03:52 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$949.99
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+Hahaa (4) PLEASENO (6) 🇧 (5) FacePalm (4) 🇷 (5) 🇺 (5) 🇭 (5) 🇸 (6) 🇹 (6) 🇴 (6) 🇵 (6) 6340_amongus_sus (3) 2161_AmongUs_Angy 🤬 
+
+[27-Mar-21 04:04 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$1099.99
+Product Page
+https://www.officedepot.com/a/products/7791294/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+PLEASENO (11) 🇸 (3) soldout (4) 🇭 (3) 🇮 (3) 🇹 (2) 3080 (2) 💸 FacePalm (5) 6340_amongus_sus (2) dopefrog (3) 1349_Pepe_Comfy (2) 🚫 🛑 2161_AmongUs_Angy (2) 
+
+[27-Mar-21 04:09 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$949.99
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+PLEASENO (2) 
+
+[27-Mar-21 04:09 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$1099.99
+Product Page
+https://www.officedepot.com/a/products/7791294/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+PLEASENO (3) KEKW (4) 🇸 💩 🇱 🇪 zerotwodance 🇵 Hahaa 6340_amongus_sus (2) 
+
+[27-Mar-21 04:11 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$1099.99
+Product Page
+https://www.officedepot.com/a/products/7791294/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+PLEASENO (9) 1540_PeePeeHands (4) GotEm (2) 🇷 (2) 🇮 (2) 🇵 (2) 🇨 (2) 🇺 (3) 🇲 (2) 
+
+[27-Mar-21 04:19 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$949.99
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+PLEASENO (6) 💩 (4) 🇵 (2) 🇱 (2) 🇸 (2) Hahaa 🇧 🇫 (2) 🇺 (2) 🇨 (2) 🇰 (2) 
+
+[27-Mar-21 04:37 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$949.99
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KannaWhat (3) 😡 (7) KEKW (3) 🛑 (2) PLEASENO 
+
+[27-Mar-21 04:40 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$1099.99
+Product Page
+https://www.officedepot.com/a/products/7791294/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🛑 (8) KEKW (2) 🙅‍♂️ PLEASENO (3) FacePalm 
+
+[27-Mar-21 04:42 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$949.99
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+PLEASENO (9) KEKW (2) 🛑 (8) 🧍 Hahaa 
+
+[27-Mar-21 04:51 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$949.99
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+PLEASENO (3) FacePalm 🇹 (2) 🇭 (2) 🇦 (3) 🇳 (2) 🇰 (2) 🇾 (2) 🇴 (2) 🇺 3080 (2) 🇩 
+
+[27-Mar-21 05:10 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$1099.99
+Product Page
+https://www.officedepot.com/a/products/7791294/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🖕 (8) PLEASENO (3) 💩 (3) 🛑 (5) 💯 (2) 🚫 (3) ♋ 🙉 🙈 🙊 okiRIP KEKW 🤦 
+
+[27-Mar-21 05:18 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$1099.99
+Product Page
+https://www.officedepot.com/a/products/7791294/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+PLEASENO (5) 🚫 (2) ⛔ 🙉 🙈 🙊 ♋ 💩 (2) 💸 👽 🦼 3080 FacePalm Hahaa 6340_amongus_sus (2) 
+
+[27-Mar-21 05:25 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$949.99
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+PLEASENO (5) 🚫 (2) 🙊 🙈 🙉 🚯 (2) 🧐 ♋ okiRIP KEKWait dopefrog 🏇 
+
+[27-Mar-21 05:36 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$949.99
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🚫 (4) 🤡 (2) 🙊 🙈 🙉 PLEASENO 
+
+[27-Mar-21 05:36 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$1099.99
+Product Page
+https://www.officedepot.com/a/products/7791294/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🚫 (3) 🙊 🙈 (2) 🛑 (4) 🤡 🙉 🇫 (2) 🇺 (2) 🇨 (2) 🇰 (2) okiRIP 3080 PLEASENO 
+
+[27-Mar-21 05:45 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$949.99
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+PLEASENO FacePalm (4) 🇸 (2) 🇹 (2) okiRIP (3) 🇴 (3) 🇵 (2) 🇫 🤣 🇳 
+
+[27-Mar-21 05:49 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$949.99
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+PLEASENO 🅱️ 🇴 (2) 🅾️ 🇧 (2) 🇸 
+
+[27-Mar-21 05:51 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$949.99
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+PLEASENO (4) 🇳 (5) 🇴 (4) 🇲 (3) 🅾️ (3) 🇷 (3) 🇪 (3) FacePalm (2) 🛑 (2) 
+
+[27-Mar-21 05:56 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$949.99
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+PLEASENO (4) zerotwodance (2) dopefrog (3) 6340_amongus_sus (2) okiRIP 
+
+[27-Mar-21 05:57 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$1099.99
+Product Page
+https://www.officedepot.com/a/products/7791294/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+PLEASENO (5) KEKW (3) 💩 (3) 
+
+[27-Mar-21 06:00 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$1099.99
+Product Page
+https://www.officedepot.com/a/products/7791294/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+PLEASENO (4) 💩 (3) KEKW (3) okiRIP (4) 🇸 (3) 🇹 (3) 🇫 (3) 🇺 (3) 🤦 dopefrog 
+
+[27-Mar-21 06:15 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$1099.99
+Product Page
+https://www.officedepot.com/a/products/7791294/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🇲 (6) 🇺 (5) 🇹 (5) 🇪 (5) 🅿️ (5) 🇳 (5) 🇾 (5) 💩 (3) 🚫 (2) 🙈 🙊 🙉 PLEASENO (2) 🚯 ♋ KEKW (3) 6340_amongus_sus okiRIP 
+
+[27-Mar-21 06:34 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$1099.99
+Product Page
+https://www.officedepot.com/a/products/7791294/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🇲 (3) 🇺 (4) 🇹 (4) 🇪 (4) 🇦 (2) 🇵 (2) 🇾 (3) 🇳 (2) 🇩 (4) 🇮 (4) 🇨 (4) 🇰 (4) 🙊 🙈 🙉 🚫 (2) ⛔ (2) 🚳 🚯 KEKW 
+
+[27-Mar-21 06:47 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$1099.99
+Product Page
+https://www.officedepot.com/a/products/7791294/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🇲 (4) 🇸 (7) 🇹 (7) 🇴 (8) 🇵 (8) 🇫 (4) 🇺 (5) 🇨 (4) 🇰 (4) FacePalm (3) 💩 (3) 🙊 🙈 🙉 🚫 (2) 🚯 🧐 (3) ♋ (2) 👉 (2) 👌 
+
+[27-Mar-21 06:49 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$949.99
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🇸 (10) 🇹 (9) 🇴 (10) 🇵 (10) 🪤 (2) 💩 (4) 🇦 (3) 🇧 (3) 🇨 (3) 🇩 (3) 🇪 (3) 🇫 (3) 🇬 (3) 🇭 (3) 🇮 (3) 🇯 (3) 🇰 (3) 🇱 (3) 🇲 (3) 🇳 (3) 
+
+[27-Mar-21 06:53 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$949.99
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (3) 🇩 (2) 🇪 (2) 🇱 (2) 📧 (2) 🇹 (2) 3️⃣ (2) KEKWait (2) 💀 PLEASENO 
+
+[27-Mar-21 06:58 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$1099.99
+Product Page
+https://www.officedepot.com/a/products/7791294/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🇲 (11) 🇺 (10) 🇹 (10) 🇪 (9) 🇵 (13) 🇳 (13) 🇾 (14) 🇮 (11) 🇸 (11) 🇧 (13) 🇦 (13) 🇩 (13) PLEASENO (2) 3060ti 
+
+[27-Mar-21 06:58 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Price
+$949.99
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (32) okiRIP (8) 1540_PeePeeHands (5) 🇲 (14) 🇺 (15) 🇹 (14) 🇪 (13) 🇵 (15) 🇳 (16) 🇾 (15) 🇮 (15) 🇸 (15) 🇧 (16) 🇦 (17) 🇩 (16) PLEASENO (2) 🔕 (4) 🧟‍♂️ (2) 😿 PepeGrill 
+
+[27-Mar-21 08:05 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+zotac
+Price
+$969.99
+Product Page
+https://www.zotacstore.com/us/zotac-gaming-geforce-rtx-3080-amp-holo-zt-a30800f-10p
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+zotac
+Model
+amp holo
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+💩 (116) KEKW (40) 3060 (10) KEKWait (19) 👀 (9) 🇫 (18) Hahaa (15) 5900 (9) 🍆 (15) PLEASENO (13) 6800xt (8) 🖕 (24) 🇱 (8) 1540_PeePeeHands (6) 🇳 (20) 🇴 (21) 🇹 (19) 🇦 (17) 🇨 (18) 6340_amongus_sus (7) 
+
+[28-Mar-21 02:35 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Product Page
+http://instockalert.io/P/US/B08HR7SV3M
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+msi
+Model
+gaming x trio
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+FacePalm (34) 🖕 (96) 🇫 (26) 💩 (33) 🇳 (13) 🤷 (10) 🇺 (17) 🅰️ (7) 🇮 (11) 🇬 (11) 🇨 (16) 🇰 (16) 🇴 (9) okiRIP (19) 🔀 (9) 🇪 (13) 🇷 (10) 😡 (17) 3080 (5) KEKW (129)  (10) 
+
+[31-Mar-21 05:26 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+asus
+Price
+$1099.99
+Product Page
+https://store.asus.com/us/item/202101AM070000002
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+ekwb
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+1540_PeePeeHands (37) KEKW (47) 😢 (12) 😐 (15) 🥴 (9) 🖕 (18) 6800 (6) 🇼 (11) FacePalm (10) 🇭 (11) 🇾 (12) PLEASENO (8) 3080 (5) 🍆 (9) 5600 (6) 🇫 (12) 🇺 (12) 🇨 (12) 🇰 (12) 💩 (12) 
+
+[31-Mar-21 06:16 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+newegg
+Price
+$1119
+Product Page
+https://www.newegg.com/asus-geforce-rtx-3080-rog-strix-rtx3080-o10g-gaming/p/N82E16814126457
+Add to Cart
+https://secure.newegg.com/Shopping/AddtoCart.aspx?Submit=ADD&ItemList=N82E16814126457
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+strix
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (141) 💩 (106) tachi_smile (18) 🤡 (24) 🍆 (23) Hahaa (16) soldout (14) okiRIP (39) 🤬 (29) 1038_Among_Us_Pepe (9) PLEASENO (16) 🍼 (12) dopefrog (18) 🤖 (11) 🧢 (8) 🇫 (17) 🖕 (26) 🇺 (11) FacePalm (11) 🇧 (10) 
+
+[31-Mar-21 06:48 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+newegg
+Price
+$1119
+Product Page
+https://www.newegg.com/asus-geforce-rtx-3080-rog-strix-rtx3080-o10g-gaming/p/N82E16814126457
+Add to Cart
+https://secure.newegg.com/Shopping/AddtoCart.aspx?Submit=ADD&ItemList=N82E16814126457
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+strix
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🍆 (54) 1540_PeePeeHands (32) KEKW (45) soldout (10) FacePalm (11) 🧢 (5) 💩 (23) PLEASENO (9) 🇫 (7) 🇸 (4) 🇦 (3) KEKWait (8) Hahaa (6) Ⓜ️ (3) 🇩 (3) 🖕 (8) 3080 (7) 3070 (2) 6340_amongus_sus (6) okiRIP 
+
+[31-Mar-21 11:23 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+zotac
+Price
+$969.99
+Product Page
+https://www.zotacstore.com/us/zotac-gaming-geforce-rtx-3080-amp-holo-zt-a30800f-10p
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+zotac
+Model
+amp holo
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (88) 🤡 (54) 3080 (11) 😢 (14) 🇸 (11) soldout (6) 🇭 (10) 💩 (19) okiRIP (18) 🇮 (9) Hahaa (5) 🇹 (9) 1349_Pepe_Comfy (4) PLEASENO (7) 🇳 (3) 🖕 (19) 🇴 (3) 💸 (3) 🔄 (9) 💰 (3) 
+
+[01-Apr-21 07:27 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Product Page
+https://instockalert.io/P/US/B08HR3Y5GQ
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+😂 (39) PLEASENO (11) FacePalm (9) Hahaa (3) 1540_PeePeeHands (3) KEKW (13) okiRIP (7) 💩 (3) 🇫 (3) 🇴 (2) 0️⃣ (2) 🇱 (2) 👎 (6) 
+
+[01-Apr-21 07:30 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Product Page
+https://instockalert.io/P/US/B08HR3Y5GQ
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+😂 (9) 🥲 (5) okiRIP (5) 😡 (2) FacePalm 🤡 (3) 🥺 3080 KEKW 
+
+[01-Apr-21 07:30 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Product Page
+https://instockalert.io/P/US/B08HR3Y5GQ
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+KEKW (37) 🇸 (6) 🇵 (6) 🅰️ (7) 💩 (13) Ⓜ️ (6) tachi_smile (3) 😂 (4) 🥲 (7) 3080 (2) ⏰ (2) 5950 FacePalm 👍 
+
+[01-Apr-21 09:15 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Product Page
+https://instockalert.io/P/US/B08HR3Y5GQ
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+KEKW (16) 🇱 (14) 🇮 (11) 🇪 (11) 🇸 (12) 🇦 (5) 🇲 (5) 🇴 (5) 🇬 (5) 🇺 (5) 🍉 (3) 😆 (4) 🧢 (3) 9520_Amongus_pog (4) FacePalm (3) 🍆 (3) PLEASENO (3) 👍 
+
+[01-Apr-21 09:15 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Product Page
+https://instockalert.io/P/US/B08HR3Y5GQ
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+KEKWait (51) 👎 (119) KEKW (38) 🖕 (59) 🤮 (15) okiRIP (28) 💩 (15) FacePalm (9) akkoShrug (8) 9791_pepe (8) 6340_amongus_sus (8) Hahaa (8) 🧢 (8) 💯 (4) 1349_Pepe_Comfy (7) 1038_Among_Us_Pepe (7) 9520_Amongus_pog (4) 🇳 (3) Ⓜ️ (5) 🇮 (4) 
+
+[01-Apr-21 03:26 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Product Page
+https://instockalert.io/P/US/B08HR3Y5GQ
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+KEKW (34) 6340_amongus_sus (12) 3080 (4) okiRIP (7) 🇳 (9) 🇴 (9) 🇫 (9) 🇺 (6) 🇨 (7) 🇰 (6) 🇬 💩 (7) 🖕 (6) 🇸 (4) 🇦 (4) 🇩 (4) 
+
+[01-Apr-21 03:27 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Product Page
+https://instockalert.io/P/US/B08HR3Y5GQ
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+🖕 (90) 🇸 (8) KEKW (27) 🇪 (9) 🇽 (6) 🇾 (7) 🇦 (3) 🇿 (2) tachi_smile (4) dopefrog (7) okiRIP (7) FacePalm (5) 😫 (8) 🤮 (6) ⬇️ (5) Hahaa (4) 6340_amongus_sus (2) soldout (2) zerotwodance (2) 😍 (2) 
+
+[01-Apr-21 03:30 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Product Page
+https://instockalert.io/P/US/B08HR3Y5GQ
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+KEKW (83) 🇸 (6) FacePalm (15) 🇳 (5) 🇹 (5) 🖕 (35) 🇴 (2) 💩 (14) 🇫 (11) okiRIP (15) 3080 (5) 🤮 (5) 👍 (5) PLEASENO (11) 🇪 (3) 🇽 (2) 🇨 (5) 🇷 (6) 🇾 (5) 🤢 (4) 
+
+[01-Apr-21 06:30 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+officedepot
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+PLEASENO (56) 🇨 (13) KEKW (38) Hahaa (11) 🇺 (10) 🇲 (11) 🇸 (5) 2️⃣ (3) 🌮 (5) 🏚️ (3) 🤡 (5) 🖕 (14) soldout (4) 🤬 (3) 💩 (10) okiRIP 6340_amongus_sus (2) 3080 (4) 🇳 🦊 
+
+[01-Apr-21 08:48 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+newegg
+Price
+$1119
+Product Page
+https://www.newegg.com/asus-geforce-rtx-3080-rog-strix-rtx3080-o10g-gaming/p/N82E16814126457
+Add to Cart
+https://secure.newegg.com/Shopping/AddtoCart.aspx?Submit=ADD&ItemList=N82E16814126457
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+strix
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+FacePalm (28) KEKW (60) 9791_pepe (12) 🇵 (14) okiRIP (16) 🤡 (14) 🇪 (11) 🚁 (6) 🇳 (9) 💩 (12) 🇮 (9) KannaWhat (5) 🇸 (11) 🍉 (6) KEKWait (8) dopefrog (10) 9520_Amongus_pog (6) 🦊 (5) 🇬 (4) 🅰️ (5) 
+
+[02-Apr-21 10:10 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+walmart
+Price
+$879
+Product Page
+https://www.walmart.com/ip/EVGA-GeForce-RTX-3080-FTW3-Ultra-Gaming-Graphic-Cards-Black/556784521
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+😩 (204) KEKW (79) 9791_pepe (12) 🇮🇱 (8) 🇳 (13) 🇮 (13) 🇬 (13) 🇪 (14) 1038_Among_Us_Pepe (9) 🇷 (13) 🇲 (5) 🤍 (6) 1349_Pepe_Comfy (5) 👍 (10) 🐈‍⬛ (6) okiRIP (19) 🍌 (5) 🍆 (7) 👎 (28) 💦 (7) 
+
+[02-Apr-21 11:36 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+bestbuy
+Price
+$1099.99
+Product Page
+https://api.bestbuy.com/click/-/6432445/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6432445/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+strix
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+👍 (11) KEKW (36) overpriced (7) 🤡 (10) 6340_amongus_sus (9) 🇳 (5) FacePalm (5) 💰 (6) 🇮 (6) 🇬 (5) 🇪 (5) 🇷 (6) 🖕 (10) 🇫 (15) 🇺 (14) 🇨 (14) 🇰 (14) 😩 (4) 🇵🇸 (6) 🙏 (4) 
+
+[02-Apr-21 12:05 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+bestbuy
+Price
+$499.99
+Product Page
+https://api.bestbuy.com/click/-/6429440/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6429440/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+nvidia
+Model
+founders edition
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (186) soldout (19) 💩 (68) 🚫 (31) 5️⃣ (8) PLEASENO (20) 🦾 (10) 😫 (17) 🇫 (24) 🔵 (6) 🇺 (25) ⌚ (10) ⚪ (7) 🍉 (7) 🛑 (7) 🇨 (20) overpriced (5) 🇰 (20) 3080 (11) 🍌 (8) 
+
+[02-Apr-21 12:11 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+amazon
+Product Page
+https://instockalert.io/P/US/B08HH5WF97
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+tuf oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+KEKW (78) Hahaa (12) PLEASENO (13) 🥲 (14) Hehe (9) 3080 (8) 🐟 (7) 🍫 (5) 1540_PeePeeHands (8) FacePalm (8) okiRIP (13) 😫 (8) 😩 (4) 🖕 (11) 🐍 (6) Ⓜ️ (4) 💩 (3) 🦐 (2) 1235_wojak_pepe_hoodie (3) 
+
+[02-Apr-21 12:46 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+bestbuy
+Price
+$499.99
+Product Page
+https://api.bestbuy.com/click/-/6429440/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6429440/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+nvidia
+Model
+founders edition
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (143) 🤦 (35) 🇸 (10) 1349_Pepe_Comfy (11) 🇴 (7) 🇬 (7) 1540_PeePeeHands (5) ❓ (12) 🇱 (8) 4766_pepegod (5) ❔ (10) Hahaa (8) 🇩 (5) 🖕 (38) 🇳 (5) okiRIP (14) GotEm (6) ⌚ (5) 🇪 (5) 🇫 (6) 
+
+[02-Apr-21 12:51 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+bestbuy
+Price
+$1099.99
+Product Page
+https://api.bestbuy.com/click/-/6432445/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6432445/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+strix
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (41) 🇳 (4) 🇮🇸 (2) FacePalm (6) 🇬🇸 (3) PLEASENO (8) 🖕 (22) 📧 (2) Hahaa (3) 🇷 (2) 🇸 (2) 🇬 (2) 🇱 (3) 🇴 (2) 🇺 (2) 🇧🇩 (2) 🇹 (2) GotEm (2) 🇩 (2) KEKWait (2) 
+
+[02-Apr-21 01:14 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+bestbuy
+Price
+$499.99
+Product Page
+https://api.bestbuy.com/click/-/6429440/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6429440/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+nvidia
+Model
+founders edition
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (84) 🇩 (12) 🇮🇸 (8) 😅 (10) 🛑 (12) 🇮 (9) 🖕 (26) soldout (9) ❓ (7) 🇨 (8) 😭 (8) ❔ (9) 🇰 (8) 💩 (12) 🤡 (12) 😫 (8) Hahaa (9) 🇸 (6) 😩 (10) KEKWait (6) 
+
+[02-Apr-21 01:35 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+bestbuy
+Price
+$499.99
+Product Page
+https://api.bestbuy.com/click/-/6429440/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6429440/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+nvidia
+Model
+founders edition
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (49) 🇳 (9) KEKWait (13) 🇫 (6) ⭕ (6) 🅰️ (2) okiRIP (5) 🇰 (3) Hahaa (3) 🇪 (6) 🇸 (4) 🇦 (3) soldout (3) 🗡️ (3) 🇩 (2) FacePalm (5) 🇱 (2) 🇮 (4) 🇬 🇷 
+
+[02-Apr-21 01:47 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+bestbuy
+Price
+$499.99
+Product Page
+https://api.bestbuy.com/click/-/6429440/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6429440/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+nvidia
+Model
+founders edition
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (75) 🇫 (15) 🇳 (11) 🇸 (9) 🇴 (7) 1038_Among_Us_Pepe (7) 🇨 (6) 🛑 (11) 🅰️ (7) Ⓜ️ (8) ❓ (8) ❔ (10) 🇮 (7) 🇬 (6) 🇪 (5) 🇷 (5) okiRIP (10) FacePalm (6) PLEASENO (3) 6340_amongus_sus (7) 
+
+[02-Apr-21 02:25 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+bestbuy
+Price
+$499.99
+Product Page
+https://api.bestbuy.com/click/-/6429440/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6429440/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+nvidia
+Model
+founders edition
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🤡 (157) 🇩 (17) KEKW (42) 🇮 (14) ❓ (11) 🇨 (13) 😆 (9) ❔ (19) 🇰 (14) 🤷 (11) 🦊 (8) 🇾 (7) 🇸 (7) 💀 (11) soldout (7) 🇼 (4) 💩 (10) KEKWait (5) 🍉 (5) 🅰️ (3) 
+
+[02-Apr-21 03:03 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+bestbuy
+Price
+$499.99
+Product Page
+https://api.bestbuy.com/click/-/6429440/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6429440/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+nvidia
+Model
+founders edition
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🤷 (22) KEKW (32) 🇫 (14) FacePalm (7) NICE (4) 🇺 (3) 💩 (9) 🤔 (4) soldout (3) 🤣 (2) 🅱️ (5) ⭕ (4) 🇴 (4) okiRIP (8) ❓ (3) GotEm 🧢 (2) 5️⃣ 0️⃣ 🅾️ 
+
+[02-Apr-21 03:19 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+bestbuy
+Price
+$499.99
+Product Page
+https://api.bestbuy.com/click/-/6429440/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6429440/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+nvidia
+Model
+founders edition
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (109) 😆 (13) PLEASENO (15) KEKWait (7) 👎 (46) 🇫 (7) 🇨 (2) 🇼 (3) 💩 (14) 9520_Amongus_pog (2) 🅰️ (2) okiRIP (9) 🇭 (2) ⛔ (3) 🇺 (2) 🇾 (2) 🙄 (5) 🤡 (10) FacePalm (9) 3080 (4) 
+
+[02-Apr-21 03:57 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+bestbuy
+Price
+$499.99
+Product Page
+https://api.bestbuy.com/click/-/6429440/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6429440/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+nvidia
+Model
+founders edition
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+1038_Among_Us_Pepe (94) 💀 (79) 🇫 (19) KEKW (66) 🇸 (12) 🇪 (9) 🇹 (8) 3080 (20) 🇨 (6) okiRIP (13) 🅰️ (7) 🇳 (7) 🖕 (46) 💩 (21) Ⓜ️ (9) 🇮 (8) 🇴 (7) soldout (8) 🇱 (10) PLEASENO (15) 
+
+[03-Apr-21 01:06 PM] DataLover#9406
+@3080_US http://www.zotacstore.com/us/zotac-gaming-geforce-rtx-3080-trinity-oc-white-edition-zt-a30800k-10p still available
+
+{Reactions}
+👍 (8) okiRIP (27) Hahaa (8) 🇬 (3) 💩 (12) 🇦 (4) soldout (5) 🇾 (3) 3080 (2) PLEASENO (4) 🇨🇳 (3) 👎 (14) KEKW (6) KEKWait (2) 🧢 (2) 🇫 🖕 (2) 
+
+[03-Apr-21 03:41 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+zotac
+Price
+$969.99
+Product Page
+https://www.zotacstore.com/us/zotac-gaming-geforce-rtx-3080-amp-holo-zt-a30800f-10p
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+zotac
+Model
+amp holo
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (103) 3070 (27) 🖕 (85) 🇨 (10) 🇿 (7) okiRIP (30) PLEASENO (16) KEKWait (14) 💩 (28) 😋 (5) 🇱 (10) ❣️ (7) 🇴 (12) 🇺 (12) 🇩 (11) 🇫 (13) 9791_pepe (6) 🟧 (8) 💰 (6) FacePalm (10) 
+
+[04-Apr-21 10:51 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+asus
+Price
+$1029.99
+Product Page
+https://store.asus.com/us/item/202009AM150000004
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+tuf
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (135) soldout (18) okiRIP (53) KEKWait (19) FacePalm (18) 🍉 (5) NICE (3) 😭 (19) 🤚 (5) 🇬 (8) PLEASENO (8) 🇴 (10) Hahaa (2) KannaWhat (3) GotEm (3) 🇳 (9) 🇪 (11) 1540_PeePeeHands (5) 1907_Pepe_Box (5) 🇫 (15) 
+
+[04-Apr-21 11:49 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+asus
+Price
+$1029.99
+Product Page
+https://store.asus.com/us/item/202009AM150000004
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+tuf
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+👀 (38) KEKW (115) 😈 (16) Hahaa (20) 🖕 (41) 👎 (59) 😋 (11) 🧢 (10) KannaWhat (6) 💩 (23) okiRIP (18) 9520_Amongus_pog (8) 🤡 (20) FacePalm (13) KEKWait (10) PLEASENO (10) 🇫 (10) 🅰️ (4) 🇺 (6) soldout (7) 
+
+[06-Apr-21 03:41 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$1224
+Product Page
+https://instockalert.io/P/US/B08HR6FMF3
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+xc3 black
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+KEKW (157) 9520_Amongus_pog (30) 3080 (19) 💩 (62) catjam (21) 6340_amongus_sus (24) Hahaa (23) 🚫 (46) 🇫 (17) 💰 (19) zerotwodance (11) 🥲 (24) xboxss (7) 🇺 (11) KannaWhat (9) 🖕 (48) 5900 (10) okiRIP (19) akkoShrug (8) 1907_Pepe_Box (11) 
+
+[07-Apr-21 01:04 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+zotac
+Price
+$939.99
+Product Page
+https://www.zotacstore.com/us/zotac-gaming-geforce-rtx-3080-trinity-oc-white-edition-zt-a30800k-10p
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+zotac
+Model
+trinity oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+😂 (32) 🤢 (16) 🍆 (15) KEKW (19) 🤡 (20) ⛔ (7) 🇫 (13) Hahaa (6) okiRIP (12) 🇳 (10) 🇴 (11) 🔥 (8) 9791_pepe (5) 🅱️ (7) 🇦 (6) 🇩 (5) KannaWhat (2) 🤮 soldout (3) 6800xt 
+
+[08-Apr-21 12:23 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$999
+Product Page
+https://instockalert.io/P/US/B083GT4CY2
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+gigabyte
+Model
+aorus
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+KEKW (154) okiRIP (67) 💩 (73) 🖕 (54) 😩 (19) 🇳 (30) 🅾️ (27) 🇫 (17) 🤷 (10) 💦 (12) KEKWait (19) ❓ (11) 🤡 (19) 🇵 (12) 🇪 (12) FacePalm (13) 🥲 (9) 3080 (7) PLEASENO (10) KannaWhat (7) 
+
+[09-Apr-21 08:30 PM] DataLover#9406
+@3080_US https://www.zotacstore.com/us/graphics-cards/geforce-rtx-30-series?limit=36
+
+{Reactions}
+🦊 (26) KEKW (81) 📈 (23) PLEASENO (25) 9520_Amongus_pog (13) 🇩 (14) 🇮 (11) 🇳 (11) 🤡 (20) ⏳ (15) akkoShrug (9) okiRIP (25) remVV (12) 5️⃣ (10) 🇺 (8) 3060 (13) 3070 (12) 2️⃣ (8) 3080 (19) KEKWait (24) 
+
+[14-Apr-21 11:19 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$879
+Product Page
+https://instockalert.io/P/US/B08HR3Y5GQ
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+remVV (7) tachi_smile (5) PepeGrill (2) Hehe (2) akkoShrug 🗑️ (7) AwOo KEKW (37) okiRIP (31) KEKWait (9) 💩 (4) 9520_Amongus_pog 1540_PeePeeHands (2) 🇼 (6) 🇭 (5) 🇾 (6) 😔 (7) 3080 🤖 🇿 
+
+[14-Apr-21 11:22 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$839
+Product Page
+https://instockalert.io/P/US/B08HR55YB5
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+xc3 ultra
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+3090 (6) KEKW (29) Hahaa (4) okiRIP (20) 🤖 (2) KEKWait (7) FacePalm (5) 👩‍🦽 🇾 (3) 😠 (5) 💩 (5) 🖕 (7) 1349_Pepe_Comfy 🇹 🇴 🇵 🚫 (4) 
+
+[14-Apr-21 11:24 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$839
+Product Page
+https://instockalert.io/P/US/B08HR55YB5
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+xc3 ultra
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+remVV (2) tachi_smile (4) 👍 (2) PepeGrill (2) okiRIP (11) 🗑️ (7) Hahaa akkoShrug (2) 💩 (12) KEKW (9) 💀 (5) 1907_Pepe_Box (2) 😋 (2) KannaWhat NICE 👀 GotEm KEKWait (6) 😆 🤯 (4) 
+
+[14-Apr-21 11:24 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$879
+Product Page
+https://instockalert.io/P/US/B08HR3Y5GQ
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+🇨 (9) 🇺 (7) Hahaa (4) 🇲 (8) 3080 (3) KEKWait (6) KEKW (9) okiRIP (6) PLEASENO (4) 🤖 1540_PeePeeHands (10) 🖕 (6) 
+
+[14-Apr-21 11:29 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$839
+Product Page
+https://instockalert.io/P/US/B08HR55YB5
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+xc3 ultra
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+remVV (9) tachi_smile (7) PepeGrill (6) KEKW (51) okiRIP (30) 🗑️ (21) akkoShrug (5) 🇳 (16) ⭕ (17) 6340_amongus_sus (16) NICE (8) 1349_Pepe_Comfy (8) 🇰 (4) 🇨 (6) FacePalm (15) soldout (10) 🖕 (26) 🇸 (5) 🤡 (17) 🤌 (11) 
+
+[15-Apr-21 02:43 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$879
+Product Page
+https://instockalert.io/P/US/B08HR3Y5GQ
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+okiRIP (50) KEKW (29) 💩 (15) 1540_PeePeeHands (6) 🧢 (6) 🌭 (2) 🤖 (5) remVV (2) tachi_smile (2) 1038_Among_Us_Pepe FacePalm (3) 🖕 (10) 🇰 🇫 (2) 🇨 🇪 🍞 🦍 😩 (2) 🍴 (3) 
+
+[15-Apr-21 02:50 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$879
+Product Page
+https://instockalert.io/P/US/B08HR3Y5GQ
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+KEKW (33) okiRIP (30) 1540_PeePeeHands (10) 🖕 (22) Hahaa (6) 1038_Among_Us_Pepe (5) tachi_smile (3) 😫 (8) 😩 (7) catjam (9) 🤐 (2) 🇺🇸 (3) 😋 (2) 🙃 (4) 3070 (3) AwOo (4) 🍴 (2) 🐈 (3) 💯 (3) 🍉 (2) 
+
+[15-Apr-21 10:58 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+bestbuy
+Product Page
+https://api.bestbuy.com/click/-/6430620/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6430620/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+gigabyte
+Model
+gaming oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🖕 (3) Hahaa 
+
+[15-Apr-21 10:58 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+bestbuy
+Product Page
+https://api.bestbuy.com/click/-/6432400/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6432400/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+xc3 ultra
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🖕 (3) 
+
+[15-Apr-21 10:58 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+bestbuy
+Product Page
+https://api.bestbuy.com/click/-/6432445/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6432445/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+strix
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🖕 (4) KEKW (3) 
+
+[15-Apr-21 10:59 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+bestbuy
+Product Page
+https://api.bestbuy.com/click/-/6436219/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6436219/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+gigabyte
+Model
+vision oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (3) 🖕 (6) 🇧 (5) 🇷 (5) 🇺 (5) 🇭 (5) PLEASENO 💩 
+
+[15-Apr-21 11:01 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+bestbuy
+Product Page
+https://api.bestbuy.com/click/-/6429440/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6429440/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+nvidia
+Model
+founders edition
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🖕 (2) 
+
+[15-Apr-21 11:01 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+bestbuy
+Product Page
+https://api.bestbuy.com/click/-/6432445/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6432445/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+strix
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🖕 (4) 
+
+[15-Apr-21 11:02 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+bestbuy
+Product Page
+https://api.bestbuy.com/click/-/6429440/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6429440/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+nvidia
+Model
+founders edition
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🖕 (5) 🇫 (2) 🇺 (2) 🇨 🇰 🇪 🇿 
+
+[15-Apr-21 11:02 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+bestbuy
+Product Page
+https://api.bestbuy.com/click/-/6432400/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6432400/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+xc3 ultra
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🖕 (3) 
+
+[15-Apr-21 11:02 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+bestbuy
+Product Page
+https://api.bestbuy.com/click/-/6436219/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6436219/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+gigabyte
+Model
+vision oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🖕 (3) 🇸 (3) 🇹 (3) 🇦 (2) 🇭 (2) 🇵 KEKW (4) 
+
+[15-Apr-21 11:02 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+bestbuy
+Product Page
+https://api.bestbuy.com/click/-/6430620/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6430620/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+gigabyte
+Model
+gaming oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (9) okiRIP (3) KEKWait (2) 🇸 1540_PeePeeHands 💩 🇩 (3) 🅰️ (3) 🇲 (3) 🇳 (3) 
+
+[15-Apr-21 11:03 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+bestbuy
+Product Page
+https://api.bestbuy.com/click/-/6436219/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6436219/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+gigabyte
+Model
+vision oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🇫 (44) 🇺 (36) 🇨 (33) 🇰 (33) 🇴 (4) 🇳 (5) KEKW (13) 💩 (5) 🇭 (2) 🇦 (2) 🤬 (3) 
+
+[15-Apr-21 11:37 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+bestbuy
+Product Page
+https://api.bestbuy.com/click/-/6432445/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6432445/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+strix
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+👍 (10) 🇨 (27) KEKW (74) 🇦 (24) 🇵 (26) PLEASENO (12) soldout (6) 🛑 (8) 🇫 (7) 👎 (55) 💩 (28) 🖕 (32) 🇧 okiRIP (21) FacePalm (4) 🇷 (2) 🍞 (2) Hahaa 🧢 (3) 1540_PeePeeHands (3) 
+
+[15-Apr-21 11:42 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+bestbuy
+Product Page
+https://api.bestbuy.com/click/-/6429440/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6429440/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+nvidia
+Model
+founders edition
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (17) 🖕 (16) 6340_amongus_sus (10) PLEASENO (7) Hahaa (7) 😆 (5) FacePalm (7) KEKWait (5) 👍 (5) remVV (3) 9791_pepe (4) 🇧 (6) 🇴 (6) 🇹 (6) 🇸 (4) 🇪 (3) 🇿 (3) 🇵🇰 (4) okiRIP (9) 🇨 
+
+[15-Apr-21 11:47 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+bestbuy
+Product Page
+https://api.bestbuy.com/click/-/6432400/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6432400/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+xc3 ultra
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🤣 (14) KEKW (23) 🇸 (6) 🇨 (3) 🇹 (4) Hahaa (5) 🅰️ (3) 🇵 (2) 🇫 (5) AwOo (2) 🇺 (4) okiRIP (5) 1540_PeePeeHands (4) 🍆 (3) catjam (3) 🍑 (2) PepeGrill (3) 
+
+[15-Apr-21 11:52 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+bestbuy
+Product Page
+https://api.bestbuy.com/click/-/6436219/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6436219/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+gigabyte
+Model
+vision oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🤣 (44) PLEASENO (19) 🤡 (22) KEKW (20) 🇸 (9) 🇹 (8) 🇫 (8) Hahaa (6) 🇺 (8) 🍞 (4) 🇩 (5) 🇵 (5) 🖕 (13) 🇮 (3) 🟨 (5) 1349_Pepe_Comfy (5) PepeGrill (4) Ⓜ️ (3) 🇪 (3) 🇭 (3) 
+
+[15-Apr-21 12:47 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+walmart
+Price
+$879
+Product Page
+https://www.walmart.com/ip/EVGA-GeForce-RTX-3080-FTW3-Ultra-Gaming-Graphic-Cards-Black/556784521
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (13) okiRIP (6) 🤣 (3) 🇾 (5) 🇴 (4) 🇺 (4) 🇷 (4) *️⃣ (3) 🇸 (6) 🇦 (6) 🇩 (6) 
+
+[15-Apr-21 12:47 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+walmart
+Price
+$879
+Product Page
+https://www.walmart.com/ip/EVGA-GeForce-RTX-3080-FTW3-Ultra-Gaming-Graphic-Cards-Black/556784521
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (75) 🤖 (12) Hahaa (9) 💩 (28) okiRIP (22) 🇫 (8) 😆 (4) 🇷 (5) 🇮 (5) 🤣 (4) 🇪 (5) 🇳 (5) 🇩 (5) 1349_Pepe_Comfy (5) 3080 (9) 3090 (5) 3060ti (6) 3060 (6) ps5de (4) 🖕 (6) 
+
+[16-Apr-21 10:49 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+walmart
+Price
+$879
+Product Page
+https://www.walmart.com/ip/EVGA-GeForce-RTX-3080-FTW3-Ultra-Gaming-Graphic-Cards-Black/556784521
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🇱 (10) 👍 (2) KEKW (7) 
+
+[16-Apr-21 10:49 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+> [DataLover] (https://bit.ly/2W0dmQp) using [streetmerchant] with :heart:
+Store
+walmart
+Price
+$879
+Product Page
+https://www.walmart.com/ip/EVGA-GeForce-RTX-3080-FTW3-Ultra-Gaming-Graphic-Cards-Black/556784521
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🇱 (37) NICE (7) KEKW (21) 🇬 (3) 🇴 (3) okiRIP (2) 🖕 (2) 💩 (2) KEKWait 
+
+[16-Apr-21 10:51 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+walmart
+Price
+$879
+Product Page
+https://www.walmart.com/ip/EVGA-GeForce-RTX-3080-FTW3-Ultra-Gaming-Graphic-Cards-Black/556784521
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (69) 🇱 (27) 🇧 (7) KannaWhat (7) 👿 (10) 🇷 (7) 🇺 (6) 🇭 (7) 💩 (15) 🇳 (4) 😋 (6) 9520_Amongus_pog (6) 🍉 (7) 🍴 (7) 🇼 (5) 🅰️ (4) ↩️ (4) Ⓜ️ (5) remVV (4) 🇦 (4) 
+
+[16-Apr-21 07:04 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+walmart
+Price
+$879
+Product Page
+https://www.walmart.com/ip/EVGA-GeForce-RTX-3080-FTW3-Ultra-Gaming-Graphic-Cards-Black/556784521
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🗑️ (40) 🇫 (35) 🇺 (27) 🇨 (27) okiRIP (22) 🇰 (26) 🇾 (14) 🇴 (13) 😫 (13) 🍉 (3) 👍 (6) 👀 (5) 3080 (6) 1540_PeePeeHands (10) remVV (5) 🧢 (6) KEKWait (14) 🕵🏽 (4) PepeGrill (3) overpriced (2) 
+
+[16-Apr-21 08:56 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+walmart
+Price
+$879
+Product Page
+https://www.walmart.com/ip/EVGA-GeForce-RTX-3080-FTW3-Ultra-Gaming-Graphic-Cards-Black/556784521
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (63) NICE (8) okiRIP (30) soldout (6) catjam (7) FacePalm (5) 😭 (6) 1540_PeePeeHands (6) 🤬 (4) KEKWait (2) 
+
+[16-Apr-21 08:59 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+walmart
+Price
+$879
+Product Page
+https://www.walmart.com/ip/EVGA-GeForce-RTX-3080-FTW3-Ultra-Gaming-Graphic-Cards-Black/556784521
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (70) 🤣 (14) soldout (11) 🇱 (15) 💩 (17) KEKWait (9) PLEASENO (9) 🤡 (14) 🇸 (4) 🇴 (4) 🇼 (4) GotEm (4) 🇾 (2) 🇪 (2) okiRIP (6) 🅱️ (4) 🤬 (5) 🇷 (3) 🇺 (4) 🇭 (4) 
+
+[16-Apr-21 09:05 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+walmart
+Price
+$879
+Product Page
+https://www.walmart.com/ip/EVGA-GeForce-RTX-3080-FTW3-Ultra-Gaming-Graphic-Cards-Black/556784521
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (97) soldout (23) FacePalm (28) PLEASENO (28) 1038_Among_Us_Pepe (13) okiRIP (32) 😭 (26) 1540_PeePeeHands (15) 🖕 (34) 🤖 (10) 😠 (15) 🇸 (12) 🇺 (10) 🇨 (9) 🇰 (11) 😩 (14) 1235_wojak_pepe_hoodie (10) 😫 (13) KEKWait (10) 🦈 (10) 
+
+[16-Apr-21 10:14 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$879
+Product Page
+https://instockalert.io/P/US/B08HR3Y5GQ
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+KEKW (38) Hahaa (8) 🖕 (14) 🤡 (6) 🇱 (5) 🦴 (2) 🇫 3080 
+
+[16-Apr-21 10:18 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$879
+Product Page
+https://instockalert.io/P/US/B08HR3Y5GQ
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+KEKW (55) PLEASENO (24) 🖕 (43) 💩 (16) 1038_Among_Us_Pepe (9) 🇳 (7) 🇴 (7) 😩 (10) Hahaa (3) soldout (4) 🇧 (7) KannaWhat (5) 🇷 (7) 🇺 (7) 6340_amongus_sus (3) 🇭 (7) KEKWait (3) 1540_PeePeeHands (3) 😀 (2) okiRIP 
+
+[16-Apr-21 10:23 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$879
+Product Page
+https://instockalert.io/P/US/B08HR3Y5GQ
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+KEKW (47) PLEASENO (13) 🖕 (38) 👍 (8) KEKWait (10) okiRIP (11) KannaWhat (7) ringingbell (7) Hahaa (5) FacePalm (7) 6340_amongus_sus (4) 🇫 (9) 🇨 (8) 🇰 (8) 🤡 (7) 🇾 (8) 👉 (9) 👈 (9) 🇴 (7) 🇺 (7) 
+
+[16-Apr-21 11:59 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$1099
+Product Page
+https://instockalert.io/P/US/B08J6F174Z
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+strix oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+👍 (28) KEKW (105) 3060 (11) 👎 (76) 😠 (14) 😫 (18) ps5c (8) 🇬 (10) 1038_Among_Us_Pepe (6) 😩 (9) 🇦 (10) 🇾 (10) 🖕 (22) KEKW (9) 🤡 (10) PLEASENO (9) FacePalm (11) 1540_PeePeeHands (9) 6340_amongus_sus (6) okiRIP (6) 
+
+[17-Apr-21 12:43 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$1099
+Product Page
+https://instockalert.io/P/US/B08J6F174Z
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+strix oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+KEKW (25) okiRIP (17) 🖕 (23) 6340_amongus_sus (5) 2161_AmongUs_Angy (6) overpriced (4) 6800 (3) PLEASENO (4) FacePalm (3) soldout (3) 🍆 (6) 🤡 (4) 😩 (3) 🇫 (4) 🇺 (3) 🇨 (3) 🇰 (3) 3080 ❔ 
+
+[17-Apr-21 12:46 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$1099
+Product Page
+https://instockalert.io/P/US/B08J6F174Z
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+strix oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+👍 (16) okiRIP (20) soldout (5) KEKW (36) 🧢 (9) FacePalm (11) 6340_amongus_sus (8) 👀 (3) 🤭 (4) 🇬 (7) 🇴 (7) PLEASENO (6) 🖕 (15) 🤣 (4) 🇳 (7) 🇫 (8) 🇪 (6) 🇱 (5) 🤡 (7) 🇦 (6) 
+
+[18-Apr-21 12:37 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$1099
+Product Page
+https://instockalert.io/P/US/B08J6F174Z
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+strix oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+👍 (6) remVV (5) tachi_smile (5) KEKW (25) 3080 (4) 💩 (16) catjam (6) soldout (3) 🇫 (4) 02smug (4) popCat (6) PepeGrill (4) 👎 (8) 🖕 (11) FacePalm (3) Hahaa (3) okiRIP (3) 👌 (3) GotEm (4) 🧢 (4) 
+
+[18-Apr-21 12:41 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$1099
+Product Page
+https://instockalert.io/P/US/B08J6F174Z
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+strix oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+okiRIP (30) 3080 (7) KEKW (24) 😈 (3) PLEASENO (3) 🖕 (9) 🧢 (2) 👎 (11) 🤡 (4) 😆 (2) 1540_PeePeeHands (3) 🇫 (6) 🇳 (4) 🇴 (4) 🇷 (4) 🇮 (5) 🇵 (4) popCat (8) 😫 (2) GotEm (2) 
+
+[18-Apr-21 08:04 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+officedepot
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (18) 😭 (8) PLEASENO (9) 🇫 (6) 💩 (11) 🇺 (7) 🇨 (6) 🇰 (6) okiRIP (5) 🇱 (3) 🇲 (3) 🇦 (3) 🇴 (3) 🇹 🇪 🔥 
+
+[18-Apr-21 08:38 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+walmart
+Price
+$879
+Product Page
+https://www.walmart.com/ip/EVGA-GeForce-RTX-3080-FTW3-Ultra-Gaming-Graphic-Cards-Black/556784521
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (11) PLEASENO (4) dopefrog (5) okiRIP (3) 🇫 (8) 🇺 (8) 🇨 (8) 🇰 (8) 
+
+[18-Apr-21 08:39 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$879
+Product Page
+https://instockalert.io/P/US/B08HR3Y5GQ
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+Hahaa (11) KEKW (17) GotEm (4) 1907_Pepe_Box (3) KEKWait (5) okiRIP (4) 
+
+[18-Apr-21 08:43 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$879
+Product Page
+https://instockalert.io/P/US/B08HR3Y5GQ
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+Hahaa (11) KEKW (17) tachi_smile (3) 👁️ (2) GotEm (2) 💩 (6) PLEASENO (2) okiRIP (5) 🇱 (8) 🇮 (7) 🇪 (8) 🇸 (8) 1907_Pepe_Box (2) 🇫 (7) 🇺 (8) 🇨 (7) 🇰 (8) KEKW (2) 
+
+[18-Apr-21 08:47 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$879
+Product Page
+https://instockalert.io/P/US/B08HR3Y5GQ
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+KEKW (52) okiRIP (50) PLEASENO (20) 🥲 (17) 🇱 (16) ℹ️ (14) 🇪 (14) 🇸 (12) 1907_Pepe_Box (3) 🇮 (4) 🇲 (3) 🇵 (5) 😫 (8) 🇴 (2) 🅾️ (2) 🇷 (2) 💩 (7) 🇫 (4) 👺 (3) zerotwodance (7) 
+
+[19-Apr-21 12:45 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$653
+Product Page
+https://instockalert.io/P/US/B08HR3Y5GQ
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+KEKW (35) 🇱 (39) 🇮 (36) 🇪 (36) 🇸 (36) 😈 (4) 🇭 (7) okiRIP (12) zerotwodance (2) 🇺 (6) soldout (2) 🤷‍♀️ (2) 🅱️ (2) ⭕ (2) 🇷 (5) 🇹 (5) popCat (7) 😔 (3) 😩 🔄 (3) 
+
+[19-Apr-21 12:48 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$653
+Product Page
+https://instockalert.io/P/US/B08HR3Y5GQ
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+💩 (47) dopefrog (15) 😩 (7) 👀 (6) 😡 (10) KEKW (10) KEKW (6) 🇨 (15) 🇺 (14) 🇲 (14) FacePalm (9) KEKWait (3) 6340_amongus_sus Hahaa PLEASENO (2) soldout AwOo (2) 🅱️ (5) ⭕ (5) 🇹 (5) 
+
+[19-Apr-21 01:24 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+walmart
+Price
+$879
+Product Page
+https://www.walmart.com/ip/EVGA-GeForce-RTX-3080-FTW3-Ultra-Gaming-Graphic-Cards-Black/556784521
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (108) PLEASENO (31) 🇱 (47) 🥺 (18) okiRIP (35) 🇮 (36) 🇪 (35) 🇸 (36) 3080 (9) 💩 (31) 🙅‍♂️ (10) 6340_amongus_sus (13) 🤷‍♀️ (10) 🖕 (25) 🇬 (7) 😆 (5) 9520_Amongus_pog (8) 🇴 (6) 💢 (8) 🐂 (10) 
+
+[19-Apr-21 01:33 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$650
+Product Page
+https://instockalert.io/P/US/B08HR55YB5
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+xc3 ultra
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+KEKW (45) 😡 (27) 🤡 (12) 💩 (27) 🇳 (9) 🇱 (7) 🇴 (11) okiRIP (7) 👀 (4) 🤷‍♀️ (3) ℹ️ (4) 🇫 (3) KEKWait (4) 🇼 (4) 🇷 (5) 🇦 (5) 😠 (4) 🇩 (4) FacePalm (4) PepeGrill (5) 
+
+[19-Apr-21 01:35 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$650
+Product Page
+https://instockalert.io/P/US/B08HR55YB5
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+xc3 ultra
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+KEKW (58) 💩 (63) 🇸 (19) 🇹 (17) 🇴 (17) ps5de (5) 🇵 (18) 🛑 (6) 🇬 (4) 🤮 (5) PLEASENO (7) 😫 (5) 🅱️ (3) dopefrog (7) 🇫 (10) 😠 (3) 🇮 (6) 🇽 (7) okiRIP (4) Hahaa (2) 
+
+[19-Apr-21 02:02 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+walmart
+Price
+$879
+Product Page
+https://www.walmart.com/ip/EVGA-GeForce-RTX-3080-FTW3-Ultra-Gaming-Graphic-Cards-Black/556784521
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+FacePalm (41) KEKW (33) 🗑️ (22) 🇼 (32) 🇦 (33) 🇨 (33) 🇰 (32) 6340_amongus_sus (3) okiRIP (9) 🇬 (4) 💩 (13) 🇴 (4) 🇹 (4) 🇮 (4) 🧙‍♂️ (3) 🤷‍♂️ (5) 🇫 (2) 😫 (7) 🖕🏿 (2) NICE 
+
+[19-Apr-21 02:35 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+walmart
+Price
+$879
+Product Page
+https://www.walmart.com/ip/EVGA-GeForce-RTX-3080-FTW3-Ultra-Gaming-Graphic-Cards-Black/556784521
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (108) 🛐 (14) KEKWait (18) 😉 (6) 🇫 (24) 🅰️ (10) 🗑️ (12) 😢 (20) FacePalm (15) okiRIP (24) 🤏 (26) 🇰 (8) 🇪 (8) 1038_Among_Us_Pepe (5) PLEASENO (9) 5600 (5) 🇷 (12) ℹ️ (12) 🇵 (12) whereamongus (9) 
+
+[19-Apr-21 03:23 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+walmart
+Price
+$879
+Product Page
+https://www.walmart.com/ip/EVGA-GeForce-RTX-3080-FTW3-Ultra-Gaming-Graphic-Cards-Black/556784521
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+ftw3
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+remVV (28) tachi_smile (18) 6800 (8) akkoShrug (9) KEKW (48) 🖕 (44) 😫 (22) okiRIP (28) FacePalm (14) popCat (19) 🇳 (8) 6340_amongus_sus (8) 🇫 (10) 💩 (20) 🇴 (6) 🇱 (3) 🅰️ (3) 3080 (6) 🇹 (3) 🤢 (6) 
+
+[19-Apr-21 09:21 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$1099
+Product Page
+https://instockalert.io/P/US/B08J6F174Z
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+strix oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+FacePalm (37) 🖕 (59) KEKW (26) 🤡 (22) soldout (7) 🇹 (7) 👍 (8) okiRIP (21) 💰 (10) 🐌 (6) 1540_PeePeeHands (9) KannaWhat (6) 💩 (8) 😆 (8) 🇼 (6) 🗑️ (9) 😒 (6) PLEASENO (7) 🅾️ (6) KEKWait (8) 
+
+[20-Apr-21 06:23 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+staples
+Price
+$922.49
+Product Page
+https://www.staples.com/evga-10g-p5-3885-kr-geforce-rtx-3080-xc3-ultra-gaming-hdmi-pci-express-4-0-x16-10gb-video/product_IM18JW283
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+xc3 ultra
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (19) 1540_PeePeeHands (4) 1038_Among_Us_Pepe (2) 6340_amongus_sus (2) PLEASENO (3) Hahaa (2) 1349_Pepe_Comfy (4) 😩 (2) 🇳 (2) 🇴 (2) 🅾️ (2) 🇧 (2) 3060 
+
+[20-Apr-21 08:17 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+staples
+Price
+$878.49
+Product Page
+https://www.staples.com/evga-10g-p5-3881-kr-geforce-rtx-3080-xc3-black-gaming-hdmi-pci-express-4-0-x16-10gb-video/product_IM18JW285
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+xc3 black
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (72) 💩 (77) okiRIP (31) 🇳 (3) 🇫 (6) 🅰️ (4) 9791_pepe (6) 🇴 (5) 🇱 (8) 1349_Pepe_Comfy (2) Hehe (3) 🇮 (5) 🇪 (4) KEKW (4) 🇰 (2) 🦵 (4) FacePalm (3) 🖕 (11) 🏳️‍🌈 (4) 💯 (5) 
+
+[20-Apr-21 03:28 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$743
+Product Page
+https://instockalert.io/P/US/B08HH5WF97
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+tuf oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+KEKW (45) 🇱 (17) 🅰️ (5) 🏳️ (6) 🇪 (5) 🇴 (5) 🖕 (14) 🇹 (5) ℹ️ (4) soldout (4) FacePalm (5) 🤢 (4) 2161_AmongUs_Angy (3) PLEASENO (3) 🇫 (2) 🇺 (2) 🤏 (2) 
+
+[20-Apr-21 03:30 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$743
+Product Page
+https://instockalert.io/P/US/B08HH5WF97
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+tuf oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+KEKW (47) 😂 (11) 🧢 (5) 9791_pepe (5) KEKW (3) KEKWait (5) FacePalm (6) 4766_pepegod (2) Hahaa (2) 🛑 (5) 😆 (3) okiRIP (2) 🖕🏿 (3) 1349_Pepe_Comfy (2) PepeGrill (2) 1038_Among_Us_Pepe (2) akkoShrug (2) 
+
+[20-Apr-21 09:26 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$859
+Product Page
+https://instockalert.io/P/US/B08HH5WF97
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+tuf oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+✈️ (26) FacePalm (10) okiRIP (14) KEKW (19) 🗼 (5) 🇬 (5) 🇼 (8) 🇹 (6) 🤬 (5) 🇫 (7) 👎 (7) 3080 (5) 🇴 (4) 3090 (2) 🇭 (3) KEKWait (2) 6340_amongus_sus (2) 
+
+[20-Apr-21 09:29 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$859
+Product Page
+https://instockalert.io/P/US/B08HH5WF97
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+tuf oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+KEKW (43) 😔 (10) 💩 (10) okiRIP (11) 🇱 (7) 🧢 (5) 🖕 (10) 🇳 (6) 🇴 (7) 🇫 (5) 🇮 (4) 🗑️ (5) PLEASENO (4) 🛑 (3) 
+
+[20-Apr-21 09:49 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$859
+Product Page
+https://instockalert.io/P/US/B08HH5WF97
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+tuf oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+💩 (58) 🤡 (17) KEKW (18) 🏳️‍🌈 (8) 🇯 (5) okiRIP (6) 🖕 (8) 🅰️ (5) 🇷 (4) KEKWait (5) Hahaa (6) 😩 (5) 1540_PeePeeHands (4) 🇸 (4) 🥱 (5) 💅 (3) 🇨 (10) 🇺 (9) 🇲 (11) 🥶 (4) 
+
+[21-Apr-21 02:16 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$859
+Product Page
+https://instockalert.io/P/US/B08HH5WF97
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+tuf oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+KEKW (25) okiRIP (15) 💩 (9) 👺 (3) 🇱 (12) 🇮 (12) 🇪 (12) 🇸 (12) GotEm (4) 😡 (6) 🇫 (7) 🇺 (4) dopefrog (11) 😠 (5) 🇨 (3) 🇰 (3) ✅ (3) 👍 (2) 
+
+[21-Apr-21 02:18 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$859
+Product Page
+https://instockalert.io/P/US/B08HH5WF97
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+tuf oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+KEKW (34) okiRIP (34) FacePalm (9) 👺 (5) 💸 (8) PLEASENO (6) 💩 (7) 😂 (6) 1907_Pepe_Box (3) 🇫 (9) 🇺 (6) Hahaa (4) 🇨 (8) 🇰 (9) GotEm (5) 👍 (4) xboxss (2) ps5de (2) 6900xt (2) 5950 (2) 
+
+[22-Apr-21 04:18 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+officedepot
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+remVV (8) tachi_smile (7) popCat (18) KEKW (11) akkoShrug (2) PLEASENO (6) 😆 (3) okiRIP (7) GotEm (3) 👎 (6) 🕵️‍♀️ (2) 💩 (6) 🇷 (3) 
+
+[22-Apr-21 06:03 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$859
+Product Page
+https://instockalert.io/P/US/B08HH5WF97
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+tuf oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+💩 (136) KEKW (64) 🗑️ (28) okiRIP (38) soldout (13) 🇭 (10) dopefrog (16) KEKWait (14) ❓ (10) 🇴 (10) 🖕 (26) 3080 (8) 🇼 (7) 🧢 (5) 😫 (10) KEKW (7) 🤣 (11) 3060 (11) zerotwodance (8) 🇷 (6) 
+
+[23-Apr-21 09:54 PM] DataLover#9406
+page just loaded for me @3080_US  https://www.zotacstore.com/us/graphics-cards/geforce-rtx-30-series
+
+{Reactions}
+KEKWait (56) 🤔 (9) 🇴 (10) 🤡 (11) 🇰 (8) 💩 (11) ❓ (11) 🖕 (16) 🧢 (5) 🇨 (5) KEKW (14) ⭕ (4) 🅾️ (4) 🇱 (6) 6340_amongus_sus (2) 🔁 (4) PLEASENO (2) Hahaa (2) 5️⃣ 3080 (2) 
+
+[24-Apr-21 02:14 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+officedepot
+Price
+$949.99
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+PLEASENO (6) 💩 (7) 🤮 (2) okiRIP (2) KEKW KEKWait (2) 
+
+[24-Apr-21 02:14 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+officedepot
+Price
+$1099.99
+Product Page
+https://www.officedepot.com/a/products/7791294/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🤮 (32) FacePalm (9) PLEASENO (4) okiRIP (11) 🖕 (5) 🤡 (6) 🇵 (4) 🇳 (4) 🇾 (4) 🛐 (2) 9791_pepe (2) 🇧 (2) 🇺 (2) 🇬 🇪 🇩 KEKW (3) KannaWhat 
+
+[24-Apr-21 04:28 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$1099.99
+Product Page
+https://instockalert.io/P/US/B08J6F174Z
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+strix oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+KEKWait (10) 💩 (3) 🇱 (2) 🇮 (3) 🇪 (2) 🇸 (2) 🇨 🇺 🇳 🇹 🇾 
+
+[24-Apr-21 04:28 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$1099.99
+Product Page
+https://instockalert.io/P/US/B08J6F174Z
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+strix oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+KEKW (28) 💩 (11) 🇫 (17) 🇦 (16) 🇰 (16) 🇪 (16) 6340_amongus_sus (5) okiRIP (5) KEKWait (5) 🤣 (2) 🗑️ (2) 
+
+[24-Apr-21 09:22 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+officedepot
+Price
+$1099.99
+Product Page
+https://www.officedepot.com/a/products/7791294/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (43) 🤢 (19) 😐 (12) 😭 (13) 💩 (13) okiRIP (17) 🇩 (4) 🤛 (2) FacePalm (2) 🇵 (4) 🇳 (3) 🍞 (3) 🇫 (4) Hahaa (3) 🇦 (2) 🇰 (4) 🇾 (4) PLEASENO (5) 🇪 (2) 😣 
+
+[24-Apr-21 09:24 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+officedepot
+Price
+$949.99
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+okiRIP (42) 🇵 (6) 🇬🇸 (2) KEKW (17) KannaWhat xboxss 🤣 (7) 🪳 🇷 🇮 💩 (6) 🇱 (10) 🇦 (7) 🇬 (8) 
+
+[24-Apr-21 09:33 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+officedepot
+Price
+$949.99
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (22) KannaWhat (5) 3080 (4) 🇵 (9) 🇳 (11) 🇾 (9) okiRIP (11) 🃏 (2) 🍞 (2) PLEASENO (7) 1540_PeePeeHands (2) 🤡 (2) 💩 (2) 🇫 (4) 
+
+[24-Apr-21 09:47 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+officedepot
+Price
+$1099.99
+Product Page
+https://www.officedepot.com/a/products/7791294/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+PLEASENO (32) okiRIP (17) KEKW (19) 🇳 (13) 😐 (2) 🇴 (9) 🍞 (3) KEKWait (2) 4766_pepegod (2) 🇵 (3) 🇼 🇪 (4) 🇭 Hahaa (2) 🤡 (2) 🇹 🥺 🇫 
+
+[24-Apr-21 09:51 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+officedepot
+Price
+$949.99
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+PLEASENO (19) 🇳 🇼 (2) 🇮 okiRIP (5) 🇬 FacePalm (9) 🇦 catjam 1540_PeePeeHands 🇧 (2) 🇨 (2) KEKW (2) 🇩 🇪 3080 (3) 
+
+[24-Apr-21 10:04 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+officedepot
+Price
+$1099.99
+Product Page
+https://www.officedepot.com/a/products/7791294/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+PLEASENO (19) KEKW (29) 🇫 (7) 🇵 (2) 🇺 (7) 🇴 🇨 (6) 🅾️ 💩 (2) Hahaa 🇰 (6) 🅿️ 🇳 (2) ⭕ (3) 🍞 (2) 🇼 🇭 
+
+[24-Apr-21 10:06 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+officedepot
+Price
+$949.99
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (54) PLEASENO (16) 9520_Amongus_pog (8) 😩 (8) Hahaa (5) FacePalm (7) 🍞 okiRIP (6) 🛑 (6) 🇫 (7) 🇦 (7) KEKWait (2) 🇰 (5) 🇪 (5) 🇺 (5) 🇨 (5) 🇮 (3) 💩 (6) 💢 (4) KannaWhat (3) 
+
+[25-Apr-21 05:50 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+officedepot
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🇵 (25) 🇳 (25) 🇾 (23) 💩 (27) 1540_PeePeeHands (15) 🇸 (17) 🇺 (17) 🇨 (18) 🇰 (17) 😐 (14) ℹ️ (4) FacePalm (10) 🇩 (8) 🇪 (8) 🅿️ (8) 🇴 (8) 🇹 (8) PLEASENO (12) 3080 (6) 1038_Among_Us_Pepe (3) 
+
+[28-Apr-21 03:36 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+bestbuy
+Product Page
+https://api.bestbuy.com/click/-/6429440/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6429440/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+nvidia
+Model
+founders edition
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (13) ☠️ (7) okiRIP (5) 🥲 (9) 👍 (2) 🇩 🇷 🇴 🇺 🇬 🇹 PLEASENO tachi_smile 02smug 
+
+[28-Apr-21 03:37 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+bestbuy
+Product Page
+https://api.bestbuy.com/click/-/6432400/pdp
+Add to Cart
+https://api.bestbuy.com/click/-/6432400/cart
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+evga
+Model
+xc3 ultra
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (31) KEKW (18) 🇫 (31) 🇺 (27) 🇨 (24) 🇰 (25) okiRIP (11) PLEASENO (8) 🇼 🇧 (2) 🇦 (2) 🇷 (2) 🖕 (15) 💩 (12) ♿ 😫 (2) 💯 👍 (2) 🇩 (2) 
+
+[28-Apr-21 10:13 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+newegg
+Price
+$1239.98
+Product Page
+https://www.newegg.com/gigabyte-geforce-rtx-3080-gv-n3080vision-oc-10gd/p/N82E16814932371
+Add to Cart
+https://secure.newegg.com/Shopping/AddtoCart.aspx?Submit=ADD&ItemList=N82E16814932371
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+gigabyte
+Model
+aorus
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (102) PLEASENO (19) okiRIP (46) Hahaa (13) 😔 (13) 💩 (15) soldout (10) 🤡 (16) GotEm (5) FacePalm (9) KEKWait (7) 02smug (4) whereamongus (7) popCat (12) 🐩 (4) 🪗 (2) 🇫 (6) 🇺 (5) 🇨 (7) 🇰 (5) 
+
+[30-Apr-21 09:00 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+officedepot
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+PLEASENO (22) 🇳 (12) ⭕ (10) KEKW (13) KEKWait (2) 💩 (8) 6340_amongus_sus 😂 okiRIP (6) 🗑️ 🇹 (6) 🇷 (6) 🇦 (6) 🇸 (7) 🇭 (5) 🚫 (2) 🖕 (3) 🇱 (2) ℹ️ (2) 🇪 (2) 
+
+[30-Apr-21 11:01 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+newegg
+Price
+$1119.98
+Product Page
+https://www.newegg.com/msi-geforce-rtx-3080-rtx-3080-gaming-x-trio-10g/p/N82E16814137597
+Add to Cart
+https://secure.newegg.com/Shopping/AddtoCart.aspx?Submit=ADD&ItemList=N82E16814137597
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+msi
+Model
+gaming x trio
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+KEKW (49) KEKWait (18) PLEASENO (8) 🤮 (10) 🤓 (4) Hahaa (5) 🤡 (5) Hehe (3) FacePalm (7) 1540_PeePeeHands (5) ❓ (6) 🤑 (4) 🇼 (8) 🇦 (7) 🤬 (5) 🇨 (7) KEKW (6) 🇰 (7) 😆 (4) 🚫 (5) 
+
+[30-Apr-21 11:09 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+newegg
+Price
+$1119.98
+Product Page
+https://www.newegg.com/msi-geforce-rtx-3080-rtx-3080-gaming-x-trio-10g/p/N82E16814137597
+Add to Cart
+https://secure.newegg.com/Shopping/AddtoCart.aspx?Submit=ADD&ItemList=N82E16814137597
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+msi
+Model
+gaming x trio
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🤮 (34) KEKW (40) Hahaa (11) KEKW (9) 🤡 (12) 🍉 (7) 🇸 (7) FacePalm (11) 🇳 (6) 🇨 (6) 🇫 (6) 🇴 (6) popCat (8) 1540_PeePeeHands (7) 🅰️ (6) 😢 (8) 🚯 (7) 🇲 (6) 🇧 (5) 3070 (5) 
+
+[30-Apr-21 11:59 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+newegg
+Price
+$1119.98
+Product Page
+https://www.newegg.com/msi-geforce-rtx-3080-rtx-3080-gaming-x-trio-10g/p/N82E16814137597
+Add to Cart
+https://secure.newegg.com/Shopping/AddtoCart.aspx?Submit=ADD&ItemList=N82E16814137597
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+msi
+Model
+gaming x trio
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🤮 (38) KEKWait (23) KEKW (23) 1540_PeePeeHands (10) Hahaa (10) 🇱 (17) 🤡 (6) FacePalm (4) 🇮 (11) 🇪 (11) 🇸 (9) 💩 (7) 🗑️ (2) 
+
+[30-Apr-21 12:49 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+newegg
+Price
+$1119.98
+Product Page
+https://www.newegg.com/msi-geforce-rtx-3080-rtx-3080-gaming-x-trio-10g/p/N82E16814137597
+Add to Cart
+https://secure.newegg.com/Shopping/AddtoCart.aspx?Submit=ADD&ItemList=N82E16814137597
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+msi
+Model
+gaming x trio
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🤮 (38) KEKW (42) 🚫 (26) 🇱 (8) 🇸 (16) 🇨 (16) 🇦 (15) Ⓜ️ (15) 🇪 (3) 1540_PeePeeHands (5) 💩 (7) PLEASENO (3) 🇫 (3) FacePalm (3) whereamongus (2) 🗑️ (2) 
+
+[30-Apr-21 01:39 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+newegg
+Price
+$1119.98
+Product Page
+https://www.newegg.com/msi-geforce-rtx-3080-rtx-3080-gaming-x-trio-10g/p/N82E16814137597
+Add to Cart
+https://secure.newegg.com/Shopping/AddtoCart.aspx?Submit=ADD&ItemList=N82E16814137597
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+msi
+Model
+gaming x trio
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+😎 (9) KEKW (44) 🤮 (19) KEKWait (9) 02smug (4) 😡 (12) 🤡 (7) 🗑️ (4) 9751_feelssickman (4) 3080 (4) 🇪 (3) 🇴 (4) 🇱 (2) okiRIP (6) 🇫 (3) 🇧 (3) 💩 (7) PLEASENO (5) 🇷 (2) Hahaa (4) 
+
+[30-Apr-21 02:32 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+newegg
+Price
+$1119.98
+Product Page
+https://www.newegg.com/msi-geforce-rtx-3080-rtx-3080-gaming-x-trio-10g/p/N82E16814137597
+Add to Cart
+https://secure.newegg.com/Shopping/AddtoCart.aspx?Submit=ADD&ItemList=N82E16814137597
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+msi
+Model
+gaming x trio
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🤮 (60) 1540_PeePeeHands (12) popCat (17) KEKW (24) 🌩️ (9) 🤨 (10) 💩 (9) 1038_Among_Us_Pepe (9) KEKWait (6) GotEm (4) PLEASENO (5) 6340_amongus_sus (3) FacePalm (6) 🇱 (11) ℹ️ (11) 🇪 (11) 🇸 (11) soldout (2) 3080 (4) 🤬 (3) 
+
+[01-May-21 02:23 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$1049.99
+Product Page
+https://instockalert.io/P/US/B08HH5WF97
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+tuf oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+KEKW (106) 😐 (42) okiRIP (35) ❓ (25) soldout (12) 🇾 (7) 🇦 (8) 💩 (24) 🏳️‍🌈 (7) FacePalm (14) 3080 (12) 🤥 (11) 🐬 (6) 🇳 (9) 🇴 (9) tachi_smile (7) Hahaa (8) popCat (9) PLEASENO (5) 
+
+[03-May-21 03:02 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$1049
+Product Page
+https://instockalert.io/P/US/B08HH5WF97
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+tuf oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+KEKW (81) 🧢 (19) Hahaa (11) FacePalm (13) 💩 (18) KEKWait (10) PLEASENO (7) 🇱 (9) 💅 (5) 😐 (5) 🇮 (7) 🇦 (8) 1349_Pepe_Comfy (3) 🇷 (7) 🤷‍♀️ (3) 🇫 (8) 🇺 (7) 🇨 (7) soldout (3) 🇰 (4) 
+
+[03-May-21 03:06 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$1049
+Product Page
+https://instockalert.io/P/US/B08HH5WF97
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+tuf oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+🤡 (77) remVV (4) 🇨🇦 (7) KEKW (40) 🖕 (37) 3080 (7) tachi_smile (5) 😐 (7) 🇸 (10) Hahaa (9) 🇹 (10) 💩 (11) 🇫 (13) 🇺 (10) 🤣 (4) PLEASENO (10) FacePalm (6) okiRIP (4) soldout (2) KEKWait (6) 
+
+[04-May-21 08:49 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$1079
+Product Page
+https://instockalert.io/P/US/B08HR5SXPS
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+msi
+Model
+ventus 3x oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+KEKWait (44) 💩 (67) KEKW (26) KEKW (21) remVV (8) 👍 (6) tachi_smile (7) okiRIP (17) overpriced (8) FacePalm (12) soldout (3) Hahaa (7) NICE (3) 🧢 (4) 🖕 (14) 6340_amongus_sus (6) ⛏️ (3) whereamongus (2) 
+
+[04-May-21 08:52 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$1079
+Product Page
+https://instockalert.io/P/US/B08HR5SXPS
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+msi
+Model
+ventus 3x oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+💩 (77) 🈂️ (6) KEKW (22) KEKW (17) PLEASENO (9) 🇸 (4) 😐 (4) 🖕 (20) 🇹 (4) 👎 (10) 🇴 (4) 1540_PeePeeHands (8) 🇵 (6) 1038_Among_Us_Pepe (3) 🇷 (3) 🇦 (3) 🇳 (3) 🇰 (3) whereamongus (5) 🇪 (2) 
+
+[05-May-21 06:33 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+amazon
+Price
+$755
+Product Page
+https://instockalert.io/P/US/B08HH5WF97
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+asus
+Model
+tuf oc
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+As an Amazon Associate I earn from qualifying purchases. Product prices and availability are subject to change.
+
+{Reactions}
+KEKW (54) 🍑 (15) okiRIP (23) 😒 (9) 🇬 (18) 🇴 (18) 🇳 (16) 🇪 (17) 🇺 (7) FacePalm (5) 🇸 (8) 🇩 (7) 💩 (24) PLEASENO (6) Hahaa (6) 3080 (5) 🖕 (6) 🕓 (4) 🇦 (2) 🇲 (2) 
+
+[05-May-21 09:13 PM] Tylup#7777
+@3080_US https://www.zotacstore.com/us/graphics-cards/geforce-rtx-30-series?limit=24
+
+{Reactions}
+KEKW (39) 💩 (39) ⚠️ (11) 🇧 (3) 🆗 (5) 🇷 (5) 👎 (10) 🚽 (5) 🇺 (3) 🇱 catjam (5) 🇭 (3) 9520_Amongus_pog (2) 🦦 (2) 🤑 🤮 (5) okiRIP (5) 🧢 (3) 🖕 (6) 1540_PeePeeHands 
+
+[06-May-21 03:13 PM] DataLover#9406
+@3080_US  https://www.zotacstore.com/us/graphics-cards/geforce-rtx-30-series?limit=36
+
+{Reactions}
+🧙🏿 (12) ⬇️ (39) PLEASENO (21) KEKWait (14) 💩 (24) 🖕 (13) 🍴 (4) 🦧 (3) 👍 (6) FacePalm (5) 🇫 (10) 🇺 (11) 🇨 (9) 🇰 (10) 🇩 (8) 🇴 (7) 🇼 (8) 🇳 (8) okiRIP (4) 3080 (2) 
+
+[06-May-21 09:10 PM] Tylup#7777
+@3080_US https://www.zotacstore.com/us/zotac-gaming-geforce-rtx-3080-trinity-oc-white-edition-zt-a30800k-10p
+
+{Reactions}
+KEKW (36) 💩 (22) 3080 (6) 🇪 (3) okiRIP (5) 🤮 (4) 🇴 (2) 🇳 (3) 🇼 (2) 
+
+[07-May-21 04:20 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+officedepot
+Product Page
+https://www.officedepot.com/a/products/7791294/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🖕 (31) okiRIP (15) KEKW (17) tachi_smile (3) remVV (3) akkoShrug (2) Hahaa (5) 6340_amongus_sus (3) FacePalm (3) 🇭 (3) 🇴 (3) 🇼 (3) 🇫 (4) 🇺 (4) 🇨 (4) 🇰 (5) 🇾 (3) soldout (2)  (2) 
+
+[07-May-21 06:54 PM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+officedepot
+Price
+$1099.99
+Product Page
+https://www.officedepot.com/a/products/7791294/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+🖕 (19) soldout (5) KEKW (6) 3080 (4) FacePalm (2) 🇵🇷 🇩🇴 okiRIP (5) 
+
+[08-May-21 09:14 AM] datalover bot#0000
+@3080_US
+
+{Embed}
+_**IN STOCK ALERT!**_
+Store
+officedepot
+Product Page
+https://www.officedepot.com/a/products/7189374/PNY-GeForce-RTX-3080-10GB-GDDR6X/
+Streaming
+https://www.twitch.tv/datalovertv
+Brand
+pny
+Model
+xlr8 revel
+Series
+3080
+https://i.ibb.co/XLRrmZF/logo.jpg
+
+{Reactions}
+PLEASENO (21) KEKWait (14) NICE (2) KEKW (4) okiRIP (3) KEKW (7) 👍 (2) 9791_pepe 🥂 (2) 🥳 😡 (2) 🖕 (3) FacePalm (2) 🇳 (3) 🇮 (2) 🙃 (2) 🇨 (2) 🇪 (2) 🇺 🇬 
+
+==============================================================
+Exported 296 message(s)
+==============================================================

@@ -142,9 +142,13 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         # Initialize the Session we'll use for stock checking
         log.debug("Initializing Monitoring Sessions")
         self.sessions_list: Optional[List[AmazonMonitor]] = []
+        print(item_list)
         for idx in range(len(item_list)):
             connector = None
+            print(item_list[idx])
             if self.proxies and idx < len(self.proxies):
+                print("Using proxies!!!")
+                print(self.proxies[idx]["https"])
                 connector = ProxyConnector.from_url(self.proxies[idx]["https"])
             self.sessions_list.append(
                 AmazonMonitor(
