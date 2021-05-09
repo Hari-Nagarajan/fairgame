@@ -186,7 +186,7 @@ class AmazonMonitor(aiohttp.ClientSession):
         self.amazon_config = amazon_config
         self.domain = urlparse(self.item.furl.url).netloc
 
-        self.delay: float = 5
+        self.delay: float = 7
         if item.purchase_delay > 0:
             self.delay = 20
         self.block_purchase_until = time.time() + item.purchase_delay
@@ -195,7 +195,7 @@ class AmazonMonitor(aiohttp.ClientSession):
     def assign_config(self, azn_config):
         self.amazon_config = azn_config
 
-    def assign_delay(self, delay: float = 5):
+    def assign_delay(self, delay: float = 7):
         self.delay = delay
 
     def assign_item(self, item: FGItem):
