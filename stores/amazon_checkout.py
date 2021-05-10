@@ -470,7 +470,7 @@ class AmazonCheckoutHandler(BaseStoreHandler):
         return None
 
     def send_notification(self, message, page_name, take_screenshot=True):
-        """Sends a notification to registered agents """
+        """Sends a notification to registered agents"""
         if take_screenshot:
             file_name = save_screenshot(self.driver, page_name)
             self.notification_handler.send_notification(message, file_name)
