@@ -92,12 +92,22 @@ resl <- lapply(rownames(drops_and_price), function (row) {
   )
 })
 
-resl2 <- list(
-  "items" = resl,
-  "amazon_domain" = "smile.amazon.com"
-)
+rep(seq(10), each = 5)
+splitres <- split(resl, rep(seq(10), each = 5))
 
-jsonlite::write_json(x = resl2, pretty = T, path = "config/amazon_aio_config.json")
+lapply(seq(10), function(i) {
+  reslNow <- splitres[[i]]
+    resl2 <- list(
+    "items" = reslNow,
+    "amazon_domain" = "smile.amazon.com"
+  )
+  jsonlite::write_json(x = resl2, pretty = T, path = paste0("config/amazon_aio_jsons/"))
+
+})
+
+
+
+
 
 
 
