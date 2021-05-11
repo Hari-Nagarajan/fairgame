@@ -453,8 +453,6 @@ Options:
   --test              Run the checkout flow but do not actually purchase the item[s]. Only functional with `--alt-checkout` mode.
   
   --alt-checkout      Utilize the old add to cart method of checkout.
-
-  --delay FLOAT       Time to wait between the end of one stock check and the beginning of the next stock check.
   
   --checkshipping     Also include items with a shipping price in the search.
                       Shipping costs are factored into reserve price check calculation.
