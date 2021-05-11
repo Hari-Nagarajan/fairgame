@@ -14,6 +14,7 @@
         * [Configuration](#Configuration)
         * [Proxies](#Proxies)
         * [Running the program](#Running-the-program)
+        * [Optional settings](#Optional-settings)
         * [Start Up](#Start-Up)
     * [Other Installation Help](#Other-Installation-Help)
         * [ASINs](#ASINs)
@@ -245,10 +246,7 @@ Discord [#asins](https://discord.gg/DuVXAN5FnN). If it's not in there, you have 
 
 #### Adjusting Delay
 
-The default configuration is setup with a delay of 5 seconds. Currently in order to change this you must edit the `amazon_monitoring.py` file located in the `stores` folder. If you do not know how to edit a .py file with a text editor I would not advise attempting to adjust the delay.
-
-Use `CTRL+F` to search for `delay` and find the line: `self.delay: float = 5`. Simply change the delay to the number in seconds you want (5, 6.5, 7, 10.1, etc)
-Only one line needs to be changed and it is found in the `__init__` function of the AmazonMonitor class.
+The default delay is 5 seconds. Check [optional settings](#Optional-settings) for details on how to change the delay.
 
 #### Check ASIN's with a Shipping Price
 
@@ -437,10 +435,17 @@ pipenv run python app.py amazon-aio
 
 #### Optional settings
 
-**!*!*Currently these options are not available with the Alpha branch, but some may be added again in the future!*!***
-
 ```options
-pipenv run python app.py amazon [Options]
+pipenv run python app.py amazon-aio [Options]
+
+Options:
+   --delay FLOAT       Time to wait between the end of one stock check and the beginning of the next stock check.
+```
+
+**!*!*Currently thes options below are not available with the Alpha branch, but some may be added again in the future!*!***
+
+```old_options
+pipenv run python app.py amazon-aio [Options]
 
 Options:
   --headless          Runs Chrome in headless mode.
