@@ -1,0 +1,255 @@
+{
+  "items": [
+    {
+      "asins": ["B08YK97LKC"],
+      "min-price": 300,
+      "max-price": 950
+    },
+    {
+      "asins": ["B08THKRCSR"],
+      "min-price": 650,
+      "max-price": 1100
+    },
+    {
+      "asins": ["B08L8KC1J7"],
+      "min-price": 400,
+      "max-price": 950
+    },
+    {
+      "asins": ["B08HJGNJ81"],
+      "min-price": 1100,
+      "max-price": 2400
+    },
+    {
+      "asins": ["B08J5F3G18"],
+      "min-price": 1100,
+      "max-price": 2400
+    },
+    {
+      "asins": ["B08LW46GH2"],
+      "min-price": 400,
+      "max-price": 950
+    },
+    {
+      "asins": ["B08YX8D8ST"],
+      "min-price": 300,
+      "max-price": 950
+    },
+    {
+      "asins": ["B08WM28PVH"],
+      "min-price": 300,
+      "max-price": 600
+    },
+    {
+      "asins": ["B08L8JNTXQ"],
+      "min-price": 400,
+      "max-price": 950
+    },
+    {
+      "asins": ["B08Y934HZQ"],
+      "min-price": 300,
+      "max-price": 950
+    },
+    {
+      "asins": ["B08LF1CWT2"],
+      "min-price": 400,
+      "max-price": 950
+    },
+    {
+      "asins": ["B08L8L9TCZ"],
+      "min-price": 400,
+      "max-price": 950
+    },
+    {
+      "asins": ["B08L8L71SM"],
+      "min-price": 400,
+      "max-price": 950
+    },
+    {
+      "asins": ["B08Q2R71CS"],
+      "min-price": 700,
+      "max-price": 1650
+    },
+    {
+      "asins": ["B08WHJPBFX"],
+      "min-price": 300,
+      "max-price": 600
+    },
+    {
+      "asins": ["B08W8DGK3X"],
+      "min-price": 300,
+      "max-price": 600
+    },
+    {
+      "asins": ["B08J6GMWCQ"],
+      "min-price": 1100,
+      "max-price": 2400
+    },
+    {
+      "asins": ["B08WGTL4CW"],
+      "min-price": 300,
+      "max-price": 600
+    },
+    {
+      "asins": ["B08L8LG4M3"],
+      "min-price": 400,
+      "max-price": 950
+    },
+    {
+      "asins": ["B08X4V8N5Q"],
+      "min-price": 300,
+      "max-price": 600
+    },
+    {
+      "asins": ["B083Z5P6TX"],
+      "min-price": 300,
+      "max-price": 800
+    },
+    {
+      "asins": ["B08HBVX53D"],
+      "min-price": 1100,
+      "max-price": 2400
+    },
+    {
+      "asins": ["B08Q9SCPGD"],
+      "min-price": 700,
+      "max-price": 1650
+    },
+    {
+      "asins": ["B08HBQWBHH"],
+      "min-price": 1100,
+      "max-price": 2400
+    },
+    {
+      "asins": ["B08HR9D2JS"],
+      "min-price": 1100,
+      "max-price": 2400
+    },
+    {
+      "asins": ["B08KWN2LZG"],
+      "min-price": 400,
+      "max-price": 950
+    },
+    {
+      "asins": ["B08HRBW6VB"],
+      "min-price": 1100,
+      "max-price": 2400
+    },
+    {
+      "asins": ["B08YKFS27X"],
+      "min-price": 300,
+      "max-price": 950
+    },
+    {
+      "asins": ["B08R81J62G"],
+      "min-price": 700,
+      "max-price": 1650
+    },
+    {
+      "asins": ["B08HR3Y5GQ"],
+      "min-price": 550,
+      "max-price": 1350
+    },
+    {
+      "asins": ["B08T9H18TJ"],
+      "min-price": 700,
+      "max-price": 1250
+    },
+    {
+      "asins": ["B08YKH7VMN"],
+      "min-price": 300,
+      "max-price": 950
+    },
+    {
+      "asins": ["B08Z5M4KFM"],
+      "min-price": 300,
+      "max-price": 950
+    },
+    {
+      "asins": ["B08YWZHJDZ"],
+      "min-price": 300,
+      "max-price": 950
+    },
+    {
+      "asins": ["B08NXYBVDB"],
+      "min-price": 650,
+      "max-price": 1100
+    },
+    {
+      "asins": ["B08J6F174Z"],
+      "min-price": 550,
+      "max-price": 1350
+    },
+    {
+      "asins": ["B08P2B5XXD"],
+      "min-price": 650,
+      "max-price": 1100
+    },
+    {
+      "asins": ["B08P2C8XXH"],
+      "min-price": 650,
+      "max-price": 1100
+    },
+    {
+      "asins": ["B08TJ2BHCQ"],
+      "min-price": 700,
+      "max-price": 1250
+    },
+    {
+      "asins": ["B08WPJ5P4R"],
+      "min-price": 300,
+      "max-price": 600
+    },
+    {
+      "asins": ["B08HH5WF97"],
+      "min-price": 550,
+      "max-price": 1350
+    },
+    {
+      "asins": ["B08NX14LV1"],
+      "min-price": 700,
+      "max-price": 1250
+    },
+    {
+      "asins": ["B08Z72P3R9"],
+      "min-price": 300,
+      "max-price": 950
+    },
+    {
+      "asins": ["B08Q3B7NYM"],
+      "min-price": 700,
+      "max-price": 1650
+    },
+    {
+      "asins": ["B08QQFW9YS"],
+      "min-price": 700,
+      "max-price": 1650
+    },
+    {
+      "asins": ["B08T9J1J28"],
+      "min-price": 650,
+      "max-price": 1100
+    },
+    {
+      "asins": ["B08WT47L8B"],
+      "min-price": 300,
+      "max-price": 600
+    },
+    {
+      "asins": ["B08HJQ182D"],
+      "min-price": 1100,
+      "max-price": 2400
+    },
+    {
+      "asins": ["B08Z4J6NHW"],
+      "min-price": 300,
+      "max-price": 950
+    },
+    {
+      "asins": ["B08Q36SRKK"],
+      "min-price": 700,
+      "max-price": 1650
+    }
+  ],
+  "amazon_domain": "smile.amazon.com"
+}

@@ -401,6 +401,7 @@ class AmazonCheckoutHandler(BaseStoreHandler):
             log.debug(f"Other error encountered while loading page: {e}")
 
     async def checkout_worker(self, queue: asyncio.Queue):
+        print("Checkout ")
         log.debug("Checkout Task Started")
         log.debug("Logging in and pulling cookies from Selenium")
         cookies = self.pull_cookies()
@@ -509,10 +510,22 @@ async def turbo_initiate(
         "offerListing.1": qualified_seller.offering_id,
         "quantity.1": "1",
     }
+
+    # TEST
+    # payload_inputs['offerListing.1'] = "%2Bh6UbMUNiEWMy%2F96uPQ5dXGuj2n6juNqdqUSdGSit8q6szPcTbk1tQAS4%2BPIuN%2BIH9nP6WjY0pujutR%2BRGX1Zkd2VS3XX3lQc9PfMBE6HLL5E%2BUm3jP05WgYh2QcdUXmfNZbZp7XNH1IjGfSb50agg%3D%3D"
+    print(payload_inputs)
+
     retry = 0
     MAX_RETRY = 5
     captcha_element = True  # to initialize loop
+    print(s)
+    print(url)
     status, text = await aio_post(client=s, url=url, data=payload_inputs)
+    print("HELLO WORLD")
+    print(status)
+
+    print(text)
+
     save_html_response("turbo-initiate", status, text)
     tree: Optional[html.HtmlElement] = None
     while retry < MAX_RETRY and captcha_element:
