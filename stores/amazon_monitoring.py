@@ -303,7 +303,7 @@ class AmazonMonitor(aiohttp.ClientSession):
             async with self.get(url) as resp:
                 status = resp.status
                 text = await resp.text()
-        except aiohttp.ClientError as e:
+        except (aiohttp.ClientError, OSError) as e:
             log.debug(e)
             status = 999
         return status, text
@@ -372,7 +372,7 @@ def get_item_sellers(
     found_asin = "[NO ASIN FOUND ON PAGE]"
     # First see if ASIN can be found with xpath
     # look for product ASIN
-    page_asin = tree.xpath("//input[@id='ftSelectAsin']")
+    page_asin = tree.xpath("//input[@id='ftSelectAsin' or @id='ddmSelectAsin']")
     if page_asin:
         try:
             found_asin = page_asin[0].value.strip()
