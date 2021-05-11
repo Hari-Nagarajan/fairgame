@@ -204,10 +204,11 @@ class AmazonMonitor(aiohttp.ClientSession):
         # Something wrong, start a new task then kill this one
         log.debug("Max consecutive request fails reached. Restarting session")
         session = AmazonMonitor(
-            headers=HEADERS,
             item=self.item,
             amazon_config=self.amazon_config,
+            delay=self.delay,
             connector=self.connector,
+            headers=HEADERS,
         )
         session.headers.update({"user-agent": UserAgent().random})
         log.debug("Sesssion Created")
