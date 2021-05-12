@@ -250,7 +250,7 @@ def amazon(
         encryption_pass=p,
         log_stock_check=log_stock_check,
         shipping_bypass=shipping_bypass,
-        alt_checkout=alt_checkout,
+        alt_checkout=True,
         wait_on_captcha_fail=captcha_wait,
     )
     try:
