@@ -253,7 +253,6 @@ class AmazonMonitor(aiohttp.ClientSession):
 
 
     async def stock_check(self, queue: asyncio.Queue, future: asyncio.Future):
-        pprint(self.proxies)
         # Do first response outside of while loop, so we can continue on captcha checks
         # and return to start of while loop with that response. Requires the next response
         # to be grabbed at end of while loop
