@@ -19,6 +19,7 @@
 
 import json
 import os
+import platform
 
 import time
 import typing
@@ -26,6 +27,7 @@ from typing import Optional, Iterable, NamedTuple, List, Dict
 from utils.debugger import debug, timer
 from fake_useragent import UserAgent
 from amazoncaptcha import AmazonCaptcha
+from random import randint
 
 from urllib.parse import urlparse
 
@@ -61,6 +63,11 @@ import asyncio
 import aiohttp
 from aiohttp_proxy import ProxyConnector, ProxyType
 
+
+if platform.system() == "Windows":
+    policy = asyncio.WindowsSelectorEventLoopPolicy()
+    asyncio.set_event_loop_policy(policy)
+
 # PDP_URL = "https://smile.amazon.com/gp/product/"
 # AMAZON_DOMAIN = "www.amazon.com.au"
 # AMAZON_DOMAIN = "www.amazon.com.br"
@@ -88,8 +95,8 @@ AMAZON_URLS = {
     "PYO_POST": "https://{domain}/gp/buy/spc/handlers/static-submit-decoupled.html/ref=ox_spc_place_order?",
 }
 
-PDP_PATH = f"/dp/"
-REALTIME_INVENTORY_PATH = f"gp/aod/ajax?asin="
+PDP_PATH = "/dp/"
+REALTIME_INVENTORY_PATH = "gp/aod/ajax?asin="
 
 CONFIG_FILE_PATH = "config/amazon_requests_config.json"
 PROXY_FILE_PATH = "config/proxies.json"
@@ -115,6 +122,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         self,
         notification_handler: NotificationHandler,
         item_list: List[FGItem],
+        delay: float,
         amazon_config,
         tasks=1,
         checkshipping=False,
@@ -133,25 +141,32 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         ua = UserAgent()
 
         self.proxies = get_proxies(path=PROXY_FILE_PATH)
+        self.proxies_length = len(self.proxies)
 
         # Initialize the Session we'll use for stock checking
         log.debug("Initializing Monitoring Sessions")
         self.sessions_list: Optional[List[AmazonMonitor]] = []
         for idx in range(len(item_list)):
             connector = None
-            if self.proxies and idx < len(self.proxies):
-                connector = ProxyConnector.from_url(self.proxies[idx]["https"])
+            if self.proxies and idx < self.proxies_length:
+                proxy = self.proxies[idx]
+                log.debug(f"Creating monitoring task with proxy [{proxy}]")
+                connector = ProxyConnector.from_url(proxy)
             self.sessions_list.append(
                 AmazonMonitor(
                     headers=HEADERS,
                     item=item_list[idx],
                     amazon_config=self.amazon_config,
                     connector=connector,
-                    proxy_index = idx,
-                    proxy_length = len(self.proxies)
+                    delay=delay,
                 )
             )
             self.sessions_list[idx].headers.update({"user-agent": ua.random})
+
+        for idx in range(self.proxies_length):
+            AmazonMonitor.proxies.update({idx: {self.proxies[idx]: time.time()}})
+            log.debug(f"Adding [{self.proxies[idx]}] to the pool")
+        AmazonMonitor.proxies_length = len(self.proxies)
 
 
 # class Offers(NamedTuple):
@@ -167,10 +182,14 @@ class AmazonMonitoringHandler(BaseStoreHandler):
 
 
 class AmazonMonitor(aiohttp.ClientSession):
+    proxies = dict()
+    proxies_length = 0
+
     def __init__(
         self,
         item: FGItem,
         amazon_config: Dict,
+        delay: float,
         *args,
         **kwargs,
     ):
@@ -179,14 +198,11 @@ class AmazonMonitor(aiohttp.ClientSession):
         self.amazon_config = amazon_config
         self.domain = urlparse(self.item.furl.url).netloc
 
-        self.delay: float = 5
+        self.delay = delay
+        if item.purchase_delay > 0:
+            self.delay = 20
+        self.block_purchase_until = time.time() + item.purchase_delay
         log.debug("Initializing Monitoring Task")
-
-    def change_proxy(self):
-        if self.proxy_index < self.proxy_length:
-            self.connector = ProxyConnector.from_url(self.proxies[self.proxy_index + 1]["https"])
-        else:
-            self.connector = ProxyConnector.from_url(self.proxies[0]["https"])
 
     def assign_config(self, azn_config):
         self.amazon_config = azn_config
@@ -201,23 +217,50 @@ class AmazonMonitor(aiohttp.ClientSession):
         # Something wrong, start a new task then kill this one
         log.debug("Max consecutive request fails reached. Restarting session")
         session = AmazonMonitor(
-            headers=HEADERS,
             item=self.item,
             amazon_config=self.amazon_config,
+            delay=self.delay,
             connector=self.connector,
+            headers=HEADERS,
         )
         session.headers.update({"user-agent": UserAgent().random})
         log.debug("Sesssion Created")
         return session
 
+    def get_new_proxy(self):
+        while True:
+            rand_num = randint(0, self.proxies_length - 1)
+            print(rand_num)
+            proxy_t = self.proxies[rand_num]
+            for proxy, t in proxy_t.items():
+                if time.time() - t >= 6:
+                    self.proxies[rand_num].update({proxy: time.time()})
+                    old_proxy = str(self.connector.proxy_url)
+                    self.connector = proxy
+                    log.debug(f'{self.item.id}: Switching from [{old_proxy}] to [{proxy}]')
+                    return None
+            else:
+                "Trying again to grab available proxy..."
+                time.sleep(1)
+  
+    @property
+    def connector(self):
+        return self._connector
+
+    @connector.setter
+    def connector(self, proxy):
+        self._connector = ProxyConnector.from_url(proxy)
+
+
     async def stock_check(self, queue: asyncio.Queue, future: asyncio.Future):
+        pprint(self.proxies)
         # Do first response outside of while loop, so we can continue on captcha checks
         # and return to start of while loop with that response. Requires the next response
         # to be grabbed at end of while loop
         log.debug(f"Monitoring Task Started for {self.item.id}")
 
         fail_counter = 0  # Count sequential get fails
-        delay = 5
+        delay = self.delay
         end_time = time.time() + delay
         status, response_text = await self.aio_get(url=self.item.furl.url)
 
@@ -268,11 +311,16 @@ class AmazonMonitor(aiohttp.ClientSession):
                     )
                     if qualified_seller:
                         log.debug("Found an offer which meets criteria")
-                        await queue.put(qualified_seller)
-                        log.debug("Offer placed in queue")
-                        log.debug("Quitting monitoring task")
-                        future.set_result(None)
-                        return None
+                        if time.time() > self.block_purchase_until:
+                            await queue.put(qualified_seller)
+                            log.debug("Offer placed in queue")
+                            log.debug("Quitting monitoring task")
+                            future.set_result(None)
+                            return None
+                        else:
+                            log.debug(
+                                f"Purchasing is blocked until {self.block_purchase_until}. It is now {time.time()}."
+                            )
             # failed to find seller. Wait a delay period then check again
             log.debug("No offers found which meet product criteria")
             await wait_timer(end_time)
@@ -287,16 +335,18 @@ class AmazonMonitor(aiohttp.ClientSession):
                 return
 
             check_count += 1
-            self.change_proxy()
+
+            if self.delay == 0: 
+                self.get_new_proxy()
+
 
     async def aio_get(self, url):
-        status = 404
         text = None
         try:
             async with self.get(url) as resp:
                 status = resp.status
                 text = await resp.text()
-        except aiohttp.ClientError as e:
+        except (aiohttp.ClientError, OSError) as e:
             log.debug(e)
             status = 999
         return status, text
@@ -356,7 +406,7 @@ async def wait_timer(end_time):
 def get_item_sellers(
     tree: html.HtmlElement, item: FGItem, free_shipping_strings, atc_method=False
 ):
-    """Parse out information to from the aod-offer nodes populate ItemDetail instances for each item """
+    """Parse out information to from the aod-offer nodes populate ItemDetail instances for each item"""
     sellers: Optional[List[SellerDetail]] = []
     if tree is None:
         return sellers
@@ -365,7 +415,7 @@ def get_item_sellers(
     found_asin = "[NO ASIN FOUND ON PAGE]"
     # First see if ASIN can be found with xpath
     # look for product ASIN
-    page_asin = tree.xpath("//input[@id='ftSelectAsin']")
+    page_asin = tree.xpath("//input[@id='ftSelectAsin' or @id='ddmSelectAsin']")
     if page_asin:
         try:
             found_asin = page_asin[0].value.strip()
