@@ -236,6 +236,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                     return old_connector, conn
             else:
                 log.debug("Trying again to grab available proxy...")
+                await asyncio.sleep(1)
   
     @property
     def connector(self):
