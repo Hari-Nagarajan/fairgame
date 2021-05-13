@@ -120,6 +120,7 @@ class FGItem:
     id: str
     min_price: Price
     max_price: Price
+    purchase_delay: int = 0
     name: str = None
     short_name: str = None
     furl: furl = None
@@ -244,7 +245,7 @@ def get_shipping_costs(tree, free_shipping_string):
 
 
 def get_form_actions(tree):
-    """ Extract the add to cart form actions from an HTML tree using XPath"""
+    """Extract the add to cart form actions from an HTML tree using XPath"""
     # ATC form actions
     # //div[@id='aod-offer']//form[contains(@action,'add-to-cart')]
     form_action_nodes = tree.xpath(
@@ -258,7 +259,7 @@ def get_form_actions(tree):
 
 
 def get_item_condition(form_action) -> AmazonItemCondition:
-    """ Attempts to determine the Item Condition from the Add To Cart form action """
+    """Attempts to determine the Item Condition from the Add To Cart form action"""
     if "_new_" in form_action:
         # log.debug(f"Item condition is new")
         return AmazonItemCondition.New

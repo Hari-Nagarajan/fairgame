@@ -41,6 +41,7 @@ class AmazonStoreHandler(BaseStoreHandler):
     def __init__(
         self,
         notification_handler: NotificationHandler,
+        delay: float,
         single_shot=False,
         encryption_pass=None,
     ) -> None:
@@ -57,7 +58,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         self.amazon_domain = "smile.amazon.com"
         self.webdriver_child_pids = []
         self.single_shot = single_shot
-        # self.loop = asyncio.get_event_loop()
+        self.delay = delay
 
         from cli.cli import global_config
 
@@ -99,6 +100,7 @@ class AmazonStoreHandler(BaseStoreHandler):
             item_list=self.item_list,
             amazon_config=amazon_config,
             tasks=checkout_tasks,
+            delay=self.delay,
         )
         log.debug("Creating checkout worker and monitoring task(s)")
         future = []
@@ -175,6 +177,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                             asin,
                             min_price,
                             max_price,
+                            purchase_delay=json_item.get("purchase_delay", 0),
                             condition=condition,
                             merchant_id=merchant_id,
                             furl=furl(
