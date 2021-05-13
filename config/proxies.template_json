@@ -1,12 +1,8 @@
 {
     "proxies": [
-        {
-            "http": "http://user:password@ipaddress:port",
-            "https": "http://user:password@ipaddress:port"
-        },
-        {
-            "http": "http://user:password@ipaddress:port",
-            "https": "http://user:password@ipaddress:port"
-        }
+            "http://user:password@ipaddress:port",
+            "http://user:password@ipaddress:port"
+            "http://user:password@ipaddress:port",
+            "http://user:password@ipaddress:port"
     ]
 }
