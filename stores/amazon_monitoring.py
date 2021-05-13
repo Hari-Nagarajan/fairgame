@@ -166,7 +166,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         for idx in range(self.proxies_length):
             AmazonMonitor.proxies.update({idx: {self.proxies[idx]: time.time()}})
             log.debug(f"Adding [{self.proxies[idx]}] to the pool")
-        AmazonMonitor.proxies_length = len(self.proxies)
+        AmazonMonitor.proxies_length = self.proxies_length
 
 
 # class Offers(NamedTuple):
