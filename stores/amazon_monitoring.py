@@ -164,7 +164,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
             self.sessions_list[idx].headers.update({"user-agent": ua.random})
 
         for idx in range(self.proxies_length):
-            AmazonMonitor.proxies.update({idx: {self.proxies[idx]: time.time()}})
+            AmazonMonitor.proxies.append({self.proxies[idx]: time.time()})
             log.debug(f"Adding [{self.proxies[idx]}] to the pool")
         AmazonMonitor.proxies_length = self.proxies_length
 
@@ -182,7 +182,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
 
 
 class AmazonMonitor(aiohttp.ClientSession):
-    proxies = dict()
+    proxies = list()
     proxies_length = 0
 
     def __init__(
@@ -232,15 +232,14 @@ class AmazonMonitor(aiohttp.ClientSession):
             rand_num = randint(0, self.proxies_length - 1)
             proxy_t = self.proxies[rand_num]
             for proxy, t in proxy_t.items():
-                if time.time() - t >= 6:
+                if time.time() - t >= self.delay:
                     self.proxies[rand_num].update({proxy: time.time()})
                     old_proxy = str(self.connector.proxy_url)
                     self.connector = proxy
                     log.debug(f'{self.item.id}: Switching from [{old_proxy}] to [{proxy}]')
                     return None
             else:
-                "Trying again to grab available proxy..."
-                time.sleep(1)
+                log.debug("Trying again to grab available proxy...")
   
     @property
     def connector(self):
@@ -334,8 +333,7 @@ class AmazonMonitor(aiohttp.ClientSession):
 
             check_count += 1
 
-            if self.delay == 0: 
-                self.get_new_proxy()
+            self.get_new_proxy()
 
 
     async def aio_get(self, url):
