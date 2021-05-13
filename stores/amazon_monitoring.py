@@ -225,17 +225,15 @@ class AmazonMonitor(aiohttp.ClientSession):
         log.debug("Sesssion Created")
         return session
 
-    def get_new_proxy(self):
+    async def get_new_proxy(self):
         while True:
             rand_num = randint(0, len(self.connectors) - 1)
             conn_t = self.connectors[rand_num]
             for conn, t in conn_t.items():
-                if time.time() - t >= self.delay:
+                if time.time() - t >= 6:
                     self.connectors[rand_num].update({conn: time.time()})
                     old_connector = self.connector
-                    self.connector = conn
-                    log.debug(f'{self.item.id}: Switching from [{old_connector.proxy_url}] to [{self.connector.proxy_url}]')
-                    return None
+                    return old_connector, conn
             else:
                 log.debug("Trying again to grab available proxy...")
   
@@ -331,7 +329,8 @@ class AmazonMonitor(aiohttp.ClientSession):
 
             check_count += 1
 
-            self.get_new_proxy()
+            conns = await self.get_new_proxy()
+            log.debug(f'{self.item.id}: Switching from [{conns[0].proxy_url}] to [{conns[1].proxy_url}]')
 
 
     async def aio_get(self, url):
