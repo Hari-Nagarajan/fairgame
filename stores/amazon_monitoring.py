@@ -141,14 +141,13 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         ua = UserAgent()
 
         self.proxies = get_proxies(path=PROXY_FILE_PATH)
-        self.proxies_length = len(self.proxies)
 
         # Initialize the Session we'll use for stock checking
         log.debug("Initializing Monitoring Sessions")
         self.sessions_list: Optional[List[AmazonMonitor]] = []
         for idx in range(len(item_list)):
             connector = None
-            if self.proxies and idx < self.proxies_length:
+            if self.proxies and idx < len(self.proxies):
                 proxy = self.proxies[idx]
                 log.debug(f"Creating monitoring task with proxy [{proxy}]")
                 connector = ProxyConnector.from_url(proxy)
@@ -163,10 +162,10 @@ class AmazonMonitoringHandler(BaseStoreHandler):
             )
             self.sessions_list[idx].headers.update({"user-agent": ua.random})
 
-        for idx in range(self.proxies_length):
-            AmazonMonitor.proxies.append({self.proxies[idx]: time.time()})
-            log.debug(f"Adding [{self.proxies[idx]}] to the pool")
-        AmazonMonitor.proxies_length = self.proxies_length
+        for idx in range(len(self.proxies)):
+            connector = ProxyConnector.from_url(self.proxies[idx])
+            AmazonMonitor.connectors.append({connector : time.time()})
+            log.debug(f"Adding [{connector.proxy_url}] to the pool")
 
 
 # class Offers(NamedTuple):
@@ -182,8 +181,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
 
 
 class AmazonMonitor(aiohttp.ClientSession):
-    proxies = list()
-    proxies_length = 0
+    connectors = list()
 
     def __init__(
         self,
@@ -229,14 +227,14 @@ class AmazonMonitor(aiohttp.ClientSession):
 
     def get_new_proxy(self):
         while True:
-            rand_num = randint(0, self.proxies_length - 1)
-            proxy_t = self.proxies[rand_num]
-            for proxy, t in proxy_t.items():
+            rand_num = randint(0, len(self.connectors) - 1)
+            conn_t = self.connectors[rand_num]
+            for conn, t in conn_t.items():
                 if time.time() - t >= self.delay:
-                    self.proxies[rand_num].update({proxy: time.time()})
-                    old_proxy = str(self.connector.proxy_url)
-                    self.connector = proxy
-                    log.debug(f'{self.item.id}: Switching from [{old_proxy}] to [{proxy}]')
+                    self.connectors[rand_num].update({conn: time.time()})
+                    old_connector = self.connector
+                    self.connector = conn
+                    log.debug(f'{self.item.id}: Switching from [{old_connector.proxy_url}] to [{self.connector.proxy_url}]')
                     return None
             else:
                 log.debug("Trying again to grab available proxy...")
@@ -246,8 +244,8 @@ class AmazonMonitor(aiohttp.ClientSession):
         return self._connector
 
     @connector.setter
-    def connector(self, proxy):
-        self._connector = ProxyConnector.from_url(proxy)
+    def connector(self, connector):
+        self._connector = connector
 
 
     async def stock_check(self, queue: asyncio.Queue, future: asyncio.Future):
