@@ -27,6 +27,7 @@ from typing import Optional, Iterable, NamedTuple, List, Dict
 from utils.debugger import debug, timer
 from fake_useragent import UserAgent
 from amazoncaptcha import AmazonCaptcha
+from random import randint
 
 from urllib.parse import urlparse
 
@@ -61,6 +62,7 @@ from utils.logger import log
 import asyncio
 import aiohttp
 from aiohttp_proxy import ProxyConnector, ProxyType
+
 
 if platform.system() == "Windows":
     policy = asyncio.WindowsSelectorEventLoopPolicy()
@@ -139,14 +141,17 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         ua = UserAgent()
 
         self.proxies = get_proxies(path=PROXY_FILE_PATH)
+        self.proxies_length = len(self.proxies)
 
         # Initialize the Session we'll use for stock checking
         log.debug("Initializing Monitoring Sessions")
         self.sessions_list: Optional[List[AmazonMonitor]] = []
         for idx in range(len(item_list)):
             connector = None
-            if self.proxies and idx < len(self.proxies):
-                connector = ProxyConnector.from_url(self.proxies[idx]["https"])
+            if self.proxies and idx < self.proxies_length:
+                proxy = self.proxies[idx]
+                log.debug(f"Creating monitoring task with proxy [{proxy}]")
+                connector = ProxyConnector.from_url(proxy)
             self.sessions_list.append(
                 AmazonMonitor(
                     headers=HEADERS,
@@ -157,6 +162,11 @@ class AmazonMonitoringHandler(BaseStoreHandler):
                 )
             )
             self.sessions_list[idx].headers.update({"user-agent": ua.random})
+
+        for idx in range(self.proxies_length):
+            AmazonMonitor.proxies.update({idx: {self.proxies[idx]: time.time()}})
+            log.debug(f"Adding [{self.proxies[idx]}] to the pool")
+        AmazonMonitor.proxies_length = len(self.proxies)
 
 
 # class Offers(NamedTuple):
@@ -172,6 +182,9 @@ class AmazonMonitoringHandler(BaseStoreHandler):
 
 
 class AmazonMonitor(aiohttp.ClientSession):
+    proxies = dict()
+    proxies_length = 0
+
     def __init__(
         self,
         item: FGItem,
@@ -214,7 +227,33 @@ class AmazonMonitor(aiohttp.ClientSession):
         log.debug("Sesssion Created")
         return session
 
+    def get_new_proxy(self):
+        while True:
+            rand_num = randint(0, self.proxies_length - 1)
+            print(rand_num)
+            proxy_t = self.proxies[rand_num]
+            for proxy, t in proxy_t.items():
+                if time.time() - t >= 6:
+                    self.proxies[rand_num].update({proxy: time.time()})
+                    old_proxy = str(self.connector.proxy_url)
+                    self.connector = proxy
+                    log.debug(f'{self.item.id}: Switching from [{old_proxy}] to [{proxy}]')
+                    return None
+            else:
+                "Trying again to grab available proxy..."
+                time.sleep(1)
+  
+    @property
+    def connector(self):
+        return self._connector
+
+    @connector.setter
+    def connector(self, proxy):
+        self._connector = ProxyConnector.from_url(proxy)
+
+
     async def stock_check(self, queue: asyncio.Queue, future: asyncio.Future):
+        pprint(self.proxies)
         # Do first response outside of while loop, so we can continue on captcha checks
         # and return to start of while loop with that response. Requires the next response
         # to be grabbed at end of while loop
@@ -296,6 +335,10 @@ class AmazonMonitor(aiohttp.ClientSession):
                 return
 
             check_count += 1
+
+            if self.delay == 0: 
+                self.get_new_proxy()
+
 
     async def aio_get(self, url):
         text = None
