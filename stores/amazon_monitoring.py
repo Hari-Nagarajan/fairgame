@@ -230,7 +230,6 @@ class AmazonMonitor(aiohttp.ClientSession):
     def get_new_proxy(self):
         while True:
             rand_num = randint(0, self.proxies_length - 1)
-            print(rand_num)
             proxy_t = self.proxies[rand_num]
             for proxy, t in proxy_t.items():
                 if time.time() - t >= 6:
