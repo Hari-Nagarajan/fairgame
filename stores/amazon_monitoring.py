@@ -28,6 +28,11 @@ from utils.debugger import debug, timer
 from fake_useragent import UserAgent
 from amazoncaptcha import AmazonCaptcha
 
+import copy
+from itertools import cycle
+from random import shuffle
+
+
 from urllib.parse import urlparse
 
 import re
@@ -66,22 +71,6 @@ if platform.system() == "Windows":
     policy = asyncio.WindowsSelectorEventLoopPolicy()
     asyncio.set_event_loop_policy(policy)
 
-# PDP_URL = "https://smile.amazon.com/gp/product/"
-# AMAZON_DOMAIN = "www.amazon.com.au"
-# AMAZON_DOMAIN = "www.amazon.com.br"
-# AMAZON_DOMAIN = "www.amazon.ca"
-# NOT SUPPORTED AMAZON_DOMAIN = "www.amazon.cn"
-# AMAZON_DOMAIN = "www.amazon.fr"
-# AMAZON_DOMAIN = "www.amazon.de"
-# NOT SUPPORTED AMAZON_DOMAIN = "www.amazon.in"
-# AMAZON_DOMAIN = "www.amazon.it"
-# AMAZON_DOMAIN = "www.amazon.co.jp"
-# AMAZON_DOMAIN = "www.amazon.com.mx"
-# AMAZON_DOMAIN = "www.amazon.nl"
-# AMAZON_DOMAIN = "www.amazon.es"
-# AMAZON_DOMAIN = "www.amazon.co.uk"
-# AMAZON_DOMAIN = "www.amazon.com"
-# AMAZON_DOMAIN = "www.amazon.se"
 
 AMAZON_URLS = {
     "BASE_URL": "https://{domain}/",
@@ -123,8 +112,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         delay: float,
         amazon_config,
         tasks=1,
-        checkshipping=False,
-    ) -> None:
+        checkshipping=False,) -> None:
         log.debug("Initializing AmazonMonitoringHandler")
         super().__init__()
 
@@ -133,7 +121,6 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         self.notification_handler = notification_handler
         self.check_shipping = checkshipping
         self.item_list: typing.List[FGItem] = item_list
-        self.stock_checks = 0
         self.start_time = int(time.time())
         self.amazon_config = amazon_config
         ua = UserAgent()
@@ -143,15 +130,13 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         # Initialize the Session we'll use for stock checking
         log.debug("Initializing Monitoring Sessions")
         self.sessions_list: Optional[List[AmazonMonitor]] = []
-        for idx in range(len(item_list)):
-            connector = None
-            if self.proxies and idx < len(self.proxies):
-                connector = ProxyConnector.from_url(self.proxies[idx]["https"])
+        for idx in range(len(self.proxies)):
+            connector = ProxyConnector.from_url(self.proxies[idx])
             self.sessions_list.append(
                 AmazonMonitor(
                     headers=HEADERS,
-                    item=item_list[idx],
                     amazon_config=self.amazon_config,
+                    items=self.item_list,
                     connector=connector,
                     delay=delay,
                 )
@@ -159,36 +144,29 @@ class AmazonMonitoringHandler(BaseStoreHandler):
             self.sessions_list[idx].headers.update({"user-agent": ua.random})
 
 
-# class Offers(NamedTuple):
-#     asin: str
-#     offerlistingid: str
-#     merchantid: str
-#     price: float
-#     timestamp: float
-#     __slots__ = ()
-#
-#     def __str__(self):
-#         return f"ASIN: {self.asin}; offerListingId: {self.offerlistingid}; merchantId: {self.merchantid}; price: {self.price}"
-
-
 class AmazonMonitor(aiohttp.ClientSession):
     def __init__(
         self,
-        item: FGItem,
+        items: list,
         amazon_config: Dict,
         delay: float,
         *args,
         **kwargs,
     ):
         super(self.__class__, self).__init__(*args, **kwargs)
-        self.item = item
+        self.items = items
+        self.items_pool = None
+        self.shuffle_items()
+        self.item = None
+        self.assign_item()
+        self.check_count = 1
         self.amazon_config = amazon_config
         self.domain = urlparse(self.item.furl.url).netloc
 
         self.delay = delay
-        if item.purchase_delay > 0:
+        if self.item.purchase_delay > 0:
             self.delay = 20
-        self.block_purchase_until = time.time() + item.purchase_delay
+        self.block_purchase_until = time.time() + self.item.purchase_delay
         log.debug("Initializing Monitoring Task")
 
     def assign_config(self, azn_config):
@@ -197,14 +175,21 @@ class AmazonMonitor(aiohttp.ClientSession):
     def assign_delay(self, delay: float = 5):
         self.delay = delay
 
-    def assign_item(self, item: FGItem):
-        self.item = item
+    def assign_item(self):
+        log.debug("Assigning next item in the queue")
+        self.item = next(self.items_pool)
+
+    def shuffle_items(self):
+        log.debug("Shuffling items queue")
+        self.items_pool = copy.deepcopy(self.items)
+        shuffle(self.items_pool)
+        self.items_pool = cycle(self.items_pool)
 
     def fail_recreate(self):
         # Something wrong, start a new task then kill this one
         log.debug("Max consecutive request fails reached. Restarting session")
         session = AmazonMonitor(
-            item=self.item,
+            items=self.items,
             amazon_config=self.amazon_config,
             delay=self.delay,
             connector=self.connector,
@@ -226,6 +211,7 @@ class AmazonMonitor(aiohttp.ClientSession):
         status, response_text = await self.aio_get(url=self.item.furl.url)
 
         save_html_response("stock-check", status, response_text)
+        beware_of_dog(self.item, status, self.connector)
 
         # do this after each request
         fail_counter = check_fail(status=status, fail_counter=fail_counter)
@@ -234,10 +220,9 @@ class AmazonMonitor(aiohttp.ClientSession):
             future.set_result(session)
             return
 
-        check_count = 1
         # Loop will only exit if a qualified seller is returned.
         while True:
-            log.debug(f"{self.item.id} Stock Check Count: {check_count}")
+            log.debug(f"{self.item.id} : {self.connector.proxy_url} : Stock Check Count = {self.check_count}")
             tree = check_response(response_text)
             if tree is not None:
                 if captcha_element := has_captcha(tree):
@@ -288,6 +273,7 @@ class AmazonMonitor(aiohttp.ClientSession):
             end_time = time.time() + delay
             status, response_text = await self.aio_get(url=self.item.furl.url)
             save_html_response("stock-check", status, response_text)
+            beware_of_dog(self.item, status, self.connector)
             # do this after each request
             fail_counter = check_fail(status=status, fail_counter=fail_counter)
             if fail_counter == -1:
@@ -295,7 +281,11 @@ class AmazonMonitor(aiohttp.ClientSession):
                 future.set_result(session)
                 return
 
-            check_count += 1
+            self.check_count += 1
+            if (self.check_count % len(self.items)) + 1 == 1:
+                log.debug("Items cycle complete")
+                self.shuffle_items()
+            self.assign_item()
 
     async def aio_get(self, url):
         text = None
@@ -526,6 +516,11 @@ def get_proxies(path=PROXY_FILE_PATH):
 
     return proxies
 
+def beware_of_dog(item, status, connector):
+    if status == 503:
+        log.debug(f"{item.id} : {status} ALERT : {connector.proxy_url}")
+    return None
+
     # def verify(self):
     #     log.debug("Verifying item list...")
     #     items_to_purge = []
@@ -644,3 +639,34 @@ def get_proxies(path=PROXY_FILE_PATH):
     #     pickle.dump(item_cache, open(item_cache_file, "wb"))
     #
     #     return True
+
+
+# class Offers(NamedTuple):
+#     asin: str
+#     offerlistingid: str
+#     merchantid: str
+#     price: float
+#     timestamp: float
+#     __slots__ = ()
+#
+#     def __str__(self):
+#         return f"ASIN: {self.asin}; offerListingId: {self.offerlistingid}; merchantId: {self.merchantid}; price: {self.price}"
+
+
+# PDP_URL = "https://smile.amazon.com/gp/product/"
+# AMAZON_DOMAIN = "www.amazon.com.au"
+# AMAZON_DOMAIN = "www.amazon.com.br"
+# AMAZON_DOMAIN = "www.amazon.ca"
+# NOT SUPPORTED AMAZON_DOMAIN = "www.amazon.cn"
+# AMAZON_DOMAIN = "www.amazon.fr"
+# AMAZON_DOMAIN = "www.amazon.de"
+# NOT SUPPORTED AMAZON_DOMAIN = "www.amazon.in"
+# AMAZON_DOMAIN = "www.amazon.it"
+# AMAZON_DOMAIN = "www.amazon.co.jp"
+# AMAZON_DOMAIN = "www.amazon.com.mx"
+# AMAZON_DOMAIN = "www.amazon.nl"
+# AMAZON_DOMAIN = "www.amazon.es"
+# AMAZON_DOMAIN = "www.amazon.co.uk"
+# AMAZON_DOMAIN = "www.amazon.com"
+# AMAZON_DOMAIN = "www.amazon.se"
+
