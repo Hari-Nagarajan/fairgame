@@ -507,10 +507,20 @@ def get_proxies(path=PROXY_FILE_PATH):
 
     return proxies
 
-def beware_of_dog(item, status, connector):
+async def beware_of_dog(item, status, connector):
+    bad_proxies_path = "html_saves/bad_proxies.json"
     if status == 503:
-        log.debug(f"{item.id} : {status} ALERT : {connector.proxy_url}")
-    return None
+        if os.path.exists(bad_proxies_path):
+            with open(bad_proxies_path) as f:
+                bad_proxies = json.load(f)
+                bad_proxies.update({str(connector.proxy_url) : "null"})
+                json.dump(bad_proxies, bad_proxies_path)
+        else:
+            with open(bad_proxies_path, "w") as f:
+                bad_proxies = dict()
+                bad_proxies.update({str(connector.proxy_url) : "null"})
+                json.dump(bad_proxies, bad_proxies_path)
+
 
     # def verify(self):
     #     log.debug("Verifying item list...")
