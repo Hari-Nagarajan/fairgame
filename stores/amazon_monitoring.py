@@ -81,6 +81,7 @@ AMAZON_URLS = {
 
 PDP_PATH = "/dp/"
 REALTIME_INVENTORY_PATH = "gp/aod/ajax?asin="
+BAD_PROXIES_PATH = "html_saves/bad_proxies.json"
 
 CONFIG_FILE_PATH = "config/amazon_requests_config.json"
 PROXY_FILE_PATH = "config/proxies.json"
@@ -106,7 +107,24 @@ class ItemsHandler:
     def assign_next_item(cls):
         return next(cls.items)
 
+class BadProxyCollector:
+    @classmethod
+    def __init__(cls):
+        if os.path.exists(BAD_PROXIES_PATH):
+            with open(BAD_PROXIES_PATH) as f:
+                cls.collection = json.load(f)
+        else:
+            cls.collection = {}
 
+    @classmethod
+    def collect(cls, status, connector):
+        if status == 503:
+            proxy = str(connector.proxy_url)
+            cls.collection.update({proxy : "null"})
+            with open(BAD_PROXIES_PATH, "w") as f:
+                json.dump(cls.collection, f, indent=4)
+
+                
 class AmazonMonitoringHandler(BaseStoreHandler):
     http_client = False
     http_20_client = False
@@ -198,6 +216,7 @@ class AmazonMonitor(aiohttp.ClientSession):
         # to be grabbed at end of while loop
 
         # log.debug(f"Monitoring Task Started for {self.item.id}")
+        collector = BadProxyCollector()
 
         fail_counter = 0  # Count sequential get fails
         delay = self.delay
@@ -205,7 +224,7 @@ class AmazonMonitor(aiohttp.ClientSession):
         status, response_text = await self.aio_get(url=self.item.furl.url)
 
         save_html_response("stock-check", status, response_text)
-        beware_of_dog(self.item, status, self.connector)
+        collector.collect(status, self.connector)
 
         # do this after each request
         fail_counter = check_fail(status=status, fail_counter=fail_counter)
@@ -213,6 +232,7 @@ class AmazonMonitor(aiohttp.ClientSession):
             session = self.fail_recreate()
             future.set_result(session)
             return
+
 
         # Loop will only exit if a qualified seller is returned.
         while True:
@@ -268,7 +288,7 @@ class AmazonMonitor(aiohttp.ClientSession):
             end_time = time.time() + delay
             status, response_text = await self.aio_get(url=self.item.furl.url)
             save_html_response("stock-check", status, response_text)
-            beware_of_dog(self.item, status, self.connector)
+            collector.collect(status, self.connector)
             # do this after each request
             fail_counter = check_fail(status=status, fail_counter=fail_counter)
             if fail_counter == -1:
@@ -506,20 +526,6 @@ def get_proxies(path=PROXY_FILE_PATH):
         proxies = proxy_json.get("proxies", [])
 
     return proxies
-
-async def beware_of_dog(item, status, connector):
-    bad_proxies_path = "html_saves/bad_proxies.json"
-    if status == 503:
-        if os.path.exists(bad_proxies_path):
-            with open(bad_proxies_path) as f:
-                bad_proxies = json.load(f)
-                bad_proxies.update({str(connector.proxy_url) : "null"})
-                json.dump(bad_proxies, bad_proxies_path)
-        else:
-            with open(bad_proxies_path, "w") as f:
-                bad_proxies = dict()
-                bad_proxies.update({str(connector.proxy_url) : "null"})
-                json.dump(bad_proxies, bad_proxies_path)
 
 
     # def verify(self):
