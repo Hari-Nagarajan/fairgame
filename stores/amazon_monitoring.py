@@ -282,9 +282,6 @@ class AmazonMonitor(aiohttp.ClientSession):
                 return
 
             self.check_count += 1
-            if (self.check_count % len(self.items)) + 1 == 1:
-                log.debug("Items cycle complete")
-                self.shuffle_items()
             self.assign_item()
 
     async def aio_get(self, url):
