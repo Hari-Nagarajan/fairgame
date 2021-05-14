@@ -236,7 +236,6 @@ class AmazonMonitor(aiohttp.ClientSession):
 
         # Loop will only exit if a qualified seller is returned.
         while True:
-            self.next_item()
             log.debug(f"{self.item.id} : {self.connector.proxy_url} : Stock Check Count = {self.check_count}")
             tree = check_response(response_text)
             if tree is not None:
@@ -297,6 +296,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                 return
 
             self.check_count += 1
+            self.next_item()
 
     async def aio_get(self, url):
         text = None
