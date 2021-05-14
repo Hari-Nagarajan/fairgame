@@ -230,12 +230,10 @@ class AmazonMonitor(aiohttp.ClientSession):
             rand_num = randint(0, len(self.connectors) - 1)
             conn_t = self.connectors[rand_num]
             for conn, t in conn_t.items():
-                if time.time() - t >= 6:
+                if time.time() - t >= 7:
                     self.connectors[rand_num].update({conn: time.time()})
                     old_connector = self.connector
                     return old_connector, conn
-            else:
-                continue
   
     @property
     def connector(self):
@@ -330,6 +328,7 @@ class AmazonMonitor(aiohttp.ClientSession):
             check_count += 1
 
             conns = await self.get_new_proxy()
+            self.connector = conns[1]
             log.debug(f'{self.item.id}: Switching from [{conns[0].proxy_url}] to [{conns[1].proxy_url}]')
 
 
