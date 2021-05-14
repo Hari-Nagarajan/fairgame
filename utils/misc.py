@@ -22,6 +22,7 @@ import os
 import aiohttp
 from typing import Optional, List
 
+import json
 
 import time
 from datetime import datetime
@@ -148,3 +149,29 @@ def parse_html_source(data):
     except html.etree.ParserError:
         log.debug("html parser error")
     return tree
+
+def response_counter(status):
+    RESPONSE_COUNTER_PATH = "html_saves/response_counter.json"
+    if os.path.exists(RESPONSE_COUNTER_PATH):
+        with open(RESPONSE_COUNTER_PATH, "r") as f:
+            counter = json.load(f)
+    else:
+        counter = {"200" : 0,
+                   "403" : 0,
+                   "503" : 0,
+                   "999" : 0,
+                   "turbo": 0} 
+
+    if status == 200:
+        counter["200"] += 1
+    if status == 403:
+        counter["403"] += 1
+    if status == 503:
+        counter["503"] += 1
+    if status == 999:
+        counter["999"] += 1
+    if status == 777:
+        counter["turbo"] += 1
+
+    with open(RESPONSE_COUNTER_PATH, "w") as f:
+        json.dump(counter, f, indent=4)

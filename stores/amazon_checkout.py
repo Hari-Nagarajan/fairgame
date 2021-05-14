@@ -76,6 +76,7 @@ from utils.misc import (
     save_html_response,
     get_timestamp_filename,
     get_webdriver_pids,
+    response_counter,
 )
 
 from functools import wraps
@@ -414,7 +415,8 @@ class AmazonCheckoutHandler(BaseStoreHandler):
         domain = "smile.amazon.com"
         resp = await self.checkout_session.get(f"https://{domain}")
         html_text = await resp.text()
-        save_html_response("session-get", resp.status, html_text)
+        # save_html_response("session-get", resp.status, html_text)
+        response_counter(resp.status)
         while True:
             log.debug("Checkout task waiting for item in queue")
             qualified_seller = await queue.get()
@@ -445,7 +447,8 @@ class AmazonCheckoutHandler(BaseStoreHandler):
                             self.checkout_session,
                             f"https://{domain}/gp/buy/thankyou/handlers/display.html?_from=cheetah&checkMFA=1&purchaseId={pid}&referrer=yield&pid={pid}&pipelineType=turbo&clientId=retailwebsite&temporaryAddToCart=1&hostPage=detail&weblab=RCX_CHECKOUT_TURBO_DESKTOP_PRIME_87783",
                         )
-                        save_html_response("order-confirm", status, text)
+                        # save_html_response("order-confirm", status, text)
+                        response_counter(status)
                     except aiohttp.ClientError:
                         log.debug("could not save order confirmation page")
                     await self.checkout_session.close()
@@ -514,6 +517,7 @@ async def turbo_initiate(
     captcha_element = True  # to initialize loop
     status, text = await aio_post(client=s, url=url, data=payload_inputs)
     save_html_response("turbo-initiate", status, text)
+    response_counter(777)
     tree: Optional[html.HtmlElement] = None
     while retry < MAX_RETRY and captcha_element:
         tree = check_response(text)

@@ -42,6 +42,7 @@ from utils.misc import (
     get_timestamp_filename,
     save_html_response,
     check_response,
+    response_counter,
 )
 
 from common.amazon_support import (
@@ -255,7 +256,8 @@ class AmazonMonitor(aiohttp.ClientSession):
         end_time = time.time() + delay
         status, response_text = await self.aio_get(url=self.item.furl.url)
 
-        save_html_response("stock-check", status, response_text)
+        # save_html_response("stock-check", status, response_text)
+        response_counter(status)
 
         # do this after each request
         fail_counter = check_fail(status=status, fail_counter=fail_counter)
@@ -317,7 +319,8 @@ class AmazonMonitor(aiohttp.ClientSession):
             await wait_timer(end_time)
             end_time = time.time() + delay
             status, response_text = await self.aio_get(url=self.item.furl.url)
-            save_html_response("stock-check", status, response_text)
+            # save_html_response("stock-check", status, response_text)
+            # response_counter(status)
             # do this after each request
             fail_counter = check_fail(status=status, fail_counter=fail_counter)
             if fail_counter == -1:
