@@ -30,7 +30,6 @@ from amazoncaptcha import AmazonCaptcha
 
 import copy
 from itertools import cycle
-from random import shuffle
 
 
 from urllib.parse import urlparse
@@ -100,6 +99,16 @@ HEADERS = {
 amazon_config = {}
 
 
+class ItemsHandler:
+    @classmethod
+    def create_items_pool(cls, item_list):
+        cls.items = cycle(item_list)
+
+    @classmethod
+    def assign_next_item(cls):
+        return next(cls.items)
+
+
 class AmazonMonitoringHandler(BaseStoreHandler):
     http_client = False
     http_20_client = False
@@ -126,6 +135,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         ua = UserAgent()
 
         self.proxies = get_proxies(path=PROXY_FILE_PATH)
+        ItemsHandler.create_items_pool(self.item_list)
 
         # Initialize the Session we'll use for stock checking
         log.debug("Initializing Monitoring Sessions")
@@ -136,29 +146,22 @@ class AmazonMonitoringHandler(BaseStoreHandler):
                 AmazonMonitor(
                     headers=HEADERS,
                     amazon_config=self.amazon_config,
-                    items=self.item_list,
                     connector=connector,
                     delay=delay,
                 )
             )
             self.sessions_list[idx].headers.update({"user-agent": ua.random})
 
-
 class AmazonMonitor(aiohttp.ClientSession):
     def __init__(
         self,
-        items: list,
         amazon_config: Dict,
         delay: float,
         *args,
         **kwargs,
     ):
         super(self.__class__, self).__init__(*args, **kwargs)
-        self.items = items
-        self.items_pool = None
-        self.shuffle_items()
-        self.item = None
-        self.assign_item()
+        self.item = self.next_item()
         self.check_count = 1
         self.amazon_config = amazon_config
         self.domain = urlparse(self.item.furl.url).netloc
@@ -175,21 +178,13 @@ class AmazonMonitor(aiohttp.ClientSession):
     def assign_delay(self, delay: float = 5):
         self.delay = delay
 
-    def assign_item(self):
-        log.debug("Assigning next item in the queue")
-        self.item = next(self.items_pool)
-
-    def shuffle_items(self):
-        log.debug("Shuffling items queue")
-        self.items_pool = copy.deepcopy(self.items)
-        shuffle(self.items_pool)
-        self.items_pool = cycle(self.items_pool)
+    def next_item(self):
+        return ItemsHandler.assign_next_item()
 
     def fail_recreate(self):
         # Something wrong, start a new task then kill this one
         log.debug("Max consecutive request fails reached. Restarting session")
         session = AmazonMonitor(
-            items=self.items,
             amazon_config=self.amazon_config,
             delay=self.delay,
             connector=self.connector,
@@ -203,7 +198,8 @@ class AmazonMonitor(aiohttp.ClientSession):
         # Do first response outside of while loop, so we can continue on captcha checks
         # and return to start of while loop with that response. Requires the next response
         # to be grabbed at end of while loop
-        log.debug(f"Monitoring Task Started for {self.item.id}")
+
+        # log.debug(f"Monitoring Task Started for {self.item.id}")
 
         fail_counter = 0  # Count sequential get fails
         delay = self.delay
@@ -222,6 +218,7 @@ class AmazonMonitor(aiohttp.ClientSession):
 
         # Loop will only exit if a qualified seller is returned.
         while True:
+            self.next_item()
             log.debug(f"{self.item.id} : {self.connector.proxy_url} : Stock Check Count = {self.check_count}")
             tree = check_response(response_text)
             if tree is not None:
@@ -282,7 +279,6 @@ class AmazonMonitor(aiohttp.ClientSession):
                 return
 
             self.check_count += 1
-            self.assign_item()
 
     async def aio_get(self, url):
         text = None
