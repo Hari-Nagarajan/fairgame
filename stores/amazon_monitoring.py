@@ -28,9 +28,7 @@ from utils.debugger import debug, timer
 from fake_useragent import UserAgent
 from amazoncaptcha import AmazonCaptcha
 
-import copy
 from itertools import cycle
-
 
 from urllib.parse import urlparse
 
