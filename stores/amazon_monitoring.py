@@ -81,7 +81,7 @@ AMAZON_URLS = {
 
 PDP_PATH = "/dp/"
 REALTIME_INVENTORY_PATH = "gp/aod/ajax?asin="
-BAD_PROXIES_PATH = "html_saves/bad_proxies.json"
+BAD_PROXIES_PATH = "config/bad_proxies.json"
 
 CONFIG_FILE_PATH = "config/amazon_requests_config.json"
 PROXY_FILE_PATH = "config/proxies.json"
@@ -110,6 +110,7 @@ class ItemsHandler:
 class BadProxyCollector:
     @classmethod
     def __init__(cls):
+        cls.last_check = time.time()
         if os.path.exists(BAD_PROXIES_PATH):
             with open(BAD_PROXIES_PATH) as f:
                 cls.collection = json.load(f)
@@ -118,11 +119,20 @@ class BadProxyCollector:
 
     @classmethod
     def collect(cls, status, connector):
+        proxy = str(connector.proxy_url)
         if status == 503:
-            proxy = str(connector.proxy_url)
-            cls.collection.update({proxy : "null"})
+            cls.collection.update({proxy : True})
+        if status == 200 and proxy in cls.collection:
+            cls.collection.update({proxy : False})
+        if cls.timer():
             with open(BAD_PROXIES_PATH, "w") as f:
                 json.dump(cls.collection, f, indent=4)
+
+    @classmethod
+    def timer(cls):
+        if time.time() - cls.last_check >= 30:
+            return True
+        return False
 
                 
 class AmazonMonitoringHandler(BaseStoreHandler):
