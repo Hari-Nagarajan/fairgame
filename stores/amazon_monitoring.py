@@ -110,42 +110,61 @@ class ItemsHandler:
 class BadProxyCollector:
     @classmethod
     def __init__(cls):
-        cls.last_check = time.time()
-        if os.path.exists(BAD_PROXIES_PATH):
-            with open(BAD_PROXIES_PATH) as f:
-                cls.collection = json.load(f)
-        else:
-            cls.collection = {}
+        while True:
+            cls.last_check = time.time()
+            if os.path.exists(BAD_PROXIES_PATH):
+                try:
+                    with open(BAD_PROXIES_PATH) as f:
+                        cls.collection = json.load(f)
+                        return None
+                except:
+                    log.debug(f"{BAD_PROXIES_PATH} can't be decoded and will be deleted.")
+                    os.remove(BAD_PROXIES_PATH)
+            else:
+                cls.collection = dict()
+                return None
 
     @classmethod
     def record(cls, status, connector):
-        proxy = str(connector.proxy_url)
-        if status == 503:
-            cls.collection.update({proxy : {"still_banned" : True}})
-        if status == 200 and proxy in cls.collection:
-            cls.collection.update({proxy : {"still_banned" : False}})
+        url = connector.proxy_url
+
+        if status == 503 and url not in cls.collection:
+            cls.collection.setdefault(url, {"banned" : True})
+        if status == 200 and url in cls.collection:
+            cls.collection[url]["banned"] = False
+
             try:
-                unbanned_time = cls.collection[proxy]["unbanned_at"]
-                if time.time() - unbanned_time > 6000:
-                    log.debug(f"{proxy} has been unbanned for an hour.\
-                            Deleting it from the banned list.")
-                    del cls.collection[proxy]
+                unbanned_time = cls.collection[url]["unban_time"]
+                if time.time() - unbanned_time >= 6000:
+                    del cls.collection[url]
             except KeyError:
-                cls.collection.update({proxy: {"unbanned_at" : time.time()}})
-        if cls.timer():
-            with open(BAD_PROXIES_PATH, "w") as f:
+                cls.collection[url].update({"unban_time" : time.time()})
+
+    @classmethod
+    async def save(cls):
+        if cls.timer() and cls.collection:
+            with await open(BAD_PROXIES_PATH, "w") as f:
                 json.dump(cls.collection, f, indent=4)
-                for_cli = "\n"
-                for proxy in cls.collection:
-                    line = str(proxy) + "\n"
-                    for_cli += line
-                log.debug(f"{for_cli}")
+        log.debug(str(cls))
 
     @classmethod
     def timer(cls):
         if time.time() - cls.last_check >= 60:
             return True
         return False
+    
+    @classmethod
+    def __str__(cls):
+        if cls.collection:
+            string = "\n\n::Status of Proxies::\n\n"
+            for url, status in cls.collection.items():
+                url = url + "\n"
+                string += url
+                for query, content in status.items():
+                    state = str(query) + " : " + str(content) + "\n"
+                    string += state
+            return string
+        return "No proxies have been banned so far."
 
                 
 class AmazonMonitoringHandler(BaseStoreHandler):
@@ -320,6 +339,7 @@ class AmazonMonitor(aiohttp.ClientSession):
 
             self.check_count += 1
             self.next_item()
+            collector.save()
 
     async def aio_get(self, url):
         text = None
