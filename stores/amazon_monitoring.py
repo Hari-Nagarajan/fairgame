@@ -120,7 +120,6 @@ class BadProxyCollector:
                 except:
                     log.debug(f"{BAD_PROXIES_PATH} can't be decoded and will be deleted.")
                     os.remove(BAD_PROXIES_PATH)
-                    return None
             else:
                 cls.collection = dict()
                 return None
