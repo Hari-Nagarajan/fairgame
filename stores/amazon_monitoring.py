@@ -135,7 +135,7 @@ class BadProxyCollector:
 
             try:
                 unbanned_time = cls.collection[url]["unban_time"]
-                if time.time() - unbanned_time >= 6000:
+                if time.time() - unbanned_time >= 300:
                     del cls.collection[url]
             except KeyError:
                 cls.collection[url].update({"unban_time" : time.time()})
