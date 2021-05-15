@@ -109,7 +109,7 @@ class ItemsHandler:
 
 class BadProxyCollector:
     @classmethod
-    def __init__(cls):
+    def load(cls):
         while True:
             cls.last_check = time.time()
             if os.path.exists(BAD_PROXIES_PATH):
@@ -252,7 +252,8 @@ class AmazonMonitor(aiohttp.ClientSession):
         # to be grabbed at end of while loop
 
         # log.debug(f"Monitoring Task Started for {self.item.id}")
-        collector = BadProxyCollector()
+        if self.issaver:
+            BadProxyCollector.load()
 
         fail_counter = 0  # Count sequential get fails
         delay = self.delay
@@ -260,7 +261,7 @@ class AmazonMonitor(aiohttp.ClientSession):
         status, response_text = await self.aio_get(url=self.item.furl.url)
 
         # save_html_response("stock-check", status, response_text)
-        collector.record(status, self.connector)
+        BadProxyCollector.record(status, self.connector)
 
         # do this after each request
         fail_counter = check_fail(status=status, fail_counter=fail_counter)
@@ -323,7 +324,7 @@ class AmazonMonitor(aiohttp.ClientSession):
             end_time = time.time() + delay
             status, response_text = await self.aio_get(url=self.item.furl.url)
             # save_html_response("stock-check", status, response_text)
-            collector.record(status, self.connector)
+            BadProxyCollector.record(status, self.connector)
             # do this after each request
             fail_counter = check_fail(status=status, fail_counter=fail_counter)
             if fail_counter == -1:
@@ -334,7 +335,7 @@ class AmazonMonitor(aiohttp.ClientSession):
             self.check_count += 1
             self.next_item()
             if self.issaver:
-                collector.save()
+                BadProxyCollector.save()
 
     async def aio_get(self, url):
         text = None
