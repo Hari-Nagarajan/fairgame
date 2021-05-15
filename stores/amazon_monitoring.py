@@ -118,15 +118,27 @@ class BadProxyCollector:
             cls.collection = {}
 
     @classmethod
-    def collect(cls, status, connector):
+    def record(cls, status, connector):
         proxy = str(connector.proxy_url)
         if status == 503:
             cls.collection.update({proxy : {"still_banned" : True}})
         if status == 200 and proxy in cls.collection:
             cls.collection.update({proxy : {"still_banned" : False}})
+            try:
+                if time.time() - cls.collection[proxy]["unbanned_at"] > 6000:
+                    log.debug(f"{proxy} has been unbanned for an hour.\
+                            Deleting it from the banned list.")
+                    del cls.collection[proxy]
+            except KeyError:
+                cls.collection.update({proxy: {"unbanned_at" : time.time()}})
         if cls.timer():
             with open(BAD_PROXIES_PATH, "w") as f:
                 json.dump(cls.collection, f, indent=4)
+                for_cli = "\n"
+                for proxy in cls.collection:
+                    line = str(proxy) + "\n"
+                    for_cli += line
+                log.debug(f"{for_cli}")
 
     @classmethod
     def timer(cls):
@@ -234,7 +246,7 @@ class AmazonMonitor(aiohttp.ClientSession):
         status, response_text = await self.aio_get(url=self.item.furl.url)
 
         # save_html_response("stock-check", status, response_text)
-        collector.collect(status, self.connector)
+        collector.record(status, self.connector)
 
         # do this after each request
         fail_counter = check_fail(status=status, fail_counter=fail_counter)
@@ -297,7 +309,7 @@ class AmazonMonitor(aiohttp.ClientSession):
             end_time = time.time() + delay
             status, response_text = await self.aio_get(url=self.item.furl.url)
             # save_html_response("stock-check", status, response_text)
-            collector.collect(status, self.connector)
+            collector.record(status, self.connector)
             # do this after each request
             fail_counter = check_fail(status=status, fail_counter=fail_counter)
             if fail_counter == -1:
