@@ -121,16 +121,16 @@ class BadProxyCollector:
     def collect(cls, status, connector):
         proxy = str(connector.proxy_url)
         if status == 503:
-            cls.collection.update({proxy : True})
+            cls.collection.update({proxy : {"still_banned" : True}})
         if status == 200 and proxy in cls.collection:
-            cls.collection.update({proxy : False})
+            cls.collection.update({proxy : {"still_banned" : False}})
         if cls.timer():
             with open(BAD_PROXIES_PATH, "w") as f:
                 json.dump(cls.collection, f, indent=4)
 
     @classmethod
     def timer(cls):
-        if time.time() - cls.last_check >= 30:
+        if time.time() - cls.last_check >= 60:
             return True
         return False
 
