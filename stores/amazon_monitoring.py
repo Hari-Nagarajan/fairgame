@@ -125,7 +125,8 @@ class BadProxyCollector:
         if status == 200 and proxy in cls.collection:
             cls.collection.update({proxy : {"still_banned" : False}})
             try:
-                if time.time() - cls.collection[proxy]["unbanned_at"] > 6000:
+                unbanned_time = cls.collection[proxy]["unbanned_at"]
+                if time.time() - unbanned_time > 6000:
                     log.debug(f"{proxy} has been unbanned for an hour.\
                             Deleting it from the banned list.")
                     del cls.collection[proxy]
@@ -199,7 +200,7 @@ class AmazonMonitor(aiohttp.ClientSession):
         **kwargs,
     ):
         super(self.__class__, self).__init__(*args, **kwargs)
-        self.item = self.next_item()
+        self.item = ItemsHandler.assign_next_item()
         self.check_count = 1
         self.amazon_config = amazon_config
         self.domain = urlparse(self.item.furl.url).netloc
@@ -217,7 +218,7 @@ class AmazonMonitor(aiohttp.ClientSession):
         self.delay = delay
 
     def next_item(self):
-        return ItemsHandler.assign_next_item()
+        self.item = ItemsHandler.assign_next_item()
 
     def fail_recreate(self):
         # Something wrong, start a new task then kill this one
