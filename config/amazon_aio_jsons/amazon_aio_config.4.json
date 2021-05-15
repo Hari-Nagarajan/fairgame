@@ -1,0 +1,75 @@
+{
+  "items": [
+    {
+      "asins": ["B08WM28PVH"],
+      "min-price": [300],
+      "max-price": [600],
+      "proxy": ["https://OR1449719690:7a30g6pv@50.114.160.47:7414"],
+      "condition": ["Any"]
+    },
+    {
+      "asins": ["B08L8JNTXQ"],
+      "min-price": [400],
+      "max-price": [950],
+      "proxy": ["https://OR1449719690:7a30g6pv@50.114.173.102:7638"],
+      "condition": ["Any"]
+    },
+    {
+      "asins": ["B08Y934HZQ"],
+      "min-price": [300],
+      "max-price": [950],
+      "proxy": ["https://OR1449719690:7a30g6pv@50.114.166.69:6801"],
+      "condition": ["Any"]
+    },
+    {
+      "asins": ["B08LF1CWT2"],
+      "min-price": [400],
+      "max-price": [950],
+      "proxy": ["https://OR1449719690:7a30g6pv@50.114.174.194:9002"],
+      "condition": ["Any"]
+    },
+    {
+      "asins": ["B08L8L9TCZ"],
+      "min-price": [400],
+      "max-price": [950],
+      "proxy": ["https://OR1449719690:7a30g6pv@50.114.165.123:6058"],
+      "condition": ["Any"]
+    },
+    {
+      "asins": ["B08L8L71SM"],
+      "min-price": [400],
+      "max-price": [950],
+      "proxy": ["https://OR1449719690:7a30g6pv@50.114.167.60:6646"],
+      "condition": ["Any"]
+    },
+    {
+      "asins": ["B08Q2R71CS"],
+      "min-price": [700],
+      "max-price": [1650],
+      "proxy": ["https://OR1449719690:7a30g6pv@50.114.175.193:8922"],
+      "condition": ["Any"]
+    },
+    {
+      "asins": ["B08WHJPBFX"],
+      "min-price": [300],
+      "max-price": [600],
+      "proxy": ["https://OR1449719690:7a30g6pv@50.114.175.11:6768"],
+      "condition": ["Any"]
+    },
+    {
+      "asins": ["B08W8DGK3X"],
+      "min-price": [300],
+      "max-price": [600],
+      "proxy": ["https://OR1449719690:7a30g6pv@50.114.169.198:5196"],
+      "condition": ["Any"]
+    },
+    {
+      "asins": ["B08WGTL4CW"],
+      "min-price": [300],
+      "max-price": [600],
+      "proxy": ["https://OR1449719690:7a30g6pv@50.114.170.51:5053"],
+      "condition": ["Any"]
+    }
+  ],
+  "amazon_domain": ["smile.amazon.com"]
+}

@@ -62,9 +62,11 @@ final_df %>%
   tally() -> countdf
 
 countdf %>%
+  filter(category != "rtx3090") %>%
   arrange(desc(n)) -> dd
 
-drops <- dd[1:50,]
+
+drops <- dd[1:25,]
 write_csv(drops, file = "config/drops.csv")
 
 tb <- table(drops$category)
@@ -76,36 +78,49 @@ drops
 
 prices <- data.frame(
   category = names(table(drops$category)),
-  low = c(300, 300, 400, 550, 1100, 300, 650, 700, 700),
-  high = c(600, 800, 950, 1350, 2400, 950, 1100, 1250, 1650)
+  low = c(300, 300, 400, 550,
+          # 1100, # no 3090
+          300, 650, 700, 700),
+  high = c(600, 800, 950, 1350,
+           # 2400, # No 3090
+           950, 1100, 1250, 1650)
 )
 
-drops %>%
-  left_join(prices, by = "category") -> drops_and_price
+proxies <- read_table("config/proxies.txt", col_names = c("Proxies"))
+prox <- proxies %>%
+  mutate(Proxies = gsub(Proxies, pattern = "(.+:.+):(.+:.+)", replacement = "\\2@\\1")) %>%
+  mutate(Proxies = paste0("https://", Proxies))
+
+drops_and_price <- drops %>%
+  left_join(prices, by = "category") %>%
+  slice(rep(1:n(), 4)) %>%
+  mutate(proxies = prox$Proxies)
+
 
 resl <- lapply(rownames(drops_and_price), function (row) {
   rownow <- drops_and_price[row,]
   list(
     asins = c(rownow$asin),
     "min-price" = rownow$low,
-    "max-price" = rownow$high
+    "max-price" = rownow$high,
+    "proxy" = rownow$proxies,
+    "condition" = "Any"
   )
 })
 
-rep(seq(10), each = 5)
-splitres <- split(resl, rep(seq(10), each = 5))
+splt <- 10
+splitres <- split(resl, rep(seq(splt), each = splt))
 
-lapply(seq(10), function(i) {
+dir.create("config/amazon_aio_jsons/", showWarnings = F)
+lapply(seq(splt), function(i) {
   reslNow <- splitres[[i]]
-    resl2 <- list(
+  resl2 <- list(
     "items" = reslNow,
     "amazon_domain" = "smile.amazon.com"
   )
-  jsonlite::write_json(x = resl2, pretty = T, path = paste0("config/amazon_aio_jsons/"))
-
+  jsonlite::write_json(x = resl2, pretty = T, path = paste0("config/amazon_aio_jsons/", "amazon_aio_config.", i,
+                                                            ".json"))
 })
-
-
 
 
 

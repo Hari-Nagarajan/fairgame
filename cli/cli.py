@@ -101,11 +101,17 @@ def main():
     default=None,
     help="Pass in encryption file password as argument",
 )
+@click.option(
+    "--config",
+    type=str,
+    default=None,
+    help="Pass in config file",
+)
 @notify_on_crash
-def amazon_aio(p):
+def amazon_aio(p, config):
     log.debug("Creating AIO Amazon Store Handler")
     aio_amazon_obj = AIO_AmazonStoreHandler(
-        notification_handler=notification_handler, encryption_pass=p
+        notification_handler=notification_handler, encryption_pass=p, config_file=config
     )
     global tasks
     log.debug("Creating AIO Amazon Store Tasks")

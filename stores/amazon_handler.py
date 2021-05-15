@@ -25,7 +25,9 @@ from utils.logger import log
 from stores.amazon_monitoring import AmazonMonitoringHandler, AmazonMonitor
 from stores.amazon_checkout import AmazonCheckoutHandler
 
-CONFIG_FILE_PATH = "config/amazon_aio_config.json"
+CONFIG_FILE_PATH = "config/amazon_aio_jsons/amazon_aio_config.json"
+
+
 STORE_NAME = "Amazon"
 
 amazon_config = {}
@@ -43,6 +45,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         notification_handler: NotificationHandler,
         single_shot=False,
         encryption_pass=None,
+        config_file=None
     ) -> None:
         super().__init__()
         self.shuffle = True
@@ -57,6 +60,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         self.amazon_domain = "smile.amazon.com"
         self.webdriver_child_pids = []
         self.single_shot = single_shot
+        self.config_file = config_file
 
         from cli.cli import global_config
 
@@ -115,32 +119,40 @@ class AmazonStoreHandler(BaseStoreHandler):
         return
 
     def parse_config(self):
-        log.debug(f"Processing config file from {CONFIG_FILE_PATH}")
+        log.debug(f"Processing config file from {self.config_file}")
         # Parse the configuration file to get our hunt list
+        print("THIS IS MY CONFIG FILE")
+        print(self.config_file)
         try:
-            with open(CONFIG_FILE_PATH) as json_file:
+
+            with open(self.config_file) as json_file:
+
                 config = json.load(json_file)
-                self.amazon_domain = config.get("amazon_domain", "smile.amazon.com")
+                print(config)
+                print(config.get("amazon_domain", "smile.amazon.com"))
+                self.amazon_domain = config.get("amazon_domain", "smile.amazon.com")[0]
 
                 json_items = config.get("items")
+                print(json_items)
                 self.parse_items(json_items)
 
         except FileNotFoundError:
             log.error(
-                f"Configuration file not found at {CONFIG_FILE_PATH}.  Please see {CONFIG_FILE_PATH}_template."
+                f"Configuration file not found at {self.config_file}.  Please see {self.config_file}_template."
             )
             exit(1)
         log.debug(f"Found {len(self.item_list)} items to track at {STORE_NAME}.")
 
     def parse_items(self, json_items):
         for json_item in json_items:
+            print(json_item)
             if (
                 "max-price" in json_item
                 and "asins" in json_item
                 and "min-price" in json_item
             ):
-                max_price = json_item["max-price"]
-                min_price = json_item["min-price"]
+                max_price = json_item["max-price"][0]
+                min_price = json_item["min-price"][0]
                 if type(max_price) is str:
                     max_price = parse_price(max_price)
                 else:
@@ -151,7 +163,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                     min_price = Price(min_price, currency=None, amount_text=None)
 
                 if "condition" in json_item:
-                    condition = parse_condition(json_item["condition"])
+                    condition = parse_condition(json_item["condition"][0])
                 else:
                     condition = AmazonItemCondition.New
 
@@ -162,6 +174,7 @@ class AmazonStoreHandler(BaseStoreHandler):
 
                 # Create new instances of an item for each asin specified
                 asins_collection = json_item["asins"]
+                proxy = json_item['proxy'][0]
                 if isinstance(asins_collection, str):
                     log.warning(
                         f"\"asins\" node needs be an list/array and included in braces (e.g., [])  Attempting to recover {json_item['asins']}"
@@ -174,6 +187,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                             asin,
                             min_price,
                             max_price,
+                            proxy,
                             purchase_delay=json_item.get("purchase_delay", 0),
                             condition=condition,
                             merchant_id=merchant_id,

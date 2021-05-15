@@ -1,0 +1,75 @@
+{
+  "items": [
+    {
+      "asins": ["B08YKFS27X"],
+      "min-price": [300],
+      "max-price": [950],
+      "proxy": ["https://OR1449719690:7a30g6pv@50.114.175.195:7086"],
+      "condition": ["Any"]
+    },
+    {
+      "asins": ["B08R81J62G"],
+      "min-price": [700],
+      "max-price": [1650],
+      "proxy": ["https://OR1449719690:7a30g6pv@50.114.168.248:7651"],
+      "condition": ["Any"]
+    },
+    {
+      "asins": ["B08HR3Y5GQ"],
+      "min-price": [550],
+      "max-price": [1350],
+      "proxy": ["https://OR1449719690:7a30g6pv@50.114.167.34:5167"],
+      "condition": ["Any"]
+    },
+    {
+      "asins": ["B08T9H18TJ"],
+      "min-price": [700],
+      "max-price": [1250],
+      "proxy": ["https://OR1449719690:7a30g6pv@50.114.160.126:5506"],
+      "condition": ["Any"]
+    },
+    {
+      "asins": ["B08YKH7VMN"],
+      "min-price": [300],
+      "max-price": [950],
+      "proxy": ["https://OR1449719690:7a30g6pv@50.114.160.134:8244"],
+      "condition": ["Any"]
+    },
+    {
+      "asins": ["B08YK97LKC"],
+      "min-price": [300],
+      "max-price": [950],
+      "proxy": ["https://OR1449719690:7a30g6pv@50.114.164.124:5296"],
+      "condition": ["Any"]
+    },
+    {
+      "asins": ["B08THKRCSR"],
+      "min-price": [650],
+      "max-price": [1100],
+      "proxy": ["https://OR1449719690:7a30g6pv@50.114.164.175:5656"],
+      "condition": ["Any"]
+    },
+    {
+      "asins": ["B08L8KC1J7"],
+      "min-price": [400],
+      "max-price": [950],
+      "proxy": ["https://OR1449719690:7a30g6pv@50.114.170.34:5277"],
+      "condition": ["Any"]
+    },
+    {
+      "asins": ["B08LW46GH2"],
+      "min-price": [400],
+      "max-price": [950],
+      "proxy": ["https://OR1449719690:7a30g6pv@50.114.172.120:8946"],
+      "condition": ["Any"]
+    },
+    {
+      "asins": ["B08YX8D8ST"],
+      "min-price": [300],
+      "max-price": [950],
+      "proxy": ["https://OR1449719690:7a30g6pv@50.114.163.161:8703"],
+      "condition": ["Any"]
+    }
+  ],
+  "amazon_domain": ["smile.amazon.com"]
+}

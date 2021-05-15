@@ -3,14 +3,16 @@
     {
       "asins": ["B0160U60XO"],
       "min-price": 2,
-      "max-price": 5,
-      "condition": "New"
+      "max-price": 6,
+      "condition": "New",
+      "proxy": "https://OR1449719690:7a30g6pv@50.114.163.149:8510"
     },
     {
       "asins": ["B006JG471M"],
       "min-price": 0,
       "max-price": 0.5,
-      "condition": "New"
+      "condition": "New",
+      "proxy": "https://OR1449719690:7a30g6pv@50.114.165.1:7757"
     }
   ],
   "amazon_domain": "smile.amazon.com"

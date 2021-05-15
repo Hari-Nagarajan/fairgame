@@ -1,0 +1,75 @@
+{
+  "items": [
+    {
+      "asins": ["B08L8L71SM"],
+      "min-price": [400],
+      "max-price": [950],
+      "proxy": ["https://OR1449719690:7a30g6pv@50.114.167.223:6689"],
+      "condition": ["Any"]
+    },
+    {
+      "asins": ["B08Q2R71CS"],
+      "min-price": [700],
+      "max-price": [1650],
+      "proxy": ["https://OR1449719690:7a30g6pv@50.114.173.240:8566"],
+      "condition": ["Any"]
+    },
+    {
+      "asins": ["B08WHJPBFX"],
+      "min-price": [300],
+      "max-price": [600],
+      "proxy": ["https://OR1449719690:7a30g6pv@50.114.162.246:6586"],
+      "condition": ["Any"]
+    },
+    {
+      "asins": ["B08W8DGK3X"],
+      "min-price": [300],
+      "max-price": [600],
+      "proxy": ["https://OR1449719690:7a30g6pv@50.114.172.14:9007"],
+      "condition": ["Any"]
+    },
+    {
+      "asins": ["B08WGTL4CW"],
+      "min-price": [300],
+      "max-price": [600],
+      "proxy": ["https://OR1449719690:7a30g6pv@50.114.170.218:8280"],
+      "condition": ["Any"]
+    },
+    {
+      "asins": ["B08L8LG4M3"],
+      "min-price": [400],
+      "max-price": [950],
+      "proxy": ["https://OR1449719690:7a30g6pv@50.114.174.225:6178"],
+      "condition": ["Any"]
+    },
+    {
+      "asins": ["B08X4V8N5Q"],
+      "min-price": [300],
+      "max-price": [600],
+      "proxy": ["https://OR1449719690:7a30g6pv@50.114.169.30:6155"],
+      "condition": ["Any"]
+    },
+    {
+      "asins": ["B083Z5P6TX"],
+      "min-price": [300],
+      "max-price": [800],
+      "proxy": ["https://OR1449719690:7a30g6pv@50.114.162.2:5079"],
+      "condition": ["Any"]
+    },
+    {
+      "asins": ["B08Q9SCPGD"],
+      "min-price": [700],
+      "max-price": [1650],
+      "proxy": ["https://OR1449719690:7a30g6pv@50.114.168.110:8595"],
+      "condition": ["Any"]
+    },
+    {
+      "asins": ["B08KWN2LZG"],
+      "min-price": [400],
+      "max-price": [950],
+      "proxy": ["https://OR1449719690:7a30g6pv@50.114.165.226:6657"],
+      "condition": ["Any"]
+    }
+  ],
+  "amazon_domain": ["smile.amazon.com"]
+}

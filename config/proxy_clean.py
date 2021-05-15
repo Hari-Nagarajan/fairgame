@@ -21,27 +21,30 @@ while True:
 
 proxies_regex = re.compile(r"(.*:.*)@(.*:.*)", re.I | re.S)
 
-with open("proxies.txt", "r") as f:
-    proxies_list = f.readlines()
+for i in range(4):
+    j = i + 1
 
-proxies = list()
+    with open("proxies." + str(j) + ".txt", "r") as f:
+        proxies_list = f.readlines()
 
-print(proxies_list)
-for proxy in proxies_list:
-    match_object = re.match(proxies_regex, proxy)
+    proxies = list()
+
+    print(proxies_list)
+    for proxy in proxies_list:
+        match_object = re.match(proxies_regex, proxy)
+        if https:
+            proxies.append(f"{match_object.group(1).strip()}@{match_object.group(2)}")
+        if socks5:
+            proxies.append(f"socks5://{match_object.group(2).strip()}@{match_object.group(1)}")
+
+    proxies_dict = dict()
+
     if https:
-        proxies.append(f"{match_object.group(1).strip()}@{match_object.group(2)}")
+        proxies_dict.update({"proxies": [ {"http": f"http://{proxy.rstrip()}",
+                "https": f"https://{proxy.rstrip()}"} for proxy in proxies]})
     if socks5:
-        proxies.append(f"socks5://{match_object.group(2).strip()}@{match_object.group(1)}")
+        proxies_dict.update({"proxies": [{"http": proxy.rstrip(), "https": proxy.rstrip()} for proxy in proxies]})
 
-proxies_dict = dict()
-
-if https:
-    proxies_dict.update({"proxies": [ {"http": f"http://{proxy}",
-            "https": f"https://{proxy}"} for proxy in proxies]})
-if socks5:
-    proxies_dict.update({"proxies": [{"http": proxy, "https": proxy} for proxy in proxies]})
-
-with open("proxies.json", 'w') as f:
-    f.write(json.dumps(proxies_dict, indent=4, sort_keys=True))
-    print("Conversion to json completed.")
+    with open("proxies." + str(j) + ".json", 'w') as f:
+        f.write(json.dumps(proxies_dict, indent=4, sort_keys=True))
+        print("Conversion to json completed.")

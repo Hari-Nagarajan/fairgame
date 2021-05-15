@@ -418,9 +418,12 @@ class AmazonCheckoutHandler(BaseStoreHandler):
         save_html_response("session-get", resp.status, html_text)
         while True:
             log.debug("Checkout task waiting for item in queue")
+            print("HER 0 ")
+            print(queue)
             qualified_seller = await queue.get()
             queue.task_done()
             if not qualified_seller:
+                print("NBOT QUAL")
                 continue
             start_time = time.time()
             TURBO_INITIATE_MAX_RETRY = 50
@@ -432,7 +435,9 @@ class AmazonCheckoutHandler(BaseStoreHandler):
                     s=self.checkout_session, qualified_seller=qualified_seller
                 )
                 retry += 1
+            print("HERE 1")
             if pid and anti_csrf:
+                print("HERE 2")
                 if await turbo_checkout(
                     s=self.checkout_session, pid=pid, anti_csrf=anti_csrf
                 ):

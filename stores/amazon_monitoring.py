@@ -97,7 +97,7 @@ PDP_PATH = "/dp/"
 REALTIME_INVENTORY_PATH = "gp/aod/ajax?asin="
 
 CONFIG_FILE_PATH = "config/amazon_requests_config.json"
-PROXY_FILE_PATH = "config/proxies.json"
+PROXY_FILE_PATH = "config/proxies.tmp.json"
 STORE_NAME = "Amazon"
 DEFAULT_MAX_TIMEOUT = 10
 
@@ -137,19 +137,17 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         self.amazon_config = amazon_config
         ua = UserAgent()
 
-        self.proxies = get_proxies(path=PROXY_FILE_PATH)
 
         # Initialize the Session we'll use for stock checking
         log.debug("Initializing Monitoring Sessions")
         self.sessions_list: Optional[List[AmazonMonitor]] = []
         print(item_list)
         for idx in range(len(item_list)):
-            connector = None
+
             print(item_list[idx])
-            if self.proxies and idx < len(self.proxies):
-                print("Using proxies!!!")
-                print(self.proxies[idx]["https"])
-                connector = ProxyConnector.from_url(self.proxies[idx]["https"])
+            print("Using proxies!!!")
+            print(item_list[idx].proxy)
+            connector = ProxyConnector.from_url(item_list[idx].proxy)
             self.sessions_list.append(
                 AmazonMonitor(
                     headers=HEADERS,
