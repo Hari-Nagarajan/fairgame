@@ -147,7 +147,7 @@ class BadProxyCollector:
     def save(cls):
         if cls.timer() and cls.collection:
             with open(BAD_PROXIES_PATH, "w") as f:
-                json.dump(cls.collection, f, indent=4)
+                json.dump(cls.collection, f, indent=4, sort_keys=True)
 
     @classmethod
     def timer(cls):
@@ -345,8 +345,12 @@ class AmazonMonitor(aiohttp.ClientSession):
             BadProxyCollector.record(status, self.connector)
             # Session sleeps for 1 minute if it gets 503'd
             if status == 503:
-                log.debug(":: 503 :: Sleeping for 60 seconds.")
-                await asyncio.sleep(60)
+                try:
+                    log.debug(f":: 503 :: {self.proxy_url} :: Sleeping for 60 seconds.")
+                except AttributeError: 
+                    log.debug(f":: 503 :: Sleeping for 60 seconds.")
+                finally:
+                    await asyncio.sleep(60)
             
             # do this after each request
             fail_counter = check_fail(status=status, fail_counter=fail_counter)
