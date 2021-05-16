@@ -346,7 +346,7 @@ class AmazonMonitor(aiohttp.ClientSession):
             # Session sleeps for 1 minute if it gets 503'd
             if status == 503:
                 log.debug(":: 503 :: Sleeping for 60 seconds.")
-                time.sleep(60)
+                await asyncio.sleep(60)
             
             # do this after each request
             fail_counter = check_fail(status=status, fail_counter=fail_counter)
