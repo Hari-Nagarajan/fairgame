@@ -301,7 +301,7 @@ class AmazonMonitor(aiohttp.ClientSession):
             # Session sleeps for 1 minute if it gets 503'd
             if status == 503:
                 try:
-                    log.debug(f":: 503 :: {self.proxy_url} :: Sleeping for 60 seconds.")
+                    log.debug(f":: 503 :: {self.connector.proxy_url} :: Sleeping for 60 seconds.")
                 except AttributeError: 
                     log.debug(f":: 503 :: Sleeping for 60 seconds.")
                 finally:

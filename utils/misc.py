@@ -177,8 +177,8 @@ class ItemsHandler:
 class BadProxyCollector:
     @classmethod
     def load(cls):
+        cls.last_save = time.time()
         while True:
-            cls.last_save = time.time()
             if os.path.exists(BAD_PROXIES_PATH):
                 try:
                     with open(BAD_PROXIES_PATH) as f:
