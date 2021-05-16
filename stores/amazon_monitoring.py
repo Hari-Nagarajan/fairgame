@@ -43,6 +43,7 @@ from utils.misc import (
     get_timestamp_filename,
     save_html_response,
     check_response,
+    UserAgentBook,
 )
 
 from common.amazon_support import (
@@ -82,6 +83,7 @@ AMAZON_URLS = {
 PDP_PATH = "/dp/"
 REALTIME_INVENTORY_PATH = "gp/aod/ajax?asin="
 BAD_PROXIES_PATH = "config/bad_proxies.json"
+HEADERS_FILE_PATH = "config/headers.json"
 
 CONFIG_FILE_PATH = "config/amazon_requests_config.json"
 PROXY_FILE_PATH = "config/proxies.json"
@@ -187,6 +189,8 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         # Initialize the Session we'll use for stock checking
         log.debug("Initializing Monitoring Sessions")
         self.sessions_list: Optional[List[AmazonMonitor]] = []
+        
+        ua_book = UserAgentBook()
 
         if self.proxies:
             for idx in range(len(self.proxies)):
@@ -200,7 +204,17 @@ class AmazonMonitoringHandler(BaseStoreHandler):
                         issaver=False,
                     )
                 )
-                self.sessions_list[idx].headers.update({"user-agent": ua.random})
+
+                session = self.sessions_list[idx]
+                proxy_url = str(session.connector.proxy_url)
+
+                try:
+                    session.headers.update({"user-agent" : ua_book.user_agents[proxy_url]})
+                except KeyError: 
+                    random_ua = ua.random
+                    ua_book.user_agents.update({proxy_url : random_ua})
+                    self.sessions_list[idx].headers.update({"user-agent": random_ua})
+
             self.sessions_list[-1].issaver = True
         else:
             connector = None

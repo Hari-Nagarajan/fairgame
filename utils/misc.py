@@ -19,6 +19,7 @@
 
 import fileinput
 import os
+import json
 import aiohttp
 from typing import Optional, List
 
@@ -148,3 +149,13 @@ def parse_html_source(data):
     except html.etree.ParserError:
         log.debug("html parser error")
     return tree
+
+
+class UserAgentBook:
+    def __init__(self, fp="config/headers.json"):
+        self.fp = fp
+        self.user_agents = dict()
+        if os.path.exists(fp):
+            with open(fp) as f:
+                self.headers = json.load(f)
+
