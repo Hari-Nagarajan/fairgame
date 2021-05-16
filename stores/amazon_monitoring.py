@@ -28,8 +28,6 @@ from utils.debugger import debug, timer
 from fake_useragent import UserAgent
 from amazoncaptcha import AmazonCaptcha
 
-from itertools import cycle
-
 from urllib.parse import urlparse
 
 import re
@@ -44,6 +42,8 @@ from utils.misc import (
     save_html_response,
     check_response,
     UserAgentBook,
+    ItemsHandler,
+    BadProxyCollector,
 )
 
 from common.amazon_support import (
@@ -82,8 +82,6 @@ AMAZON_URLS = {
 
 PDP_PATH = "/dp/"
 REALTIME_INVENTORY_PATH = "gp/aod/ajax?asin="
-BAD_PROXIES_PATH = "config/bad_proxies.json"
-HEADERS_FILE_PATH = "config/headers.json"
 
 CONFIG_FILE_PATH = "config/amazon_requests_config.json"
 PROXY_FILE_PATH = "config/proxies.json"
@@ -100,64 +98,6 @@ HEADERS = {
 amazon_config = {}
 
 
-class ItemsHandler:
-    @classmethod
-    def create_items_pool(cls, item_list):
-        cls.items = cycle(item_list)
-
-    @classmethod
-    def pop(cls):
-        return next(cls.items)
-
-class BadProxyCollector:
-    @classmethod
-    def load(cls):
-        while True:
-            cls.last_check = time.time()
-            if os.path.exists(BAD_PROXIES_PATH):
-                try:
-                    with open(BAD_PROXIES_PATH) as f:
-                        cls.collection = json.load(f)
-                        return None
-                except:
-                    log.debug(f"{BAD_PROXIES_PATH} can't be decoded and will be deleted.")
-                    os.remove(BAD_PROXIES_PATH)
-            else:
-                cls.collection = dict()
-                return None
-
-    @classmethod
-    def record(cls, status, connector):
-        try:
-            url = str(connector.proxy_url)
-
-            if status == 503 and url not in cls.collection:
-                cls.collection.update({url : {"banned" : True}})
-            if status == 200 and url in cls.collection:
-                cls.collection[url]["banned"] = False
-
-                try:
-                    unbanned_time = cls.collection[url]["unban_time"]
-                    if time.time() - unbanned_time >= 300:
-                        del cls.collection[url]
-                except KeyError:
-                    cls.collection[url].update({"unban_time" : time.time()})
-        except AttributeError:
-            pass
-
-    @classmethod
-    def save(cls):
-        if cls.timer() and cls.collection:
-            with open(BAD_PROXIES_PATH, "w") as f:
-                json.dump(cls.collection, f, indent=4, sort_keys=True)
-
-    @classmethod
-    def timer(cls):
-        if time.time() - cls.last_check >= 60:
-            return True
-        return False
-    
-                
 class AmazonMonitoringHandler(BaseStoreHandler):
     http_client = False
     http_20_client = False
@@ -213,8 +153,9 @@ class AmazonMonitoringHandler(BaseStoreHandler):
                 except KeyError: 
                     random_ua = ua.random
                     ua_book.user_agents.update({proxy_url : random_ua})
-                    self.sessions_list[idx].headers.update({"user-agent": random_ua})
+                    self.sessions_list[idx].headers.update({"user-agent": ua_book.user_agents[proxy_url]})
 
+            ua_book.save()
             self.sessions_list[-1].issaver = True
         else:
             connector = None

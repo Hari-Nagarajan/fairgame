@@ -22,7 +22,7 @@ import os
 import json
 import aiohttp
 from typing import Optional, List
-
+from itertools import cycle
 
 import time
 from datetime import datetime
@@ -47,7 +47,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from utils.logger import log
 
-
+BAD_PROXIES_PATH = "config/bad_proxies.json"
 DEFAULT_MAX_TIMEOUT = 5
 
 
@@ -152,10 +152,74 @@ def parse_html_source(data):
 
 
 class UserAgentBook:
-    def __init__(self, fp="config/headers.json"):
+    def __init__(self, fp="config/user_agents.json"):
         self.fp = fp
         self.user_agents = dict()
         if os.path.exists(fp):
             with open(fp) as f:
-                self.headers = json.load(f)
+                self.user_agents = json.load(f)
 
+    def save(self):
+        with open(self.fp, 'w') as f:
+            json.dump(self.user_agents, f, indent=4)
+
+
+class ItemsHandler:
+    @classmethod
+    def create_items_pool(cls, item_list):
+        cls.items = cycle(item_list)
+
+    @classmethod
+    def pop(cls):
+        return next(cls.items)
+
+
+class BadProxyCollector:
+    @classmethod
+    def load(cls):
+        while True:
+            cls.last_check = time.time()
+            if os.path.exists(BAD_PROXIES_PATH):
+                try:
+                    with open(BAD_PROXIES_PATH) as f:
+                        cls.collection = json.load(f)
+                        return None
+                except:
+                    log.debug(f"{BAD_PROXIES_PATH} can't be decoded and will be deleted.")
+                    os.remove(BAD_PROXIES_PATH)
+            else:
+                cls.collection = dict()
+                return None
+
+    @classmethod
+    def record(cls, status, connector):
+        try:
+            url = str(connector.proxy_url)
+
+            if status == 503 and url not in cls.collection:
+                cls.collection.update({url : {"banned" : True}})
+            if status == 200 and url in cls.collection:
+                cls.collection[url]["banned"] = False
+
+                try:
+                    unbanned_time = cls.collection[url]["unban_time"]
+                    if time.time() - unbanned_time >= 300:
+                        del cls.collection[url]
+                except KeyError:
+                    cls.collection[url].update({"unban_time" : time.time()})
+        except AttributeError:
+            pass
+
+    @classmethod
+    def save(cls):
+        if cls.timer() and cls.collection:
+            with open(BAD_PROXIES_PATH, "w") as f:
+                json.dump(cls.collection, f, indent=4, sort_keys=True)
+
+    @classmethod
+    def timer(cls):
+        if time.time() - cls.last_check >= 60:
+            return True
+        return False
+    
+                
