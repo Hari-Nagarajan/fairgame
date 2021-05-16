@@ -184,7 +184,8 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         # Initialize the Session we'll use for stock checking
         log.debug("Initializing Monitoring Sessions")
         self.sessions_list: Optional[List[AmazonMonitor]] = []
-
+        
+        connector = None
         if self.proxies:
             for idx in range(len(self.proxies)):
                 connector = ProxyConnector.from_url(self.proxies[idx])
@@ -199,6 +200,19 @@ class AmazonMonitoringHandler(BaseStoreHandler):
                 )
                 self.sessions_list[idx].headers.update({"user-agent": ua.random})
             self.sessions_list[-1].issaver = True
+        else:
+            self.sessions_list.append(
+                AmazonMonitor(
+                    headers=HEADERS,
+                    amazon_config=self.amazon_config,
+                    connector=connector,
+                    delay=delay,
+                    issaver=False,
+                )
+            )
+            self.sessions_list[idx].headers.update({"user-agent": ua.random})
+        self.sessions_list[-1].issaver = True
+
 
 
 class AmazonMonitor(aiohttp.ClientSession):
@@ -325,6 +339,10 @@ class AmazonMonitor(aiohttp.ClientSession):
             status, response_text = await self.aio_get(url=self.item.furl.url)
             # save_html_response("stock-check", status, response_text)
             BadProxyCollector.record(status, self.connector)
+            # Session sleeps for 1 minute if it gets 503'd
+            if status == 503:
+                time.sleep(10)
+            
             # do this after each request
             fail_counter = check_fail(status=status, fail_counter=fail_counter)
             if fail_counter == -1:
