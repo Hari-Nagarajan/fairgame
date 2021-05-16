@@ -126,19 +126,22 @@ class BadProxyCollector:
 
     @classmethod
     def record(cls, status, connector):
-        url = str(connector.proxy_url)
+        try:
+            url = str(connector.proxy_url)
 
-        if status == 503 and url not in cls.collection:
-            cls.collection.update({url : {"banned" : True}})
-        if status == 200 and url in cls.collection:
-            cls.collection[url]["banned"] = False
+            if status == 503 and url not in cls.collection:
+                cls.collection.update({url : {"banned" : True}})
+            if status == 200 and url in cls.collection:
+                cls.collection[url]["banned"] = False
 
-            try:
-                unbanned_time = cls.collection[url]["unban_time"]
-                if time.time() - unbanned_time >= 300:
-                    del cls.collection[url]
-            except KeyError:
-                cls.collection[url].update({"unban_time" : time.time()})
+                try:
+                    unbanned_time = cls.collection[url]["unban_time"]
+                    if time.time() - unbanned_time >= 300:
+                        del cls.collection[url]
+                except KeyError:
+                    cls.collection[url].update({"unban_time" : time.time()})
+        except AttributeError:
+            pass
 
     @classmethod
     def save(cls):
@@ -184,8 +187,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         # Initialize the Session we'll use for stock checking
         log.debug("Initializing Monitoring Sessions")
         self.sessions_list: Optional[List[AmazonMonitor]] = []
-        
-        connector = None
+
         if self.proxies:
             for idx in range(len(self.proxies)):
                 connector = ProxyConnector.from_url(self.proxies[idx])
@@ -201,6 +203,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
                 self.sessions_list[idx].headers.update({"user-agent": ua.random})
             self.sessions_list[-1].issaver = True
         else:
+            connector = None
             self.sessions_list.append(
                 AmazonMonitor(
                     headers=HEADERS,
@@ -210,9 +213,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
                     issaver=False,
                 )
             )
-            self.sessions_list[idx].headers.update({"user-agent": ua.random})
-        self.sessions_list[-1].issaver = True
-
+            self.sessions_list[0].headers.update({"user-agent": ua.random})
 
 
 class AmazonMonitor(aiohttp.ClientSession):
@@ -287,7 +288,10 @@ class AmazonMonitor(aiohttp.ClientSession):
 
         # Loop will only exit if a qualified seller is returned.
         while True:
-            log.debug(f"{self.item.id} : {self.connector.proxy_url} : Stock Check Count = {self.check_count}")
+            try:
+                log.debug(f"{self.item.id} : {self.connector.proxy_url} : Stock Check Count = {self.check_count}")
+            except AttributeError:
+                log.debug(f"{self.item.id} : Stock Check Count = {self.check_count}")
             tree = check_response(response_text)
             if tree is not None:
                 if captcha_element := has_captcha(tree):
@@ -341,7 +345,8 @@ class AmazonMonitor(aiohttp.ClientSession):
             BadProxyCollector.record(status, self.connector)
             # Session sleeps for 1 minute if it gets 503'd
             if status == 503:
-                time.sleep(10)
+                log.debug(":: 503 :: Sleeping for 60 seconds.")
+                time.sleep(60)
             
             # do this after each request
             fail_counter = check_fail(status=status, fail_counter=fail_counter)

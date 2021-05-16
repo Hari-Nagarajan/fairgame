@@ -5,6 +5,7 @@ verify_ssl = true
 
 [dev-packages]
 pyinstaller = "*"
+pylint = "*"
 
 [packages]
 requests = {extras = ["socks"], version = "*"}
