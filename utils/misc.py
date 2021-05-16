@@ -178,7 +178,7 @@ class BadProxyCollector:
     @classmethod
     def load(cls):
         while True:
-            cls.last_check = time.time()
+            cls.last_save = time.time()
             if os.path.exists(BAD_PROXIES_PATH):
                 try:
                     with open(BAD_PROXIES_PATH) as f:
@@ -215,10 +215,11 @@ class BadProxyCollector:
         if cls.timer() and cls.collection:
             with open(BAD_PROXIES_PATH, "w") as f:
                 json.dump(cls.collection, f, indent=4, sort_keys=True)
+            cls.last_save = time.time()
 
     @classmethod
     def timer(cls):
-        if time.time() - cls.last_check >= 60:
+        if time.time() - cls.last_save >= 60:
             return True
         return False
     
