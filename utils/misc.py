@@ -212,8 +212,10 @@ class BadProxyCollector:
 
             if status == 503:
                 cls.collection.update({url : {"banned" : True}})
-                if cls.collection[url]["unban_time"]:
+                try:
                     del cls.collection[url]["unban_time"]
+                except KeyError:
+                    pass
             if status == 200 and url in cls.collection:
                 cls.collection[url]["banned"] = False
 
