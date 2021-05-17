@@ -243,7 +243,6 @@ class AmazonMonitor(aiohttp.ClientSession):
 
         # Loop will only exit if a qualified seller is returned.
         while True:
-            self.next_item()
             while ItemsHandler.check_last_access(self.item):
                 await asyncio.sleep(0.1)
 
@@ -321,6 +320,7 @@ class AmazonMonitor(aiohttp.ClientSession):
             if self.issaver:
                 BadProxyCollector.save()
             
+            self.next_item()
 
     async def aio_get(self, url):
         text = None
