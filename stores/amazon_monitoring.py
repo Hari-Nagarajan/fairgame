@@ -20,8 +20,6 @@
 import json
 import os
 import platform
-from random import shuffle
-from itertools import cycle
 
 import time
 import typing
@@ -135,11 +133,11 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         ua_book = UserAgentBook()
 
         if self.proxies:
-            stagger_time = list(range(len(self.item_list)))
-            shuffle(stagger_time)
-            stagger_time = cycle(stagger_time)
-
             for idx in range(len(self.proxies)):
+                if idx <= len(self.item_list):
+                    stagger_time = 0
+                else:
+                    stagger_time = idx // len(self.item_list)
                 connector = ProxyConnector.from_url(self.proxies[idx])
                 self.sessions_list.append(
                     AmazonMonitor(
@@ -147,7 +145,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
                         amazon_config=self.amazon_config,
                         connector=connector,
                         delay=delay,
-                        init_sleep=next(stagger_time),
+                        init_sleep=stagger_time,
                         issaver=False,
                     )
                 )
