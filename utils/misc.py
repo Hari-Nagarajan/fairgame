@@ -21,6 +21,7 @@ import fileinput
 import os
 import json
 import aiohttp
+import asyncio
 from typing import Optional, List
 from itertools import cycle
 
@@ -165,13 +166,25 @@ class UserAgentBook:
 
 
 class ItemsHandler:
+    item_ids = {}
+
     @classmethod
     def create_items_pool(cls, item_list):
+        for item in item_list:
+            cls.item_ids.update({item.id: time.time()})
         cls.items = cycle(item_list)
 
     @classmethod
     def pop(cls):
-        return next(cls.items)
+        wait_time = 0
+        next_item = next(cls.items)
+        last_access = cls.item_ids[next_item.id]
+        difference = time.time() - last_access
+        if difference < 1:
+            wait_time = 1 - difference
+            log.debug(f"{next_item.id} last accessed at {last_access}. Sleeping for {round(wait_time, 2)} seconds.")
+        cls.item_ids.update({next_item.id: time.time()})
+        return (wait_time, next_item)
 
 
 class BadProxyCollector:

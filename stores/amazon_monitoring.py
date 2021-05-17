@@ -134,10 +134,6 @@ class AmazonMonitoringHandler(BaseStoreHandler):
 
         if self.proxies:
             for idx in range(len(self.proxies)):
-                if idx <= len(self.item_list):
-                    stagger_time = 0
-                else:
-                    stagger_time = idx // len(self.item_list)
                 connector = ProxyConnector.from_url(self.proxies[idx])
                 self.sessions_list.append(
                     AmazonMonitor(
@@ -145,7 +141,6 @@ class AmazonMonitoringHandler(BaseStoreHandler):
                         amazon_config=self.amazon_config,
                         connector=connector,
                         delay=delay,
-                        init_sleep=stagger_time,
                         issaver=False,
                     )
                 )
@@ -182,17 +177,15 @@ class AmazonMonitor(aiohttp.ClientSession):
         amazon_config: Dict,
         delay: float,
         issaver: bool,
-        init_sleep: int,
         *args,
         **kwargs,
     ):
         super(self.__class__, self).__init__(*args, **kwargs)
-        self.item = ItemsHandler.pop()
+        self.item = next(ItemsHandler.items)
         self.check_count = 1
         self.amazon_config = amazon_config
         self.domain = urlparse(self.item.furl.url).netloc
         self.issaver = issaver
-        self.init_sleep=init_sleep
 
         self.delay = delay
         if self.item.purchase_delay > 0:
@@ -207,7 +200,9 @@ class AmazonMonitor(aiohttp.ClientSession):
         self.delay = delay
 
     def next_item(self):
-        self.item = ItemsHandler.pop()
+        wait_time, item = ItemsHandler.pop()
+        self.item = item
+        return wait_time
 
     def fail_recreate(self):
         # Something wrong, start a new task then kill this one
@@ -215,7 +210,6 @@ class AmazonMonitor(aiohttp.ClientSession):
         session = AmazonMonitor(
             amazon_config=self.amazon_config,
             delay=self.delay,
-            init_sleep=0,
             connector=self.connector,
             headers=HEADERS,
             issaver=self.issaver,
@@ -228,9 +222,6 @@ class AmazonMonitor(aiohttp.ClientSession):
         # Do first response outside of while loop, so we can continue on captcha checks
         # and return to start of while loop with that response. Requires the next response
         # to be grabbed at end of while loop
-
-        # experiemntal: try to staggger sessions by sleeping
-        await asyncio.sleep(self.init_sleep)
 
         # log.debug(f"Monitoring Task Started for {self.item.id}")
         if self.issaver:
@@ -326,7 +317,8 @@ class AmazonMonitor(aiohttp.ClientSession):
                 return
 
             self.check_count += 1
-            self.next_item()
+            wait_time = self.next_item()
+            await asyncio.sleep(wait_time)
             if self.issaver:
                 BadProxyCollector.save()
 
