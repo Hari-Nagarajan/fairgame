@@ -221,6 +221,9 @@ class AmazonMonitor(aiohttp.ClientSession):
         # and return to start of while loop with that response. Requires the next response
         # to be grabbed at end of while loop
 
+        # experiemntal: try to staggger sessions by sleeping
+        time.sleep(1)
+
         # log.debug(f"Monitoring Task Started for {self.item.id}")
         if self.issaver:
             BadProxyCollector.load()
