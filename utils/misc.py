@@ -183,7 +183,6 @@ class ItemsHandler:
         last_access = cls.item_ids[item.id]
         difference = time.time() - last_access
         if difference < 1:
-            cls.item_ids.update({item.id: time.time()})
             return True
         cls.item_ids.update({item.id: time.time()})
         return False
