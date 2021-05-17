@@ -215,6 +215,7 @@ class AmazonMonitor(aiohttp.ClientSession):
         session = AmazonMonitor(
             amazon_config=self.amazon_config,
             delay=self.delay,
+            init_sleep=0,
             connector=self.connector,
             headers=HEADERS,
             issaver=self.issaver,
