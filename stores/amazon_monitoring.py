@@ -181,7 +181,7 @@ class AmazonMonitor(aiohttp.ClientSession):
         **kwargs,
     ):
         super(self.__class__, self).__init__(*args, **kwargs)
-        self.item = next(ItemsHandler.items)
+        self.item = ItemsHandler.pop()
         self.check_count = 1
         self.amazon_config = amazon_config
         self.domain = urlparse(self.item.furl.url).netloc
@@ -200,9 +200,7 @@ class AmazonMonitor(aiohttp.ClientSession):
         self.delay = delay
 
     def next_item(self):
-        wait_time, item = ItemsHandler.pop()
-        self.item = item
-        return wait_time
+        self.item = ItemsHandler.pop()
 
     def fail_recreate(self):
         # Something wrong, start a new task then kill this one
