@@ -130,6 +130,8 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         log.debug("Initializing Monitoring Sessions")
         self.sessions_list: Optional[List[AmazonMonitor]] = []
         
+        BadProxyCollector.load()
+
         ua_book = UserAgentBook()
 
         if self.proxies:
@@ -141,7 +143,6 @@ class AmazonMonitoringHandler(BaseStoreHandler):
                         amazon_config=self.amazon_config,
                         connector=connector,
                         delay=delay,
-                        issaver=False,
                     )
                 )
 
@@ -156,7 +157,6 @@ class AmazonMonitoringHandler(BaseStoreHandler):
                     self.sessions_list[idx].headers.update({"user-agent": ua_book.user_agents[proxy_url]})
 
             ua_book.save()
-            self.sessions_list[-1].issaver = True
         else:
             connector = None
             self.sessions_list.append(
@@ -165,7 +165,6 @@ class AmazonMonitoringHandler(BaseStoreHandler):
                     amazon_config=self.amazon_config,
                     connector=connector,
                     delay=delay,
-                    issaver=False,
                 )
             )
             self.sessions_list[0].headers.update({"user-agent": ua.random})
@@ -176,7 +175,6 @@ class AmazonMonitor(aiohttp.ClientSession):
         self,
         amazon_config: Dict,
         delay: float,
-        issaver: bool,
         *args,
         **kwargs,
     ):
@@ -185,7 +183,6 @@ class AmazonMonitor(aiohttp.ClientSession):
         self.check_count = 1
         self.amazon_config = amazon_config
         self.domain = urlparse(self.item.furl.url).netloc
-        self.issaver = issaver
 
         self.delay = delay
         if self.item.purchase_delay > 0:
@@ -210,7 +207,6 @@ class AmazonMonitor(aiohttp.ClientSession):
             delay=self.delay,
             connector=self.connector,
             headers=HEADERS,
-            issaver=self.issaver,
         )
         session.headers.update({"user-agent": UserAgent().random})
         log.debug("Sesssion Created")
@@ -222,9 +218,6 @@ class AmazonMonitor(aiohttp.ClientSession):
         # to be grabbed at end of while loop
 
         # log.debug(f"Monitoring Task Started for {self.item.id}")
-        if self.issaver:
-            BadProxyCollector.load()
-
         fail_counter = 0  # Count sequential get fails
         delay = self.delay
         end_time = time.time() + delay
@@ -317,8 +310,9 @@ class AmazonMonitor(aiohttp.ClientSession):
                 return
 
             self.check_count += 1
-            if self.issaver:
-                BadProxyCollector.save()
+
+            if BadProxyCollector.timer():
+                await queue.put(BadProxyCollector.save())
             
             self.next_item()
 
