@@ -141,6 +141,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
                         amazon_config=self.amazon_config,
                         connector=connector,
                         delay=delay,
+                        init_sleep=idx,
                         issaver=False,
                     )
                 )
@@ -186,6 +187,7 @@ class AmazonMonitor(aiohttp.ClientSession):
         self.amazon_config = amazon_config
         self.domain = urlparse(self.item.furl.url).netloc
         self.issaver = issaver
+        self.init_sleep=init_sleep
 
         self.delay = delay
         if self.item.purchase_delay > 0:
@@ -222,7 +224,7 @@ class AmazonMonitor(aiohttp.ClientSession):
         # to be grabbed at end of while loop
 
         # experiemntal: try to staggger sessions by sleeping
-        time.sleep(1)
+        await asyncio.sleep(self.init_sleep)
 
         # log.debug(f"Monitoring Task Started for {self.item.id}")
         if self.issaver:
