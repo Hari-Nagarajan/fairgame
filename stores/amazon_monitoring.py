@@ -178,6 +178,7 @@ class AmazonMonitor(aiohttp.ClientSession):
         amazon_config: Dict,
         delay: float,
         issaver: bool,
+        init_sleep: int,
         *args,
         **kwargs,
     ):
