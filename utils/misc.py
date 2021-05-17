@@ -210,8 +210,10 @@ class BadProxyCollector:
         try:
             url = str(connector.proxy_url)
 
-            if status == 503 and url not in cls.collection:
+            if status == 503:
                 cls.collection.update({url : {"banned" : True}})
+                if cls.collection[url]["unban_time"]:
+                    del cls.collection[url]["unban_time"]
             if status == 200 and url in cls.collection:
                 cls.collection[url]["banned"] = False
 
