@@ -179,7 +179,7 @@ class ItemsHandler:
         return next(cls.items)
 
     @classmethod
-    def check_wait(cls, item):
+    def check_last_access(cls, item):
         last_access = cls.item_ids[item.id]
         difference = time.time() - last_access
         if difference < 1:

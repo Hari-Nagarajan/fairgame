@@ -243,6 +243,10 @@ class AmazonMonitor(aiohttp.ClientSession):
 
         # Loop will only exit if a qualified seller is returned.
         while True:
+            self.next_item()
+            while ItemsHandler.check_last_access(self.item):
+                await asyncio.sleep(0.1)
+
             try:
                 log.debug(f"{self.item.id} : {self.connector.proxy_url} : Stock Check Count = {self.check_count}")
             except AttributeError:
@@ -298,7 +302,6 @@ class AmazonMonitor(aiohttp.ClientSession):
             status, response_text = await self.aio_get(url=self.item.furl.url)
             # save_html_response("stock-check", status, response_text)
             BadProxyCollector.record(status, self.connector)
-            # Session sleeps for 1 minute if it gets 503'd
             if status == 503:
                 try:
                     log.debug(f":: 503 :: {self.connector.proxy_url} :: Sleeping for 60 seconds.")
@@ -318,9 +321,6 @@ class AmazonMonitor(aiohttp.ClientSession):
             if self.issaver:
                 BadProxyCollector.save()
             
-            self.next_item()
-            while ItemsHandler.check_wait(self.item):
-                await asyncio.sleep(0.1)
 
     async def aio_get(self, url):
         text = None
