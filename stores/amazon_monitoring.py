@@ -303,11 +303,11 @@ class AmazonMonitor(aiohttp.ClientSession):
             BadProxyCollector.record(status, self.connector)
             if status == 503:
                 try:
-                    log.debug(f":: 503 :: {self.connector.proxy_url} :: Sleeping for 60 seconds.")
+                    log.debug(f":: 503 :: {self.connector.proxy_url} :: Sleeping for 5 minutes.")
                 except AttributeError: 
-                    log.debug(f":: 503 :: Sleeping for 60 seconds.")
+                    log.debug(f":: 503 :: Sleeping for 5 minutes.")
                 finally:
-                    await asyncio.sleep(60)
+                    await asyncio.sleep(300)
             
             # do this after each request
             fail_counter = check_fail(status=status, fail_counter=fail_counter)
