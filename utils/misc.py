@@ -176,15 +176,17 @@ class ItemsHandler:
 
     @classmethod
     def pop(cls):
-        wait_time = 0
-        next_item = next(cls.items)
-        last_access = cls.item_ids[next_item.id]
+        return next(cls.items)
+
+    @classmethod
+    def check_wait(cls, item):
+        last_access = cls.item_ids[item.id]
         difference = time.time() - last_access
         if difference < 1:
-            wait_time = 1 - difference
-            log.debug(f"{next_item.id} last accessed at {last_access}. Sleeping for {round(wait_time, 2)} seconds.")
-        cls.item_ids.update({next_item.id: time.time()})
-        return (wait_time, next_item)
+            cls.item_ids.update({item.id: time.time()})
+            return True
+        cls.item_ids.update({item.id: time.time()})
+        return False
 
 
 class BadProxyCollector:

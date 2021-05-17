@@ -317,10 +317,12 @@ class AmazonMonitor(aiohttp.ClientSession):
                 return
 
             self.check_count += 1
-            wait_time = self.next_item()
-            await asyncio.sleep(wait_time)
             if self.issaver:
                 BadProxyCollector.save()
+            
+            self.next_item()
+            while ItemsHandler.check_wait(self.item):
+                await asyncio.sleep(0.1)
 
     async def aio_get(self, url):
         text = None
