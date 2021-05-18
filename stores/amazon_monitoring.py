@@ -310,12 +310,12 @@ class AmazonMonitor(aiohttp.ClientSession):
                 if status == 503:
                     try:
                         log.debug(
-                            f":: 503 :: {self.connector.proxy_url} :: Sleeping for 5 minutes."
+                            f":: 503 :: {self.connector.proxy_url} :: Sleeping for 10 minutes."
                         )
                     except AttributeError:
-                        log.debug(f":: 503 :: Sleeping for 5 minutes.")
+                        log.debug(f":: 503 :: Sleeping for 10 minutes.")
                     finally:
-                        await asyncio.sleep(300)
+                        await asyncio.sleep(600)
             if BadProxyCollector.timer():
                 await queue.put(BadProxyCollector.save())
 

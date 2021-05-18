@@ -182,7 +182,7 @@ class ItemsHandler:
     def check_last_access(cls, item):
         last_access = cls.item_ids[item.id]
         difference = time.time() - last_access
-        if difference < 1:
+        if difference < 2:
             return True
         cls.item_ids.update({item.id: time.time()})
         return False
@@ -196,30 +196,34 @@ class BadProxyCollector:
             if os.path.exists(BAD_PROXIES_PATH):
                 try:
                     with open(BAD_PROXIES_PATH) as f:
-                        cls.collection = json.load(f)
-                        return None
+                        temp = json.load(f)
+                        cls.collection = {"bad_proxies": set()}
+                        for proxy in temp["bad_proxies"]:
+                            cls.collection["bad_proxies"].add(proxy)
+                        break
                 except:
                     log.debug(
                         f"{BAD_PROXIES_PATH} can't be decoded and will be deleted."
                     )
                     os.remove(BAD_PROXIES_PATH)
             else:
-                cls.collection = dict()
-                return None
+                cls.collection = {"bad_proxies": set()}
+                break
 
     @classmethod
     def record(cls, status, connector):
         url = str(connector.proxy_url)
         if status == 503:
-            cls.collection.update({url: {"last_checked": time.ctime()}})
-        if status == 200 and url in cls.collection:
-            del cls.collection[url]
+            cls.collection["bad_proxies"].add(url)
+        if status == 200 and url in cls.collection["bad_proxies"]:
+            cls.collection["bad_proxies"].discard(url)
 
     @classmethod
     def save(cls):
         if cls.timer() and cls.collection:
             with open(BAD_PROXIES_PATH, "w") as f:
-                json.dump(cls.collection, f, indent=4, sort_keys=True)
+                temp = {"bad_proxies": list(cls.collection["bad_proxies"])}
+                json.dump(temp, f, indent=4)
             cls.last_save = time.time()
 
     @classmethod
