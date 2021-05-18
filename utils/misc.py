@@ -21,10 +21,8 @@ import fileinput
 import os
 import json
 import aiohttp
-import asyncio
 from typing import Optional, List
 from itertools import cycle
-from json import JSONDecodeError
 
 import time
 from datetime import datetime
@@ -213,6 +211,6 @@ class BadProxyCollector:
 
     @classmethod
     def timer(cls):
-        if time.time() - cls.last_save >= 30:
+        if time.time() - cls.last_save >= 300:
             return True
         return False
