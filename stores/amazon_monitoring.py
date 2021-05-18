@@ -237,7 +237,7 @@ class AmazonMonitor(aiohttp.ClientSession):
         # Loop will only exit if a qualified seller is returned.
         while True:
             while ItemsHandler.check_last_access(self.item):
-                await asyncio.sleep(0.5)
+                await asyncio.sleep(0.1)
 
             try:
                 log.debug(
