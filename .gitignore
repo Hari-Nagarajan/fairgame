@@ -22,3 +22,4 @@ screenshots/*.png
 logs/*.log*
 tags
 .venv*
+.lnk
