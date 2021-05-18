@@ -75,7 +75,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         log.info(message)
         self.notification_handler.send_notification(message)
 
-    async def run_async(self, checkout_tasks=1):
+    async def run_async(self):
         log.debug("Creating checkout queue")
         global queue
         queue = asyncio.Queue()
@@ -99,7 +99,6 @@ class AmazonStoreHandler(BaseStoreHandler):
             notification_handler=self.notification_handler,
             item_list=self.item_list,
             amazon_config=amazon_config,
-            tasks=checkout_tasks,
             delay=self.delay,
         )
         log.debug("Creating checkout worker and monitoring task(s)")

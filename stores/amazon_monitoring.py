@@ -224,7 +224,7 @@ class AmazonMonitor(aiohttp.ClientSession):
         delay = self.delay
         end_time = time.time() + delay
         status, response_text = await self.aio_get(url=self.item.furl.url)
-        save_html_response("stock-check", status, response_text)
+        # save_html_response("stock-check", status, response_text)
 
         # do this after each request
         fail_counter = check_fail(status=status, fail_counter=fail_counter)
