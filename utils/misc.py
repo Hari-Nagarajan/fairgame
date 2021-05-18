@@ -207,26 +207,11 @@ class BadProxyCollector:
 
     @classmethod
     def record(cls, status, connector):
-        try:
-            url = str(connector.proxy_url)
-
-            if status == 503:
-                cls.collection.update({url : {"banned" : True}})
-                try:
-                    del cls.collection[url]["unban_time"]
-                except KeyError:
-                    pass
-            if status == 200 and url in cls.collection:
-                cls.collection[url]["banned"] = False
-
-                try:
-                    unbanned_time = cls.collection[url]["unban_time"]
-                    if time.time() - unbanned_time >= 300:
-                        del cls.collection[url]
-                except KeyError:
-                    cls.collection[url].update({"unban_time" : time.time()})
-        except AttributeError:
-            pass
+        url = str(connector.proxy_url)
+        if status == 503:
+            cls.collection.update({url : {"last_checked" : time.ctime()}})
+        if status == 200 and url in cls.collection:
+            del cls.collection[url]
 
     @classmethod
     def save(cls):
