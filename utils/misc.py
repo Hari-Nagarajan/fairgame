@@ -24,6 +24,7 @@ import aiohttp
 import asyncio
 from typing import Optional, List
 from itertools import cycle
+from json import JSONDecodeError
 
 import time
 from datetime import datetime
@@ -190,44 +191,28 @@ class ItemsHandler:
 
 class BadProxyCollector:
     @classmethod
-    def load(cls):
+    def start(cls):
         cls.last_save = time.time()
-        while True:
-            if os.path.exists(BAD_PROXIES_PATH):
-                try:
-                    with open(BAD_PROXIES_PATH) as f:
-                        temp = json.load(f)
-                        cls.collection = {"bad_proxies": set()}
-                        for proxy in temp["bad_proxies"]:
-                            cls.collection["bad_proxies"].add(proxy)
-                        break
-                except:
-                    log.debug(
-                        f"{BAD_PROXIES_PATH} can't be decoded and will be deleted."
-                    )
-                    os.remove(BAD_PROXIES_PATH)
-            else:
-                cls.collection = {"bad_proxies": set()}
-                break
+        cls.collection = set()
 
     @classmethod
     def record(cls, status, connector):
         url = str(connector.proxy_url)
         if status == 503:
-            cls.collection["bad_proxies"].add(url)
-        if status == 200 and url in cls.collection["bad_proxies"]:
-            cls.collection["bad_proxies"].discard(url)
+            cls.collection.add(url)
+        if status == 200 and url in cls.collection:
+            cls.collection.discard(url)
 
     @classmethod
     def save(cls):
         if cls.timer() and cls.collection:
             with open(BAD_PROXIES_PATH, "w") as f:
-                temp = {"bad_proxies": list(cls.collection["bad_proxies"])}
+                temp = list(cls.collection)
                 json.dump(temp, f, indent=4)
             cls.last_save = time.time()
 
     @classmethod
     def timer(cls):
-        if time.time() - cls.last_save >= 60:
+        if time.time() - cls.last_save >= 30:
             return True
         return False

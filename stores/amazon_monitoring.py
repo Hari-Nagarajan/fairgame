@@ -132,7 +132,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         self.sessions_list: Optional[List[AmazonMonitor]] = []
 
         if self.proxies:
-            BadProxyCollector.load()
+            BadProxyCollector.start()
             ua_book = UserAgentBook()
             for idx in range(len(self.proxies)):
                 connector = ProxyConnector.from_url(self.proxies[idx])
@@ -153,8 +153,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
                         {"user-agent": ua_book.user_agents[proxy_url]}
                     )
                 except KeyError:
-                    random_ua = ua.random
-                    ua_book.user_agents.update({proxy_url: random_ua})
+                    ua_book.user_agents.update({proxy_url: ua.random})
                     self.sessions_list[idx].headers.update(
                         {"user-agent": ua_book.user_agents[proxy_url]}
                     )
@@ -308,15 +307,15 @@ class AmazonMonitor(aiohttp.ClientSession):
 
             if self.connector:
                 BadProxyCollector.record(status, self.connector)
-                if status == 503:
-                    try:
-                        log.debug(
-                            f":: 503 :: {self.connector.proxy_url} :: Sleeping for 10 minutes."
-                        )
-                    except AttributeError:
-                        log.debug(f":: 503 :: Sleeping for 10 minutes.")
-                    finally:
-                        await asyncio.sleep(600)
+            if status == 503:
+                try:
+                    log.debug(
+                        f":: 503 :: {self.connector.proxy_url} :: Sleeping for 10 minutes."
+                    )
+                except AttributeError:
+                    log.debug(f":: 503 :: Sleeping for 10 minutes.")
+                finally:
+                    await asyncio.sleep(600)
             if BadProxyCollector.timer():
                 await queue.put(BadProxyCollector.save())
 
