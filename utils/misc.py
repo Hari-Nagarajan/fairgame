@@ -161,7 +161,7 @@ class UserAgentBook:
                 self.user_agents = json.load(f)
 
     def save(self):
-        with open(self.fp, 'w') as f:
+        with open(self.fp, "w") as f:
             json.dump(self.user_agents, f, indent=4)
 
 
@@ -199,7 +199,9 @@ class BadProxyCollector:
                         cls.collection = json.load(f)
                         return None
                 except:
-                    log.debug(f"{BAD_PROXIES_PATH} can't be decoded and will be deleted.")
+                    log.debug(
+                        f"{BAD_PROXIES_PATH} can't be decoded and will be deleted."
+                    )
                     os.remove(BAD_PROXIES_PATH)
             else:
                 cls.collection = dict()
@@ -209,7 +211,7 @@ class BadProxyCollector:
     def record(cls, status, connector):
         url = str(connector.proxy_url)
         if status == 503:
-            cls.collection.update({url : {"last_checked" : time.ctime()}})
+            cls.collection.update({url: {"last_checked": time.ctime()}})
         if status == 200 and url in cls.collection:
             del cls.collection[url]
 
@@ -225,5 +227,3 @@ class BadProxyCollector:
         if time.time() - cls.last_save >= 60:
             return True
         return False
-    
-                

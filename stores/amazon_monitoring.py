@@ -109,8 +109,8 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         item_list: List[FGItem],
         delay: float,
         amazon_config,
-        tasks=1,
-        checkshipping=False,) -> None:
+        checkshipping=False,
+    ) -> None:
         log.debug("Initializing AmazonMonitoringHandler")
         super().__init__()
 
@@ -129,7 +129,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         # Initialize the Session we'll use for stock checking
         log.debug("Initializing Monitoring Sessions")
         self.sessions_list: Optional[List[AmazonMonitor]] = []
-        
+
         BadProxyCollector.load()
 
         ua_book = UserAgentBook()
@@ -150,11 +150,15 @@ class AmazonMonitoringHandler(BaseStoreHandler):
                 proxy_url = str(session.connector.proxy_url)
 
                 try:
-                    session.headers.update({"user-agent" : ua_book.user_agents[proxy_url]})
-                except KeyError: 
+                    session.headers.update(
+                        {"user-agent": ua_book.user_agents[proxy_url]}
+                    )
+                except KeyError:
                     random_ua = ua.random
-                    ua_book.user_agents.update({proxy_url : random_ua})
-                    self.sessions_list[idx].headers.update({"user-agent": ua_book.user_agents[proxy_url]})
+                    ua_book.user_agents.update({proxy_url: random_ua})
+                    self.sessions_list[idx].headers.update(
+                        {"user-agent": ua_book.user_agents[proxy_url]}
+                    )
 
             ua_book.save()
         else:
@@ -233,14 +237,15 @@ class AmazonMonitor(aiohttp.ClientSession):
             future.set_result(session)
             return
 
-
         # Loop will only exit if a qualified seller is returned.
         while True:
             while ItemsHandler.check_last_access(self.item):
                 await asyncio.sleep(0.1)
 
             try:
-                log.debug(f"{self.item.id} : {self.connector.proxy_url} : Stock Check Count = {self.check_count}")
+                log.debug(
+                    f"{self.item.id} : {self.connector.proxy_url} : Stock Check Count = {self.check_count}"
+                )
             except AttributeError:
                 log.debug(f"{self.item.id} : Stock Check Count = {self.check_count}")
             tree = check_response(response_text)
@@ -296,12 +301,14 @@ class AmazonMonitor(aiohttp.ClientSession):
             BadProxyCollector.record(status, self.connector)
             if status == 503:
                 try:
-                    log.debug(f":: 503 :: {self.connector.proxy_url} :: Sleeping for 5 minutes.")
-                except AttributeError: 
+                    log.debug(
+                        f":: 503 :: {self.connector.proxy_url} :: Sleeping for 5 minutes."
+                    )
+                except AttributeError:
                     log.debug(f":: 503 :: Sleeping for 5 minutes.")
                 finally:
                     await asyncio.sleep(300)
-            
+
             # do this after each request
             fail_counter = check_fail(status=status, fail_counter=fail_counter)
             if fail_counter == -1:
@@ -311,10 +318,10 @@ class AmazonMonitor(aiohttp.ClientSession):
 
             self.check_count += 1
 
+            self.next_item()
+
             if BadProxyCollector.timer():
                 await queue.put(BadProxyCollector.save())
-            
-            self.next_item()
 
     async def aio_get(self, url):
         text = None
@@ -545,7 +552,6 @@ def get_proxies(path=PROXY_FILE_PATH):
 
     return proxies
 
-
     # def verify(self):
     #     log.debug("Verifying item list...")
     #     items_to_purge = []
@@ -694,4 +700,3 @@ def get_proxies(path=PROXY_FILE_PATH):
 # AMAZON_DOMAIN = "www.amazon.co.uk"
 # AMAZON_DOMAIN = "www.amazon.com"
 # AMAZON_DOMAIN = "www.amazon.se"
-
