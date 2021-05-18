@@ -31,6 +31,7 @@ import asyncio
 from typing import Optional, List
 
 import click
+import uvloop
 
 from common.globalconfig import AMAZON_CREDENTIAL_FILE, GlobalConfig
 from notifications.notifications import NotificationHandler, TIME_FORMAT
@@ -106,6 +107,7 @@ def main():
 )
 @notify_on_crash
 def amazon_aio(p, delay):
+    uvloop.install()
     log.debug("Creating AIO Amazon Store Handler")
     aio_amazon_obj = AIO_AmazonStoreHandler(
         notification_handler=notification_handler, encryption_pass=p, delay=delay

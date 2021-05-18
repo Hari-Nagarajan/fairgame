@@ -65,6 +65,7 @@ import asyncio
 import aiohttp
 from aiohttp_proxy import ProxyConnector, ProxyType
 
+
 if platform.system() == "Windows":
     policy = asyncio.WindowsSelectorEventLoopPolicy()
     asyncio.set_event_loop_policy(policy)
