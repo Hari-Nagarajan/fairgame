@@ -130,11 +130,9 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         log.debug("Initializing Monitoring Sessions")
         self.sessions_list: Optional[List[AmazonMonitor]] = []
 
-        BadProxyCollector.load()
-
-        ua_book = UserAgentBook()
-
         if self.proxies:
+            BadProxyCollector.load()
+            ua_book = UserAgentBook()
             for idx in range(len(self.proxies)):
                 connector = ProxyConnector.from_url(self.proxies[idx])
                 self.sessions_list.append(
@@ -226,9 +224,7 @@ class AmazonMonitor(aiohttp.ClientSession):
         delay = self.delay
         end_time = time.time() + delay
         status, response_text = await self.aio_get(url=self.item.furl.url)
-
-        # save_html_response("stock-check", status, response_text)
-        BadProxyCollector.record(status, self.connector)
+        save_html_response("stock-check", status, response_text)
 
         # do this after each request
         fail_counter = check_fail(status=status, fail_counter=fail_counter)
@@ -298,16 +294,6 @@ class AmazonMonitor(aiohttp.ClientSession):
             end_time = time.time() + delay
             status, response_text = await self.aio_get(url=self.item.furl.url)
             # save_html_response("stock-check", status, response_text)
-            BadProxyCollector.record(status, self.connector)
-            if status == 503:
-                try:
-                    log.debug(
-                        f":: 503 :: {self.connector.proxy_url} :: Sleeping for 5 minutes."
-                    )
-                except AttributeError:
-                    log.debug(f":: 503 :: Sleeping for 5 minutes.")
-                finally:
-                    await asyncio.sleep(300)
 
             # do this after each request
             fail_counter = check_fail(status=status, fail_counter=fail_counter)
@@ -317,9 +303,19 @@ class AmazonMonitor(aiohttp.ClientSession):
                 return
 
             self.check_count += 1
-
             self.next_item()
 
+            if self.connector:
+                BadProxyCollector.record(status, self.connector)
+                if status == 503:
+                    try:
+                        log.debug(
+                            f":: 503 :: {self.connector.proxy_url} :: Sleeping for 5 minutes."
+                        )
+                    except AttributeError:
+                        log.debug(f":: 503 :: Sleeping for 5 minutes.")
+                    finally:
+                        await asyncio.sleep(300)
             if BadProxyCollector.timer():
                 await queue.put(BadProxyCollector.save())
 
