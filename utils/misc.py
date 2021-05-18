@@ -165,10 +165,9 @@ class UserAgentBook:
 
 
 class ItemsHandler:
-    item_ids = {}
-
     @classmethod
     def create_items_pool(cls, item_list):
+        cls.item_ids = {}
         for item in item_list:
             cls.item_ids.update({item.id: time.time()})
         cls.items = cycle(item_list)
