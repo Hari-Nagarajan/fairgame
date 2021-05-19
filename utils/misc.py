@@ -202,7 +202,7 @@ class BadProxyCollector:
 
     @classmethod
     def save(cls):
-        if cls.timer() and cls.collection:
+        if cls.collection:
             with open(BAD_PROXIES_PATH, "w") as f:
                 temp = list(cls.collection)
                 json.dump(temp, f, indent=4)
