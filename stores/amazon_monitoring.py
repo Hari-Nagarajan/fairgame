@@ -20,6 +20,7 @@
 import json
 import os
 import platform
+import concurrent.futures
 
 import time
 import typing
@@ -229,7 +230,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                     token = True
         await asyncio.sleep(2)
         status, response_text = await self.aio_get(self.atc_json_url())
-        if await len(response_text.strip()) > 300:
+        if len(response_text.strip()) > 300:
             save_html_response("stock-check", status, response_text)
             log.debug("Failed to Validate Session.")
             session = self.fail_recreate()
@@ -248,7 +249,7 @@ class AmazonMonitor(aiohttp.ClientSession):
         status, response_text = await self.aio_get(url=self.item.furl.url)
 
         _, json_str = await self.aio_get(self.atc_json_url())
-        json_dict = json.loads(await json_str.strip())
+        json_dict = json.loads(json_str.strip())
 
         # do this after each request
         fail_counter = check_fail(status=status, fail_counter=fail_counter)
