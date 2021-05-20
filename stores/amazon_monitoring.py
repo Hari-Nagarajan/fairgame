@@ -307,7 +307,7 @@ class AmazonMonitor(aiohttp.ClientSession):
             self.next_item()
 
             if self.connector:
-                BadProxyCollector.record(status, self.connector)
+                bpc.record(status, self.connector)
             if status == 503:
                 try:
                     log.debug(
@@ -317,8 +317,8 @@ class AmazonMonitor(aiohttp.ClientSession):
                     log.debug(f":: 503 :: Sleeping for 10 minutes.")
                 finally:
                     await asyncio.sleep(600)
-            if BadProxyCollector.timer():
-                await queue.put(BadProxyCollector.save())
+            if bpc.timer():
+                await queue.put(bpc.save())
 
     async def aio_get(self, url):
         text = None
