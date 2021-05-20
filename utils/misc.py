@@ -21,6 +21,7 @@ from typing import Optional, List
 import time
 import os.path
 import json
+import asyncio.sleep
 from datetime import datetime
 from itertools import cycle
 
@@ -41,6 +42,7 @@ from utils.logger import log
 
 
 DEFAULT_MAX_TIMEOUT = 5
+BAD_PROXIES_PATH = "config/bad_proxies.json"
 
 
 def create_webdriver_wait(driver, wait_time=10):
@@ -169,13 +171,13 @@ class ItemsHandler:
         return next(cls.items)
 
     @classmethod
-    def check_last_access(cls, item):
-        last_access = cls.item_ids[item.id]
+    async def check_last_access(cls, item, delay):
+        last_access = cls.item_ids[item]
         difference = time.time() - last_access
-        if difference < 1:
-            return True
-        cls.item_ids.update({item.id: time.time()})
-        return False
+        if difference < delay:
+            await asyncio.sleep(delay - difference)
+        else:
+            cls.item_ids.update({item: time.time()})
 
 
 class BadProxyCollector:
@@ -194,6 +196,7 @@ class BadProxyCollector:
 
     @classmethod
     def save(cls):
+        log.debug("Saving bad_proxies.json to disk.")
         if cls.collection:
             with open(BAD_PROXIES_PATH, "w") as f:
                 temp = list(cls.collection)
