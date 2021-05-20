@@ -248,11 +248,11 @@ class AmazonMonitor(aiohttp.ClientSession):
             stagger_time = delay / good_proxies
             log.debug(f"PROXIES :: GOOD={good_proxies} :: BAD={bpc.bad_proxies} :: Current stagger delay is {round(stagger_time, 2)}s")
             diff = time.time() - self.get_last_task()
+            self.set_last_task()
             if diff < stagger_time:
                 rest_time = stagger_time - diff
                 log.debug(f"Resting for {round((rest_time * 1000), 2)}ms")
                 await asyncio.sleep(rest_time)
-            self.set_last_task()
 
             try:
                 log.debug(
