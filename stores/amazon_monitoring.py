@@ -260,15 +260,8 @@ class AmazonMonitor(aiohttp.ClientSession):
 
         # Loop will only exit if a qualified seller is returned.
         while True:
-            if bpc.total_proxies:
-                bad_proxies = bpc.bad_proxies
-                good_proxies = bpc.total_proxies - bad_proxies
-                task_delay = delay / good_proxies
-                log.debug(f"PROXIES :: GOOD={good_proxies} :: BAD={bad_proxies} :: Current task delay is {round(task_delay, 2)}s")
-                ItemsHandler.check_last_access(self.item.id, task_delay)
-
             _, json_str = await self.aio_get(self.atc_json_url())
-            json_dict = json.loads(await json_str.strip())
+            json_dict = json.loads(json_str.strip())
             json_keys = json_dict.keys()
 
             try:
@@ -351,6 +344,19 @@ class AmazonMonitor(aiohttp.ClientSession):
                     await asyncio.sleep(600)
             if bpc.timer():
                 await queue.put(bpc.save())
+
+            bad_proxies = bpc.bad_proxies
+            good_proxies = bpc.total_proxies - bad_proxies
+            if (
+                bpc.total_proxies
+                and good_proxies > ItemsHandler.length()
+            ):
+                task_delay = delay / (good_proxies / ItemsHandler.length())
+                log.debug(
+                    f"PROXIES :: GOOD={good_proxies} :: BAD={bad_proxies} :: Current task delay is {round(task_delay, 2)}s"
+                )
+                ItemsHandler.check_last_access(self.item.id, task_delay)
+
 
     async def aio_get(self, url):
         text = None

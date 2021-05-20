@@ -173,11 +173,14 @@ class ItemsHandler:
     @classmethod
     async def check_last_access(cls, item, delay):
         last_access = cls.item_ids[item]
+        cls.item_ids.update({item: time.time()})
         difference = time.time() - last_access
         if difference < delay:
             await asyncio.sleep(delay - difference)
-        else:
-            cls.item_ids.update({item: time.time()})
+
+    @classmethod
+    def length(cls):
+        return len(cls.item_ids)
 
 
 class BadProxyCollector:
