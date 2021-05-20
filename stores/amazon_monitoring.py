@@ -213,9 +213,8 @@ class AmazonMonitor(aiohttp.ClientSession):
         return cls.last_task
 
     @classmethod
-    def switch_group_timer(cls, delay=60):
+    def switch_group_timer(cls, delay=300):
         if time.time() - cls.group_switch_time >= delay:
-            cls.group_switch_time = time.time()
             return True
         return False
     
@@ -227,6 +226,7 @@ class AmazonMonitor(aiohttp.ClientSession):
         log.debug(f"Switching to proxy group {cls.current_group}")
         cls.current_group_proxies.clear()
         bpc.collection.clear()
+        cls.group_switch_time = time.time()
 
     @classmethod
     def get_group_total(cls):
@@ -286,7 +286,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                 self.current_group_proxies.add(self.connector.proxy_url)
                 time.sleep(delay / self.get_group_total())
             elif self.group_num is not self.get_current_group():
-                await asyncio.sleep(60)
+                await asyncio.sleep(delay)
                 continue
             good_proxies = self.get_group_total() - bpc.bad_proxies
             log.debug(f"PROXIES :: GROUP[{self.current_group}] :: GOOD={good_proxies} :: BAD={bpc.bad_proxies}")
