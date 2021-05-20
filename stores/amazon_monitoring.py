@@ -288,7 +288,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                 self.current_group_proxies.add(self.connector.proxy_url)
                 time.sleep(delay / self.get_group_total())
             elif self.group_num is not self.get_current_group():
-                await asyncio.sleep(delay)
+                await asyncio.sleep(600)
                 continue
             good_proxies = self.get_group_total() - bpc.bad_proxies
             log.debug(f"PROXIES :: GROUP[{self.current_group}] :: GOOD={good_proxies} :: BAD={bpc.bad_proxies}")
