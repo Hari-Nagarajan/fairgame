@@ -81,6 +81,8 @@ AMAZON_URLS = {
     "PYO_POST": "https://{domain}/gp/buy/spc/handlers/static-submit-decoupled.html/ref=ox_spc_place_order?",
 }
 
+COOKIE_HARVEST_URL = "https://www.amazon.com/gp/overlay/display.html"
+
 PDP_PATH = "/dp/"
 REALTIME_INVENTORY_PATH = "gp/aod/ajax?asin="
 
@@ -144,10 +146,8 @@ class AmazonMonitoringHandler(BaseStoreHandler):
                         delay=delay,
                     )
                 )
-
                 session = self.sessions_list[idx]
                 proxy_url = str(session.connector.proxy_url)
-
                 try:
                     session.headers.update(
                         {"user-agent": ua_book.user_agents[proxy_url]}
@@ -157,7 +157,6 @@ class AmazonMonitoringHandler(BaseStoreHandler):
                     self.sessions_list[idx].headers.update(
                         {"user-agent": ua_book.user_agents[proxy_url]}
                     )
-
             ua_book.save()
         else:
             connector = None
@@ -185,12 +184,14 @@ class AmazonMonitor(aiohttp.ClientSession):
         self.check_count = 1
         self.amazon_config = amazon_config
         self.domain = urlparse(self.item.furl.url).netloc
+        self.session_id = None
 
         self.delay = delay
         if self.item.purchase_delay > 0:
             self.delay = 20
         self.block_purchase_until = time.time() + self.item.purchase_delay
         log.debug("Initializing Monitoring Task")
+        self.validate_session()
 
     def assign_config(self, azn_config):
         self.amazon_config = azn_config
@@ -201,9 +202,13 @@ class AmazonMonitor(aiohttp.ClientSession):
     def next_item(self):
         self.item = ItemsHandler.pop()
 
+    def construct_json_url(self):
+        url = f"https://smile.amazon.com/gp/add-to-cart/json?session-id={self.session_id}&clientName=retailwebsite&nextPage=cartitems&ASIN={self.item.id}Q&offerListingID=7On6yp6oyBHAQdiIZ%2FoOaBwX2XF%2FFgAqRcGzZhDed%2BI11UVFqdR9aYULMUDvfF%2FASutY2lKvuFB91NY7RDQH2jRP6bLHRLKpBpxEEWc7xXFw%2FSV40W5Z9w3m1tq1GgsO%2FiQmjLLKNY%2B1FIwRiH57iw%3D%3D&quantity=1"
+        return url
+
     def fail_recreate(self):
         # Something wrong, start a new task then kill this one
-        log.debug("Max consecutive request fails reached. Restarting session")
+        log.debug("Recreating Session")
         session = AmazonMonitor(
             amazon_config=self.amazon_config,
             delay=self.delay,
@@ -214,6 +219,23 @@ class AmazonMonitor(aiohttp.ClientSession):
         log.debug("Sesssion Created")
         return session
 
+    async def validate_session(self, future: asyncio.Future):
+        token = False
+        while not token:
+            await self.get(COOKIE_HARVEST_URL)
+            for cookie in self.cookie_jar:
+                if cookie.key == "session-id":
+                    self.session_id = cookie.value
+                if cookie.key == "session-token":
+                    token = True
+        await asyncio.sleep(2)
+        status, response_text = await self.aio_get(self.construct_json_url())
+        if await len(response_text.strip()) > 300:
+            save_html_response("stock-check", status, response_text)
+            log.debug("Failed to Validate Session.")
+            session = self.fail_recreate()
+            future.set_result(session)
+
     async def stock_check(self, queue: asyncio.Queue, future: asyncio.Future):
         # Do first response outside of while loop, so we can continue on captcha checks
         # and return to start of while loop with that response. Requires the next response
@@ -223,8 +245,11 @@ class AmazonMonitor(aiohttp.ClientSession):
         fail_counter = 0  # Count sequential get fails
         delay = self.delay
         end_time = time.time() + delay
+
         status, response_text = await self.aio_get(url=self.item.furl.url)
-        # save_html_response("stock-check", status, response_text)
+
+        _, json_str = await self.aio_get(self.construct_json_url())
+        json_dict = json.loads(await json_str.strip())
 
         # do this after each request
         fail_counter = check_fail(status=status, fail_counter=fail_counter)
@@ -238,12 +263,17 @@ class AmazonMonitor(aiohttp.ClientSession):
             while ItemsHandler.check_last_access(self.item):
                 await asyncio.sleep(0.1)
 
+            _, json_str = await self.aio_get(self.construct_json_url())
+            json_dict = json.loads(await json_str.strip())
+            json_keys = json_dict.keys()
+
             try:
                 log.debug(
                     f"{self.item.id} : {self.connector.proxy_url} : Stock Check Count = {self.check_count}"
                 )
             except AttributeError:
                 log.debug(f"{self.item.id} : Stock Check Count = {self.check_count}")
+
             tree = check_response(response_text)
             if tree is not None:
                 if captcha_element := has_captcha(tree):
@@ -266,13 +296,12 @@ class AmazonMonitor(aiohttp.ClientSession):
                     await wait_timer(end_time)
                     end_time = time.time() + delay
                     continue
-                if tree is not None and (
-                    sellers := get_item_sellers(
+                if "statusList" not in json_keys:
+                    sellers = get_item_sellers(
                         tree,
                         item=self.item,
                         free_shipping_strings=self.amazon_config["FREE_SHIPPING"],
                     )
-                ):
                     qualified_seller = get_qualified_seller(
                         item=self.item, sellers=sellers
                     )
@@ -353,8 +382,8 @@ class AmazonMonitor(aiohttp.ClientSession):
                 f = furl(domain)  # Use the original URL to get the schema and host
                 f = f.set(path=captcha_element.attrib["action"])
                 f.add(args=input_dict)
-                status, response = await self.aio_get(f.url)
-                return status, response
+                status, response_text = await self.aio_get(url=f.url)
+                return status, response_text
         return None
 
 
