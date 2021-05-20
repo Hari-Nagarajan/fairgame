@@ -185,6 +185,7 @@ class BadProxyCollector:
     def start(cls, proxies):
         cls.last_save = time.time()
         cls.collection = set()
+        cls.bad_proxies = 0
         cls.total_proxies = len(proxies)
 
     @classmethod
