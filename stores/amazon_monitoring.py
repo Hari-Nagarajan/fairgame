@@ -278,7 +278,7 @@ class AmazonMonitor(aiohttp.ClientSession):
         while True:
             self.switch_proxy_group()
             if self.group_num is not self.get_current_group():
-                await asyncio.sleep(600)
+                await asyncio.sleep(delay)
                 continue
             if self.connector.proxy_url not in self.current_group_proxies:
                 self.current_group_proxies.add(self.connector.proxy_url)
