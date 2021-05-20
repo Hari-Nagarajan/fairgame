@@ -172,13 +172,7 @@ class ItemsHandler:
         return next(cls.items)
 
     @classmethod
-    async def check_last_access(cls, item, delay):
-        last_access = cls.item_ids[item]
-        difference = time.time() - last_access
-        if difference < delay:
-            await asyncio.sleep(delay - difference)
-        else:
-            cls.item_ids.update({item: time.time()})
+    async def task_timer(cls, item, delay):
 
     @classmethod
     def length(cls):
