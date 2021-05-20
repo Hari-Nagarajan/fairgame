@@ -181,7 +181,7 @@ class AmazonMonitor(aiohttp.ClientSession):
     last_task = time.time()
     total_groups = 0
     current_group = 1 
-    current_group_ua = set()
+    current_group_proxies = set()
 
     def __init__(
         self,
@@ -213,18 +213,18 @@ class AmazonMonitor(aiohttp.ClientSession):
     
     @classmethod
     def switch_proxy_group(cls):
-        if time.time() - cls.start_time >= 900:
+        if time.time() - cls.start_time >= 600:
             cls.current_group+=1
             if cls.current_group > cls.total_groups:
                 cls.current_group = 1
             log.debug(f"Switching to proxy group {cls.current_group}")
             cls.start_time = time.time()
-            cls.current_group_ua.clear()
+            cls.current_group_proxies.clear()
             bpc.collection.clear()
 
     @classmethod
     def get_group_total(cls):
-        return len(cls.current_group_ua)
+        return len(cls.current_group_proxies)
 
     @classmethod
     def get_current_group(cls):
@@ -275,10 +275,10 @@ class AmazonMonitor(aiohttp.ClientSession):
         # Loop will only exit if a qualified seller is returned.
         while True:
             self.switch_proxy_group()
-            if self.group_num > 0:
-                if self.group_num is not self.get_current_group():
-                    await asyncio.sleep(300)
-            self.current_group_ua.add(self.connector.proxy_url)
+            if self.group_num is not self.get_current_group():
+                await asyncio.sleep(600)
+                continue
+            self.current_group_proxies.add(self.connector.proxy_url)
             good_proxies = self.get_group_total() - bpc.bad_proxies
             stagger_time = delay / good_proxies
             log.debug(f"PROXIES :: GROUP[{self.current_group}] :: GOOD={good_proxies} :: BAD={bpc.bad_proxies} :: Current stagger delay is {round(stagger_time, 2)}s")
@@ -287,7 +287,7 @@ class AmazonMonitor(aiohttp.ClientSession):
             if diff < stagger_time:
                 rest_time = stagger_time - diff
                 log.debug(f"Resting for {round((rest_time * 1000), 2)}ms")
-                await asyncio.sleep(rest_time)
+                time.sleep(rest_time)
 
             try:
                 log.debug(
