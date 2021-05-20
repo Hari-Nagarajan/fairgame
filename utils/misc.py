@@ -182,9 +182,10 @@ class ItemsHandler:
 
 class BadProxyCollector:
     @classmethod
-    def start(cls):
+    def start(cls, proxies):
         cls.last_save = time.time()
         cls.collection = set()
+        cls.total_proxies = len(proxies)
 
     @classmethod
     def record(cls, status, connector):
@@ -193,6 +194,7 @@ class BadProxyCollector:
             cls.collection.add(url)
         if status == 200 and url in cls.collection:
             cls.collection.discard(url)
+        cls.bad_proxies = len(cls.collection)
 
     @classmethod
     def save(cls):

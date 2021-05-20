@@ -41,7 +41,7 @@ from utils.misc import (
     get_timestamp_filename,
     save_html_response,
     check_response,
-    BadProxyCollector,
+    BadProxyCollector as bpc,
     ItemsHandler,
     UserAgentBook,
 )
@@ -130,12 +130,10 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         # Initialize the Session we'll use for stock checking
         log.debug("Initializing Monitoring Sessions")
         self.sessions_list: Optional[List[AmazonMonitor]] = []
-        task_delay = None
 
         if self.proxies:
-            BadProxyCollector.start()
+            bpc.start(self.proxies)
             ua_book = UserAgentBook()
-            task_delay = delay / len(self.proxies)
             for idx in range(len(self.proxies)):
                 connector = ProxyConnector.from_url(self.proxies[idx])
                 self.sessions_list.append(
@@ -144,7 +142,6 @@ class AmazonMonitoringHandler(BaseStoreHandler):
                         amazon_config=self.amazon_config,
                         connector=connector,
                         delay=delay,
-                        task_delay=task_delay,
                     )
                 )
 
@@ -170,7 +167,6 @@ class AmazonMonitoringHandler(BaseStoreHandler):
                     amazon_config=self.amazon_config,
                     connector=connector,
                     delay=delay,
-                    task_delay=task_delay,
                 )
             )
             self.sessions_list[0].headers.update({"user-agent": ua.random})
@@ -181,7 +177,6 @@ class AmazonMonitor(aiohttp.ClientSession):
         self,
         amazon_config: Dict,
         delay: float,
-        task_delay: float,
         *args,
         **kwargs,
     ):
@@ -190,7 +185,6 @@ class AmazonMonitor(aiohttp.ClientSession):
         self.check_count = 1
         self.amazon_config = amazon_config
         self.domain = urlparse(self.item.furl.url).netloc
-        self.task_delay = task_delay
         self.delay = delay
         if self.item.purchase_delay > 0:
             self.delay = 20
@@ -212,7 +206,6 @@ class AmazonMonitor(aiohttp.ClientSession):
         session = AmazonMonitor(
             amazon_config=self.amazon_config,
             delay=self.delay,
-            task_delay=self.task_delay,
             connector=self.connector,
             headers=HEADERS,
         )
@@ -241,8 +234,10 @@ class AmazonMonitor(aiohttp.ClientSession):
 
         # Loop will only exit if a qualified seller is returned.
         while True:
-            if self.task_delay:
-                ItemsHandler.check_last_access(self.item.id, self.task_delay)
+            if bpc.total_proxies:
+                good_proxies = bpc.total_proxies - bpc.bad_proxies
+                task_delay = delay / good_proxies
+                ItemsHandler.check_last_access(self.item.id, task_delay)
 
             try:
                 log.debug(
