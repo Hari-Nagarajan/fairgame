@@ -170,13 +170,6 @@ class ItemsHandler:
     def pop(cls):
         return next(cls.items)
 
-    @classmethod
-    async def check_last_access(cls, item, delay):
-        last_access = cls.item_ids[item]
-        cls.item_ids.update({item: time.time()})
-        difference = time.time() - last_access
-        if difference < delay:
-            await asyncio.sleep(delay - difference)
 
     @classmethod
     def length(cls):

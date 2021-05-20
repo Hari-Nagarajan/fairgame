@@ -173,6 +173,8 @@ class AmazonMonitoringHandler(BaseStoreHandler):
 
 
 class AmazonMonitor(aiohttp.ClientSession):
+    last_task = time.time()
+
     def __init__(
         self,
         amazon_config: Dict,
@@ -191,6 +193,14 @@ class AmazonMonitor(aiohttp.ClientSession):
         self.block_purchase_until = time.time() + self.item.purchase_delay
         log.debug("Initializing Monitoring Task")
 
+    @classmethod
+    def set_last_task(cls):
+        cls.last_task = time.time()
+
+    @classmethod
+    def get_last_task(cls):
+        return cls.last_task
+
     def assign_config(self, azn_config):
         self.amazon_config = azn_config
 
@@ -199,6 +209,7 @@ class AmazonMonitor(aiohttp.ClientSession):
 
     def next_item(self):
         self.item = ItemsHandler.pop()
+
 
     def fail_recreate(self):
         # Something wrong, start a new task then kill this one
@@ -233,6 +244,16 @@ class AmazonMonitor(aiohttp.ClientSession):
 
         # Loop will only exit if a qualified seller is returned.
         while True:
+            good_proxies = bpc.total_proxies - bpc.bad_proxies
+            stagger_time = delay / good_proxies
+            log.debug(f"PROXIES :: GOOD={good_proxies} :: BAD={bpc.bad_proxies} :: Current stagger delay is {round(stagger_time, 2)}s")
+            diff = time.time() - self.get_last_task()
+            if diff < stagger_time:
+                rest_time = stagger_time - diff
+                log.debug(f"Resting for {round(rest_time, 2)}s")
+                await asyncio.sleep(rest_time)
+            self.set_last_task()
+
             try:
                 log.debug(
                     f"{self.item.id} : {self.connector.proxy_url} : Stock Check Count = {self.check_count}"
@@ -313,18 +334,6 @@ class AmazonMonitor(aiohttp.ClientSession):
                     await asyncio.sleep(600)
             if bpc.timer():
                 await queue.put(bpc.save())
-
-            bad_proxies = bpc.bad_proxies
-            good_proxies = bpc.total_proxies - bad_proxies
-            if (
-                bpc.total_proxies
-                and good_proxies > ItemsHandler.length()
-            ):
-                task_delay = delay / (good_proxies / ItemsHandler.length())
-                log.debug(
-                    f"PROXIES :: GOOD={good_proxies} :: BAD={bad_proxies} :: Current task delay is {round(task_delay, 2)}s"
-                )
-                await ItemsHandler.check_last_access(self.item.id, task_delay)
 
 
     async def aio_get(self, url):
