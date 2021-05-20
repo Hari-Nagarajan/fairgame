@@ -136,6 +136,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
             ua_book = UserAgentBook()
             for group_num, proxy_group in enumerate(self.proxies, start=1):
                 AmazonMonitor.total_groups+=1
+                AmazonMonitor.lengths_of_groups.append(len(proxy_group))
                 for idx in range(len(proxy_group)):
                     connector = ProxyConnector.from_url(proxy_group[idx])
                     self.sessions_list.append(
@@ -179,6 +180,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
 class AmazonMonitor(aiohttp.ClientSession):
     start_time = time.time()
     last_task = time.time()
+    lengths_of_groups = list()
     total_groups = 0
     current_group = 1 
     current_group_proxies = set()
@@ -280,15 +282,9 @@ class AmazonMonitor(aiohttp.ClientSession):
                 continue
             if self.connector.proxy_url not in self.current_group_proxies:
                 self.current_group_proxies.add(self.connector.proxy_url)
+                time.sleep(delay / self.lengths_of_groups[self.current_group - 1])
             good_proxies = self.get_group_total() - bpc.bad_proxies
-            stagger_time = delay / good_proxies
-            log.debug(f"PROXIES :: GROUP[{self.current_group}] :: GOOD={good_proxies} :: BAD={bpc.bad_proxies} :: Current stagger delay is {round(stagger_time, 2)}s")
-            diff = time.time() - self.get_last_task()
-            self.set_last_task()
-            if diff < stagger_time:
-                rest_time = stagger_time - diff
-                log.debug(f"Resting for {round((rest_time * 1000), 2)}ms")
-                await asyncio.sleep(rest_time)
+            log.debug(f"PROXIES :: GROUP[{self.current_group}] :: GOOD={good_proxies} :: BAD={bpc.bad_proxies}")
 
             try:
                 log.debug(
