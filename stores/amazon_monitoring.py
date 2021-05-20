@@ -207,9 +207,8 @@ class AmazonMonitor(aiohttp.ClientSession):
             amazon_config=self.amazon_config,
             delay=self.delay,
             connector=self.connector,
-            headers=HEADERS,
+            headers=self.headers,
         )
-        session.headers.update({"user-agent": UserAgent().random})
         log.debug("Sesssion Created")
         return session
 
