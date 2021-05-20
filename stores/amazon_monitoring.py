@@ -367,8 +367,6 @@ class AmazonMonitor(aiohttp.ClientSession):
                     log.debug(f":: 503 :: Sleeping for 10 minutes.")
                 finally:
                     await asyncio.sleep(600)
-            if bpc.timer():
-                await queue.put(bpc.save())
 
 
     async def aio_get(self, url):
