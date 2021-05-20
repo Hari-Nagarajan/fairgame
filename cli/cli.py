@@ -105,9 +105,16 @@ def main():
 @click.option(
     "--delay", type=float, default=5.0, help="Time to wait between checks for item[s]"
 )
+@click.option(
+    "--uv",
+    is_flag=True,
+    default=False,
+    help="Use uvloop to speed up asyncio. Not supported on Windows.",
+)
 @notify_on_crash
-def amazon_aio(p, delay):
-    uvloop.install()
+def amazon_aio(p, delay, uv):
+    if uv:
+        uvloop.install()
     log.debug("Creating AIO Amazon Store Handler")
     aio_amazon_obj = AIO_AmazonStoreHandler(
         notification_handler=notification_handler, encryption_pass=p, delay=delay
