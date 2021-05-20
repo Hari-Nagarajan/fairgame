@@ -237,7 +237,7 @@ class AmazonMonitor(aiohttp.ClientSession):
             if bpc.total_proxies:
                 good_proxies = bpc.total_proxies - bpc.bad_proxies
                 task_delay = delay / good_proxies
-                log.debug(f"Current task delay is {round(task_delay, 2)s}")
+                log.debug(f"Current task delay is {round(task_delay, 2)}s")
                 ItemsHandler.check_last_access(self.item.id, task_delay)
 
             try:
