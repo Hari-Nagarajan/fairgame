@@ -226,7 +226,7 @@ class AmazonMonitor(aiohttp.ClientSession):
 
     @classmethod
     def get_group_total(cls):
-        return len(cls.current_group_proxies)
+        return cls.lengths_of_groups[cls.current_group - 1]
 
     @classmethod
     def get_current_group(cls):
@@ -276,13 +276,14 @@ class AmazonMonitor(aiohttp.ClientSession):
 
         # Loop will only exit if a qualified seller is returned.
         while True:
-            self.switch_proxy_group()
-            if self.group_num is not self.get_current_group():
-                await asyncio.sleep(delay)
-                continue
+            if self.current_group:
+                self.switch_proxy_group()
             if self.connector.proxy_url not in self.current_group_proxies:
                 self.current_group_proxies.add(self.connector.proxy_url)
-                time.sleep(delay / self.lengths_of_groups[self.current_group - 1])
+                time.sleep(delay / self.get_group_total())
+            elif self.group_num is not self.get_current_group():
+                await asyncio.sleep(delay)
+                continue
             good_proxies = self.get_group_total() - bpc.bad_proxies
             log.debug(f"PROXIES :: GROUP[{self.current_group}] :: GOOD={good_proxies} :: BAD={bpc.bad_proxies}")
 
