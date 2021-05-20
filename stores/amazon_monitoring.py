@@ -289,7 +289,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                 if rest_time > 1:
                     rest_time = 0
                 log.debug(f"Resting for {round((rest_time * 1000), 2)}ms")
-                await asyncio.sleep(rest_time)
+                time.sleep(rest_time)
 
             try:
                 log.debug(
