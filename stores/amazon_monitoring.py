@@ -31,12 +31,20 @@ from amazoncaptcha import AmazonCaptcha
 from urllib.parse import urlparse
 
 import re
-from itertools import cycle
 
 import requests
 from furl import furl
 from lxml import html
 from price_parser import parse_price, Price
+from utils.misc import (
+    parse_html_source,
+    get_timestamp_filename,
+    save_html_response,
+    check_response,
+    BadProxyCollector,
+    ItemsHandler,
+    UserAgentBook,
+)
 
 from common.amazon_support import (
     AmazonItemCondition,
@@ -78,7 +86,6 @@ REALTIME_INVENTORY_PATH = "gp/aod/ajax?asin="
 
 CONFIG_FILE_PATH = "config/amazon_requests_config.json"
 PROXY_FILE_PATH = "config/proxies.json"
-BAD_PROXIES_PATH = "config/bad_proxies.json"
 STORE_NAME = "Amazon"
 DEFAULT_MAX_TIMEOUT = 10
 
@@ -349,70 +356,6 @@ class AmazonMonitor(aiohttp.ClientSession):
                 status, response = await self.aio_get(f.url)
                 return status, response
         return None
-
-
-class UserAgentBook:
-    def __init__(self, fp="config/user_agents.json"):
-        self.fp = fp
-        self.user_agents = dict()
-        if os.path.exists(fp):
-            with open(fp) as f:
-                self.user_agents = json.load(f)
-
-    def save(self):
-        with open(self.fp, "w") as f:
-            json.dump(self.user_agents, f, indent=4)
-
-
-class ItemsHandler:
-    @classmethod
-    def create_items_pool(cls, item_list):
-        cls.item_ids = {}
-        for item in item_list:
-            cls.item_ids.update({item.id: time.time()})
-        cls.items = cycle(item_list)
-
-    @classmethod
-    def pop(cls):
-        return next(cls.items)
-
-    @classmethod
-    def check_last_access(cls, item):
-        last_access = cls.item_ids[item.id]
-        difference = time.time() - last_access
-        if difference < 1:
-            return True
-        cls.item_ids.update({item.id: time.time()})
-        return False
-
-
-class BadProxyCollector:
-    @classmethod
-    def start(cls):
-        cls.last_save = time.time()
-        cls.collection = set()
-
-    @classmethod
-    def record(cls, status, connector):
-        url = str(connector.proxy_url)
-        if status == 503:
-            cls.collection.add(url)
-        if status == 200 and url in cls.collection:
-            cls.collection.discard(url)
-
-    @classmethod
-    def save(cls):
-        if cls.collection:
-            with open(BAD_PROXIES_PATH, "w") as f:
-                temp = list(cls.collection)
-                json.dump(temp, f, indent=4)
-            cls.last_save = time.time()
-
-    @classmethod
-    def timer(cls):
-        if time.time() - cls.last_save >= 300:
-            return True
-        return False
 
 
 def check_fail(status, fail_counter, fail_list=None) -> int:
