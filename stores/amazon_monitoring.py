@@ -182,6 +182,7 @@ class AmazonMonitor(aiohttp.ClientSession):
     total_groups = 0
     current_group = 1 
     current_group_proxies = set()
+    proxies_loaded = False
 
     def __init__(
         self,
@@ -221,6 +222,7 @@ class AmazonMonitor(aiohttp.ClientSession):
             cls.start_time = time.time()
             cls.current_group_proxies.clear()
             bpc.collection.clear()
+            cls.proxies_loaded = False
 
     @classmethod
     def get_group_total(cls):
@@ -278,16 +280,22 @@ class AmazonMonitor(aiohttp.ClientSession):
             if self.group_num is not self.get_current_group():
                 await asyncio.sleep(600)
                 continue
-            self.current_group_proxies.add(self.connector.proxy_url)
+            while not self.proxies_loaded:
+                group_length = len(get_proxies(path=PROXY_FILE_PATH)[self.current_group])
+                added = 0
+                while added < group_length:
+                    self.current_group_proxies.add(self.connector.proxy_url)
+                    added+=1
+                self.proxies_loaded = True
             good_proxies = self.get_group_total() - bpc.bad_proxies
             stagger_time = delay / good_proxies
             log.debug(f"PROXIES :: GROUP[{self.current_group}] :: GOOD={good_proxies} :: BAD={bpc.bad_proxies} :: Current stagger delay is {round(stagger_time, 2)}s")
             diff = time.time() - self.get_last_task()
-            self.set_last_task()
             if diff < stagger_time:
                 rest_time = stagger_time - diff
                 log.debug(f"Resting for {round((rest_time * 1000), 2)}ms")
-                await asyncio.sleep(rest_time)
+                time.sleep(rest_time)
+            self.set_last_task()
 
             try:
                 log.debug(
@@ -330,7 +338,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                     if qualified_seller:
                         log.debug("Found an offer which meets criteria")
                         if time.time() > self.block_purchase_until:
-                            await queue.put_nowait(qualified_seller)
+                            await queue.put(qualified_seller)
                             log.debug("Offer placed in queue")
                             log.debug("Quitting monitoring task")
                             future.set_result(None)
