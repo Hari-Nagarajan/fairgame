@@ -16,16 +16,14 @@
 #
 #      The author may be contacted through the project's GitHub, at:
 #      https://github.com/Hari-Nagarajan/fairgame
-
-import fileinput
-import os
-import json
-import aiohttp
 from typing import Optional, List
-from itertools import cycle
 
 import time
+import os.path
+import json
+import asyncio
 from datetime import datetime
+from itertools import cycle
 
 import psutil
 import requests
@@ -34,21 +32,17 @@ from lxml import html
 from selenium import webdriver
 
 from selenium.common.exceptions import (
-    NoSuchElementException,
     TimeoutException,
-    WebDriverException,
 )
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.remote.webelement import WebElement
-from selenium.webdriver.support import expected_conditions as EC, wait
-from selenium.webdriver.support.expected_conditions import staleness_of
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 from utils.logger import log
 
-BAD_PROXIES_PATH = "config/bad_proxies.json"
+
 DEFAULT_MAX_TIMEOUT = 5
+BAD_PROXIES_PATH = "config/bad_proxies.json"
 
 
 def create_webdriver_wait(driver, wait_time=10):
@@ -177,20 +171,22 @@ class ItemsHandler:
         return next(cls.items)
 
     @classmethod
-    def check_last_access(cls, item):
-        last_access = cls.item_ids[item.id]
+    async def check_last_access(cls, item, delay):
+        last_access = cls.item_ids[item]
         difference = time.time() - last_access
-        if difference < 1:
-            return True
-        cls.item_ids.update({item.id: time.time()})
-        return False
+        if difference < delay:
+            await asyncio.sleep(delay - difference)
+        else:
+            cls.item_ids.update({item: time.time()})
 
 
 class BadProxyCollector:
     @classmethod
-    def start(cls):
+    def start(cls, proxies):
         cls.last_save = time.time()
         cls.collection = set()
+        cls.bad_proxies = 0
+        cls.total_proxies = len(proxies)
 
     @classmethod
     def record(cls, status, connector):
@@ -199,9 +195,11 @@ class BadProxyCollector:
             cls.collection.add(url)
         if status == 200 and url in cls.collection:
             cls.collection.discard(url)
+        cls.bad_proxies = len(cls.collection)
 
     @classmethod
     def save(cls):
+        log.debug("Saving bad_proxies.json to disk.")
         if cls.collection:
             with open(BAD_PROXIES_PATH, "w") as f:
                 temp = list(cls.collection)

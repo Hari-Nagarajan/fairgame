@@ -41,9 +41,9 @@ from utils.misc import (
     get_timestamp_filename,
     save_html_response,
     check_response,
-    UserAgentBook,
+    BadProxyCollector as bpc,
     ItemsHandler,
-    BadProxyCollector,
+    UserAgentBook,
 )
 
 from common.amazon_support import (
@@ -134,7 +134,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         self.sessions_list: Optional[List[AmazonMonitor]] = []
 
         if self.proxies:
-            BadProxyCollector.start()
+            bpc.start(self.proxies)
             ua_book = UserAgentBook()
             for idx in range(len(self.proxies)):
                 connector = ProxyConnector.from_url(self.proxies[idx])
@@ -185,7 +185,6 @@ class AmazonMonitor(aiohttp.ClientSession):
         self.amazon_config = amazon_config
         self.domain = urlparse(self.item.furl.url).netloc
         self.session_id = None
-
         self.delay = delay
         if self.item.purchase_delay > 0:
             self.delay = 20
@@ -260,8 +259,12 @@ class AmazonMonitor(aiohttp.ClientSession):
 
         # Loop will only exit if a qualified seller is returned.
         while True:
-            while ItemsHandler.check_last_access(self.item):
-                await asyncio.sleep(0.1)
+            if bpc.total_proxies:
+                bad_proxies = bpc.bad_proxies
+                good_proxies = bpc.total_proxies - bad_proxies
+                task_delay = delay / good_proxies
+                log.debug(f"PROXIES :: GOOD={good_proxies} :: BAD={bad_proxies} :: Current task delay is {round(task_delay, 2)}s")
+                ItemsHandler.check_last_access(self.item.id, task_delay)
 
             _, json_str = await self.aio_get(self.atc_json_url())
             json_dict = json.loads(await json_str.strip())
@@ -335,7 +338,7 @@ class AmazonMonitor(aiohttp.ClientSession):
             self.next_item()
 
             if self.connector:
-                BadProxyCollector.record(status, self.connector)
+                bpc.record(status, self.connector)
             if status == 503:
                 try:
                     log.debug(
@@ -345,8 +348,8 @@ class AmazonMonitor(aiohttp.ClientSession):
                     log.debug(f":: 503 :: Sleeping for 10 minutes.")
                 finally:
                     await asyncio.sleep(600)
-            if BadProxyCollector.timer():
-                await queue.put(BadProxyCollector.save())
+            if bpc.timer():
+                await queue.put(bpc.save())
 
     async def aio_get(self, url):
         text = None
