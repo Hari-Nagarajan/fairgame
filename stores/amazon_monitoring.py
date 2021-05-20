@@ -234,12 +234,18 @@ class AmazonMonitor(aiohttp.ClientSession):
 
         # Loop will only exit if a qualified seller is returned.
         while True:
-            if bpc.total_proxies:
-                bad_proxies = bpc.bad_proxies
-                good_proxies = bpc.total_proxies - bad_proxies
-                task_delay = delay / good_proxies
-                log.debug(f"PROXIES :: GOOD={good_proxies} :: BAD={bad_proxies} :: Current task delay is {round(task_delay, 2)}s")
-                ItemsHandler.check_last_access(self.item.id, task_delay)
+            bad_proxies = bpc.bad_proxies
+            good_proxies = bpc.total_proxies - bad_proxies
+            if (
+                bpc.total_proxies
+                and ItemsHandler.first_item == self.item.id
+                and good_proxies > ItemsHandler.length()
+            ):
+                task_delay = delay / (good_proxies / ItemsHandler.length())
+                log.debug(
+                    f"PROXIES :: GOOD={good_proxies} :: BAD={bad_proxies} :: Current task delay is {round(task_delay, 2)}s"
+                )
+                time.sleep(task_delay)
 
             try:
                 log.debug(

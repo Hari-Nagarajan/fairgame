@@ -162,6 +162,7 @@ class ItemsHandler:
     @classmethod
     def create_items_pool(cls, item_list):
         cls.item_ids = {}
+        cls.first_item = item_list[0].id
         for item in item_list:
             cls.item_ids.update({item.id: time.time()})
         cls.items = cycle(item_list)
@@ -178,6 +179,10 @@ class ItemsHandler:
             await asyncio.sleep(delay - difference)
         else:
             cls.item_ids.update({item: time.time()})
+
+    @classmethod
+    def length(cls):
+        return len(cls.item_ids)
 
 
 class BadProxyCollector:
