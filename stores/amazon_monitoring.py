@@ -278,7 +278,8 @@ class AmazonMonitor(aiohttp.ClientSession):
             if self.group_num is not self.get_current_group():
                 await asyncio.sleep(600)
                 continue
-            self.current_group_proxies.add(self.connector.proxy_url)
+            if self.connector.proxy_url not in self.current_group_proxies:
+                self.current_group_proxies.add(self.connector.proxy_url)
             good_proxies = self.get_group_total() - bpc.bad_proxies
             stagger_time = delay / good_proxies
             log.debug(f"PROXIES :: GROUP[{self.current_group}] :: GOOD={good_proxies} :: BAD={bpc.bad_proxies} :: Current stagger delay is {round(stagger_time, 2)}s")
@@ -286,10 +287,8 @@ class AmazonMonitor(aiohttp.ClientSession):
             self.set_last_task()
             if diff < stagger_time:
                 rest_time = stagger_time - diff
-                if rest_time > 1:
-                    rest_time = 0
                 log.debug(f"Resting for {round((rest_time * 1000), 2)}ms")
-                time.sleep(rest_time)
+                await asyncio.sleep(rest_time)
 
             try:
                 log.debug(
