@@ -178,7 +178,6 @@ class ItemsHandler:
 class BadProxyCollector:
     @classmethod
     def start(cls, proxies):
-        cls.last_save = time.time()
         cls.collection = set()
         cls.bad_proxies = 0
         cls.total_proxies = len(proxies)
@@ -192,17 +191,3 @@ class BadProxyCollector:
             cls.collection.discard(url)
         cls.bad_proxies = len(cls.collection)
 
-    @classmethod
-    def save(cls):
-        log.debug("Saving bad_proxies.json to disk.")
-        if cls.collection:
-            with open(BAD_PROXIES_PATH, "w") as f:
-                temp = list(cls.collection)
-                json.dump(temp, f, indent=4)
-            cls.last_save = time.time()
-
-    @classmethod
-    def timer(cls):
-        if time.time() - cls.last_save >= 300:
-            return True
-        return False
