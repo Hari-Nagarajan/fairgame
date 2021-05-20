@@ -547,14 +547,10 @@ def get_qualified_seller(item, sellers, check_shipping=False) -> SellerDetail or
 
 def get_proxies(path=PROXY_FILE_PATH):
     """Initialize proxies from json configuration file"""
-    proxies = []
-
     # TODO: verify format of json?
     if os.path.exists(path):
-        proxy_json = json.load(open(path))
-        proxies = proxy_json.get("proxies", [])
-
-    return proxies
+        with open(path) as f:
+            return json.load(f)
 
     # def verify(self):
     #     log.debug("Verifying item list...")
