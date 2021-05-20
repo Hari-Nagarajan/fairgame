@@ -134,29 +134,32 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         if self.proxies:
             bpc.start(self.proxies)
             ua_book = UserAgentBook()
-            for idx in range(len(self.proxies)):
-                connector = ProxyConnector.from_url(self.proxies[idx])
-                self.sessions_list.append(
-                    AmazonMonitor(
-                        headers=HEADERS,
-                        amazon_config=self.amazon_config,
-                        connector=connector,
-                        delay=delay,
+            for group_num, proxy_group in enumerate(self.proxies, start=1):
+                AmazonMonitor.total_groups+=1
+                for idx in range(len(proxy_group)):
+                    connector = ProxyConnector.from_url(proxy_group[idx])
+                    self.sessions_list.append(
+                        AmazonMonitor(
+                            headers=HEADERS,
+                            amazon_config=self.amazon_config,
+                            connector=connector,
+                            delay=delay,
+                            group_num=group_num,
+                        )
                     )
-                )
 
-                session = self.sessions_list[idx]
-                proxy_url = str(session.connector.proxy_url)
+                    session = self.sessions_list[idx]
+                    proxy_url = str(session.connector.proxy_url)
 
-                try:
-                    session.headers.update(
-                        {"user-agent": ua_book.user_agents[proxy_url]}
-                    )
-                except KeyError:
-                    ua_book.user_agents.update({proxy_url: ua.random})
-                    self.sessions_list[idx].headers.update(
-                        {"user-agent": ua_book.user_agents[proxy_url]}
-                    )
+                    try:
+                        session.headers.update(
+                            {"user-agent": ua_book.user_agents[proxy_url]}
+                        )
+                    except KeyError:
+                        ua_book.user_agents.update({proxy_url: ua.random})
+                        self.sessions_list[idx].headers.update(
+                            {"user-agent": ua_book.user_agents[proxy_url]}
+                        )
 
             ua_book.save()
         else:
@@ -167,22 +170,29 @@ class AmazonMonitoringHandler(BaseStoreHandler):
                     amazon_config=self.amazon_config,
                     connector=connector,
                     delay=delay,
+                    group_num=0,
                 )
             )
             self.sessions_list[0].headers.update({"user-agent": ua.random})
 
 
 class AmazonMonitor(aiohttp.ClientSession):
+    start_time = time.time()
     last_task = time.time()
+    total_groups = 0
+    current_group = 1 
+    current_group_ua = set()
 
     def __init__(
         self,
         amazon_config: Dict,
         delay: float,
+        group_num: int,
         *args,
         **kwargs,
     ):
         super(self.__class__, self).__init__(*args, **kwargs)
+        self.group_num = group_num
         self.item = ItemsHandler.pop()
         self.check_count = 1
         self.amazon_config = amazon_config
@@ -200,6 +210,25 @@ class AmazonMonitor(aiohttp.ClientSession):
     @classmethod
     def get_last_task(cls):
         return cls.last_task
+    
+    @classmethod
+    def switch_proxy_group(cls):
+        if time.time() - cls.start_time >= 900:
+            cls.current_group+=1
+            if cls.current_group > cls.total_groups:
+                cls.current_group = 1
+            log.debug(f"Switching to proxy group {cls.current_group}")
+            cls.start_time = time.time()
+            cls.current_group_ua.clear()
+            bpc.collection.clear()
+
+    @classmethod
+    def get_group_total(cls):
+        return len(cls.current_group_ua)
+
+    @classmethod
+    def get_current_group(cls):
+        return cls.current_group
 
     def assign_config(self, azn_config):
         self.amazon_config = azn_config
@@ -219,6 +248,7 @@ class AmazonMonitor(aiohttp.ClientSession):
             delay=self.delay,
             connector=self.connector,
             headers=self.headers,
+            group_num=self.group_num,
         )
         log.debug("Sesssion Created")
         return session
@@ -244,9 +274,14 @@ class AmazonMonitor(aiohttp.ClientSession):
 
         # Loop will only exit if a qualified seller is returned.
         while True:
-            good_proxies = bpc.total_proxies - bpc.bad_proxies
+            self.switch_proxy_group()
+            if self.group_num > 0:
+                if self.group_num is not self.get_current_group():
+                    await asyncio.sleep(300)
+            self.current_group_ua.add(self.connector.proxy_url)
+            good_proxies = self.get_group_total() - bpc.bad_proxies
             stagger_time = delay / good_proxies
-            log.debug(f"PROXIES :: GOOD={good_proxies} :: BAD={bpc.bad_proxies} :: Current stagger delay is {round(stagger_time, 2)}s")
+            log.debug(f"PROXIES :: GROUP[{self.current_group}] :: GOOD={good_proxies} :: BAD={bpc.bad_proxies} :: Current stagger delay is {round(stagger_time, 2)}s")
             diff = time.time() - self.get_last_task()
             self.set_last_task()
             if diff < stagger_time:

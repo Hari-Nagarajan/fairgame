@@ -113,14 +113,14 @@ def main():
 )
 @notify_on_crash
 def amazon_aio(p, delay, uv):
-    if uv:
-        uvloop.install()
     log.debug("Creating AIO Amazon Store Handler")
     aio_amazon_obj = AIO_AmazonStoreHandler(
         notification_handler=notification_handler, encryption_pass=p, delay=delay
     )
     global tasks
     log.debug("Creating AIO Amazon Store Tasks")
+    if uv:
+        uvloop.install()
     tasks = asyncio.run(aio_amazon_obj.run_async())
     if tasks:
         for task in tasks:
