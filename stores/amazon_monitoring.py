@@ -319,7 +319,6 @@ class AmazonMonitor(aiohttp.ClientSession):
             good_proxies = bpc.total_proxies - bad_proxies
             if (
                 bpc.total_proxies
-                and ItemsHandler.first_item == self.item.id
                 and good_proxies > ItemsHandler.length()
             ):
                 task_delay = delay / (good_proxies / ItemsHandler.length())
