@@ -274,7 +274,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                     if qualified_seller:
                         log.debug("Found an offer which meets criteria")
                         if time.time() > self.block_purchase_until:
-                            await queue.put(qualified_seller)
+                            await queue.put_nowait(qualified_seller)
                             log.debug("Offer placed in queue")
                             log.debug("Quitting monitoring task")
                             future.set_result(None)
