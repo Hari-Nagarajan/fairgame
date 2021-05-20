@@ -162,7 +162,6 @@ class ItemsHandler:
     @classmethod
     def create_items_pool(cls, item_list):
         cls.item_ids = {}
-        cls.first_item = item_list[0].id
         for item in item_list:
             cls.item_ids.update({item.id: time.time()})
         cls.items = cycle(item_list)
@@ -172,7 +171,12 @@ class ItemsHandler:
         return next(cls.items)
 
     @classmethod
-    async def task_timer(cls, item, delay):
+    async def check_last_access(cls, item, delay):
+        last_access = cls.item_ids[item]
+        cls.item_ids.update({item: time.time()})
+        difference = time.time() - last_access
+        if difference < delay:
+            await asyncio.sleep(delay - difference)
 
     @classmethod
     def length(cls):

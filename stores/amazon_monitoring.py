@@ -325,7 +325,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                 log.debug(
                     f"PROXIES :: GOOD={good_proxies} :: BAD={bad_proxies} :: Current task delay is {round(task_delay, 2)}s"
                 )
-                asyncio.sleep(task_delay)
+                ItemsHandler.check_last_access(self.item.id, task_delay)
 
 
     async def aio_get(self, url):
