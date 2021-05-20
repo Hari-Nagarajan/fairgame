@@ -250,7 +250,7 @@ class AmazonMonitor(aiohttp.ClientSession):
             diff = time.time() - self.get_last_task()
             if diff < stagger_time:
                 rest_time = stagger_time - diff
-                log.debug(f"Resting for {rest_time}s")
+                log.debug(f"Resting for {round((rest_time * 1000), 2)}ms")
                 await asyncio.sleep(rest_time)
             self.set_last_task()
 
