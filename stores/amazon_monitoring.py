@@ -202,7 +202,7 @@ class AmazonMonitor(aiohttp.ClientSession):
     def next_item(self):
         self.item = ItemsHandler.pop()
 
-    def construct_json_url(self):
+    def atc_json_url(self):
         url = f"https://smile.amazon.com/gp/add-to-cart/json?session-id={self.session_id}&clientName=retailwebsite&nextPage=cartitems&ASIN={self.item.id}Q&offerListingID=7On6yp6oyBHAQdiIZ%2FoOaBwX2XF%2FFgAqRcGzZhDed%2BI11UVFqdR9aYULMUDvfF%2FASutY2lKvuFB91NY7RDQH2jRP6bLHRLKpBpxEEWc7xXFw%2FSV40W5Z9w3m1tq1GgsO%2FiQmjLLKNY%2B1FIwRiH57iw%3D%3D&quantity=1"
         return url
 
@@ -229,7 +229,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                 if cookie.key == "session-token":
                     token = True
         await asyncio.sleep(2)
-        status, response_text = await self.aio_get(self.construct_json_url())
+        status, response_text = await self.aio_get(self.atc_json_url())
         if await len(response_text.strip()) > 300:
             save_html_response("stock-check", status, response_text)
             log.debug("Failed to Validate Session.")
@@ -248,7 +248,7 @@ class AmazonMonitor(aiohttp.ClientSession):
 
         status, response_text = await self.aio_get(url=self.item.furl.url)
 
-        _, json_str = await self.aio_get(self.construct_json_url())
+        _, json_str = await self.aio_get(self.atc_json_url())
         json_dict = json.loads(await json_str.strip())
 
         # do this after each request
@@ -263,7 +263,7 @@ class AmazonMonitor(aiohttp.ClientSession):
             while ItemsHandler.check_last_access(self.item):
                 await asyncio.sleep(0.1)
 
-            _, json_str = await self.aio_get(self.construct_json_url())
+            _, json_str = await self.aio_get(self.atc_json_url())
             json_dict = json.loads(await json_str.strip())
             json_keys = json_dict.keys()
 
