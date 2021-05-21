@@ -21,7 +21,6 @@ from typing import Optional, List
 import time
 import os.path
 import json
-import asyncio
 from datetime import datetime
 from itertools import cycle
 
@@ -145,19 +144,6 @@ def parse_html_source(data):
     return tree
 
 
-class UserAgentBook:
-    def __init__(self, fp="config/user_agents.json"):
-        self.fp = fp
-        self.user_agents = dict()
-        if os.path.exists(fp):
-            with open(fp) as f:
-                self.user_agents = json.load(f)
-
-    def save(self):
-        with open(self.fp, "w") as f:
-            json.dump(self.user_agents, f, indent=4)
-
-
 class ItemsHandler:
     @classmethod
     def create_items_pool(cls, item_list):
@@ -171,14 +157,6 @@ class ItemsHandler:
         return next(cls.items)
 
     @classmethod
-    async def check_last_access(cls, item, delay):
-        last_access = cls.item_ids[item]
-        cls.item_ids.update({item: time.time()})
-        difference = time.time() - last_access
-        if difference < delay:
-            await asyncio.sleep(delay - difference)
-
-    @classmethod
     def length(cls):
         return len(cls.item_ids)
 
@@ -186,7 +164,6 @@ class ItemsHandler:
 class BadProxyCollector:
     @classmethod
     def start(cls, proxies):
-        cls.last_save = time.time()
         cls.collection = set()
         cls.bad_proxies = 0
         cls.total_proxies = len(proxies)
@@ -200,17 +177,3 @@ class BadProxyCollector:
             cls.collection.discard(url)
         cls.bad_proxies = len(cls.collection)
 
-    @classmethod
-    def save(cls):
-        log.debug("Saving bad_proxies.json to disk.")
-        if cls.collection:
-            with open(BAD_PROXIES_PATH, "w") as f:
-                temp = list(cls.collection)
-                json.dump(temp, f, indent=4)
-            cls.last_save = time.time()
-
-    @classmethod
-    def timer(cls):
-        if time.time() - cls.last_save >= 300:
-            return True
-        return False
