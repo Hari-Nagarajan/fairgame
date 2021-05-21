@@ -325,14 +325,14 @@ class AmazonMonitor(aiohttp.ClientSession):
 
             if self.item.id in ItemsHandler.offerid_list.keys():
                 offering_id = next(ItemsHandler.offerid_list[self.item.id])
-                log.debug(f":: {self.item.id} :: grabbing offering id: {offering_id}")
-                log.debug(f":: {self.item.id} :: fetching json endpoint")
+                log.debug(f"{self.item.id} :: grabbing offering id: {offering_id}")
+                log.debug(f"{self.item.id} :: fetching json endpoint")
                 status, json_str = await self.aio_get(
                     self.atc_json_url(offering_id=offering_id)
                 )
                 save_html_response("atc_json_stock_check", status, json_str)
 
-                log.debug(f":: JSON :: {self.connector.proxy_url} :: {status}")
+                log.debug(f"{self.item.id} :: JSON :: {self.connector.proxy_url} :: {status}")
 
                 try:
                     json_dict = json.loads(json_str.strip())
@@ -425,7 +425,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                 status, response_text = await self.aio_get(url=self.item.furl.url)
                 # save_html_response("stock-check", status, response_text)
 
-                log.debug(f":: AJAX :: {self.connector.proxy_url} :: {status}")
+                log.debug(f"{self.item.id} :: AJAX :: {self.connector.proxy_url} :: {status}")
 
                 # do this after each request
                 fail_counter = check_fail(status=status, fail_counter=fail_counter)
