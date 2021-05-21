@@ -264,15 +264,16 @@ class AmazonMonitor(aiohttp.ClientSession):
                 if cookie.key == "session-token":
                     token = True
             await asyncio.sleep(5)
-        status, response_text = await self.aio_get(self.atc_json_url(offering_id=TEST_OFFERID))
+        _, response_text = await self.aio_get(
+            self.atc_json_url(offering_id=TEST_OFFERID)
+        )
         tree = check_response(response_text)
         if captcha_element := has_captcha(tree):
-            log.debug("Captcha found during monitoring task")
+            log.debug("Captcha found during validation task")
             await asyncio.sleep(1)
             status, response_text = await self.async_captcha_solve(
                 captcha_element[0], self.domain
-                )
-        save_html_response("session-validation", status, response_text)
+            )
         log.debug("Session validated")
         return True
 
@@ -318,7 +319,7 @@ class AmazonMonitor(aiohttp.ClientSession):
 
             try:
                 log.debug(
-                        f"{self.item.id} :: PROXY_GROUP[{self.current_group}] :: {self.connector.proxy_url} :: Stock Check Count = {self.check_count}"
+                    f"{self.item.id} :: PROXY_GROUP[{self.current_group}] :: {self.connector.proxy_url} :: Stock Check Count = {self.check_count}"
                 )
             except AttributeError:
                 log.debug(f"{self.item.id} : Stock Check Count = {self.check_count}")
@@ -331,7 +332,9 @@ class AmazonMonitor(aiohttp.ClientSession):
                     self.atc_json_url(offering_id=offering_id)
                 )
 
-                log.debug(f"{self.item.id} :: JSON :: {self.connector.proxy_url} :: {status}")
+                log.debug(
+                    f"{self.item.id} :: JSON :: {self.connector.proxy_url} :: {status}"
+                )
 
                 if status != 503:
                     try:
@@ -340,7 +343,9 @@ class AmazonMonitor(aiohttp.ClientSession):
                         if "statusList" not in json_dict.keys():
                             for item in json_dict["items"]:
                                 if item["ASIN"] == self.item.id:
-                                    save_html_response("atc_json_in_stock", status, json_str)
+                                    save_html_response(
+                                        "atc_json_in_stock", status, json_str
+                                    )
                                     await queue.put(offering_id)
                                     await wait_timer(end_time)
                                     end_time = time.time() + delay
@@ -363,7 +368,9 @@ class AmazonMonitor(aiohttp.ClientSession):
                                 captcha_element[0], self.domain
                             )
                             # do this after each request
-                            fail_counter = check_fail(status=status, fail_counter=fail_counter)
+                            fail_counter = check_fail(
+                                status=status, fail_counter=fail_counter
+                            )
                             if fail_counter == -1:
                                 session = self.fail_recreate()
                                 future.set_result(session)
@@ -388,7 +395,9 @@ class AmazonMonitor(aiohttp.ClientSession):
                         )
 
                         # do this after each request
-                        fail_counter = check_fail(status=status, fail_counter=fail_counter)
+                        fail_counter = check_fail(
+                            status=status, fail_counter=fail_counter
+                        )
                         if fail_counter == -1:
                             session = self.fail_recreate()
                             future.set_result(session)
@@ -426,7 +435,9 @@ class AmazonMonitor(aiohttp.ClientSession):
                 status, response_text = await self.aio_get(url=self.item.furl.url)
                 # save_html_response("stock-check", status, response_text)
 
-                log.debug(f"{self.item.id} :: AJAX :: {self.connector.proxy_url} :: {status}")
+                log.debug(
+                    f"{self.item.id} :: AJAX :: {self.connector.proxy_url} :: {status}"
+                )
 
                 # do this after each request
                 fail_counter = check_fail(status=status, fail_counter=fail_counter)
@@ -437,7 +448,6 @@ class AmazonMonitor(aiohttp.ClientSession):
 
                 self.check_count += 1
                 self.next_item()
-
 
     async def aio_get(self, url):
         text = None
