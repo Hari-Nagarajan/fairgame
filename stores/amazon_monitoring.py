@@ -272,9 +272,12 @@ class AmazonMonitor(aiohttp.ClientSession):
         if captcha_element := has_captcha(tree):
             log.debug("Captcha found during validation task")
             await asyncio.sleep(1)
-            status, response_text = await self.async_captcha_solve(
-                captcha_element[0], self.domain
-            )
+            try:
+                status, response_text = await self.async_captcha_solve(
+                    captcha_element[0], self.domain
+                )
+            except TypeError:
+                pass
         else:
             log.debug("Received Session-Token")
             return True

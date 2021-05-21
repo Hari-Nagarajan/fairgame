@@ -6,7 +6,6 @@ verify_ssl = true
 [dev-packages]
 pyinstaller = "*"
 uvloop = "*"
-black = "*"
 
 [packages]
 requests = {extras = ["socks"], version = "*"}
@@ -41,7 +40,7 @@ dnspython = "*"
 fake-useragent = "*"
 pysocks = "*"
 aiohttp-proxy = "*"
-black = "*"
+uvloop = "*"
 
 [requires]
 python_version = "3.8"
