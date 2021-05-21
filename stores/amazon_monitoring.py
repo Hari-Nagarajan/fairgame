@@ -213,9 +213,8 @@ class AmazonMonitor(aiohttp.ClientSession):
             amazon_config=self.amazon_config,
             delay=self.delay,
             connector=self.connector,
-            headers=HEADERS,
+            headers=self.headers,
         )
-        session.headers.update({"user-agent": UserAgent().random})
         log.debug("Sesssion Created")
         return session
 
@@ -305,7 +304,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                     if qualified_seller:
                         log.debug("Found an offer which meets criteria")
                         if time.time() > self.block_purchase_until:
-                            await queue.put(qualified_seller)
+                            await queue.put_nowait(qualified_seller)
                             log.debug("Offer placed in queue")
                             log.debug("Quitting monitoring task")
                             future.set_result(None)
@@ -578,14 +577,10 @@ def get_qualified_seller(item, sellers, check_shipping=False) -> SellerDetail or
 
 def get_proxies(path=PROXY_FILE_PATH):
     """Initialize proxies from json configuration file"""
-    proxies = []
-
     # TODO: verify format of json?
     if os.path.exists(path):
-        proxy_json = json.load(open(path))
-        proxies = proxy_json.get("proxies", [])
-
-    return proxies
+        with open(path) as f:
+            return json.load(f)
 
     # def verify(self):
     #     log.debug("Verifying item list...")
