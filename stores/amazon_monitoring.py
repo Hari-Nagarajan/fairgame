@@ -331,6 +331,19 @@ class AmazonMonitor(aiohttp.ClientSession):
                     self.atc_json_url(offering_id=offering_id)
                 )
                 save_html_response("atc_json_stock_check", status, json_str)
+                if self.connector:
+                    bpc.record(status, self.connector)
+                if status == 503:
+                    try:
+                        log.debug(
+                            f":: 503 :: {self.connector.proxy_url} :: Sleeping for 10 minutes."
+                        )
+                    except AttributeError:
+                        log.debug(":: 503 :: Sleeping for 10 minutes.")
+                    finally:
+                        await asyncio.sleep(600)
+                        continue
+
                 try:
                     json_dict = json.loads(json_str.strip())
                     if "statusList" not in json_dict.keys():
@@ -338,10 +351,19 @@ class AmazonMonitor(aiohttp.ClientSession):
                             if item["ASIN"] == self.item.id:
                                 save_html_response("atc_json_in_stock", status, json_str)
                                 await queue.put(offering_id)
+                                await wait_timer(end_time)
+                                end_time = time.time() + delay
+                                self.check_count += 1
+                                self.next_item()
                                 continue
                     else:
                         log.debug("self.item.id not in stock")
+                        await wait_timer(end_time)
+                        end_time = time.time() + delay
+                        self.check_count += 1
+                        self.next_item()
                         continue
+
                 except json.decoder.JSONDecodeError:
                     text_response = json_str
                     tree = check_response(text_response)
@@ -360,6 +382,8 @@ class AmazonMonitor(aiohttp.ClientSession):
 
                         await wait_timer(end_time)
                         end_time = time.time() + delay
+                        self.check_count += 1
+                        self.next_item()
                         continue
 
             tree = check_response(response_text)
