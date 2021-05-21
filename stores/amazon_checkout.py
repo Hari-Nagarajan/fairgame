@@ -419,72 +419,74 @@ class AmazonCheckoutHandler(BaseStoreHandler):
             log.debug("Checkout task waiting for item in queue")
             task = await queue.get()
             queue.task_done()
-            if isinstance(task, (SellerDetail)):
+            if isinstance(task, SellerDetail):
                 await self.qualified_seller_checkout(qualified_seller=task)
-            if isinstance(task, (str)):
+            if isinstance(task, str):
                 await self.json_hit_checkout(offering_id=task)
 
     async def json_hit_checkout(self, offering_id):
-        start_time = time.time()
-        TURBO_INITIATE_MAX_RETRY = 50
-        retry = 0
-        pid = None
-        anti_csrf = None
-        while (not (pid and anti_csrf)) and retry < TURBO_INITIATE_MAX_RETRY:
-            pid, anti_csrf = await turbo_initiate(
-                s=self.checkout_session, offering_id=offering_id
-            )
-            retry += 1
-        if pid and anti_csrf:
-            if await turbo_checkout(
-                s=self.checkout_session, pid=pid, anti_csrf=anti_csrf
-            ):
-                log.info("Maybe completed checkout")
-                time_difference = time.time() - start_time
-                log.info(
-                    f"Time from stock found to checkout: {round(time_difference,2)} seconds."
+        while True:
+            start_time = time.time()
+            TURBO_INITIATE_MAX_RETRY = 50
+            retry = 0
+            pid = None
+            anti_csrf = None
+            while (not (pid and anti_csrf)) and retry < TURBO_INITIATE_MAX_RETRY:
+                pid, anti_csrf = await turbo_initiate(
+                    s=self.checkout_session, offering_id=offering_id
                 )
-                try:
-                    status, text = await aio_get(
-                        self.checkout_session,
-                        f"https://{domain}/gp/buy/thankyou/handlers/display.html?_from=cheetah&checkMFA=1&purchaseId={pid}&referrer=yield&pid={pid}&pipelineType=turbo&clientId=retailwebsite&temporaryAddToCart=1&hostPage=detail&weblab=RCX_CHECKOUT_TURBO_DESKTOP_PRIME_87783",
+                retry += 1
+            if pid and anti_csrf:
+                if await turbo_checkout(
+                    s=self.checkout_session, pid=pid, anti_csrf=anti_csrf
+                ):
+                    log.info("Maybe completed checkout")
+                    time_difference = time.time() - start_time
+                    log.info(
+                        f"Time from stock found to checkout: {round(time_difference,2)} seconds."
                     )
-                    save_html_response("order-confirm", status, text)
-                except aiohttp.ClientError:
-                    log.debug("could not save order confirmation page")
-                await self.checkout_session.close()
-                break
+                    try:
+                        status, text = await aio_get(
+                            self.checkout_session,
+                            f"https://{domain}/gp/buy/thankyou/handlers/display.html?_from=cheetah&checkMFA=1&purchaseId={pid}&referrer=yield&pid={pid}&pipelineType=turbo&clientId=retailwebsite&temporaryAddToCart=1&hostPage=detail&weblab=RCX_CHECKOUT_TURBO_DESKTOP_PRIME_87783",
+                        )
+                        save_html_response("order-confirm", status, text)
+                    except aiohttp.ClientError:
+                        log.debug("could not save order confirmation page")
+                    await self.checkout_session.close()
+                    break
 
     async def qualified_seller_checkout(self, qualified_seller):
-        start_time = time.time()
-        TURBO_INITIATE_MAX_RETRY = 50
-        retry = 0
-        pid = None
-        anti_csrf = None
-        while (not (pid and anti_csrf)) and retry < TURBO_INITIATE_MAX_RETRY:
-            pid, anti_csrf = await turbo_initiate(
-                s=self.checkout_session, qualified_seller=qualified_seller
-            )
-            retry += 1
-        if pid and anti_csrf:
-            if await turbo_checkout(
-                s=self.checkout_session, pid=pid, anti_csrf=anti_csrf
-            ):
-                log.info("Maybe completed checkout")
-                time_difference = time.time() - start_time
-                log.info(
-                    f"Time from stock found to checkout: {round(time_difference,2)} seconds."
+        while True:
+            start_time = time.time()
+            TURBO_INITIATE_MAX_RETRY = 50
+            retry = 0
+            pid = None
+            anti_csrf = None
+            while (not (pid and anti_csrf)) and retry < TURBO_INITIATE_MAX_RETRY:
+                pid, anti_csrf = await turbo_initiate(
+                    s=self.checkout_session, qualified_seller=qualified_seller
                 )
-                try:
-                    status, text = await aio_get(
-                        self.checkout_session,
-                        f"https://{domain}/gp/buy/thankyou/handlers/display.html?_from=cheetah&checkMFA=1&purchaseId={pid}&referrer=yield&pid={pid}&pipelineType=turbo&clientId=retailwebsite&temporaryAddToCart=1&hostPage=detail&weblab=RCX_CHECKOUT_TURBO_DESKTOP_PRIME_87783",
+                retry += 1
+            if pid and anti_csrf:
+                if await turbo_checkout(
+                    s=self.checkout_session, pid=pid, anti_csrf=anti_csrf
+                ):
+                    log.info("Maybe completed checkout")
+                    time_difference = time.time() - start_time
+                    log.info(
+                        f"Time from stock found to checkout: {round(time_difference,2)} seconds."
                     )
-                    save_html_response("order-confirm", status, text)
-                except aiohttp.ClientError:
-                    log.debug("could not save order confirmation page")
-                await self.checkout_session.close()
-                break
+                    try:
+                        status, text = await aio_get(
+                            self.checkout_session,
+                            f"https://{domain}/gp/buy/thankyou/handlers/display.html?_from=cheetah&checkMFA=1&purchaseId={pid}&referrer=yield&pid={pid}&pipelineType=turbo&clientId=retailwebsite&temporaryAddToCart=1&hostPage=detail&weblab=RCX_CHECKOUT_TURBO_DESKTOP_PRIME_87783",
+                        )
+                        save_html_response("order-confirm", status, text)
+                    except aiohttp.ClientError:
+                        log.debug("could not save order confirmation page")
+                    await self.checkout_session.close()
+                    break
 
     @contextmanager
     def wait_for_page_content_change(self, timeout=5):

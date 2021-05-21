@@ -155,13 +155,16 @@ class ItemsHandler:
     @classmethod
     def create_oid_pool(cls, offerid_list):
         cls.offerid_list = offerid_list
+        to_del = list()
         if offerid_list:
             for asin in cls.offerid_list.keys():
                 if cls.offerid_list[asin]:
                     cls.offerid_list[asin] = cycle(cls.offerid_list[asin])
                 else:
-                    del cls.offerid_list[asin]
-
+                    to_del.append(asin)
+        if to_del:
+            for asin in to_del:
+                del cls.offerid_list[asin]
 
     @classmethod
     def pop(cls):
@@ -187,4 +190,3 @@ class BadProxyCollector:
         if status == 200 and url in cls.collection:
             cls.collection.discard(url)
         cls.bad_proxies = len(cls.collection)
-
