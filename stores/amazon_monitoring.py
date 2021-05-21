@@ -80,8 +80,7 @@ AMAZON_URLS = {
     "PYO_POST": "https://{domain}/gp/buy/spc/handlers/static-submit-decoupled.html/ref=ox_spc_place_order?",
 }
 
-
-TEST_OFFERID = "Aweg8kHVQz3F9Zo%2FvQprIWf7YDM6Ohrgqa7pJ7G9vmjCKrx3Y3V4tvLiVgSzvz5cBOC51koNq5IvvVM0d6mFpRRiRyCn4y%2Fsw3c4SHVHgz6RT0z04L6L8TWqpe3zZ5m4BXmvkP%2BktCfHnMIwUvn0%2Bw%3D%3D"
+TEST_OFFERID = "%2FrmJgLzYPCM5PuSLAyuqjETrxn9wHVxf28UkwHgJklP2XwUnPOVDYg8qh1IUCQkxefKPTuC2Fq0KJO1qmzsREaxAKyMQfymJA8DLkSCDY2l9kSA8D9fsSg%3D%3D"
 COOKIE_HARVEST_URL = "https://www.amazon.com/gp/overlay/display.html"
 OFFERID_PATH = "config/offerid.json"
 
