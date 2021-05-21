@@ -315,14 +315,10 @@ class AmazonMonitor(aiohttp.ClientSession):
             elif self.group_num is not self.get_current_group():
                 await asyncio.sleep(10)
                 continue
-            good_proxies = self.get_group_total() - bpc.bad_proxies
-            log.debug(
-                f"PROXIES :: GROUP[{self.current_group}] :: GOOD={good_proxies} :: BAD={bpc.bad_proxies}"
-            )
 
             try:
                 log.debug(
-                    f"{self.item.id} : {self.connector.proxy_url} : Stock Check Count = {self.check_count}"
+                        f"{self.item.id} :: PROX_GROUP[{self.current_group}] :: {self.connector.proxy_url} :: Stock Check Count = {self.check_count}"
                 )
             except AttributeError:
                 log.debug(f"{self.item.id} : Stock Check Count = {self.check_count}")
@@ -435,7 +431,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                         f":: 503 :: {self.connector.proxy_url} :: Sleeping for 10 minutes."
                     )
                 except AttributeError:
-                    log.debug(f":: 503 :: Sleeping for 10 minutes.")
+                    log.debug(":: 503 :: Sleeping for 10 minutes.")
                 finally:
                     await asyncio.sleep(600)
 
