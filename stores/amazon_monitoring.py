@@ -302,7 +302,7 @@ class AmazonMonitor(aiohttp.ClientSession):
 
         # Loop will only exit if a qualified seller is returned.
         while True:
-            if self.group_num == self.get_current_group():
+            if self.group_num == self.get_current_group() and not self.validated:
                 c = 0
                 while c < 5:
                     validated = await self.validate_session()
