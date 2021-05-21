@@ -326,7 +326,7 @@ class AmazonMonitor(aiohttp.ClientSession):
             if self.item.id in ItemsHandler.offerid_list.keys():
                 offering_id = next(ItemsHandler.offerid_list[self.item.id])
                 log.debug(f"grabbing offering id: {offering_id}")
-                log.debug(f"fetching json endpoint")
+                log.debug("fetching json endpoint")
                 status, json_str = await self.aio_get(
                     self.atc_json_url(offering_id=offering_id)
                 )
