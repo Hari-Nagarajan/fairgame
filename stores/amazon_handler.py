@@ -80,19 +80,25 @@ class AmazonStoreHandler(BaseStoreHandler):
         global queue
         queue = asyncio.Queue()
         log.debug("Creating checkout handler")
+        if self.amazon_domain.endswith(".com"):
+            cookie_suffix = "main"
+        else:
+            cookie_suffix = "acb" + self.amazon_domain.split(".")[-1]
+        cookie_list = [
+            "session-id",
+            "x-amz-captcha-1",
+            "x-amz-captcha-2",
+            f"ubid-{cookie_suffix}",
+            f"x-{cookie_suffix}",
+            f"at-{cookie_suffix}",
+            f"sess-at-{cookie_suffix}",
+        ]
         amazon_checkout = AmazonCheckoutHandler(
             notification_handler=self.notification_handler,
             amazon_config=amazon_config,
-            cookie_list=[
-                "session-id",
-                "x-amz-captcha-1",
-                "x-amz-captcha-2",
-                "ubid-main",
-                "x-main",
-                "at-main",
-                "sess-at-main",
-            ],
+            cookie_list=cookie_list,
             profile_path=self.profile_path,
+            amazon_domain=self.amazon_domain,
         )
         log.debug("Creating monitoring handler")
         amazon_monitoring = AmazonMonitoringHandler(
@@ -180,7 +186,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                             condition=condition,
                             merchant_id=merchant_id,
                             furl=furl(
-                                url=f"https://smile.amazon.com/gp/aod/ajax?asin={asin}"
+                                url=f"https://{self.amazon_domain}/gp/aod/ajax?asin={asin}"
                             ),
                         )
                     )
