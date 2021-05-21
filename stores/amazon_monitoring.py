@@ -183,6 +183,7 @@ class AmazonMonitor(aiohttp.ClientSession):
         **kwargs,
     ):
         super(self.__class__, self).__init__(*args, **kwargs)
+        self.validated = False
         self.group_num = group_num
         self.item = ItemsHandler.pop()
         self.check_count = 1
@@ -274,20 +275,12 @@ class AmazonMonitor(aiohttp.ClientSession):
             status, response_text = await self.async_captcha_solve(
                 captcha_element[0], self.domain
             )
-        log.debug("Session validated")
-        return True
+        else:
+            log.debug("Received Session-Token")
+            return True
+
 
     async def stock_check(self, queue: asyncio.Queue, future: asyncio.Future):
-        c = 0
-        while c < 5:
-            validated = await self.validate_session()
-            if validated:
-                break
-            c += 1
-        if c == 5:
-            session = self.fail_recreate()
-            future.set_result(session)
-
         # Do first response outside of while loop, so we can continue on captcha checks
         # and return to start of while loop with that response. Requires the next response
         # to be grabbed at end of while loop
@@ -308,6 +301,18 @@ class AmazonMonitor(aiohttp.ClientSession):
 
         # Loop will only exit if a qualified seller is returned.
         while True:
+            if self.group_num == self.get_current_group():
+                c = 0
+                while c < 5:
+                    validated = await self.validate_session()
+                    if validated:
+                        self.validated = True
+                        break
+                    c += 1
+                    await asyncio.sleep(delay)
+                if c == 5:
+                    session = self.fail_recreate()
+                    future.set_result(session)
             if self.current_group and self.switch_group_timer():
                 self.switch_proxy_group()
             if self.connector.proxy_url not in self.current_group_proxies:
@@ -328,7 +333,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                 offering_id = next(ItemsHandler.offerid_list[self.item.id])
                 log.debug(f"{self.item.id} :: grabbing offering id: {offering_id}")
                 log.debug(f"{self.item.id} :: fetching json endpoint")
-                status, json_str = await self.aio_get(
+                status, response_text = await self.aio_get(
                     self.atc_json_url(offering_id=offering_id)
                 )
 
@@ -336,28 +341,30 @@ class AmazonMonitor(aiohttp.ClientSession):
                     f"{self.item.id} :: JSON :: {self.connector.proxy_url} :: {status}"
                 )
 
-                if status != 503:
+                if status != 503 and response_text is not None:
                     try:
-                        json_dict = json.loads(json_str.strip())
+                        json_dict = json.loads(response_text)
                         log.debug(f"{self.item.id} :: {json_dict}")
                         if "statusList" not in json_dict.keys():
-                            for item in json_dict["items"]:
-                                if item["ASIN"] == self.item.id:
-                                    save_html_response(
-                                        "atc_json_in_stock", status, json_str
-                                    )
-                                    await queue.put(offering_id)
-                                    await wait_timer(end_time)
-                                    end_time = time.time() + delay
-                                    self.check_count += 1
-                                    self.next_item()
+                            try:
+                                for item in json_dict["items"]:
+                                    if item["ASIN"] == self.item.id:
+                                        save_html_response(
+                                            "atc_json_in_stock", status, json_str
+                                        )
+                                        await queue.put(offering_id)
+                                        await wait_timer(end_time)
+                                        end_time = time.time() + delay
+                                        self.check_count += 1
+                                        self.next_item()
+                            except KeyError as e:
+                                log.debug(e)
                         else:
                             log.debug(f"{self.item.id} not in stock")
                             await wait_timer(end_time)
                             end_time = time.time() + delay
                             self.check_count += 1
                             self.next_item()
-
                     except json.decoder.JSONDecodeError:
                         text_response = json_str
                         tree = check_response(text_response)
@@ -380,6 +387,10 @@ class AmazonMonitor(aiohttp.ClientSession):
                             end_time = time.time() + delay
                             self.check_count += 1
                             self.next_item()
+
+                    except AttributeError as e:
+                        log.debug(e)
+
 
             else:
                 tree = check_response(response_text)
