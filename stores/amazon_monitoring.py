@@ -43,7 +43,6 @@ from utils.misc import (
     check_response,
     BadProxyCollector as bpc,
     ItemsHandler,
-    UserAgentBook,
 )
 
 from common.amazon_support import (
@@ -80,6 +79,10 @@ AMAZON_URLS = {
     "PTC_GET": "https://{domain}/gp/cart/view.html/ref=lh_co_dup?ie=UTF8&proceedToCheckout.x=129",
     "PYO_POST": "https://{domain}/gp/buy/spc/handlers/static-submit-decoupled.html/ref=ox_spc_place_order?",
 }
+
+TEST_OFFERID = "7On6yp6oyBHAQdiIZ%2FoOaBwX2XF%2FFgAqRcGzZhDed%2BI11UVFqdR9aYULMUDvfF%2FASutY2lKvuFB91NY7RDQH2jRP6bLHRLKpBpxEEWc7xXFw%2FSV40W5Z9w3m1tq1GgsO%2FiQmjLLKNY%2B1FIwRiH57iw%3D%3D"
+COOKIE_HARVEST_URL = "https://www.amazon.com/gp/overlay/display.html"
+OFFERID_PATH = "config/offerid.json"
 
 PDP_PATH = "/dp/"
 REALTIME_INVENTORY_PATH = "gp/aod/ajax?asin="
@@ -124,8 +127,10 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         self.amazon_config = amazon_config
         ua = UserAgent()
 
-        self.proxies = get_proxies(path=PROXY_FILE_PATH)
+        self.proxies = get_json(path=PROXY_FILE_PATH)
         ItemsHandler.create_items_pool(self.item_list)
+        offerid_list = get_json(path=OFFERID_PATH)
+        ItemsHandler.create_oid_pool(offerid_list)
 
         # Initialize the Session we'll use for stock checking
         log.debug("Initializing Monitoring Sessions")
@@ -133,9 +138,8 @@ class AmazonMonitoringHandler(BaseStoreHandler):
 
         if self.proxies:
             bpc.start(self.proxies)
-            ua_book = UserAgentBook()
             for group_num, proxy_group in enumerate(self.proxies, start=1):
-                AmazonMonitor.total_groups+=1
+                AmazonMonitor.total_groups += 1
                 AmazonMonitor.lengths_of_groups.append(len(proxy_group))
                 for idx in range(len(proxy_group)):
                     connector = ProxyConnector.from_url(proxy_group[idx])
@@ -148,21 +152,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
                             group_num=group_num,
                         )
                     )
-
-                    session = self.sessions_list[idx]
-                    proxy_url = str(session.connector.proxy_url)
-
-                    try:
-                        session.headers.update(
-                            {"user-agent": ua_book.user_agents[proxy_url]}
-                        )
-                    except KeyError:
-                        ua_book.user_agents.update({proxy_url: ua.random})
-                        self.sessions_list[idx].headers.update(
-                            {"user-agent": ua_book.user_agents[proxy_url]}
-                        )
-
-            ua_book.save()
+                    self.sessions_list[idx].headers.update({"user-agent": ua.random})
         else:
             connector = None
             self.sessions_list.append(
@@ -180,7 +170,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
 class AmazonMonitor(aiohttp.ClientSession):
     lengths_of_groups = list()
     total_groups = 0
-    current_group = 1 
+    current_group = 1
     current_group_proxies = set()
     group_switch_time = time.time()
 
@@ -198,6 +188,7 @@ class AmazonMonitor(aiohttp.ClientSession):
         self.check_count = 1
         self.amazon_config = amazon_config
         self.domain = urlparse(self.item.furl.url).netloc
+        self.session_id = None
         self.delay = delay
         if self.item.purchase_delay > 0:
             self.delay = 20
@@ -217,10 +208,10 @@ class AmazonMonitor(aiohttp.ClientSession):
         if time.time() - cls.group_switch_time >= delay:
             return True
         return False
-    
+
     @classmethod
     def switch_proxy_group(cls):
-        cls.current_group+=1
+        cls.current_group += 1
         if cls.current_group > cls.total_groups:
             cls.current_group = 1
         log.debug(f"Switching to proxy group {cls.current_group}")
@@ -245,10 +236,13 @@ class AmazonMonitor(aiohttp.ClientSession):
     def next_item(self):
         self.item = ItemsHandler.pop()
 
+    def atc_json_url(self, offering_id):
+        url = f"https://smile.amazon.com/gp/add-to-cart/json?session-id={self.session_id}&clientName=retailwebsite&nextPage=cartitems&ASIN={self.item.id}Q&offerListingID={offering_id}&quantity=1"
+        return url
 
     def fail_recreate(self):
         # Something wrong, start a new task then kill this one
-        log.debug("Max consecutive request fails reached. Restarting session")
+        log.debug("Recreating Session")
         session = AmazonMonitor(
             amazon_config=self.amazon_config,
             delay=self.delay,
@@ -259,7 +253,40 @@ class AmazonMonitor(aiohttp.ClientSession):
         log.debug("Sesssion Created")
         return session
 
+    async def validate_session(self):
+        log.debug("Getting validated session for monitoring through json endpoint")
+        token = False
+        while not token:
+            await self.get(COOKIE_HARVEST_URL)
+            for cookie in self.cookie_jar:
+                if cookie.key == "session-id":
+                    self.session_id = cookie.value
+                if cookie.key == "session-token":
+                    token = True
+            await asyncio.sleep(5)
+        status, response_text = await self.aio_get(self.atc_json_url(offering_id=TEST_OFFERID))
+        tree = check_response(response_text)
+        if captcha_element := has_captcha(tree):
+            log.debug("Captcha found during monitoring task")
+            await asyncio.sleep(1)
+            status, response_text = await self.async_captcha_solve(
+                captcha_element[0], self.domain
+                )
+        save_html_response("session-validation", status, response_text)
+        log.debug("Session validated")
+        return True
+
     async def stock_check(self, queue: asyncio.Queue, future: asyncio.Future):
+        c = 0
+        while c < 5:
+            validated = await self.validate_session()
+            if validated:
+                break
+            c += 1
+        if c == 5:
+            session = self.fail_recreate()
+            future.set_result(session)
+
         # Do first response outside of while loop, so we can continue on captcha checks
         # and return to start of while loop with that response. Requires the next response
         # to be grabbed at end of while loop
@@ -268,8 +295,8 @@ class AmazonMonitor(aiohttp.ClientSession):
         fail_counter = 0  # Count sequential get fails
         delay = self.delay
         end_time = time.time() + delay
+
         status, response_text = await self.aio_get(url=self.item.furl.url)
-        # save_html_response("stock-check", status, response_text)
 
         # do this after each request
         fail_counter = check_fail(status=status, fail_counter=fail_counter)
@@ -286,10 +313,12 @@ class AmazonMonitor(aiohttp.ClientSession):
                 self.current_group_proxies.add(self.connector.proxy_url)
                 time.sleep(delay / self.get_group_total())
             elif self.group_num is not self.get_current_group():
-                await asyncio.sleep(delay)
+                await asyncio.sleep(10)
                 continue
             good_proxies = self.get_group_total() - bpc.bad_proxies
-            log.debug(f"PROXIES :: GROUP[{self.current_group}] :: GOOD={good_proxies} :: BAD={bpc.bad_proxies}")
+            log.debug(
+                f"PROXIES :: GROUP[{self.current_group}] :: GOOD={good_proxies} :: BAD={bpc.bad_proxies}"
+            )
 
             try:
                 log.debug(
@@ -297,6 +326,46 @@ class AmazonMonitor(aiohttp.ClientSession):
                 )
             except AttributeError:
                 log.debug(f"{self.item.id} : Stock Check Count = {self.check_count}")
+
+            if self.item.id in ItemsHandler.offerid_list.keys():
+                offering_id = next(ItemsHandler.offerid_list[self.item.id])
+                log.debug(f"grabbing offering id: {offering_id}")
+                log.debug(f"fetching json endpoint")
+                status, json_str = await self.aio_get(
+                    self.atc_json_url(offering_id=offering_id)
+                )
+                save_html_response("atc_json_stock_check", status, json_str)
+                try:
+                    json_dict = json.loads(json_str.strip())
+                    if "statusList" not in json_dict.keys():
+                        for item in json_dict["items"]:
+                            if item["ASIN"] == self.item.id:
+                                save_html_response("atc_json_in_stock", status, json_str)
+                                await queue.put(offering_id)
+                                continue
+                    else:
+                        log.debug("self.item.id not in stock")
+                        continue
+                except json.decoder.JSONDecodeError:
+                    text_response = json_str
+                    tree = check_response(text_response)
+                    if captcha_element := has_captcha(tree):
+                        log.debug("Captcha found during monitoring task")
+                        await asyncio.sleep(1)
+                        status, response_text = await self.async_captcha_solve(
+                            captcha_element[0], self.domain
+                        )
+                        # do this after each request
+                        fail_counter = check_fail(status=status, fail_counter=fail_counter)
+                        if fail_counter == -1:
+                            session = self.fail_recreate()
+                            future.set_result(session)
+                            return
+
+                        await wait_timer(end_time)
+                        end_time = time.time() + delay
+                        continue
+
             tree = check_response(response_text)
             if tree is not None:
                 if captcha_element := has_captcha(tree):
@@ -332,7 +401,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                     if qualified_seller:
                         log.debug("Found an offer which meets criteria")
                         if time.time() > self.block_purchase_until:
-                            await queue.put_nowait(qualified_seller)
+                            await queue.put(qualified_seller)
                             log.debug("Offer placed in queue")
                             log.debug("Quitting monitoring task")
                             future.set_result(None)
@@ -370,7 +439,6 @@ class AmazonMonitor(aiohttp.ClientSession):
                 finally:
                     await asyncio.sleep(600)
 
-
     async def aio_get(self, url):
         text = None
         try:
@@ -405,8 +473,8 @@ class AmazonMonitor(aiohttp.ClientSession):
                 f = furl(domain)  # Use the original URL to get the schema and host
                 f = f.set(path=captcha_element.attrib["action"])
                 f.add(args=input_dict)
-                status, response = await self.aio_get(f.url)
-                return status, response
+                status, response_text = await self.aio_get(url=f.url)
+                return status, response_text
         return None
 
 
@@ -589,7 +657,7 @@ def get_qualified_seller(item, sellers, check_shipping=False) -> SellerDetail or
         return seller
 
 
-def get_proxies(path=PROXY_FILE_PATH):
+def get_json(path):
     """Initialize proxies from json configuration file"""
     # TODO: verify format of json?
     if os.path.exists(path):

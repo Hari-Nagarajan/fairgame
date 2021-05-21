@@ -144,19 +144,6 @@ def parse_html_source(data):
     return tree
 
 
-class UserAgentBook:
-    def __init__(self, fp="config/user_agents.json"):
-        self.fp = fp
-        self.user_agents = dict()
-        if os.path.exists(fp):
-            with open(fp) as f:
-                self.user_agents = json.load(f)
-
-    def save(self):
-        with open(self.fp, "w") as f:
-            json.dump(self.user_agents, f, indent=4)
-
-
 class ItemsHandler:
     @classmethod
     def create_items_pool(cls, item_list):
@@ -166,9 +153,22 @@ class ItemsHandler:
         cls.items = cycle(item_list)
 
     @classmethod
+    def create_oid_pool(cls, offerid_list):
+        cls.offerid_list = offerid_list
+        to_del = list()
+        if offerid_list:
+            for asin in cls.offerid_list.keys():
+                if cls.offerid_list[asin]:
+                    cls.offerid_list[asin] = cycle(cls.offerid_list[asin])
+                else:
+                    to_del.append(asin)
+        if to_del:
+            for asin in to_del:
+                del cls.offerid_list[asin]
+
+    @classmethod
     def pop(cls):
         return next(cls.items)
-
 
     @classmethod
     def length(cls):
@@ -190,4 +190,3 @@ class BadProxyCollector:
         if status == 200 and url in cls.collection:
             cls.collection.discard(url)
         cls.bad_proxies = len(cls.collection)
-
