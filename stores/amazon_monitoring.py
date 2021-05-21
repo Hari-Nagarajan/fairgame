@@ -378,6 +378,8 @@ class AmazonMonitor(aiohttp.ClientSession):
 
                                 await wait_timer(end_time)
                                 end_time = time.time() + delay
+                                self.check_count += 1
+                                self.next_item()
                                 continue
                     except AttributeError as e:
                         log.debug(e)
@@ -407,6 +409,8 @@ class AmazonMonitor(aiohttp.ClientSession):
 
                         await wait_timer(end_time)
                         end_time = time.time() + delay
+                        self.check_count += 1
+                        self.next_item()
                         continue
                     if tree is not None and (
                         sellers := get_item_sellers(
