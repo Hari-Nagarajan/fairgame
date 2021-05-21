@@ -318,31 +318,21 @@ class AmazonMonitor(aiohttp.ClientSession):
 
             try:
                 log.debug(
-                        f"{self.item.id} :: PROX_GROUP[{self.current_group}] :: {self.connector.proxy_url} :: Stock Check Count = {self.check_count}"
+                        f"{self.item.id} :: PROXY_GROUP[{self.current_group}] :: {self.connector.proxy_url} :: Stock Check Count = {self.check_count}"
                 )
             except AttributeError:
                 log.debug(f"{self.item.id} : Stock Check Count = {self.check_count}")
 
             if self.item.id in ItemsHandler.offerid_list.keys():
                 offering_id = next(ItemsHandler.offerid_list[self.item.id])
-                log.debug(f"grabbing offering id: {offering_id}")
-                log.debug("fetching json endpoint")
+                log.debug(f":: {self.item.id} :: grabbing offering id: {offering_id}")
+                log.debug(f":: {self.item.id} :: fetching json endpoint")
                 status, json_str = await self.aio_get(
                     self.atc_json_url(offering_id=offering_id)
                 )
                 save_html_response("atc_json_stock_check", status, json_str)
-                if self.connector:
-                    bpc.record(status, self.connector)
-                if status == 503:
-                    try:
-                        log.debug(
-                            f":: 503 :: {self.connector.proxy_url} :: Sleeping for 10 minutes."
-                        )
-                    except AttributeError:
-                        log.debug(":: 503 :: Sleeping for 10 minutes.")
-                    finally:
-                        await asyncio.sleep(600)
-                        continue
+
+                log.debug(f":: JSON :: {self.connector.proxy_url} :: {status}")
 
                 try:
                     json_dict = json.loads(json_str.strip())
@@ -355,14 +345,12 @@ class AmazonMonitor(aiohttp.ClientSession):
                                 end_time = time.time() + delay
                                 self.check_count += 1
                                 self.next_item()
-                                continue
                     else:
-                        log.debug("self.item.id not in stock")
+                        log.debug(f"{self.item.id} not in stock")
                         await wait_timer(end_time)
                         end_time = time.time() + delay
                         self.check_count += 1
                         self.next_item()
-                        continue
 
                 except json.decoder.JSONDecodeError:
                     text_response = json_str
@@ -384,80 +372,71 @@ class AmazonMonitor(aiohttp.ClientSession):
                         end_time = time.time() + delay
                         self.check_count += 1
                         self.next_item()
+
+            else:
+                tree = check_response(response_text)
+                if tree is not None:
+                    if captcha_element := has_captcha(tree):
+                        log.debug("Captcha found during monitoring task")
+                        # wait a second so it doesn't continuously hit captchas very quickly
+                        # TODO: maybe track captcha hits so that it aborts after several?
+                        await asyncio.sleep(1)
+                        # get the next response after solving captcha and then continue to next loop iteration
+                        status, response_text = await self.async_captcha_solve(
+                            captcha_element[0], self.domain
+                        )
+
+                        # do this after each request
+                        fail_counter = check_fail(status=status, fail_counter=fail_counter)
+                        if fail_counter == -1:
+                            session = self.fail_recreate()
+                            future.set_result(session)
+                            return
+
+                        await wait_timer(end_time)
+                        end_time = time.time() + delay
                         continue
+                    if tree is not None and (
+                        sellers := get_item_sellers(
+                            tree,
+                            item=self.item,
+                            free_shipping_strings=self.amazon_config["FREE_SHIPPING"],
+                        )
+                    ):
+                        qualified_seller = get_qualified_seller(
+                            item=self.item, sellers=sellers
+                        )
+                        if qualified_seller:
+                            log.debug("Found an offer which meets criteria")
+                            if time.time() > self.block_purchase_until:
+                                await queue.put(qualified_seller)
+                                log.debug("Offer placed in queue")
+                                log.debug("Quitting monitoring task")
+                                future.set_result(None)
+                                return None
+                            else:
+                                log.debug(
+                                    f"Purchasing is blocked until {self.block_purchase_until}. It is now {time.time()}."
+                                )
+                # failed to find seller. Wait a delay period then check again
+                log.debug("No offers found which meet product criteria")
+                await wait_timer(end_time)
+                end_time = time.time() + delay
+                status, response_text = await self.aio_get(url=self.item.furl.url)
+                # save_html_response("stock-check", status, response_text)
 
-            tree = check_response(response_text)
-            if tree is not None:
-                if captcha_element := has_captcha(tree):
-                    log.debug("Captcha found during monitoring task")
-                    # wait a second so it doesn't continuously hit captchas very quickly
-                    # TODO: maybe track captcha hits so that it aborts after several?
-                    await asyncio.sleep(1)
-                    # get the next response after solving captcha and then continue to next loop iteration
-                    status, response_text = await self.async_captcha_solve(
-                        captcha_element[0], self.domain
-                    )
+                log.debug(f":: AJAX :: {self.connector.proxy_url} :: {status}")
 
-                    # do this after each request
-                    fail_counter = check_fail(status=status, fail_counter=fail_counter)
-                    if fail_counter == -1:
-                        session = self.fail_recreate()
-                        future.set_result(session)
-                        return
+                # do this after each request
+                fail_counter = check_fail(status=status, fail_counter=fail_counter)
+                if fail_counter == -1:
+                    session = self.fail_recreate()
+                    future.set_result(session)
+                    return
 
-                    await wait_timer(end_time)
-                    end_time = time.time() + delay
-                    continue
-                if tree is not None and (
-                    sellers := get_item_sellers(
-                        tree,
-                        item=self.item,
-                        free_shipping_strings=self.amazon_config["FREE_SHIPPING"],
-                    )
-                ):
-                    qualified_seller = get_qualified_seller(
-                        item=self.item, sellers=sellers
-                    )
-                    if qualified_seller:
-                        log.debug("Found an offer which meets criteria")
-                        if time.time() > self.block_purchase_until:
-                            await queue.put(qualified_seller)
-                            log.debug("Offer placed in queue")
-                            log.debug("Quitting monitoring task")
-                            future.set_result(None)
-                            return None
-                        else:
-                            log.debug(
-                                f"Purchasing is blocked until {self.block_purchase_until}. It is now {time.time()}."
-                            )
-            # failed to find seller. Wait a delay period then check again
-            log.debug("No offers found which meet product criteria")
-            await wait_timer(end_time)
-            end_time = time.time() + delay
-            status, response_text = await self.aio_get(url=self.item.furl.url)
-            # save_html_response("stock-check", status, response_text)
+                self.check_count += 1
+                self.next_item()
 
-            # do this after each request
-            fail_counter = check_fail(status=status, fail_counter=fail_counter)
-            if fail_counter == -1:
-                session = self.fail_recreate()
-                future.set_result(session)
-                return
-
-            self.check_count += 1
-            self.next_item()
-
-            if self.connector:
-                bpc.record(status, self.connector)
-            if status == 503:
-                try:
-                    log.debug(
-                        f":: 503 :: {self.connector.proxy_url} :: Sleeping for 10 minutes."
-                    )
-                except AttributeError:
-                    log.debug(":: 503 :: Sleeping for 10 minutes.")
-                finally:
-                    await asyncio.sleep(600)
 
     async def aio_get(self, url):
         text = None
