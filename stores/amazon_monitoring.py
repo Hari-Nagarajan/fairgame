@@ -345,7 +345,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                 if status != 503 and response_text is not None:
                     try:
                         json_dict = json.loads(response_text)
-                        log.debug(f"{self.item.id} :: {json_dict}")
+                        log.debug(f"{self.item.id} :: {self.connector.proxy_url} :: {json_dict}")
                         if "statusList" not in json_dict.keys():
                             try:
                                 for item in json_dict["items"]:
