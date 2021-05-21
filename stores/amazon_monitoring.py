@@ -20,7 +20,6 @@
 import json
 import os
 import platform
-import concurrent.futures
 
 import time
 import typing
@@ -82,6 +81,7 @@ AMAZON_URLS = {
 }
 
 COOKIE_HARVEST_URL = "https://www.amazon.com/gp/overlay/display.html"
+OFFERID_PATH = "config/offerid.json"
 
 PDP_PATH = "/dp/"
 REALTIME_INVENTORY_PATH = "gp/aod/ajax?asin="
@@ -126,17 +126,20 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         self.amazon_config = amazon_config
         ua = UserAgent()
 
-        self.proxies = get_proxies(path=PROXY_FILE_PATH)
+        self.proxies = get_json(path=PROXY_FILE_PATH)
+        offerid_list = get_json(path=OFFERID_PATH)
         ItemsHandler.create_items_pool(self.item_list)
+        ItemsHandler.create_oid_pool(offerid_list)
 
         # Initialize the Session we'll use for stock checking
         log.debug("Initializing Monitoring Sessions")
         self.sessions_list: Optional[List[AmazonMonitor]] = []
 
+
         if self.proxies:
             bpc.start(self.proxies)
             for group_num, proxy_group in enumerate(self.proxies, start=1):
-                AmazonMonitor.total_groups+=1
+                AmazonMonitor.total_groups += 1
                 AmazonMonitor.lengths_of_groups.append(len(proxy_group))
                 for idx in range(len(proxy_group)):
                     connector = ProxyConnector.from_url(proxy_group[idx])
@@ -193,7 +196,6 @@ class AmazonMonitor(aiohttp.ClientSession):
             self.delay = 20
         self.block_purchase_until = time.time() + self.item.purchase_delay
         log.debug("Initializing Monitoring Task")
-        self.validate_session()
 
     @classmethod
     def set_last_task(cls):
@@ -208,10 +210,10 @@ class AmazonMonitor(aiohttp.ClientSession):
         if time.time() - cls.group_switch_time >= delay:
             return True
         return False
-    
+
     @classmethod
     def switch_proxy_group(cls):
-        cls.current_group+=1
+        cls.current_group += 1
         if cls.current_group > cls.total_groups:
             cls.current_group = 1
         log.debug(f"Switching to proxy group {cls.current_group}")
@@ -236,8 +238,8 @@ class AmazonMonitor(aiohttp.ClientSession):
     def next_item(self):
         self.item = ItemsHandler.pop()
 
-    def atc_json_url(self):
-        url = f"https://smile.amazon.com/gp/add-to-cart/json?session-id={self.session_id}&clientName=retailwebsite&nextPage=cartitems&ASIN={self.item.id}Q&offerListingID={self.offer_id}&quantity=1"
+    def atc_json_url(self, offering_id):
+        url = f"https://smile.amazon.com/gp/add-to-cart/json?session-id={self.session_id}&clientName=retailwebsite&nextPage=cartitems&ASIN={self.item.id}Q&offerListingID={offering_id}&quantity=1"
         return url
 
     def fail_recreate(self):
@@ -253,7 +255,8 @@ class AmazonMonitor(aiohttp.ClientSession):
         log.debug("Sesssion Created")
         return session
 
-    async def validate_session(self, future: asyncio.Future):
+    async def validate_session(self):
+        log.debug("Getting validated session for monitoring through json endpoint")
         token = False
         while not token:
             await self.get(COOKIE_HARVEST_URL)
@@ -262,15 +265,26 @@ class AmazonMonitor(aiohttp.ClientSession):
                     self.session_id = cookie.value
                 if cookie.key == "session-token":
                     token = True
-        await asyncio.sleep(2)
+        await asyncio.sleep(5)
         status, response_text = await self.aio_get(self.atc_json_url())
         if len(response_text.strip()) > 300:
             save_html_response("stock-check", status, response_text)
             log.debug("Failed to Validate Session.")
+            return False
+        log.debug("Session validated")
+        return True
+
+    async def stock_check(self, queue: asyncio.Queue, future: asyncio.Future):
+        c = 0
+        while c < 5:
+            validated = await self.validate_session()
+            if validated:
+                break
+            c += 1
+        if c == 5:
             session = self.fail_recreate()
             future.set_result(session)
 
-    async def stock_check(self, queue: asyncio.Queue, future: asyncio.Future):
         # Do first response outside of while loop, so we can continue on captcha checks
         # and return to start of while loop with that response. Requires the next response
         # to be grabbed at end of while loop
@@ -281,9 +295,6 @@ class AmazonMonitor(aiohttp.ClientSession):
         end_time = time.time() + delay
 
         status, response_text = await self.aio_get(url=self.item.furl.url)
-
-        _, json_str = await self.aio_get(self.atc_json_url())
-        json_dict = json.loads(json_str.strip())
 
         # do this after each request
         fail_counter = check_fail(status=status, fail_counter=fail_counter)
@@ -300,14 +311,22 @@ class AmazonMonitor(aiohttp.ClientSession):
                 self.current_group_proxies.add(self.connector.proxy_url)
                 time.sleep(delay / self.get_group_total())
             elif self.group_num is not self.get_current_group():
-                await asyncio.sleep(delay)
+                await asyncio.sleep(10)
                 continue
             good_proxies = self.get_group_total() - bpc.bad_proxies
             log.debug(f"PROXIES :: GROUP[{self.current_group}] :: GOOD={good_proxies} :: BAD={bpc.bad_proxies}")
 
-            _, json_str = await self.aio_get(self.atc_json_url())
-            json_dict = json.loads(json_str.strip())
-            json_keys = json_dict.keys()
+            for asin in ItemsHandler.offerid_list.keys():
+                if self.item.id == asin:
+                    offering_id = next(ItemsHandler.offerid_list[asin])
+                    _, json_str = await self.aio_get(self.atc_json_url(offering_id=offering_id))
+                    json_dict = json.loads(json_str.strip())
+                    json_keys = json_dict.keys()
+                    for k in json_keys:
+                        if k.lower() == "statuslist":
+                            continue
+                        else:
+                            await queue.put(offering_id)
 
             try:
                 log.debug(
@@ -607,7 +626,7 @@ def get_qualified_seller(item, sellers, check_shipping=False) -> SellerDetail or
         return seller
 
 
-def get_proxies(path=PROXY_FILE_PATH):
+def get_json(path):
     """Initialize proxies from json configuration file"""
     # TODO: verify format of json?
     if os.path.exists(path):
