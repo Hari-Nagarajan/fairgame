@@ -330,48 +330,49 @@ class AmazonMonitor(aiohttp.ClientSession):
                 status, json_str = await self.aio_get(
                     self.atc_json_url(offering_id=offering_id)
                 )
-                save_html_response("atc_json_stock_check", status, json_str)
 
                 log.debug(f"{self.item.id} :: JSON :: {self.connector.proxy_url} :: {status}")
 
-                try:
-                    json_dict = json.loads(json_str.strip())
-                    if "statusList" not in json_dict.keys():
-                        for item in json_dict["items"]:
-                            if item["ASIN"] == self.item.id:
-                                save_html_response("atc_json_in_stock", status, json_str)
-                                await queue.put(offering_id)
-                                await wait_timer(end_time)
-                                end_time = time.time() + delay
-                                self.check_count += 1
-                                self.next_item()
-                    else:
-                        log.debug(f"{self.item.id} not in stock")
-                        await wait_timer(end_time)
-                        end_time = time.time() + delay
-                        self.check_count += 1
-                        self.next_item()
+                if status != 503:
+                    try:
+                        json_dict = json.loads(json_str.strip())
+                        log.debug(f"{self.item.id} :: {json_dict}")
+                        if "statusList" not in json_dict.keys():
+                            for item in json_dict["items"]:
+                                if item["ASIN"] == self.item.id:
+                                    save_html_response("atc_json_in_stock", status, json_str)
+                                    await queue.put(offering_id)
+                                    await wait_timer(end_time)
+                                    end_time = time.time() + delay
+                                    self.check_count += 1
+                                    self.next_item()
+                        else:
+                            log.debug(f"{self.item.id} not in stock")
+                            await wait_timer(end_time)
+                            end_time = time.time() + delay
+                            self.check_count += 1
+                            self.next_item()
 
-                except json.decoder.JSONDecodeError:
-                    text_response = json_str
-                    tree = check_response(text_response)
-                    if captcha_element := has_captcha(tree):
-                        log.debug("Captcha found during monitoring task")
-                        await asyncio.sleep(1)
-                        status, response_text = await self.async_captcha_solve(
-                            captcha_element[0], self.domain
-                        )
-                        # do this after each request
-                        fail_counter = check_fail(status=status, fail_counter=fail_counter)
-                        if fail_counter == -1:
-                            session = self.fail_recreate()
-                            future.set_result(session)
-                            return
+                    except json.decoder.JSONDecodeError:
+                        text_response = json_str
+                        tree = check_response(text_response)
+                        if captcha_element := has_captcha(tree):
+                            log.debug("Captcha found during monitoring task")
+                            await asyncio.sleep(1)
+                            status, response_text = await self.async_captcha_solve(
+                                captcha_element[0], self.domain
+                            )
+                            # do this after each request
+                            fail_counter = check_fail(status=status, fail_counter=fail_counter)
+                            if fail_counter == -1:
+                                session = self.fail_recreate()
+                                future.set_result(session)
+                                return
 
-                        await wait_timer(end_time)
-                        end_time = time.time() + delay
-                        self.check_count += 1
-                        self.next_item()
+                            await wait_timer(end_time)
+                            end_time = time.time() + delay
+                            self.check_count += 1
+                            self.next_item()
 
             else:
                 tree = check_response(response_text)
