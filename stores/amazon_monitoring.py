@@ -255,32 +255,32 @@ class AmazonMonitor(aiohttp.ClientSession):
         return session
 
     async def validate_session(self):
-        log.debug("Getting validated session for monitoring through json endpoint")
-        token = False
-        while not token:
-            await self.get(COOKIE_HARVEST_URL)
-            for cookie in self.cookie_jar:
-                if cookie.key == "session-id":
-                    self.session_id = cookie.value
-                if cookie.key == "session-token":
-                    token = True
-            await asyncio.sleep(5)
-        _, response_text = await self.aio_get(
-            self.atc_json_url(offering_id=TEST_OFFERID)
-        )
-        tree = check_response(response_text)
-        if captcha_element := has_captcha(tree):
-            log.debug("Captcha found during validation task")
-            await asyncio.sleep(1)
-            try:
+        try:
+            log.debug("Getting validated session for monitoring through json endpoint")
+            token = False
+            while not token:
+                await self.get(COOKIE_HARVEST_URL)
+                for cookie in self.cookie_jar:
+                    if cookie.key == "session-id":
+                        self.session_id = cookie.value
+                    if cookie.key == "session-token":
+                        token = True
+                await asyncio.sleep(5)
+            _, response_text = await self.aio_get(
+                self.atc_json_url(offering_id=TEST_OFFERID)
+            )
+            tree = check_response(response_text)
+            if captcha_element := has_captcha(tree):
+                log.debug("Captcha found during validation task")
+                await asyncio.sleep(1)
                 status, response_text = await self.async_captcha_solve(
                     captcha_element[0], self.domain
                 )
-            except TypeError:
-                pass
-        else:
-            log.debug("Received Session-Token")
-            return True
+            else:
+                log.debug("Received Session-Token")
+                return True
+        except TypeError:
+            pass
 
 
     async def stock_check(self, queue: asyncio.Queue, future: asyncio.Future):
