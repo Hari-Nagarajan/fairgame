@@ -336,7 +336,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                 if status != 503 and response_text is not None:
                     stock = self.parse_json(response_text=response_text)
                     if stock:
-                        ItemsHandler.throw_out(self.item)
+                        ItemsHandler.trash(self.item)
                         await queue.put(offering_id)
                         save_html_response(f"in-stock_{self.item.id}", status, response_text)
                 else:
@@ -439,6 +439,8 @@ class AmazonMonitor(aiohttp.ClientSession):
                 return
             self.check_count += 1
             self.next_item()
+            if ItemsHandler.timer():
+                ItemsHandler.refresh()
 
     async def aio_get(self, url):
         text = None

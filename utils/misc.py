@@ -147,6 +147,8 @@ def parse_html_source(data):
 class ItemsHandler:
     @classmethod
     def create_items_pool(cls, item_list):
+        cls.start = time.time()
+        cls.removed_items = list()
         cls.items = item_list
         cls.circular_array = cycle(cls.items)
 
@@ -165,9 +167,23 @@ class ItemsHandler:
                 del cls.offerid_list[asin]
 
     @classmethod
-    def throw_out(cls, item):
-        cls.items.remove(item)
+    def trash(cls, item):
+        i = cls.items.index(item)
+        cls.removed_items.append(cls.items.pop(i))
         cls.circular_array = cycle(cls.items)
+
+    @classmethod
+    def refresh(cls):
+        if cls.removed_items:
+            for item in cls.removed_items:
+                cls.items.append(item)
+                cls.circular_array = cycle(cls.items)
+
+    @classmethod
+    def timer(cls):
+        if time.time() - cls.start > 600:
+            return True
+
 
     @classmethod
     def pop(cls):
