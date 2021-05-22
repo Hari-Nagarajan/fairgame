@@ -179,6 +179,7 @@ class ItemsHandler:
             for item in cls.removed_items:
                 cls.items.append(item)
                 cls.circular_array = cycle(cls.items)
+                cls.removed_items.clear()
 
     @classmethod
     def timer(cls):
