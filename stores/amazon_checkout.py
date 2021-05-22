@@ -460,7 +460,7 @@ class AmazonCheckoutHandler(BaseStoreHandler):
                     try:
                         status, text = await aio_get(
                             self.checkout_session,
-                            f"https://{domain}/gp/buy/thankyou/handlers/display.html?_from=cheetah&checkMFA=1&purchaseId={pid}&referrer=yield&pid={pid}&pipelineType=turbo&clientId=retailwebsite&temporaryAddToCart=1&hostPage=detail&weblab=RCX_CHECKOUT_TURBO_DESKTOP_PRIME_87783",
+                            f"https://{self.amazon_domain}/gp/buy/thankyou/handlers/display.html?_from=cheetah&checkMFA=1&purchaseId={pid}&referrer=yield&pid={pid}&pipelineType=turbo&clientId=retailwebsite&temporaryAddToCart=1&hostPage=detail&weblab=RCX_CHECKOUT_TURBO_DESKTOP_PRIME_87783",
                         )
                         save_html_response("order-confirm", status, text)
                     except aiohttp.ClientError:
