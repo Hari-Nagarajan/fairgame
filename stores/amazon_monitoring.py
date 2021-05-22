@@ -325,32 +325,33 @@ class AmazonMonitor(aiohttp.ClientSession):
 
             try:
                 log.debug(
-                    f"{self.item.id} :: PROXY_GROUP[{self.current_group}] :: {self.connector.proxy_url} :: Stock Check Count = {self.check_count}"
+                    f"{self.item.id} : PROXY_GROUP[{self.current_group}] : {self.connector.proxy_url} : Stock Check Count = {self.check_count}"
                 )
             except AttributeError:
                 log.debug(f"{self.item.id} : Stock Check Count = {self.check_count}")
 
             if self.item.id in ItemsHandler.offerid_list.keys():
                 offering_id = next(ItemsHandler.offerid_list[self.item.id])
-                log.debug(f"{self.item.id} :: grabbing offering id: {offering_id}")
-                log.debug(f"{self.item.id} :: fetching json endpoint")
+                log.debug(f"{self.item.id} : grabbing offering id: {offering_id}")
+                log.debug(f"{self.item.id} : fetching json endpoint")
                 status, response_text = await self.aio_get(
                     self.atc_json_url(offering_id=offering_id)
                 )
 
                 log.debug(
-                    f"{self.item.id} :: JSON :: {self.connector.proxy_url} :: {status}"
+                    f"{self.item.id} : JSON : {self.connector.proxy_url} : {status}"
                 )
 
                 if status != 503 and response_text is not None:
                     json_dict = None
                     try:
                         json_dict = json.loads(response_text)
-                        log.debug(f"{self.item.id} :: {self.connector.proxy_url} :: {json_dict}")
+                        log.debug(f"{self.item.id} : {self.connector.proxy_url} : {json_dict}")
                         if "statusList" not in json_dict.keys():
                             try:
                                 for item in json_dict["items"]:
                                     if item["ASIN"] == self.item.id:
+                                        log.debug(f"{self.item.id} : In-Stock! Passing task to checkout worker.")
                                         await queue.put(offering_id)
                                         save_html_response(
                                             "atc_json_in_stock", status, response_text
@@ -443,7 +444,7 @@ class AmazonMonitor(aiohttp.ClientSession):
             # save_html_response("stock-check", status, response_text)
 
             log.debug(
-                f"{self.item.id} :: AJAX :: {self.connector.proxy_url} :: {status}"
+                f"{self.item.id} : AJAX : {self.connector.proxy_url} : {status}"
             )
 
             # do this after each request
