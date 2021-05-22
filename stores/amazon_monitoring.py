@@ -330,16 +330,15 @@ class AmazonMonitor(aiohttp.ClientSession):
             except AttributeError:
                 log.debug(f"{self.item.id} : Stock Check Count = {self.check_count}")
 
-            if self.item.id in ItemsHandler.offerid_list.keys():
+            if self.item.id in ItemsHandler.offerid_list.keys():                
+                log.debug(
+                    f"{self.item.id} : JSON : {self.connector.proxy_url} : {status}"
+                )
                 offering_id = next(ItemsHandler.offerid_list[self.item.id])
                 log.debug(f"{self.item.id} : grabbing offering id: {offering_id}")
                 log.debug(f"{self.item.id} : fetching json endpoint")
                 status, response_text = await self.aio_get(
                     self.atc_json_url(offering_id=offering_id)
-                )
-
-                log.debug(
-                    f"{self.item.id} : JSON : {self.connector.proxy_url} : {status}"
                 )
 
                 if status != 503 and response_text is not None:
@@ -388,6 +387,9 @@ class AmazonMonitor(aiohttp.ClientSession):
 
 
             else:
+                log.debug(
+                f"{self.item.id} : AJAX : {self.connector.proxy_url} : {status}"
+            )
                 tree = check_response(response_text)
                 if tree is not None:
                     if captcha_element := has_captcha(tree):
@@ -441,13 +443,10 @@ class AmazonMonitor(aiohttp.ClientSession):
             await wait_timer(end_time)
             end_time = time.time() + delay
             status, response_text = await self.aio_get(url=self.item.furl.url)
+            
             # save_html_response("stock-check", status, response_text)
-
-            log.debug(
-                f"{self.item.id} : AJAX : {self.connector.proxy_url} : {status}"
-            )
-
             # do this after each request
+            
             fail_counter = check_fail(status=status, fail_counter=fail_counter)
             if fail_counter == -1:
                 session = self.fail_recreate()
