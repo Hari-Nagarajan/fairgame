@@ -280,7 +280,6 @@ class AmazonMonitor(aiohttp.ClientSession):
                 log.debug("Received Session-Token")
                 return True
 
-
     async def stock_check(self, queue: asyncio.Queue, future: asyncio.Future):
         # Do first response outside of while loop, so we can continue on captcha checks
         # and return to start of while loop with that response. Requires the next response
@@ -330,13 +329,17 @@ class AmazonMonitor(aiohttp.ClientSession):
             except AttributeError:
                 log.debug(f"{self.item.id} : Stock Check Count = {self.check_count}")
 
-            if self.item.id in ItemsHandler.offerid_list.keys():                
+            if self.item.id in ItemsHandler.offerid_list.keys():
                 log.debug(
                     f"{self.item.id} : JSON : {self.connector.proxy_url} : {status}"
                 )
                 offering_id = next(ItemsHandler.offerid_list[self.item.id])
-                log.debug(f"{self.item.id} : {self.connector.proxy_url} : grabbing offering id: {offering_id}")
-                log.debug(f"{self.item.id} : {self.connector.proxy_url} : fetching json endpoint")
+                log.debug(
+                    f"{self.item.id} : {self.connector.proxy_url} : grabbing offering id: {offering_id}"
+                )
+                log.debug(
+                    f"{self.item.id} : {self.connector.proxy_url} : fetching json endpoint"
+                )
                 status, response_text = await self.aio_get(
                     self.atc_json_url(offering_id=offering_id)
                 )
@@ -345,25 +348,33 @@ class AmazonMonitor(aiohttp.ClientSession):
                     json_dict = None
                     try:
                         json_dict = json.loads(response_text)
-                        log.debug(f"{self.item.id} : {self.connector.proxy_url} : {json_dict}")
+                        log.debug(
+                            f"{self.item.id} : {self.connector.proxy_url} : {json_dict}"
+                        )
                         try:
                             if json_dict["isOK"] and json_dict["items"]:
                                 for item in json_dict["items"]:
                                     if item["ASIN"] == self.item.id:
-                                        log.debug(f"{self.item.id} : {self.connector.proxy_url} : In-Stock! Passing task to checkout worker.")
+                                        log.debug(
+                                            f"{self.item.id} : {self.connector.proxy_url} : In-Stock! Passing task to checkout worker."
+                                        )
                                         await queue.put(offering_id)
                                         save_html_response(
                                             "atc_json_in_stock", status, response_text
                                         )
                             else:
-                                log.debug(f"{self.item.id} : {self.connector.proxy_url} : Not-In-Stock")
+                                log.debug(
+                                    f"{self.item.id} : {self.connector.proxy_url} : Not-In-Stock"
+                                )
                         except KeyError as e:
                             log.debug(e)
                     except json.decoder.JSONDecodeError:
                         tree = check_response(response_text)
                         if tree is not None:
                             if captcha_element := has_captcha(tree):
-                                log.debug(f"{self.item.id} : {self.connector.proxy_url} : Captcha found during monitoring task")
+                                log.debug(
+                                    f"{self.item.id} : {self.connector.proxy_url} : Captcha found during monitoring task"
+                                )
                                 await asyncio.sleep(1)
                                 status, response_text = await self.async_captcha_solve(
                                     captcha_element[0], self.domain
@@ -385,15 +396,16 @@ class AmazonMonitor(aiohttp.ClientSession):
                     except AttributeError as e:
                         log.debug(e)
 
-
             else:
                 log.debug(
-                f"{self.item.id} : AJAX : {self.connector.proxy_url} : {status}"
-            )
+                    f"{self.item.id} : AJAX : {self.connector.proxy_url} : {status}"
+                )
                 tree = check_response(response_text)
                 if tree is not None:
                     if captcha_element := has_captcha(tree):
-                        log.debug(f"{self.item.id} : {self.connector.proxy_url} : Captcha found during monitoring task")
+                        log.debug(
+                            f"{self.item.id} : {self.connector.proxy_url} : Captcha found during monitoring task"
+                        )
                         # wait a second so it doesn't continuously hit captchas very quickly
                         # TODO: maybe track captcha hits so that it aborts after several?
                         await asyncio.sleep(1)
@@ -427,11 +439,17 @@ class AmazonMonitor(aiohttp.ClientSession):
                             item=self.item, sellers=sellers
                         )
                         if qualified_seller:
-                            log.debug(f"{self.item.id} : {self.connector.proxy_url} : Found an offer which meets criteria")
+                            log.debug(
+                                f"{self.item.id} : {self.connector.proxy_url} : Found an offer which meets criteria"
+                            )
                             if time.time() > self.block_purchase_until:
                                 await queue.put(qualified_seller)
-                                log.debug(f"{self.item.id} : {self.connector.proxy_url} : Offer placed in queue")
-                                log.debug(f"{self.item.id} : {self.connector.proxy_url} : Quitting monitoring task")
+                                log.debug(
+                                    f"{self.item.id} : {self.connector.proxy_url} : Offer placed in queue"
+                                )
+                                log.debug(
+                                    f"{self.item.id} : {self.connector.proxy_url} : Quitting monitoring task"
+                                )
                                 future.set_result(None)
                                 return None
                             else:
@@ -439,14 +457,16 @@ class AmazonMonitor(aiohttp.ClientSession):
                                     f"{self.item.id} : {self.connector.proxy_url} : Purchasing is blocked until {self.block_purchase_until}. It is now {time.time()}."
                                 )
                 # failed to find seller. Wait a delay period then check again
-                log.debug(f"{self.item.id} : {self.connector.proxy_url} : No offers found which meet product criteria")
+                log.debug(
+                    f"{self.item.id} : {self.connector.proxy_url} : No offers found which meet product criteria"
+                )
             await wait_timer(end_time)
             end_time = time.time() + delay
             status, response_text = await self.aio_get(url=self.item.furl.url)
-            
+
             # save_html_response("stock-check", status, response_text)
             # do this after each request
-            
+
             fail_counter = check_fail(status=status, fail_counter=fail_counter)
             if fail_counter == -1:
                 session = self.fail_recreate()
