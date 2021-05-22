@@ -347,7 +347,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                         json_dict = json.loads(response_text)
                         log.debug(f"{self.item.id} : {self.connector.proxy_url} : {json_dict}")
                         try:
-                            if json_dict["isOk"] and json_dict["items"]:
+                            if json_dict["isOK"] and json_dict["items"]:
                                 for item in json_dict["items"]:
                                     if item["ASIN"] == self.item.id:
                                         log.debug(f"{self.item.id} : {self.connector.proxy_url} : In-Stock! Passing task to checkout worker.")
