@@ -176,10 +176,10 @@ class ItemsHandler:
     def refresh(cls):
         cls.start = time.time()
         if cls.removed_items:
-            for item in cls.removed_items:
-                cls.items.append(item)
-                cls.circular_array = cycle(cls.items)
-                cls.removed_items.clear()
+            for _ in range(len(cls.removed_items)):
+                cls.items.append(cls.removed_items.pop())
+        cls.circular_array = cycle(cls.items)
+        cls.removed_items.clear()
 
     @classmethod
     def timer(cls):
