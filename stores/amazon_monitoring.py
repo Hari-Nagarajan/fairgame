@@ -257,12 +257,10 @@ class AmazonMonitor(aiohttp.ClientSession):
         log.debug(f"{self.connector.proxy_url} : Getting validated session for monitoring through json endpoint")
         token = False
         while not token:
-            await self.get(COOKIE_HARVEST_URL)
+            async with self.get(COOKIE_HARVEST_URL) as resp:
+                pass
             for cookie in self.cookie_jar:
-                if cookie.key == "session-id":
-                    self.headers.update({"session-id": cookie.value})
                 if cookie.key == "session-token":
-                    self.headers.update({"session-token": cookie.value})
                     token = True
             await asyncio.sleep(5)
         _, response_text = await self.aio_get(
