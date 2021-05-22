@@ -508,7 +508,7 @@ async def aio_get(client, url, data=None):
 async def turbo_initiate(
     domain, s: aiohttp.ClientSession, qualified_seller: Optional[SellerDetail] = None
 ):
-    url = f"https://{domain}/checkout/turbo-initiate?ref_=dp_start-bbf_1_glance_buyNow_2-1&pipelineType=turbo&weblab=RCX_CHECKOUT_TURBO_DESKTOP_NONPRIME_87784&temporaryAddToCart=1"
+    url = f"https://{domain}/checkout/turbo-initiate?ref_=dp_start-bbf_1_glance_buyNow_4-2&referrer=detail&pipelineType=turbo&clientId=retailwebsite&weblab=RCX_CHECKOUT_TURBO_DESKTOP_NONPRIME_87784&temporaryAddToCart=1"
     pid = None
     anti_csrf = None
 
