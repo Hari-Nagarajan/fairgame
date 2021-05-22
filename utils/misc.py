@@ -174,6 +174,7 @@ class ItemsHandler:
 
     @classmethod
     def refresh(cls):
+        cls.start = time.time()
         if cls.removed_items:
             for item in cls.removed_items:
                 cls.items.append(item)
@@ -183,7 +184,6 @@ class ItemsHandler:
     def timer(cls):
         if time.time() - cls.start > 6000:
             return True
-
 
     @classmethod
     def pop(cls):

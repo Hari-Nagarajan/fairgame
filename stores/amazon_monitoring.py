@@ -299,7 +299,10 @@ class AmazonMonitor(aiohttp.ClientSession):
         fail_counter = check_fail(status=status, fail_counter=fail_counter)
         if fail_counter == -1:
             session = self.fail_recreate()
-            future.set_result(session)
+            try:
+                future.set_result(session)
+            except asyncio.exceptions.InvalidStateError as e:
+                log.debug(e)
             return
 
         # Loop will only exit if a qualified seller is returned.
@@ -310,7 +313,10 @@ class AmazonMonitor(aiohttp.ClientSession):
                     self.validated = True
                 else:
                     session = self.fail_recreate()
-                    future.set_result(session)
+                    try:
+                        future.set_result(session)
+                    except asyncio.exceptions.InvalidStateError as e:
+                        log.debug(e)
                     continue
             if self.current_group and self.switch_group_timer():
                 self.switch_proxy_group()
@@ -359,7 +365,10 @@ class AmazonMonitor(aiohttp.ClientSession):
                             )
                             if fail_counter == -1:
                                 session = self.fail_recreate()
-                                future.set_result(session)
+                                try:
+                                    future.set_result(session)
+                                except asyncio.exceptions.InvalidStateError as e:
+                                    log.debug(e)
                                 return
                             await wait_timer(end_time)
                             end_time = time.time() + delay
@@ -388,7 +397,10 @@ class AmazonMonitor(aiohttp.ClientSession):
                         )
                         if fail_counter == -1:
                             session = self.fail_recreate()
-                            future.set_result(session)
+                            try:
+                                future.set_result(session)
+                            except asyncio.exceptions.InvalidStateError as e:
+                                log.debug(e)
                             return
                         await wait_timer(end_time)
                         end_time = time.time() + delay
@@ -435,7 +447,10 @@ class AmazonMonitor(aiohttp.ClientSession):
             fail_counter = check_fail(status=status, fail_counter=fail_counter)
             if fail_counter == -1:
                 session = self.fail_recreate()
-                future.set_result(session)
+                try:
+                    future.set_result(session)
+                except asyncio.exceptions.InvalidStateError as e:
+                    log.debug(e)
                 return
             self.check_count += 1
             self.next_item()
