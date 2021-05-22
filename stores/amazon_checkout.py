@@ -439,7 +439,9 @@ class AmazonCheckoutHandler(BaseStoreHandler):
             anti_csrf = None
             while (not (pid and anti_csrf)) and retry < TURBO_INITIATE_MAX_RETRY:
                 pid, anti_csrf = await turbo_initiate(
-                    s=self.checkout_session, offering_id=offering_id
+                    domain=self.amazon_domain,
+                    s=self.checkout_session,
+                    offering_id=offering_id,
                 )
                 retry += 1
             if pid and anti_csrf:

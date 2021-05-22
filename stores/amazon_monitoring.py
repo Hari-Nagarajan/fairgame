@@ -353,7 +353,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                                     if item["ASIN"] == self.item.id:
                                         await queue.put(offering_id)
                                         save_html_response(
-                                            "atc_json_in_stock", status, json_str
+                                            "atc_json_in_stock", status, response_text
                                         )
                             except KeyError as e:
                                 log.debug(e)
