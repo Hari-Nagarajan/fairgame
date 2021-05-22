@@ -140,7 +140,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
             bpc.start(self.proxies)
             for group_num, proxy_group in enumerate(self.proxies, start=1):
                 AmazonMonitor.total_groups += 1
-                AmazonMonitor.lengths_of_groups.append(len(proxy_group))
+                AmazonMonitor.lengths_of_groups.update({group_num: len(proxy_group)})
                 for idx in range(len(proxy_group)):
                     connector = ProxyConnector.from_url(proxy_group[idx])
                     self.sessions_list.append(
@@ -168,7 +168,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
 
 
 class AmazonMonitor(aiohttp.ClientSession):
-    lengths_of_groups = list()
+    lengths_of_groups = dict()
     total_groups = 0
     current_group = 1
     current_group_proxies = set()
@@ -196,14 +196,6 @@ class AmazonMonitor(aiohttp.ClientSession):
         log.debug("Initializing Monitoring Task")
 
     @classmethod
-    def set_last_task(cls):
-        cls.last_task = time.time()
-
-    @classmethod
-    def get_last_task(cls):
-        return cls.last_task
-
-    @classmethod
     def switch_group_timer(cls, delay=300):
         if time.time() - cls.group_switch_time >= delay:
             return True
@@ -221,7 +213,7 @@ class AmazonMonitor(aiohttp.ClientSession):
 
     @classmethod
     def get_group_total(cls):
-        return cls.lengths_of_groups[cls.current_group - 1]
+        return cls.lengths_of_groups[cls.get_current_group()]
 
     @classmethod
     def get_current_group(cls):
@@ -255,28 +247,41 @@ class AmazonMonitor(aiohttp.ClientSession):
 
     async def validate_session(self):
         log.debug(f"{self.connector.proxy_url} : Getting validated session for monitoring through json endpoint")
-        token = False
-        while not token:
-            async with self.get(COOKIE_HARVEST_URL) as resp:
-                pass
-            for cookie in self.cookie_jar:
-                if cookie.key == "session-token":
-                    token = True
+        c = 0
+        while c < 5:
+            token = False
+            while not token:
+                async with self.get(COOKIE_HARVEST_URL) as _:
+                    pass
+                for cookie in self.cookie_jar:
+                    if cookie.key == "session-id":
+                        session_id = cookie.value
+                        self.headers.update({"session-id": session_id})
+                    if cookie.key == "session-token":
+                        session_token = cookie.value
+                        self.headers.update({"session-token": session_token})
+                        token = True
             await asyncio.sleep(5)
-        _, response_text = await self.aio_get(
-            self.atc_json_url(self.headers.get("session-id"), offering_id=TEST_OFFERID)
-        )
-        tree = check_response(response_text)
-        if tree is not None:
-            if captcha_element := has_captcha(tree):
-                log.debug("Captcha found during validation task")
-                await asyncio.sleep(1)
-                status, response_text = await self.async_captcha_solve(
-                    captcha_element[0], self.domain
-                )
-            else:
-                log.debug("Received Session-Token")
-                return True
+            _, response_text = await self.aio_get(
+                self.atc_json_url(self.headers.get("session-id"), offering_id=TEST_OFFERID)
+            )
+            tree = check_response(response_text)
+            if tree is not None:
+                try:
+                    json_dict = json.loads(response_text)
+                    if json_dict["isOK"]:
+                        log.debug(json_dict)
+                        log.debug("Received Session-Token")
+                        return True
+                except json.decoder.JSONDecodeError:
+                    if captcha_element := has_captcha(tree):
+                        log.debug("Captcha found during validation task")
+                        await asyncio.sleep(1)
+                        status, response_text = await self.async_captcha_solve(
+                            captcha_element[0], self.domain
+                        )
+                    c += 1
+        return False
 
     async def stock_check(self, queue: asyncio.Queue, future: asyncio.Future):
         # Do first response outside of while loop, so we can continue on captcha checks
@@ -300,15 +305,10 @@ class AmazonMonitor(aiohttp.ClientSession):
         # Loop will only exit if a qualified seller is returned.
         while True:
             if self.group_num == self.get_current_group() and not self.validated:
-                c = 0
-                while c < 5:
-                    validated = await self.validate_session()
-                    if validated:
-                        self.validated = True
-                        break
-                    c += 1
-                    await asyncio.sleep(delay)
-                if c == 5:
+                validated = await self.validate_session()
+                if validated:
+                    self.validated = True
+                else:
                     session = self.fail_recreate()
                     future.set_result(session)
             if self.current_group and self.switch_group_timer():
@@ -317,7 +317,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                 self.current_group_proxies.add(self.connector.proxy_url)
                 time.sleep(delay / self.get_group_total())
             elif self.group_num is not self.get_current_group():
-                await asyncio.sleep(10)
+                await asyncio.sleep(30)
                 continue
 
             try:
