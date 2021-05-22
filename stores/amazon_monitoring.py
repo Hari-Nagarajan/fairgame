@@ -358,7 +358,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                             except KeyError as e:
                                 log.debug(e)
                         else:
-                            log.debug(f"{self.item.id} not in stock")
+                            log.debug(f"{self.item.id} : Not-In-Stock")
                     except json.decoder.JSONDecodeError:
                         tree = check_response(response_text)
                         if tree is not None:
