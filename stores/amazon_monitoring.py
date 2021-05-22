@@ -311,6 +311,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                 else:
                     session = self.fail_recreate()
                     future.set_result(session)
+                    continue
             if self.current_group and self.switch_group_timer():
                 self.switch_proxy_group()
             if self.connector.proxy_url not in self.current_group_proxies:
