@@ -489,6 +489,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                         return True
             elif not json_dict["isOK"]:
                 log.debug(f"{self.item.id} : {self.connector.proxy_url} : CSRF Error")
+                self.validated = False
             else:
                 log.debug(f"{self.item.id} : {self.connector.proxy_url} : Not-In-Stock")
             return False
