@@ -147,10 +147,8 @@ def parse_html_source(data):
 class ItemsHandler:
     @classmethod
     def create_items_pool(cls, item_list):
-        cls.item_ids = {}
-        for item in item_list:
-            cls.item_ids.update({item.id: time.time()})
-        cls.items = cycle(item_list)
+        cls.items = item_list
+        cls.circular_array = cycle(cls.items)
 
     @classmethod
     def create_oid_pool(cls, offerid_list):
@@ -167,12 +165,13 @@ class ItemsHandler:
                 del cls.offerid_list[asin]
 
     @classmethod
-    def pop(cls):
-        return next(cls.items)
+    def throw_out(cls, item):
+        cls.items.remove(item)
+        cls.circular_array = cycle(cls.items)
 
     @classmethod
-    def length(cls):
-        return len(cls.item_ids)
+    def pop(cls):
+        return next(cls.circular_array)
 
 
 class BadProxyCollector:
