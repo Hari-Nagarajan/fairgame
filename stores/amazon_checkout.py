@@ -447,7 +447,10 @@ class AmazonCheckoutHandler(BaseStoreHandler):
                 retry += 1
             if pid and anti_csrf:
                 if await turbo_checkout(
-                    s=self.checkout_session, pid=pid, anti_csrf=anti_csrf
+                    domain=self.amazon_domain,
+                    s=self.checkout_session,
+                    pid=pid,
+                    anti_csrf=anti_csrf,
                 ):
                     log.info("Maybe completed checkout")
                     time_difference = time.time() - start_time
