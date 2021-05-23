@@ -188,20 +188,3 @@ class ItemsHandler:
     @classmethod
     def pop(cls):
         return next(cls.circular_array)
-
-
-class BadProxyCollector:
-    @classmethod
-    def start(cls, proxies):
-        cls.collection = set()
-        cls.bad_proxies = 0
-        cls.total_proxies = len(proxies)
-
-    @classmethod
-    def record(cls, status, connector):
-        url = str(connector.proxy_url)
-        if status == 503:
-            cls.collection.add(url)
-        if status == 200 and url in cls.collection:
-            cls.collection.discard(url)
-        cls.bad_proxies = len(cls.collection)
