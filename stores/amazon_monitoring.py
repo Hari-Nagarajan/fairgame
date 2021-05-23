@@ -340,8 +340,8 @@ class AmazonMonitor(aiohttp.ClientSession):
                     stock = self.parse_json(response_text=response_text)
                     if stock:
                         try:
-                            log.debug("Placing {self.item.id} on a 60 min cooldown")
                             ItemsHandler.trash(self.item)
+                            log.debug(f"Placing {self.item.id} on a 60 min cooldown")
                             await queue.put(offering_id)
                             save_html_response(f"in-stock_{self.item.id}", status, response_text)
                         except ValueError as e:
