@@ -342,10 +342,10 @@ class AmazonMonitor(aiohttp.ClientSession):
                         try:
                             log.debug("Placing {self.item.id} on a 60 min cooldown")
                             ItemsHandler.trash(self.item)
+                            await queue.put(offering_id)
+                            save_html_response(f"in-stock_{self.item.id}", status, response_text)
                         except ValueError as e:
                             log.debug(e)
-                        await queue.put(offering_id)
-                        save_html_response(f"in-stock_{self.item.id}", status, response_text)
                 else:
                     tree = check_response(response_text)
                     if tree is not None:
