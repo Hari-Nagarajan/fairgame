@@ -263,7 +263,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                         session_token = cookie.value
                         self.headers.update({"session-token": session_token})
                         token = True
-            await asyncio.sleep(5)
+            await asyncio.sleep(self.delay)
             _, response_text = await self.aio_get(
                 self.atc_json_url(self.headers.get("session-id"), offering_id=TEST_OFFERID)
             )
@@ -282,6 +282,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                         status, response_text = await self.async_captcha_solve(
                             captcha_element[0], self.domain
                         )
+                        await asyncio.sleep(self.delay)
                     c += 1
         return False
 
