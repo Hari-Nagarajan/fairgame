@@ -223,7 +223,11 @@ class AmazonMonitor(aiohttp.ClientSession):
         self.delay = delay
 
     def next_item(self):
-        self.item = ItemsHandler.pop()
+        try:
+            self.item = ItemsHandler.pop()
+        except StopIteration as e:
+            log.debug(e)
+            return
 
     def atc_json_url(self, session_id, offering_id):
         url = f"https://smile.amazon.com/gp/add-to-cart/json?session-id={session_id}&clientName=retailwebsite&nextPage=cartitems&ASIN={self.item.id}Q&offerListingID={offering_id}&quantity=1"
@@ -344,7 +348,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                             log.debug(f"Placing {self.item.id} on a 60 min cooldown")
                             await queue.put(offering_id)
                             save_html_response(f"in-stock_{self.item.id}", status, response_text)
-                        except (ValueError, StopIteration) as e:
+                        except ValueError as e:
                             log.debug(e)
                             return
                 else:
