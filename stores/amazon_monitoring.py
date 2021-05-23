@@ -344,11 +344,6 @@ class AmazonMonitor(aiohttp.ClientSession):
                             ItemsHandler.trash(self.item)
                         except ValueError as e:
                             log.debug(e)
-                            await wait_timer(end_time)
-                            end_time = time.time() + delay
-                            self.check_count += 1
-                            self.next_item()
-                            continue
                         await queue.put(offering_id)
                         save_html_response(f"in-stock_{self.item.id}", status, response_text)
                 else:
