@@ -349,8 +349,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                             await queue.put(offering_id)
                             save_html_response(f"in-stock_{self.item.id}", status, response_text)
                         except ValueError as e:
-                            log.debug(e)
-                            return
+                            pass
                 else:
                     tree = check_response(response_text)
                     if tree is not None:
