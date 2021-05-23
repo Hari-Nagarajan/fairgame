@@ -41,7 +41,6 @@ from utils.misc import (
     get_timestamp_filename,
     save_html_response,
     check_response,
-    BadProxyCollector as bpc,
     ItemsHandler,
 )
 
@@ -137,7 +136,6 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         self.sessions_list: Optional[List[AmazonMonitor]] = []
 
         if self.proxies:
-            bpc.start(self.proxies)
             for group_num, proxy_group in enumerate(self.proxies, start=1):
                 AmazonMonitor.total_groups += 1
                 AmazonMonitor.lengths_of_groups.update({group_num: len(proxy_group)})
@@ -208,7 +206,6 @@ class AmazonMonitor(aiohttp.ClientSession):
             cls.current_group = 1
         log.debug(f"Switching to proxy group {cls.current_group}")
         cls.current_group_proxies.clear()
-        bpc.collection.clear()
         cls.group_switch_time = time.time()
 
     @classmethod
