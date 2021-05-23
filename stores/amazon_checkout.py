@@ -509,8 +509,8 @@ async def aio_get(client, url, data=None):
 async def turbo_initiate(
     domain, s: aiohttp.ClientSession, qualified_seller: Optional[SellerDetail] = None
 ):
-    url = f"https://{domain}/checkout/turbo-initiate?ref_=dp_start-bbf_1_glance_buyNow_2-1&referrer=detail&pipelineType=turbo&clientId=retailwebsite&weblab=RCX_CHECKOUT_TURBO_DESKTOP_PRIME_87783&temporaryAddToCart=1"
-    # url = f"https://{domain}/checkout/turbo-initiate?ref_=dp_start-bbf_1_glance_buyNow_4-2&referrer=detail&pipelineType=turbo&clientId=retailwebsite&weblab=RCX_CHECKOUT_TURBO_DESKTOP_NONPRIME_87784&temporaryAddToCart=1"
+    # url = f"https://{domain}/checkout/turbo-initiate?ref_=dp_start-bbf_1_glance_buyNow_2-1&referrer=detail&pipelineType=turbo&clientId=retailwebsite&weblab=RCX_CHECKOUT_TURBO_DESKTOP_PRIME_87783&temporaryAddToCart=1"
+    url = f"https://{domain}/checkout/turbo-initiate?ref_=dp_start-bbf_1_glance_buyNow_4-2&referrer=detail&pipelineType=turbo&clientId=retailwebsite&weblab=RCX_CHECKOUT_TURBO_DESKTOP_NONPRIME_87784&temporaryAddToCart=1"
     pid = None
     anti_csrf = None
 
@@ -562,9 +562,9 @@ async def turbo_initiate(
 
 @timer
 async def turbo_checkout(domain, s: aiohttp.ClientSession, pid, anti_csrf):
-    log.debug("trying to checkout")
-    url = f"https://{domain}/checkout/spc/place-order?ref_=chk_spc_placeOrder&_srcRID=&clientId=retailwebsite&pipelineType=turbo&cachebuster=1621370978440&pid={pid}"
-    # url = f"https://{domain}/checkout/spc/place-order?ref_=chk_spc_placeOrder&clientId=retailwebsite&pipelineType=turbo&pid={pid}"
+    log.info("trying to checkout")
+    url = f"https://{domain}/checkout/spc/place-order?ref_=chk_spc_placeOrder&clientId=retailwebsite&pipelineType=turbo&pid={pid}"
+    # url = f"https://{domain}/checkout/spc/place-order?ref_=chk_spc_placeOrder&_srcRID=&clientId=retailwebsite&pipelineType=turbo&cachebuster=1621370978440&pid={pid}"
     header_update = {"anti-csrftoken-a2z": anti_csrf}
     s.headers.update(header_update)
 

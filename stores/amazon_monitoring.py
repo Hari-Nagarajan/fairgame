@@ -248,43 +248,45 @@ class AmazonMonitor(aiohttp.ClientSession):
         return session
 
     async def validate_session(self):
-        log.debug(f"{self.connector.proxy_url} : Getting validated session for monitoring through json endpoint")
-        c = 0
-        while c < 5:
-            token = False
-            while not token:
-                async with self.get(COOKIE_HARVEST_URL) as _:
-                    pass
-                for cookie in self.cookie_jar:
-                    if cookie.key == "session-id":
-                        session_id = cookie.value
-                        self.headers.update({"session-id": session_id})
-                    if cookie.key == "session-token":
-                        session_token = cookie.value
-                        self.headers.update({"session-token": session_token})
-                        token = True
-            await asyncio.sleep(self.delay)
-            _, response_text = await self.aio_get(
-                self.atc_json_url(self.headers.get("session-id"), offering_id=TEST_OFFERID)
-            )
-            tree = check_response(response_text)
-            if tree is not None:
-                try:
-                    json_dict = json.loads(response_text)
-                    if json_dict["isOK"]:
-                        log.debug(json_dict)
-                        log.debug("Received Session-Token")
-                        return True
-                except json.decoder.JSONDecodeError:
-                    if captcha_element := has_captcha(tree):
-                        log.debug("Captcha found during validation task")
-                        await asyncio.sleep(1)
-                        status, response_text = await self.async_captcha_solve(
-                            captcha_element[0], self.domain
-                        )
-                        await asyncio.sleep(self.delay)
-                    c += 1
-        return False
+        try:
+            log.debug(f"{self.connector.proxy_url} : Getting validated session for monitoring through json endpoint")
+            c = 0
+            while c < 5:
+                token = False
+                while not token:
+                    await self.get(COOKIE_HARVEST_URL)
+                    for cookie in self.cookie_jar:
+                        if cookie.key == "session-id":
+                            session_id = cookie.value
+                            self.headers.update({"session-id": session_id})
+                        if cookie.key == "session-token":
+                            session_token = cookie.value
+                            self.headers.update({"session-token": session_token})
+                            token = True
+                await asyncio.sleep(self.delay)
+                _, response_text = await self.aio_get(
+                    self.atc_json_url(self.headers.get("session-id"), offering_id=TEST_OFFERID)
+                )
+                tree = check_response(response_text)
+                if tree is not None:
+                    try:
+                        json_dict = json.loads(response_text)
+                        if json_dict["isOK"]:
+                            log.debug(json_dict)
+                            log.debug("Received Session-Token")
+                            return True
+                    except json.decoder.JSONDecodeError:
+                        if captcha_element := has_captcha(tree):
+                            log.debug("Captcha found during validation task")
+                            await asyncio.sleep(1)
+                            status, response_text = await self.async_captcha_solve(
+                                captcha_element[0], self.domain
+                            )
+                            await asyncio.sleep(self.delay)
+                        c += 1
+            return False
+        except aiohttp.ServerDisconnectedError as e:
+            log.debug(e)
 
     async def stock_check(self, queue: asyncio.Queue, future: asyncio.Future):
         # Do first response outside of while loop, so we can continue on captcha checks
@@ -348,7 +350,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                     if stock:
                         try:
                             ItemsHandler.trash(self.item)
-                            log.debug(f"Placing {self.item.id} on a 60 min cooldown")
+                            log.info(f"Placing {self.item.id} on a 60 min cooldown")
                             await queue.put(offering_id)
                             save_html_response(f"in-stock_{self.item.id}", status, response_text)
                         except ValueError as e:
@@ -357,7 +359,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                     tree = check_response(response_text)
                     if tree is not None:
                         if captcha_element := has_captcha(tree):
-                            log.debug(
+                            log.info(
                                 f"{self.item.id} : {self.connector.proxy_url} : Captcha found during monitoring task"
                             )
                             # wait a second so it doesn't continuously hit captchas very quickly
@@ -389,7 +391,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                 tree = check_response(response_text)
                 if tree is not None:
                     if captcha_element := has_captcha(tree):
-                        log.debug(
+                        log.info(
                             f"{self.item.id} : {self.connector.proxy_url} : Captcha found during monitoring task"
                         )
                         # wait a second so it doesn't continuously hit captchas very quickly
@@ -426,15 +428,15 @@ class AmazonMonitor(aiohttp.ClientSession):
                             item=self.item, sellers=sellers
                         )
                         if qualified_seller:
-                            log.debug(
+                            log.info(
                                 f"{self.item.id} : {self.connector.proxy_url} : Found an offer which meets criteria"
                             )
                             if time.time() > self.block_purchase_until:
                                 await queue.put(qualified_seller)
-                                log.debug(
+                                log.info(
                                     f"{self.item.id} : {self.connector.proxy_url} : Offer placed in queue"
                                 )
-                                log.debug(
+                                log.info(
                                     f"{self.item.id} : {self.connector.proxy_url} : Quitting monitoring task"
                                 )
                                 future.set_result(None)
@@ -474,7 +476,6 @@ class AmazonMonitor(aiohttp.ClientSession):
         except (asyncio.TimeoutError, aiohttp.ClientError, OSError) as e:
             if (isinstance(e, asyncio.TimeoutError)):
                 print("Welp, looks like we're in time out. Hol' up, wait a minute.")
-                pass
             status = 999
         return status, text
 
@@ -490,7 +491,7 @@ class AmazonMonitor(aiohttp.ClientSession):
             captcha = AmazonCaptcha.fromlink(link)
             solution = captcha.solve()
             if solution:
-                log.info(f"solution is:{solution} ")
+                log.debug(f"solution is:{solution} ")
                 form_inputs = captcha_element.xpath(".//input")
                 input_dict = {}
                 for form_input in form_inputs:
@@ -509,17 +510,17 @@ class AmazonMonitor(aiohttp.ClientSession):
         json_dict = None
         try:
             json_dict = json.loads(response_text)
-            log.debug(f"{self.item.id} : {self.connector.proxy_url} : {json_dict}")
+            # log.debug(f"{self.item.id} : {self.connector.proxy_url} : {json_dict}")
             if json_dict["isOK"] and json_dict["items"]:
                 for item in json_dict["items"]:
                     if item["ASIN"] == self.item.id:
-                        log.debug(f"{self.item.id} : {self.connector.proxy_url} : In-Stock! Passing task to checkout worker.")
+                        log.info(f"{self.item.id} : In-Stock! Passing task to checkout worker.")
                         return True
             elif not json_dict["isOK"]:
                 log.debug(f"{self.item.id} : {self.connector.proxy_url} : CSRF Error")
                 self.validated = False
             else:
-                log.debug(f"{self.item.id} : {self.connector.proxy_url} : Not-In-Stock")
+                log.info(f"{self.item.id} : Not-In-Stock")
             return False
 
         except json.decoder.JSONDecodeError:
@@ -619,7 +620,7 @@ def parse_offers(offers: html.HtmlElement, free_shipping_strings, atc_method=Fal
                     merchant_id = find_merchant_id.group(1)
             except IndexError:
                 pass
-        log.info(f"merchant_id: {merchant_id}")
+        log.debug(f"merchant_id: {merchant_id}")
         # log failure to find merchant ID
         if not merchant_id:
             log.debug("No Merchant ID found")
@@ -631,17 +632,17 @@ def parse_offers(offers: html.HtmlElement, free_shipping_strings, atc_method=Fal
             log.debug("No price found for this offer, skipping")
             continue
         price = parse_price(price_text)
-        log.info(f"price: {price.amount_text}")
+        log.debug(f"price: {price.amount_text}")
         # Get Seller shipping cost
         shipping_cost = get_shipping_costs(offer, free_shipping_strings)
-        log.info(f"shipping: {shipping_cost.amount_text}")
+        log.debug(f"shipping: {shipping_cost.amount_text}")
         # Get Seller product condition
         condition_heading = offer.xpath(".//div[@id='aod-offer-heading']/h5")
         if condition_heading:
             condition = AmazonItemCondition.from_str(condition_heading[0].text.strip())
         else:
             condition = AmazonItemCondition.Unknown
-        log.info(f"condition: {str(condition)}")
+        log.debug(f"condition: {str(condition)}")
 
         # Get Seller item offerListingId
         offer_ids = offer.xpath(f".//input[@name='offeringID.1']")
@@ -650,7 +651,7 @@ def parse_offers(offers: html.HtmlElement, free_shipping_strings, atc_method=Fal
         else:
             log.error("No offer ID found for this offer, skipping")
             continue
-        log.info(f"offer id: {offer_id}")
+        log.debug(f"offer id: {offer_id}")
 
         # get info for ATC post
         # only use if doing ATC method
