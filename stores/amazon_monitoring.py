@@ -471,7 +471,9 @@ class AmazonMonitor(aiohttp.ClientSession):
                 status = resp.status
                 text = await resp.text()
         except (asyncio.TimeoutError, aiohttp.ClientError, OSError) as e:
-            log.debug(e)
+            if (isinstance(e, asyncio.TimeoutError)):
+                print("Welp, looks like we're in time out. Hol' up, wait a minute.")
+                pass
             status = 999
         return status, text
 
