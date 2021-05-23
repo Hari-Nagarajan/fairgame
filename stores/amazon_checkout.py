@@ -518,8 +518,10 @@ async def turbo_initiate(
         return pid, anti_csrf
     if isinstance(qualified_seller, SellerDetail):
         offering_id = qualified_seller.offering_id
+        log.debug("turbo init received an instance of SellerDetail.")
     if isinstance(qualified_seller, str):
         offering_id = qualified_seller
+        log.debug("turbo init received an offerid string.")
     payload_inputs = {
         "offerListing.1": offering_id,
         "quantity.1": "1",
