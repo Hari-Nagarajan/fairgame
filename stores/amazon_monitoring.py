@@ -25,12 +25,13 @@ import time
 import typing
 from typing import Optional, Iterable, NamedTuple, List, Dict
 from utils.debugger import debug, timer
-from fake_useragent import UserAgent
+# from fake_useragent import UserAgent
 from amazoncaptcha import AmazonCaptcha
 
 from urllib.parse import urlparse
 
-from random import randint
+from random import randint, choice
+from fake_headers import Headers
 import re
 
 import requests
@@ -93,12 +94,14 @@ STORE_NAME = "Amazon"
 DEFAULT_MAX_TIMEOUT = 10
 
 # Request
-HEADERS = {
-    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-    "Accept-Encoding": "gzip, deflate, sdch, br",
-    "content-type": "application/x-www-form-urlencoded",
-}
+
+# HEADERS = {
+#     "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36",
+#     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+#     "Accept-Encoding": "gzip, deflate, sdch, br",
+#     "content-type": "application/x-www-form-urlencoded",
+# }
+
 amazon_config = {}
 
 
@@ -125,7 +128,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         self.item_list: typing.List[FGItem] = item_list
         self.start_time = int(time.time())
         self.amazon_config = amazon_config
-        ua = UserAgent()
+        # ua = UserAgent()
 
         self.proxies = get_json(path=PROXY_FILE_PATH)
         ItemsHandler.create_items_pool(self.item_list)
@@ -144,26 +147,26 @@ class AmazonMonitoringHandler(BaseStoreHandler):
                     connector = ProxyConnector.from_url(proxy_group[idx])
                     self.sessions_list.append(
                         AmazonMonitor(
-                            headers=HEADERS,
+                            headers=random_header(),
                             amazon_config=self.amazon_config,
                             connector=connector,
                             delay=delay,
                             group_num=group_num,
                         )
                     )
-                    self.sessions_list[idx].headers.update({"user-agent": ua.random})
+                    # self.sessions_list[idx].headers.update({"user-agent": ua.random})
         else:
             connector = None
             self.sessions_list.append(
                 AmazonMonitor(
-                    headers=HEADERS,
+                    headers=random_header(),
                     amazon_config=self.amazon_config,
                     connector=connector,
                     delay=delay,
                     group_num=0,
                 )
             )
-            self.sessions_list[0].headers.update({"user-agent": ua.random})
+            # self.sessions_list[0].headers.update({"user-agent": ua.random})
 
 
 class AmazonMonitor(aiohttp.ClientSession):
@@ -707,6 +710,11 @@ def get_json(path):
     if os.path.exists(path):
         with open(path) as f:
             return json.load(f)
+
+def random_header():
+    header = Headers(headers=True)
+    return header.generate()
+
 
     # def verify(self):
     #     log.debug("Verifying item list...")
