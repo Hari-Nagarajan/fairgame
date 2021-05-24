@@ -170,7 +170,6 @@ class AmazonMonitor(aiohttp.ClientSession):
     lengths_of_groups = dict()
     total_groups = 0
     current_group = 1
-    current_group_proxies = set()
     group_switch_time = time.time()
 
     def __init__(
@@ -320,9 +319,6 @@ class AmazonMonitor(aiohttp.ClientSession):
                     await asyncio.sleep(3600)
             if self.current_group and self.switch_group_timer():
                 self.switch_proxy_group()
-            if self.connector.proxy_url not in self.current_group_proxies:
-                self.current_group_proxies.add(self.connector.proxy_url)
-                time.sleep(delay / self.get_group_total())
             elif self.group_num is not self.get_current_group():
                 await asyncio.sleep(30)
                 continue
