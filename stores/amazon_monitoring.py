@@ -208,7 +208,6 @@ class AmazonMonitor(aiohttp.ClientSession):
         if cls.current_group > cls.total_groups:
             cls.current_group = 1
         log.debug(f"Switching to proxy group {cls.current_group}")
-        cls.current_group_proxies.clear()
         cls.group_switch_time = time.time()
 
     @classmethod
