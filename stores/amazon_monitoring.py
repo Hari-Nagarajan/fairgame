@@ -251,7 +251,7 @@ class AmazonMonitor(aiohttp.ClientSession):
         try:
             log.debug(f"{self.connector.proxy_url} : Getting validated session for monitoring through json endpoint")
             c = 0
-            while c < 5:
+            while c < 10:
                 token = False
                 while not token:
                     await self.get(COOKIE_HARVEST_URL)
@@ -277,9 +277,8 @@ class AmazonMonitor(aiohttp.ClientSession):
                             return True
                     except json.decoder.JSONDecodeError:
                         if captcha_element := has_captcha(tree):
-                            log.debug("Captcha found during validation task")
                             await asyncio.sleep(1)
-                            status, response_text = await self.async_captcha_solve(
+                            _, response_text = await self.async_captcha_solve(
                                 captcha_element[0], self.domain
                             )
                             await asyncio.sleep(self.delay)
@@ -312,18 +311,13 @@ class AmazonMonitor(aiohttp.ClientSession):
 
         # Loop will only exit if a qualified seller is returned.
         while True:
-            delay = self.delay + randint(0, 4)
             if self.group_num == self.get_current_group() and not self.validated:
                 validated = await self.validate_session()
                 if validated:
                     self.validated = True
                 else:
-                    session = self.fail_recreate()
-                    try:
-                        future.set_result(session)
-                    except asyncio.exceptions.InvalidStateError as e:
-                        log.debug(e)
-                    continue
+                    log.info(f"{self.connector.proxy_url} failed too many times. Cooldown for 60 minutes.")
+                    await asyncio.sleep(3600)
             if self.current_group and self.switch_group_timer():
                 self.switch_proxy_group()
             if self.connector.proxy_url not in self.current_group_proxies:
@@ -333,6 +327,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                 await asyncio.sleep(30)
                 continue
 
+            delay = self.delay + randint(0, 4)
             try:
                 log.debug(f"{self.item.id} : PROXY_GROUP[{self.current_group}] : {self.connector.proxy_url} : Stock Check Count = {self.check_count}")
             except AttributeError:
@@ -374,12 +369,8 @@ class AmazonMonitor(aiohttp.ClientSession):
                                 status=status, fail_counter=fail_counter
                             )
                             if fail_counter == -1:
-                                session = self.fail_recreate()
-                                try:
-                                    future.set_result(session)
-                                except asyncio.exceptions.InvalidStateError as e:
-                                    log.debug(e)
-                                return
+                                log.info(f"{self.connector.proxy_url} failed too many times. Cooldown for 60 minutes.")
+                                await asyncio.sleep(3600)
                             await wait_timer(end_time)
                             end_time = time.time() + delay
                             self.check_count += 1
@@ -480,7 +471,7 @@ class AmazonMonitor(aiohttp.ClientSession):
         return status, text
 
     async def async_captcha_solve(self, captcha_element, domain):
-        log.debug("Encountered CAPTCHA. Attempting to solve.")
+        log.info("Encountered CAPTCHA. Attempting to solve.")
         # Starting from the form, get the inputs and image
         captcha_images = captcha_element.xpath(
             '//img[contains(@src, "amazon.com/captcha/")]'
@@ -491,7 +482,7 @@ class AmazonMonitor(aiohttp.ClientSession):
             captcha = AmazonCaptcha.fromlink(link)
             solution = captcha.solve()
             if solution:
-                log.debug(f"solution is:{solution} ")
+                log.info(f"solution is:{solution} ")
                 form_inputs = captcha_element.xpath(".//input")
                 input_dict = {}
                 for form_input in form_inputs:

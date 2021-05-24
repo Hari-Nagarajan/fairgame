@@ -121,14 +121,11 @@ def amazon_aio(p, delay, uv):
     log.debug("Creating AIO Amazon Store Tasks")
     if uv:
         uvloop.install()
-    try:
-        tasks = asyncio.run(aio_amazon_obj.run_async())
-        if tasks:
-            for task in tasks:
-                task.cancel()
-        log.info("All tasks complete, exiting program")
-    except Exception as e:
-        log.debug(e)
+    tasks = asyncio.run(aio_amazon_obj.run_async())
+    if tasks:
+        for task in tasks:
+            task.cancel()
+    log.info("All tasks complete, exiting program")
 
 
 # async def task_handler(tasks: List[asyncio.Task]):
