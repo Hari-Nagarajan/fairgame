@@ -41,6 +41,9 @@ fake-useragent = "*"
 pysocks = "*"
 aiohttp-proxy = "*"
 uvloop = "*"
+fake-headers = "*"
+bs4 = "*"
+html5lib = "*"
 
 [requires]
 python_version = "3.8"
