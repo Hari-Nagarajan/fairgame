@@ -478,31 +478,34 @@ class AmazonMonitor(aiohttp.ClientSession):
         return status, text
 
     async def async_captcha_solve(self, captcha_element, domain):
-        log.info("Encountered CAPTCHA. Attempting to solve.")
-        # Starting from the form, get the inputs and image
-        captcha_images = captcha_element.xpath(
-            '//img[contains(@src, "amazon.com/captcha/")]'
-        )
-        if captcha_images:
-            link = captcha_images[0].attrib["src"]
-            # link = 'https://images-na.ssl-images-amazon.com/captcha/usvmgloq/Captcha_kwrrnqwkph.jpg'
-            captcha = AmazonCaptcha.fromlink(link)
-            solution = captcha.solve()
-            if solution:
-                log.info(f"solution is:{solution} ")
-                form_inputs = captcha_element.xpath(".//input")
-                input_dict = {}
-                for form_input in form_inputs:
-                    if form_input.type == "text":
-                        input_dict[form_input.name] = solution
-                    else:
-                        input_dict[form_input.name] = form_input.value
-                f = furl(domain)  # Use the original URL to get the schema and host
-                f = f.set(path=captcha_element.attrib["action"])
-                f.add(args=input_dict)
-                status, response_text = await self.aio_get(url=f.url)
-                return status, response_text
-        return None
+        try:
+            log.info("Encountered CAPTCHA. Attempting to solve.")
+            # Starting from the form, get the inputs and image
+            captcha_images = captcha_element.xpath(
+                '//img[contains(@src, "amazon.com/captcha/")]'
+            )
+            if captcha_images:
+                link = captcha_images[0].attrib["src"]
+                # link = 'https://images-na.ssl-images-amazon.com/captcha/usvmgloq/Captcha_kwrrnqwkph.jpg'
+                captcha = AmazonCaptcha.fromlink(link)
+                solution = captcha.solve()
+                if solution:
+                    log.info(f"solution is:{solution} ")
+                    form_inputs = captcha_element.xpath(".//input")
+                    input_dict = {}
+                    for form_input in form_inputs:
+                        if form_input.type == "text":
+                            input_dict[form_input.name] = solution
+                        else:
+                            input_dict[form_input.name] = form_input.value
+                    f = furl(domain)  # Use the original URL to get the schema and host
+                    f = f.set(path=captcha_element.attrib["action"])
+                    f.add(args=input_dict)
+                    status, response_text = await self.aio_get(url=f.url)
+                    return status, response_text
+            return None
+        except Exception as e:
+            log.exception(e)
 
     def parse_json(self, response_text):
         json_dict = None
