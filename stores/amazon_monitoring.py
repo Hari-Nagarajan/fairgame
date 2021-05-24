@@ -27,6 +27,7 @@ from typing import Optional, Iterable, NamedTuple, List, Dict
 from utils.debugger import debug, timer
 # from fake_useragent import UserAgent
 from amazoncaptcha import AmazonCaptcha
+from amazoncaptcha.exceptions import ContentTypeError
 
 from urllib.parse import urlparse
 
@@ -504,8 +505,9 @@ class AmazonMonitor(aiohttp.ClientSession):
                     status, response_text = await self.aio_get(url=f.url)
                     return status, response_text
             return None
-        except Exception as e:
-            log.exception(e)
+        except ContentTypeError:
+            return None
+            
 
     def parse_json(self, response_text):
         json_dict = None
