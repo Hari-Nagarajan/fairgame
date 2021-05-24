@@ -320,6 +320,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                     log.info(f"{self.connector.proxy_url} failed too many times. Cooldown for 60 minutes.")
                     await asyncio.sleep(3600)
                     fail_counter = 0
+                    continue
             if self.current_group and self.switch_group_timer():
                 self.switch_proxy_group()
             elif self.group_num is not self.get_current_group():
@@ -378,7 +379,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                             continue
 
             else:
-                log.debug(f"{self.item.id} : AJAX : {self.connector.proxy_url} : {status}")
+                log.info(f"{self.item.id} : AJAX : {self.connector.proxy_url} : {status}")
                 tree = check_response(response_text)
                 if tree is not None:
                     if captcha_element := has_captcha(tree):
@@ -440,7 +441,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                                     f"{self.item.id} : {self.connector.proxy_url} : Purchasing is blocked until {self.block_purchase_until}. It is now {time.time()}."
                                 )
                 # failed to find seller. Wait a delay period then check again
-                log.debug(
+                log.info(
                     f"{self.item.id} : {self.connector.proxy_url} : No offers found which meet product criteria"
                 )
             await wait_timer(end_time)
@@ -575,7 +576,7 @@ def get_item_sellers(
             found_asin = find_asin.group(1)
 
     if found_asin != item.id:
-        log.debug(
+        log.info(
             f"Aborting Check, ASINs do not match. Found {found_asin}; Searching for {item.id}."
         )
         return sellers
@@ -584,9 +585,9 @@ def get_item_sellers(
     offers = tree.xpath("//div[@id='aod-sticky-pinned-offer'] | //div[@id='aod-offer']")
     # Exit if no offers found
     if not offers:
-        log.debug(f"No offers for {item.id} = {item.short_name}")
+        log.info(f"No offers for {item.id} = {item.short_name}")
         return sellers
-    log.debug(f"Found {len(offers)} offers.")
+    log.info(f"Found {len(offers)} offers.")
     # Parse the found offers
 
     sellers = parse_offers(offers, free_shipping_strings, atc_method=atc_method)
