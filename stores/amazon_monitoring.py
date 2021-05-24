@@ -397,12 +397,14 @@ class AmazonMonitor(aiohttp.ClientSession):
                             status=status, fail_counter=fail_counter
                         )
                         if fail_counter == -1:
-                            session = self.fail_recreate()
-                            try:
-                                future.set_result(session)
-                            except asyncio.exceptions.InvalidStateError as e:
-                                log.debug(e)
-                            return
+                            log.info(f"{self.connector.proxy_url} failed too many times. Cooldown for 60 minutes.")
+                            await asyncio.sleep(3600)
+                            # session = self.fail_recreate()
+                            # try:
+                            #     future.set_result(session)
+                            # except asyncio.exceptions.InvalidStateError as e:
+                            #     log.debug(e)
+                            # return
                         await wait_timer(end_time)
                         end_time = time.time() + delay
                         self.check_count += 1
@@ -447,12 +449,14 @@ class AmazonMonitor(aiohttp.ClientSession):
             # do this after each request
             fail_counter = check_fail(status=status, fail_counter=fail_counter)
             if fail_counter == -1:
-                session = self.fail_recreate()
-                try:
-                    future.set_result(session)
-                except asyncio.exceptions.InvalidStateError as e:
-                    log.debug(e)
-                return
+                log.info(f"{self.connector.proxy_url} failed too many times. Cooldown for 60 minutes.")
+                await asyncio.sleep(3600)
+                # session = self.fail_recreate()
+                # try:
+                #     future.set_result(session)
+                # except asyncio.exceptions.InvalidStateError as e:
+                #     log.debug(e)
+                # return
             self.check_count += 1
             self.next_item()
             if ItemsHandler.timer():
@@ -525,7 +529,7 @@ def check_fail(status, fail_counter, fail_list=None) -> int:
 
     if fail_list is None:
         fail_list = [503, 999]
-    MAX_FAILS = 5
+    MAX_FAILS = 10
     n = fail_counter
     if status in fail_list:
         n += 1
