@@ -253,7 +253,7 @@ class AmazonMonitor(aiohttp.ClientSession):
         try:
             log.debug(f"{self.connector.proxy_url} : Getting validated session for monitoring through json endpoint")
             c = 0
-            while c < 10:
+            while c < 5:
                 token = False
                 while not token:
                     await self.get(COOKIE_HARVEST_URL)
@@ -532,7 +532,7 @@ def check_fail(status, fail_counter, fail_list=None) -> int:
 
     if fail_list is None:
         fail_list = [503, 999]
-    MAX_FAILS = 10
+    MAX_FAILS = 5
     n = fail_counter
     if status in fail_list:
         n += 1
