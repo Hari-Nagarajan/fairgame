@@ -379,7 +379,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                             continue
 
             else:
-                log.info(f"{self.item.id} : AJAX : {self.connector.proxy_url} : {status}")
+                log.debug(f"{self.item.id} : AJAX : {self.connector.proxy_url} : {status}")
                 tree = check_response(response_text)
                 if tree is not None:
                     if captcha_element := has_captcha(tree):
@@ -442,7 +442,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                                 )
                 # failed to find seller. Wait a delay period then check again
                 log.info(
-                    f"{self.item.id} : {self.connector.proxy_url} : No offers found which meet product criteria"
+                    f"{self.item.id} : AJAX : No offers found which meet product criteria"
                 )
             await wait_timer(end_time)
             end_time = time.time() + delay
@@ -518,7 +518,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                 log.debug(f"{self.item.id} : {self.connector.proxy_url} : CSRF Error")
                 self.validated = False
             else:
-                log.info(f"{self.item.id} : Not-In-Stock")
+                log.info(f"{self.item.id} : JSON : Not-In-Stock")
             return False
 
         except json.decoder.JSONDecodeError:
@@ -576,7 +576,7 @@ def get_item_sellers(
             found_asin = find_asin.group(1)
 
     if found_asin != item.id:
-        log.info(
+        log.debug(
             f"Aborting Check, ASINs do not match. Found {found_asin}; Searching for {item.id}."
         )
         return sellers
