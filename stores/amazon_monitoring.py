@@ -286,7 +286,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                             await asyncio.sleep(self.delay)
                         c += 1
             return False
-        except aiohttp.ServerDisconnectedError as e:
+        except (aiohttp.ServerDisconnectedError, TypeError) as e:
             log.debug(e)
 
     async def stock_check(self, queue: asyncio.Queue, future: asyncio.Future):
