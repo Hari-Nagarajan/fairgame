@@ -313,45 +313,75 @@ class AmazonMonitor(aiohttp.ClientSession):
 
         # Loop will only exit if a qualified seller is returned.
         while True:
-            if self.group_num == self.get_current_group() and not self.validated:
-                validated = await self.validate_session()
-                if validated:
-                    self.validated = True
-                else:
-                    log.info(f"{self.connector.proxy_url} failed too many times. Cooldown for 60 minutes.")
-                    await asyncio.sleep(3600)
-                    fail_counter = 0
-                    continue
-            if self.current_group and self.switch_group_timer():
-                self.switch_proxy_group()
-            elif self.group_num is not self.get_current_group():
-                await asyncio.sleep(30)
-                continue
-
-            delay = self.delay + randint(0, 4)
             try:
-                log.debug(f"{self.item.id} : PROXY_GROUP[{self.current_group}] : {self.connector.proxy_url} : Stock Check Count = {self.check_count}")
-            except AttributeError:
-                log.debug(f"{self.item.id} : Stock Check Count = {self.check_count}")
+                if self.group_num == self.get_current_group() and not self.validated:
+                    validated = await self.validate_session()
+                    if validated:
+                        self.validated = True
+                    else:
+                        log.info(f"{self.connector.proxy_url} failed too many times. Cooldown for 60 minutes.")
+                        await asyncio.sleep(3600)
+                        fail_counter = 0
+                        continue
+                if self.current_group and self.switch_group_timer():
+                    self.switch_proxy_group()
+                elif self.group_num is not self.get_current_group():
+                    await asyncio.sleep(30)
+                    continue
 
-            if self.item.id in ItemsHandler.offerid_list.keys():
-                offering_id = next(ItemsHandler.offerid_list[self.item.id])
-                log.debug(f"{self.item.id} : JSON : {self.connector.proxy_url} : {status}")
-                log.debug(f"{self.item.id} : {self.connector.proxy_url} : offerID={offering_id}")
+                delay = self.delay + randint(0, 4)
+                try:
+                    log.debug(f"{self.item.id} : PROXY_GROUP[{self.current_group}] : {self.connector.proxy_url} : Stock Check Count = {self.check_count}")
+                except AttributeError:
+                    log.debug(f"{self.item.id} : Stock Check Count = {self.check_count}")
 
-                status, response_text = await self.aio_get(self.atc_json_url(self.headers.get("session-id"), offering_id=offering_id))
+                if self.item.id in ItemsHandler.offerid_list.keys():
+                    offering_id = next(ItemsHandler.offerid_list[self.item.id])
+                    log.debug(f"{self.item.id} : JSON : {self.connector.proxy_url} : {status}")
+                    log.debug(f"{self.item.id} : {self.connector.proxy_url} : offerID={offering_id}")
 
-                if status != 503 and response_text is not None:
-                    stock = self.parse_json(response_text=response_text)
-                    if stock:
-                        try:
-                            ItemsHandler.trash(self.item)
-                            log.info(f"Placing {self.item.id} on a 60 min cooldown")
-                            await queue.put(offering_id)
-                            save_html_response(f"in-stock_{self.item.id}", status, response_text)
-                        except ValueError as e:
-                            pass
+                    status, response_text = await self.aio_get(self.atc_json_url(self.headers.get("session-id"), offering_id=offering_id))
+
+                    if status != 503 and response_text is not None:
+                        stock = self.parse_json(response_text=response_text)
+                        if stock:
+                            try:
+                                ItemsHandler.trash(self.item)
+                                log.info(f"Placing {self.item.id} on a 60 min cooldown")
+                                await queue.put(offering_id)
+                                save_html_response(f"in-stock_{self.item.id}", status, response_text)
+                            except ValueError as e:
+                                pass
+                    else:
+                        tree = check_response(response_text)
+                        if tree is not None:
+                            if captcha_element := has_captcha(tree):
+                                log.info(
+                                    f"{self.item.id} : {self.connector.proxy_url} : Captcha found during monitoring task"
+                                )
+                                # wait a second so it doesn't continuously hit captchas very quickly
+                                # TODO: maybe track captcha hits so that it aborts after several?
+                                await asyncio.sleep(1)
+                                # get the next response after solving captcha and then continue to next loop iteration
+                                status, response_text = await self.async_captcha_solve(
+                                    captcha_element[0], self.domain
+                                )
+                                # do this after each request
+                                fail_counter = check_fail(
+                                    status=status, fail_counter=fail_counter
+                                )
+                                if fail_counter == -1:
+                                    log.info(f"{self.connector.proxy_url} failed too many times. Cooldown for 60 minutes.")
+                                    await asyncio.sleep(3600)
+                                    fail_counter = 0
+                                await wait_timer(end_time)
+                                end_time = time.time() + delay
+                                self.check_count += 1
+                                self.next_item()
+                                continue
+
                 else:
+                    log.debug(f"{self.item.id} : AJAX : {self.connector.proxy_url} : {status}")
                     tree = check_response(response_text)
                     if tree is not None:
                         if captcha_element := has_captcha(tree):
@@ -373,98 +403,71 @@ class AmazonMonitor(aiohttp.ClientSession):
                                 log.info(f"{self.connector.proxy_url} failed too many times. Cooldown for 60 minutes.")
                                 await asyncio.sleep(3600)
                                 fail_counter = 0
+                                # session = self.fail_recreate()
+                                # try:
+                                #     future.set_result(session)
+                                # except asyncio.exceptions.InvalidStateError as e:
+                                #     log.debug(e)
+                                # return
                             await wait_timer(end_time)
                             end_time = time.time() + delay
                             self.check_count += 1
                             self.next_item()
                             continue
-
-            else:
-                log.debug(f"{self.item.id} : AJAX : {self.connector.proxy_url} : {status}")
-                tree = check_response(response_text)
-                if tree is not None:
-                    if captcha_element := has_captcha(tree):
-                        log.info(
-                            f"{self.item.id} : {self.connector.proxy_url} : Captcha found during monitoring task"
-                        )
-                        # wait a second so it doesn't continuously hit captchas very quickly
-                        # TODO: maybe track captcha hits so that it aborts after several?
-                        await asyncio.sleep(1)
-                        # get the next response after solving captcha and then continue to next loop iteration
-                        status, response_text = await self.async_captcha_solve(
-                            captcha_element[0], self.domain
-                        )
-                        # do this after each request
-                        fail_counter = check_fail(
-                            status=status, fail_counter=fail_counter
-                        )
-                        if fail_counter == -1:
-                            log.info(f"{self.connector.proxy_url} failed too many times. Cooldown for 60 minutes.")
-                            await asyncio.sleep(3600)
-                            fail_counter = 0
-                            # session = self.fail_recreate()
-                            # try:
-                            #     future.set_result(session)
-                            # except asyncio.exceptions.InvalidStateError as e:
-                            #     log.debug(e)
-                            # return
-                        await wait_timer(end_time)
-                        end_time = time.time() + delay
-                        self.check_count += 1
-                        self.next_item()
-                        continue
-                    if tree is not None and (
-                        sellers := get_item_sellers(
-                            tree,
-                            item=self.item,
-                            free_shipping_strings=self.amazon_config["FREE_SHIPPING"],
-                        )
-                    ):
-                        qualified_seller = get_qualified_seller(
-                            item=self.item, sellers=sellers
-                        )
-                        if qualified_seller:
-                            log.info(
-                                f"{self.item.id} : {self.connector.proxy_url} : Found an offer which meets criteria"
+                        if tree is not None and (
+                            sellers := get_item_sellers(
+                                tree,
+                                item=self.item,
+                                free_shipping_strings=self.amazon_config["FREE_SHIPPING"],
                             )
-                            if time.time() > self.block_purchase_until:
-                                await queue.put(qualified_seller)
+                        ):
+                            qualified_seller = get_qualified_seller(
+                                item=self.item, sellers=sellers
+                            )
+                            if qualified_seller:
                                 log.info(
-                                    f"{self.item.id} : {self.connector.proxy_url} : Offer placed in queue"
+                                    f"{self.item.id} : {self.connector.proxy_url} : Found an offer which meets criteria"
                                 )
-                                log.info(
-                                    f"{self.item.id} : {self.connector.proxy_url} : Quitting monitoring task"
-                                )
-                                future.set_result(None)
-                                return None
-                            else:
-                                log.debug(
-                                    f"{self.item.id} : {self.connector.proxy_url} : Purchasing is blocked until {self.block_purchase_until}. It is now {time.time()}."
-                                )
-                # failed to find seller. Wait a delay period then check again
-                log.info(
-                    f"{self.item.id} : AJAX : No offers found which meet product criteria"
-                )
-            await wait_timer(end_time)
-            end_time = time.time() + delay
-            status, response_text = await self.aio_get(url=self.item.furl.url)
-            # save_html_response("stock-check", status, response_text)
-            # do this after each request
-            fail_counter = check_fail(status=status, fail_counter=fail_counter)
-            if fail_counter == -1:
-                log.info(f"{self.connector.proxy_url} failed too many times. Cooldown for 60 minutes.")
-                await asyncio.sleep(3600)
-                fail_counter = 0
-                # session = self.fail_recreate()
-                # try:
-                #     future.set_result(session)
-                # except asyncio.exceptions.InvalidStateError as e:
-                #     log.debug(e)
-                # return
-            self.check_count += 1
-            self.next_item()
-            if ItemsHandler.timer():
-                ItemsHandler.refresh()
+                                if time.time() > self.block_purchase_until:
+                                    await queue.put(qualified_seller)
+                                    log.info(
+                                        f"{self.item.id} : {self.connector.proxy_url} : Offer placed in queue"
+                                    )
+                                    log.info(
+                                        f"{self.item.id} : {self.connector.proxy_url} : Quitting monitoring task"
+                                    )
+                                    future.set_result(None)
+                                    return None
+                                else:
+                                    log.debug(
+                                        f"{self.item.id} : {self.connector.proxy_url} : Purchasing is blocked until {self.block_purchase_until}. It is now {time.time()}."
+                                    )
+                    # failed to find seller. Wait a delay period then check again
+                    log.info(
+                        f"{self.item.id} : AJAX : No offers found which meet product criteria"
+                    )
+                await wait_timer(end_time)
+                end_time = time.time() + delay
+                status, response_text = await self.aio_get(url=self.item.furl.url)
+                # save_html_response("stock-check", status, response_text)
+                # do this after each request
+                fail_counter = check_fail(status=status, fail_counter=fail_counter)
+                if fail_counter == -1:
+                    log.info(f"{self.connector.proxy_url} failed too many times. Cooldown for 60 minutes.")
+                    await asyncio.sleep(3600)
+                    fail_counter = 0
+                    # session = self.fail_recreate()
+                    # try:
+                    #     future.set_result(session)
+                    # except asyncio.exceptions.InvalidStateError as e:
+                    #     log.debug(e)
+                    # return
+                self.check_count += 1
+                self.next_item()
+                if ItemsHandler.timer():
+                    ItemsHandler.refresh()
+            except IOError as e:
+                log.exception(e)
 
     async def aio_get(self, url):
         text = None
