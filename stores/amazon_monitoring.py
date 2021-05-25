@@ -124,6 +124,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         amazon_config,
         tasks=1,
         checkshipping=False,
+        use_proxies=False,
     ) -> None:
         log.debug("Initializing AmazonMonitoringHandler")
         super().__init__()
@@ -138,7 +139,10 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         self.amazon_config = amazon_config
         ua = UserAgent()
 
-        self.proxies = get_proxies(path=PROXY_FILE_PATH)
+        if use_proxies:
+            self.proxies = get_proxies(path=PROXY_FILE_PATH)
+        else:
+            self.proxies = []
 
         # Initialize the Session we'll use for stock checking
         log.debug("Initializing Monitoring Sessions")

@@ -17,22 +17,19 @@
 #      The author may be contacted through the project's GitHub, at:
 #      https://github.com/Hari-Nagarajan/fairgame
 
-import base64
 import os
 import platform
-import shutil
 import time
-import urllib
 from datetime import datetime
 from functools import wraps
 from pathlib import Path
 from signal import SIGINT, signal
 import asyncio
-from typing import Optional, List
+from typing import List
 
 import click
 
-from common.globalconfig import AMAZON_CREDENTIAL_FILE, GlobalConfig
+from common.globalconfig import GlobalConfig
 from notifications.notifications import NotificationHandler, TIME_FORMAT
 
 from stores.amazon_handler import AmazonStoreHandler as AIO_AmazonStoreHandler
@@ -95,6 +92,7 @@ def main():
 
 
 @click.command()
+@click.option("--headless", is_flag=True, help="Headless mode.")
 @click.option(
     "--p",
     type=str,
@@ -104,11 +102,27 @@ def main():
 @click.option(
     "--delay", type=float, default=5.0, help="Time to wait between checks for item[s]"
 )
+@click.option(
+    "--proxies",
+    is_flag=True,
+    default=False,
+    help="Use proxies list",
+)
+@click.option(
+    "--checkshipping",
+    is_flag=True,
+    help="Factor shipping costs into reserve price and look for items with a shipping price",
+)
 @notify_on_crash
-def amazon_aio(p, delay):
+def amazon_aio(headless, p, delay, proxies, checkshipping):
     log.debug("Creating AIO Amazon Store Handler")
     aio_amazon_obj = AIO_AmazonStoreHandler(
-        notification_handler=notification_handler, encryption_pass=p, delay=delay
+        notification_handler=notification_handler,
+        encryption_pass=p,
+        delay=delay,
+        headless=headless,
+        use_proxies=proxies,
+        check_shipping=checkshipping,
     )
     global tasks
     log.debug("Creating AIO Amazon Store Tasks")
