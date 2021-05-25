@@ -93,7 +93,6 @@ def main():
 
 @click.command()
 @click.option("--headless", is_flag=True, help="Headless mode.")
-@click.option("--single-shot", is_flag=True, help="Quit after 1 successful purchase")
 @click.option(
     "--p",
     type=str,
@@ -115,14 +114,13 @@ def main():
     help="Factor shipping costs into reserve price and look for items with a shipping price",
 )
 @notify_on_crash
-def amazon_aio(headless, single_shot, p, delay, proxies, checkshipping):
+def amazon_aio(headless, p, delay, proxies, checkshipping):
     log.debug("Creating AIO Amazon Store Handler")
     aio_amazon_obj = AIO_AmazonStoreHandler(
         notification_handler=notification_handler,
         encryption_pass=p,
         delay=delay,
         headless=headless,
-        single_shot=single_shot,
         use_proxies=proxies,
         check_shipping=checkshipping,
     )
