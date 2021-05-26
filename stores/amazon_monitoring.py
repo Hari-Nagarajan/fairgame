@@ -25,6 +25,7 @@ import time
 import typing
 from typing import Optional, Iterable, NamedTuple, List, Dict
 from utils.debugger import debug, timer
+
 # from fake_useragent import UserAgent
 from amazoncaptcha import AmazonCaptcha
 from amazoncaptcha.exceptions import ContentTypeError
@@ -104,10 +105,10 @@ DEFAULT_MAX_TIMEOUT = 10
 # }
 
 HEADERS = {
-"user-agent": "Amazon/353724.0 CFNetwork/1237 Darwin/20.4.0",
-"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9, image/webp,*/*;q=0.8",
-"Accept-Encoding": "gzip, deflate, sdch, br",
-"content-type": "application/x-www-form-urlencoded",
+    "user-agent": "Amazon/353724.0 CFNetwork/1237 Darwin/20.4.0",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9, image/webp,*/*;q=0.8",
+    "Accept-Encoding": "gzip, deflate, sdch, br",
+    "content-type": "application/x-www-form-urlencoded",
 }
 
 amazon_config = {}
@@ -265,7 +266,9 @@ class AmazonMonitor(aiohttp.ClientSession):
 
     async def validate_session(self):
         try:
-            log.debug(f"{self.connector.proxy_url} : Getting validated session for monitoring through json endpoint")
+            log.debug(
+                f"{self.connector.proxy_url} : Getting validated session for monitoring through json endpoint"
+            )
             c = 0
             while c < 5:
                 token = False
@@ -281,7 +284,9 @@ class AmazonMonitor(aiohttp.ClientSession):
                             token = True
                 await asyncio.sleep(self.delay)
                 _, response_text = await self.aio_get(
-                    self.atc_json_url(self.headers.get("session-id"), offering_id=TEST_OFFERID)
+                    self.atc_json_url(
+                        self.headers.get("session-id"), offering_id=TEST_OFFERID
+                    )
                 )
                 tree = check_response(response_text)
                 if tree is not None:
@@ -333,7 +338,9 @@ class AmazonMonitor(aiohttp.ClientSession):
                     if validated:
                         self.validated = True
                     else:
-                        log.info(f"{self.connector.proxy_url} failed too many times. Cooldown for 60 minutes.")
+                        log.info(
+                            f"{self.connector.proxy_url} failed too many times. Cooldown for 60 minutes."
+                        )
                         await asyncio.sleep(3600)
                         fail_counter = 0
                         continue
@@ -346,16 +353,31 @@ class AmazonMonitor(aiohttp.ClientSession):
                 delay = self.delay + randint(0, 4)
 
                 try:
-                    log.debug(f"{self.item.id} : PROXY_GROUP[{self.current_group}] : {self.connector.proxy_url} : Stock Check Count = {self.check_count}")
+                    log.debug(
+                        f"{self.item.id} : PROXY_GROUP[{self.current_group}] : {self.connector.proxy_url} : Stock Check Count = {self.check_count}"
+                    )
                 except AttributeError:
-                    log.debug(f"{self.item.id} : Stock Check Count = {self.check_count}")
+                    log.debug(
+                        f"{self.item.id} : Stock Check Count = {self.check_count}"
+                    )
 
-                if ItemsHandler.offerid_list and self.item.id in ItemsHandler.offerid_list.keys():
+                if (
+                    ItemsHandler.offerid_list
+                    and self.item.id in ItemsHandler.offerid_list.keys()
+                ):
                     offering_id = next(ItemsHandler.offerid_list[self.item.id])
-                    log.debug(f"{self.item.id} : JSON : {self.connector.proxy_url} : {status}")
-                    log.debug(f"{self.item.id} : {self.connector.proxy_url} : offerID={offering_id}")
+                    log.debug(
+                        f"{self.item.id} : JSON : {self.connector.proxy_url} : {status}"
+                    )
+                    log.debug(
+                        f"{self.item.id} : {self.connector.proxy_url} : offerID={offering_id}"
+                    )
 
-                    status, response_text = await self.aio_get(self.atc_json_url(self.headers.get("session-id"), offering_id=offering_id))
+                    status, response_text = await self.aio_get(
+                        self.atc_json_url(
+                            self.headers.get("session-id"), offering_id=offering_id
+                        )
+                    )
 
                     if status != 503 and response_text is not None:
                         stock = self.parse_json(response_text=response_text)
@@ -364,7 +386,9 @@ class AmazonMonitor(aiohttp.ClientSession):
                                 ItemsHandler.trash(self.item)
                                 log.info(f"Placing {self.item.id} on a 60 min cooldown")
                                 await queue.put(offering_id)
-                                save_html_response(f"in-stock_{self.item.id}", status, response_text)
+                                save_html_response(
+                                    f"in-stock_{self.item.id}", status, response_text
+                                )
                             except ValueError as e:
                                 pass
                     else:
@@ -386,7 +410,9 @@ class AmazonMonitor(aiohttp.ClientSession):
                                     status=status, fail_counter=fail_counter
                                 )
                                 if fail_counter == -1:
-                                    log.info(f"{self.connector.proxy_url} failed too many times. Cooldown for 60 minutes.")
+                                    log.info(
+                                        f"{self.connector.proxy_url} failed too many times. Cooldown for 60 minutes."
+                                    )
                                     await asyncio.sleep(3600)
                                     fail_counter = 0
                                 await wait_timer(end_time)
@@ -396,7 +422,9 @@ class AmazonMonitor(aiohttp.ClientSession):
                                 continue
 
                 else:
-                    log.debug(f"{self.item.id} : AJAX : {self.connector.proxy_url} : {status}")
+                    log.debug(
+                        f"{self.item.id} : AJAX : {self.connector.proxy_url} : {status}"
+                    )
                     tree = check_response(response_text)
                     if tree is not None:
                         if captcha_element := has_captcha(tree):
@@ -415,7 +443,9 @@ class AmazonMonitor(aiohttp.ClientSession):
                                 status=status, fail_counter=fail_counter
                             )
                             if fail_counter == -1:
-                                log.info(f"{self.connector.proxy_url} failed too many times. Cooldown for 60 minutes.")
+                                log.info(
+                                    f"{self.connector.proxy_url} failed too many times. Cooldown for 60 minutes."
+                                )
                                 await asyncio.sleep(3600)
                                 fail_counter = 0
                                 # session = self.fail_recreate()
@@ -433,7 +463,9 @@ class AmazonMonitor(aiohttp.ClientSession):
                             sellers := get_item_sellers(
                                 tree,
                                 item=self.item,
-                                free_shipping_strings=self.amazon_config["FREE_SHIPPING"],
+                                free_shipping_strings=self.amazon_config[
+                                    "FREE_SHIPPING"
+                                ],
                             )
                         ):
                             qualified_seller = get_qualified_seller(
@@ -468,7 +500,9 @@ class AmazonMonitor(aiohttp.ClientSession):
                 # do this after each request
                 fail_counter = check_fail(status=status, fail_counter=fail_counter)
                 if fail_counter == -1:
-                    log.info(f"{self.connector.proxy_url} failed too many times. Cooldown for 60 minutes.")
+                    log.info(
+                        f"{self.connector.proxy_url} failed too many times. Cooldown for 60 minutes."
+                    )
                     await asyncio.sleep(3600)
                     fail_counter = 0
                     # session = self.fail_recreate()
@@ -524,7 +558,6 @@ class AmazonMonitor(aiohttp.ClientSession):
             return None
         except ContentTypeError:
             return None
-            
 
     def parse_json(self, response_text):
         json_dict = None
@@ -534,7 +567,9 @@ class AmazonMonitor(aiohttp.ClientSession):
             if json_dict["isOK"] and json_dict["items"]:
                 for item in json_dict["items"]:
                     if item["ASIN"] == self.item.id:
-                        log.info(f"{self.item.id} : In-Stock! Passing task to checkout worker.")
+                        log.info(
+                            f"{self.item.id} : In-Stock! Passing task to checkout worker."
+                        )
                         return True
             elif not json_dict["isOK"]:
                 log.debug(f"{self.item.id} : {self.connector.proxy_url} : CSRF Error")
@@ -735,11 +770,11 @@ def get_json(path):
     else:
         return None
 
+
 def random_header():
     header = Headers(headers=True)
     header = header.generate()
     return header
-
 
     # def verify(self):
     #     log.debug("Verifying item list...")

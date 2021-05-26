@@ -121,13 +121,16 @@ class AmazonStoreHandler(BaseStoreHandler):
             future[idx].add_done_callback(recreate_session_callback)
 
         with concurrent.futures.ProcessPoolExecutor() as executor:
-            executor.submit(asyncio.gather( 
-            *[
-                amazon_monitoring.sessions_list[idx].stock_check(queue, future[idx])
-                for idx in range(len(amazon_monitoring.sessions_list))
-            ],
+            executor.submit(
+                asyncio.gather(
+                    *[
+                        amazon_monitoring.sessions_list[idx].stock_check(
+                            queue, future[idx]
+                        )
+                        for idx in range(len(amazon_monitoring.sessions_list))
+                    ],
+                )
             )
-        )
             executor.submit(await amazon_checkout.checkout_worker(queue=queue))
         return
 
