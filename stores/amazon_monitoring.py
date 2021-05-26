@@ -67,6 +67,8 @@ import asyncio
 import aiohttp
 from aiohttp_proxy import ProxyConnector, ProxyType
 
+from concurrent.futures import ProcessPoolExecutor as PPE
+
 
 if platform.system() == "Windows":
     policy = asyncio.WindowsSelectorEventLoopPolicy()
@@ -540,7 +542,8 @@ class AmazonMonitor(aiohttp.ClientSession):
                 link = captcha_images[0].attrib["src"]
                 # link = 'https://images-na.ssl-images-amazon.com/captcha/usvmgloq/Captcha_kwrrnqwkph.jpg'
                 captcha = AmazonCaptcha.fromlink(link)
-                solution = captcha.solve()
+                with PPE() as executor:
+                    solution = executor.submit(captcha.solve).result()
                 if solution:
                     log.info(f"solution is:{solution} ")
                     form_inputs = captcha_element.xpath(".//input")
