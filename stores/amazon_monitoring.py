@@ -31,7 +31,7 @@ from amazoncaptcha.exceptions import ContentTypeError
 
 from urllib.parse import urlparse
 
-from random import randint, choice
+from random import randint
 from fake_headers import Headers
 import re
 
@@ -102,6 +102,13 @@ DEFAULT_MAX_TIMEOUT = 10
 #     "Accept-Encoding": "gzip, deflate, sdch, br",
 #     "content-type": "application/x-www-form-urlencoded",
 # }
+
+HEADERS = {
+"user-agent": "Amazon/353724.0 CFNetwork/1237 Darwin/20.4.0",
+"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9, image/webp,*/*;q=0.8",
+"Accept-Encoding": "gzip, deflate, sdch, br",
+"content-type": "application/x-www-form-urlencoded",
+}
 
 amazon_config = {}
 
@@ -321,7 +328,7 @@ class AmazonMonitor(aiohttp.ClientSession):
         # Loop will only exit if a qualified seller is returned.
         while True:
             try:
-                if self.group_num == self.get_current_group() and not self.validated:
+                if self.group_num is self.get_current_group() and not self.validated:
                     validated = await self.validate_session()
                     if validated:
                         self.validated = True
@@ -337,6 +344,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                     continue
 
                 delay = self.delay + randint(0, 4)
+
                 try:
                     log.debug(f"{self.item.id} : PROXY_GROUP[{self.current_group}] : {self.connector.proxy_url} : Stock Check Count = {self.check_count}")
                 except AttributeError:
@@ -729,7 +737,8 @@ def get_json(path):
 
 def random_header():
     header = Headers(headers=True)
-    return header.generate()
+    header = header.generate()
+    return header
 
 
     # def verify(self):

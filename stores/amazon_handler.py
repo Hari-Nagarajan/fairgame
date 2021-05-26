@@ -4,6 +4,8 @@ import typing
 import asyncio
 from furl import furl
 from price_parser import parse_price, Price
+import inspect
+import concurrent.futures
 
 from common.amazon_support import (
     AmazonItemCondition,
@@ -118,13 +120,15 @@ class AmazonStoreHandler(BaseStoreHandler):
             future.append(asyncio.Future())
             future[idx].add_done_callback(recreate_session_callback)
 
-        await asyncio.gather(
-            amazon_checkout.checkout_worker(queue=queue),
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            executor.submit(asyncio.gather( 
             *[
                 amazon_monitoring.sessions_list[idx].stock_check(queue, future[idx])
                 for idx in range(len(amazon_monitoring.sessions_list))
             ],
+            )
         )
+            executor.submit(await amazon_checkout.checkout_worker(queue=queue))
         return
 
     def parse_config(self):
