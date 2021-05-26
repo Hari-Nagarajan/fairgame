@@ -11,7 +11,7 @@ uvloop = "*"
 requests = {extras = ["socks"], version = "*"}
 click = "*"
 selenium = "*"
-chromedriver-py = "~=89.0.4389.23"
+chromedriver-py = "~=91.0.4472.19"
 furl = "*"
 twilio = "*"
 discord-webhook = "*"

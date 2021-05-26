@@ -118,6 +118,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         delay: float,
         amazon_config,
         checkshipping=False,
+        use_proxies=False,
     ) -> None:
         log.debug("Initializing AmazonMonitoringHandler")
         super().__init__()
@@ -131,7 +132,10 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         self.amazon_config = amazon_config
         # ua = UserAgent()
 
-        self.proxies = get_json(path=PROXY_FILE_PATH)
+        if use_proxies:
+            self.proxies = get_json(path=PROXY_FILE_PATH)
+        else:
+            self.proxies = []
         ItemsHandler.create_items_pool(self.item_list)
         offerid_list = get_json(path=OFFERID_PATH)
         ItemsHandler.create_oid_pool(offerid_list)
@@ -155,8 +159,8 @@ class AmazonMonitoringHandler(BaseStoreHandler):
                             group_num=group_num,
                         )
                     )
-                    # self.sessions_list[idx].headers.update({"user-agent": ua.random})
         else:
+            AmazonMonitor.total_groups += 1
             connector = None
             self.sessions_list.append(
                 AmazonMonitor(
@@ -164,10 +168,9 @@ class AmazonMonitoringHandler(BaseStoreHandler):
                     amazon_config=self.amazon_config,
                     connector=connector,
                     delay=delay,
-                    group_num=0,
+                    group_num=1,
                 )
             )
-            # self.sessions_list[0].headers.update({"user-agent": ua.random})
 
 
 class AmazonMonitor(aiohttp.ClientSession):
@@ -717,6 +720,8 @@ def get_json(path):
     if os.path.exists(path):
         with open(path) as f:
             return json.load(f)
+    else:
+        return None
 
 def random_header():
     header = Headers(headers=True)

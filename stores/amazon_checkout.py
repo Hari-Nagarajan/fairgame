@@ -18,30 +18,20 @@
 #      https://github.com/Hari-Nagarajan/fairgame
 
 import stdiomask
-import fileinput
-import os
 import platform
 import time
-import typing
 from contextlib import contextmanager
-from datetime import datetime
-import queue
 import asyncio
 import aiohttp
-from typing import Optional, List
+from typing import Optional
 
-import secrets
 import re
 
 import psutil
-import requests
 from amazoncaptcha import AmazonCaptcha
-from chromedriver_py import binary_path
 from furl import furl
 from lxml import html
-from price_parser import parse_price, Price
-from selenium import webdriver
-from utils.debugger import debug, timer
+from utils.debugger import timer
 
 from selenium.common.exceptions import (
     NoSuchElementException,
@@ -51,8 +41,7 @@ from selenium.common.exceptions import (
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
-from selenium.webdriver.support import expected_conditions as EC, wait
-from selenium.webdriver.support.expected_conditions import staleness_of
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 from notifications.notifications import NotificationHandler
@@ -70,15 +59,11 @@ from utils.selenium_utils import (
 from common.amazon_support import SellerDetail, has_captcha
 from utils.misc import (
     check_response,
-    parse_html_source,
     join_xpaths,
     wait_for_element_by_xpath,
     save_html_response,
-    get_timestamp_filename,
     get_webdriver_pids,
 )
-
-from functools import wraps
 
 AMAZON_URLS = {
     "BASE_URL": "https://{domain}/",
@@ -113,8 +98,6 @@ class AmazonCheckoutHandler(BaseStoreHandler):
         amazon_config,
         profile_path,
         headless=False,
-        username=None,
-        password=None,
         timer=7200,
         cookie_list=None,
         amazon_domain="smile.amazon.com",
