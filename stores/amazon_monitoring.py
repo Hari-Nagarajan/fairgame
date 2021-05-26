@@ -190,6 +190,7 @@ class AmazonMonitor(aiohttp.ClientSession):
     total_groups = 0
     current_group = 1
     group_switch_time = time.time()
+    running_sessions = set()
 
     def __init__(
         self,
@@ -225,6 +226,7 @@ class AmazonMonitor(aiohttp.ClientSession):
             cls.current_group = 1
         log.debug(f"Switching to proxy group {cls.current_group}")
         cls.group_switch_time = time.time()
+        cls.running_sessions.clear()
 
     @classmethod
     def get_group_total(cls):
@@ -332,6 +334,9 @@ class AmazonMonitor(aiohttp.ClientSession):
 
         # Loop will only exit if a qualified seller is returned.
         while True:
+            if self.connector.proxy_url not in self.running_sessions:
+                time.sleep(delay / self.get_group_total())
+                self.running_sessions.add(self.connector.proxy_url)
             try:
                 if self.group_num is self.get_current_group() and not self.validated:
                     validated = await self.validate_session()
