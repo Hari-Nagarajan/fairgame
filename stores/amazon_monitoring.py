@@ -377,6 +377,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                         f"{self.item.id} : {self.connector.proxy_url} : offerID={offering_id}"
                     )
 
+                    end_time = time.time() + delay
                     status, response_text = await self.aio_get(
                         self.atc_json_url(
                             self.headers.get("session-id"), offering_id=offering_id
@@ -388,7 +389,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                         if stock:
                             try:
                                 ItemsHandler.trash(self.item)
-                                log.info(f"Placing {self.item.id} on a 60 min cooldown")
+                                log.info(f"Placing {self.item.id} on a cooldown")
                                 await queue.put(offering_id)
                                 save_html_response(
                                     f"in-stock_{self.item.id}", status, response_text
@@ -406,24 +407,19 @@ class AmazonMonitor(aiohttp.ClientSession):
                                 # TODO: maybe track captcha hits so that it aborts after several?
                                 await asyncio.sleep(1)
                                 # get the next response after solving captcha and then continue to next loop iteration
+                                end_time = time.time() + delay
                                 status, response_text = await self.async_captcha_solve(
                                     captcha_element[0], self.domain
                                 )
                                 # do this after each request
-                                fail_counter = check_fail(
-                                    status=status, fail_counter=fail_counter
-                                )
-                                if fail_counter == -1:
-                                    log.info(
-                                        f"{self.connector.proxy_url} failed too many times. Cooldown for 6 hours."
-                                    )
-                                    await asyncio.sleep(21600)
-                                    fail_counter = 0
 
                 else:
+                    end_time = time.time() + delay
+                    status, response_text = await self.aio_get(url=self.item.furl.url)
                     log.debug(
                         f"{self.item.id} : AJAX : {self.connector.proxy_url} : {status}"
                     )
+
                     tree = check_response(response_text)
                     if tree is not None:
                         if captcha_element := has_captcha(tree):
@@ -434,25 +430,17 @@ class AmazonMonitor(aiohttp.ClientSession):
                             # TODO: maybe track captcha hits so that it aborts after several?
                             await asyncio.sleep(1)
                             # get the next response after solving captcha and then continue to next loop iteration
+                            end_time = time.time() + delay
                             status, response_text = await self.async_captcha_solve(
                                 captcha_element[0], self.domain
                             )
                             # do this after each request
-                            fail_counter = check_fail(
-                                status=status, fail_counter=fail_counter
-                            )
-                            if fail_counter == -1:
-                                log.info(
-                                    f"{self.connector.proxy_url} failed too many times. Cooldown for 6 hours."
-                                )
-                                await asyncio.sleep(21600)
-                                fail_counter = 0
-                                # session = self.fail_recreate()
-                                # try:
-                                #     future.set_result(session)
-                                # except asyncio.exceptions.InvalidStateError as e:
-                                #     log.debug(e)
-                                # return
+                            # session = self.fail_recreate()
+                            # try:
+                            #     future.set_result(session)
+                            # except asyncio.exceptions.InvalidStateError as e:
+                            #     log.debug(e)
+                            # return
                         if tree is not None and (
                             sellers := get_item_sellers(
                                 tree,
@@ -484,15 +472,20 @@ class AmazonMonitor(aiohttp.ClientSession):
                                         f"{self.item.id} : {self.connector.proxy_url} : Purchasing is blocked until {self.block_purchase_until}. It is now {time.time()}."
                                     )
                     # failed to find seller. Wait a delay period then check again
-                    log.info(
-                        f"{self.item.id} : AJAX : No offers found which meet product criteria"
-                    )
+                    log.info(f"{self.item.id} : AJAX : No offers found which meet product criteria")
+
+                fail_counter = check_fail(status=status, fail_counter=fail_counter)
+                if fail_counter == -1:
+                    log.info(f"{self.connector.proxy_url} failed too many times. Cooldown for 6 hours.")
+                    await asyncio.sleep(21600)
+                    fail_counter = 0
+
                 await wait_timer(end_time)
-                end_time = time.time() + delay
                 self.check_count += 1
                 self.next_item()
                 if ItemsHandler.timer():
                     ItemsHandler.refresh()
+
             except IOError as e:
                 log.exception(e)
 

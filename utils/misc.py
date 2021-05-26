@@ -171,6 +171,7 @@ class ItemsHandler:
         i = cls.items.index(item)
         cls.removed_items.append(cls.items.pop(i))
         cls.circular_array = cycle(cls.items)
+        cls.start = time.time()
 
     @classmethod
     def refresh(cls):
@@ -182,7 +183,7 @@ class ItemsHandler:
 
     @classmethod
     def timer(cls):
-        if time.time() - cls.start > 3600:
+        if time.time() - cls.start > 300:
             return True
 
     @classmethod
