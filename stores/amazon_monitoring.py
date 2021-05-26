@@ -351,11 +351,10 @@ class AmazonMonitor(aiohttp.ClientSession):
                         continue
                 if self.current_group and self.switch_group_timer():
                     self.switch_proxy_group()
-                elif self.group_num is not self.get_current_group():
-                    await asyncio.sleep(30)
-                    continue
+                while self.group_num is not self.get_current_group():
+                    await asyncio.sleep(60)
 
-                delay = self.delay + randint(0, 4)
+                delay = self.delay + randint(0, 5)
 
                 try:
                     log.debug(
@@ -420,11 +419,6 @@ class AmazonMonitor(aiohttp.ClientSession):
                                     )
                                     await asyncio.sleep(21600)
                                     fail_counter = 0
-                                await wait_timer(end_time)
-                                end_time = time.time() + delay
-                                self.check_count += 1
-                                self.next_item()
-                                continue
 
                 else:
                     log.debug(
@@ -459,11 +453,6 @@ class AmazonMonitor(aiohttp.ClientSession):
                                 # except asyncio.exceptions.InvalidStateError as e:
                                 #     log.debug(e)
                                 # return
-                            await wait_timer(end_time)
-                            end_time = time.time() + delay
-                            self.check_count += 1
-                            self.next_item()
-                            continue
                         if tree is not None and (
                             sellers := get_item_sellers(
                                 tree,
@@ -500,22 +489,6 @@ class AmazonMonitor(aiohttp.ClientSession):
                     )
                 await wait_timer(end_time)
                 end_time = time.time() + delay
-                status, response_text = await self.aio_get(url=self.item.furl.url)
-                # save_html_response("stock-check", status, response_text)
-                # do this after each request
-                fail_counter = check_fail(status=status, fail_counter=fail_counter)
-                if fail_counter == -1:
-                    log.info(
-                        f"{self.connector.proxy_url} failed too many times. Cooldown for 6 hours."
-                    )
-                    await asyncio.sleep(21600)
-                    fail_counter = 0
-                    # session = self.fail_recreate()
-                    # try:
-                    #     future.set_result(session)
-                    # except asyncio.exceptions.InvalidStateError as e:
-                    #     log.debug(e)
-                    # return
                 self.check_count += 1
                 self.next_item()
                 if ItemsHandler.timer():
