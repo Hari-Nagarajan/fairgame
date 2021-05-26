@@ -82,7 +82,7 @@ def get_timestamp_filename(name, extension):
     """Utility method to create a filename with a timestamp appended to the root and before
     the provided file extension"""
     now = datetime.now()
-    date = now.strftime("%m-%d-%Y_%H:%M:%S.%f")
+    date = now.strftime("%m-%d-%Y_%H:%M:%S:%f")
     if extension.startswith("."):
         return name + "_" + date + extension
     else:

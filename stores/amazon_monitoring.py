@@ -104,12 +104,12 @@ DEFAULT_MAX_TIMEOUT = 10
 #     "content-type": "application/x-www-form-urlencoded",
 # }
 
-HEADERS = {
-    "user-agent": "Amazon/353724.0 CFNetwork/1237 Darwin/20.4.0",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9, image/webp,*/*;q=0.8",
-    "Accept-Encoding": "gzip, deflate, sdch, br",
-    "content-type": "application/x-www-form-urlencoded",
-}
+# HEADERS = {
+#     "user-agent": "Amazon/353724.0 CFNetwork/1237 Darwin/20.4.0",
+#     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9, image/webp,*/*;q=0.8",
+#     "Accept-Encoding": "gzip, deflate, sdch, br",
+#     "content-type": "application/x-www-form-urlencoded",
+# }
 
 amazon_config = {}
 
