@@ -116,12 +116,18 @@ def main():
     help="Use proxies list",
 )
 @click.option(
+    "--offerid",
+    is_flag=True,
+    default=False,
+    help="Use offering_id list",
+)
+@click.option(
     "--checkshipping",
     is_flag=True,
     help="Factor shipping costs into reserve price and look for items with a shipping price",
 )
 @notify_on_crash
-def amazon_aio(headless, p, delay, proxies, checkshipping):
+def amazon_aio(headless, p, delay, proxies, offerid, uv, checkshipping):
     log.debug("Creating AIO Amazon Store Handler")
     aio_amazon_obj = AIO_AmazonStoreHandler(
         notification_handler=notification_handler,
@@ -129,6 +135,7 @@ def amazon_aio(headless, p, delay, proxies, checkshipping):
         delay=delay,
         headless=headless,
         use_proxies=proxies,
+        use_offerid=offerid,
         check_shipping=checkshipping,
     )
     global tasks

@@ -119,6 +119,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         amazon_config,
         checkshipping=False,
         use_proxies=False,
+        use_offerid=False,
     ) -> None:
         log.debug("Initializing AmazonMonitoringHandler")
         super().__init__()
@@ -136,9 +137,12 @@ class AmazonMonitoringHandler(BaseStoreHandler):
             self.proxies = get_json(path=PROXY_FILE_PATH)
         else:
             self.proxies = []
+        if use_offerid:
+            offerid_list = get_json(path=OFFERID_PATH)
+            ItemsHandler.create_oid_pool(offerid_list)
+        else:
+            offerid_list = {}
         ItemsHandler.create_items_pool(self.item_list)
-        offerid_list = get_json(path=OFFERID_PATH)
-        ItemsHandler.create_oid_pool(offerid_list)
 
         # Initialize the Session we'll use for stock checking
         log.debug("Initializing Monitoring Sessions")
@@ -338,7 +342,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                 except AttributeError:
                     log.debug(f"{self.item.id} : Stock Check Count = {self.check_count}")
 
-                if self.item.id in ItemsHandler.offerid_list.keys():
+                if ItemsHandler.offerid_list and self.item.id in ItemsHandler.offerid_list.keys():
                     offering_id = next(ItemsHandler.offerid_list[self.item.id])
                     log.debug(f"{self.item.id} : JSON : {self.connector.proxy_url} : {status}")
                     log.debug(f"{self.item.id} : {self.connector.proxy_url} : offerID={offering_id}")

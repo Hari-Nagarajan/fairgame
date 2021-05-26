@@ -39,6 +39,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         single_shot=False,
         encryption_pass=None,
         use_proxies=False,
+        use_offerid=False,
         check_shipping=False,
     ) -> None:
         super().__init__()
@@ -57,6 +58,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         self.headless = headless
         self.delay = delay
         self.use_proxies = use_proxies
+        self.use_offerid = use_offerid
         self.check_shipping = check_shipping
 
         from cli.cli import global_config
@@ -107,6 +109,7 @@ class AmazonStoreHandler(BaseStoreHandler):
             amazon_config=amazon_config,
             delay=self.delay,
             use_proxies=self.use_proxies,
+            use_offerid=self.use_offerid,
             checkshipping=self.check_shipping,
         )
         log.debug("Creating checkout worker and monitoring task(s)")
