@@ -25,6 +25,7 @@ import time
 import typing
 from typing import Optional, Iterable, NamedTuple, List, Dict
 from utils.debugger import debug, timer
+from concurrent.futures import ProcessPoolExecutor as PPE
 
 # from fake_useragent import UserAgent
 from amazoncaptcha import AmazonCaptcha
@@ -94,6 +95,8 @@ CONFIG_FILE_PATH = "config/amazon_requests_config.json"
 PROXY_FILE_PATH = "config/proxies.json"
 STORE_NAME = "Amazon"
 DEFAULT_MAX_TIMEOUT = 10
+
+executor = PPE(max_workers=2)
 
 # Request
 
@@ -508,11 +511,11 @@ class AmazonMonitor(aiohttp.ClientSession):
                 '//img[contains(@src, "amazon.com/captcha/")]'
             )
             if captcha_images:
-                loop = asyncio.get_event_loop()
                 link = captcha_images[0].attrib["src"]
                 # link = 'https://images-na.ssl-images-amazon.com/captcha/usvmgloq/Captcha_kwrrnqwkph.jpg'
                 captcha = AmazonCaptcha.fromlink(link)
-                solution = await loop.run_in_executor(None, captcha.solve)
+                loop = asyncio.get_event_loop()
+                solution = await loop.run_in_executor(executor, captcha.solve)
                 # solution = captcha.solve()
                 if solution:
                     log.info(f"solution is:{solution} ")
