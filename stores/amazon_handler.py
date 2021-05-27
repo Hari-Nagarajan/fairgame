@@ -5,7 +5,6 @@ import asyncio
 from furl import furl
 from price_parser import parse_price, Price
 import inspect
-import concurrent.futures
 
 from common.amazon_support import (
     AmazonItemCondition,
