@@ -508,10 +508,12 @@ class AmazonMonitor(aiohttp.ClientSession):
                 '//img[contains(@src, "amazon.com/captcha/")]'
             )
             if captcha_images:
+                loop = asyncio.get_event_loop()
                 link = captcha_images[0].attrib["src"]
                 # link = 'https://images-na.ssl-images-amazon.com/captcha/usvmgloq/Captcha_kwrrnqwkph.jpg'
                 captcha = AmazonCaptcha.fromlink(link)
-                solution = captcha.solve()
+                solution = await loop.run_in_executor(None, captcha.solve)
+                # solution = captcha.solve()
                 if solution:
                     log.info(f"solution is:{solution} ")
                     form_inputs = captcha_element.xpath(".//input")

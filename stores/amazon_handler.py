@@ -120,18 +120,15 @@ class AmazonStoreHandler(BaseStoreHandler):
             future.append(asyncio.Future())
             future[idx].add_done_callback(recreate_session_callback)
 
-        with concurrent.futures.ProcessPoolExecutor() as executor:
-            executor.submit(
-                asyncio.gather(
-                    *[
-                        amazon_monitoring.sessions_list[idx].stock_check(
-                            queue, future[idx]
-                        )
-                        for idx in range(len(amazon_monitoring.sessions_list))
-                    ],
+        await asyncio.gather(
+            self.parallel_checkout_worker(amazon_checkout.checkout_worker, queue),
+            *[
+                amazon_monitoring.sessions_list[idx].stock_check(
+                    queue, future[idx]
                 )
-            )
-            executor.submit(await amazon_checkout.checkout_worker(queue=queue))
+                for idx in range(len(amazon_monitoring.sessions_list))
+            ],
+        )
         return
 
     def parse_config(self):
@@ -151,6 +148,11 @@ class AmazonStoreHandler(BaseStoreHandler):
             )
             exit(1)
         log.debug(f"Found {len(self.item_list)} items to track at {STORE_NAME}.")
+
+    async def parallel_checkout_worker(self, checkout_worker, queue):
+        loop = asyncio.get_event_loop()
+        checkout_worker = await checkout_worker(queue)
+        await loop.run_in_executor(None, checkout_worker)
 
     def parse_items(self, json_items):
         for json_item in json_items:
