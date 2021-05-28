@@ -5,7 +5,7 @@ NC='\033[0m'
 if pyenv --version ; then
 
     printf "\n${YELLOW}You do not have 'pyenv' installed.
-    If you are not on Python 3.8, This instalation will fail!${NC} \n"
+    If you are not on Python 3.8, This installation will fail!${NC} \n"
 
 fi
 
