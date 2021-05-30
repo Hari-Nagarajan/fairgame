@@ -33,7 +33,6 @@ from amazoncaptcha.exceptions import ContentTypeError
 
 from urllib.parse import urlparse
 
-from random import randint
 from fake_headers import Headers
 import re
 
@@ -96,7 +95,7 @@ PROXY_FILE_PATH = "config/proxies.json"
 STORE_NAME = "Amazon"
 DEFAULT_MAX_TIMEOUT = 10
 
-executor = PPE(max_workers=2)
+executor = PPE(max_workers=6)
 
 # Request
 
@@ -357,8 +356,6 @@ class AmazonMonitor(aiohttp.ClientSession):
                 while self.group_num is not self.get_current_group():
                     await asyncio.sleep(60)
 
-                delay = self.delay + randint(0, 5)
-
                 try:
                     log.debug(
                         f"{self.item.id} : PROXY_GROUP[{self.current_group}] : {self.connector.proxy_url} : Stock Check Count = {self.check_count}"
@@ -388,12 +385,12 @@ class AmazonMonitor(aiohttp.ClientSession):
                     )
 
                     if status != 503 and response_text is not None:
-                        stock = self.parse_json(response_text=response_text)
+                        stock = await self.parse_json(response_text=response_text)
                         if stock:
                             try:
                                 ItemsHandler.trash(self.item)
                                 log.info(f"Placing {self.item.id} on a cooldown")
-                                await queue.put(offering_id)
+                                queue.put_nowait(offering_id)
                                 save_html_response(
                                     f"in-stock_{self.item.id}", status, response_text
                                 )
@@ -444,6 +441,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                             # except asyncio.exceptions.InvalidStateError as e:
                             #     log.debug(e)
                             # return
+                        loop = asyncio.get_event_loop()
                         if tree is not None and (
                             sellers := get_item_sellers(
                                 tree,
@@ -453,8 +451,11 @@ class AmazonMonitor(aiohttp.ClientSession):
                                 ],
                             )
                         ):
-                            qualified_seller = get_qualified_seller(
-                                item=self.item, sellers=sellers
+                            qualified_seller = await loop.run_in_executor(
+                                    executor,
+                                    get_qualified_seller,
+                                    self.item,
+                                    sellers,
                             )
                             if qualified_seller:
                                 log.info(
@@ -475,11 +476,15 @@ class AmazonMonitor(aiohttp.ClientSession):
                                         f"{self.item.id} : {self.connector.proxy_url} : Purchasing is blocked until {self.block_purchase_until}. It is now {time.time()}."
                                     )
                     # failed to find seller. Wait a delay period then check again
-                    log.info(f"{self.item.id} : AJAX : No offers found which meet product criteria")
+                    log.info(
+                        f"{self.item.id} : AJAX : No offers found which meet product criteria"
+                    )
 
                 fail_counter = check_fail(status=status, fail_counter=fail_counter)
                 if fail_counter == -1:
-                    log.info(f"{self.connector.proxy_url} failed too many times. Cooldown for 6 hours.")
+                    log.info(
+                        f"{self.connector.proxy_url} failed too many times. Cooldown for 6 hours."
+                    )
                     await asyncio.sleep(21600)
                     fail_counter = 0
 
@@ -535,11 +540,12 @@ class AmazonMonitor(aiohttp.ClientSession):
         except ContentTypeError:
             return None
 
-    def parse_json(self, response_text):
+    async def parse_json(self, response_text):
         json_dict = None
         try:
-            json_dict = json.loads(response_text)
-            # log.debug(f"{self.item.id} : {self.connector.proxy_url} : {json_dict}")
+            loop = asyncio.get_event_loop()
+            json_dict = await loop.run_in_executor(executor, json.loads, response_text)
+            log.debug(f"{self.item.id} : {self.connector.proxy_url} : {json_dict}")
             if json_dict["isOK"] and json_dict["items"]:
                 for item in json_dict["items"]:
                     if item["ASIN"] == self.item.id:
