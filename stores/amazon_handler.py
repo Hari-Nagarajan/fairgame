@@ -4,17 +4,10 @@ import typing
 import asyncio
 from furl import furl
 from price_parser import parse_price, Price
-import inspect
 
 from common.amazon_support import (
     AmazonItemCondition,
-    condition_check,
     FGItem,
-    get_shipping_costs,
-    price_check,
-    SellerDetail,
-    solve_captcha,
-    merchant_check,
     parse_condition,
 )
 
@@ -42,8 +35,11 @@ class AmazonStoreHandler(BaseStoreHandler):
         self,
         notification_handler: NotificationHandler,
         delay: float,
+        headless=False,
         single_shot=False,
         encryption_pass=None,
+        use_proxies=False,
+        check_shipping=False,
     ) -> None:
         super().__init__()
         self.shuffle = True
@@ -58,7 +54,10 @@ class AmazonStoreHandler(BaseStoreHandler):
         self.amazon_domain = "smile.amazon.com"
         self.webdriver_child_pids = []
         self.single_shot = single_shot
+        self.headless = headless
         self.delay = delay
+        self.use_proxies = use_proxies
+        self.check_shipping = check_shipping
 
         from cli.cli import global_config
 
@@ -80,19 +79,26 @@ class AmazonStoreHandler(BaseStoreHandler):
         global queue
         queue = asyncio.Queue()
         log.debug("Creating checkout handler")
+        if self.amazon_domain.endswith(".com"):
+            cookie_suffix = "main"
+        else:
+            cookie_suffix = "acb" + self.amazon_domain.split(".")[-1]
+        cookie_list = [
+            "session-id",
+            "x-amz-captcha-1",
+            "x-amz-captcha-2",
+            f"ubid-{cookie_suffix}",
+            f"x-{cookie_suffix}",
+            f"at-{cookie_suffix}",
+            f"sess-at-{cookie_suffix}",
+        ]
         amazon_checkout = AmazonCheckoutHandler(
             notification_handler=self.notification_handler,
             amazon_config=amazon_config,
-            cookie_list=[
-                "session-id",
-                "x-amz-captcha-1",
-                "x-amz-captcha-2",
-                "ubid-main",
-                "x-main",
-                "at-main",
-                "sess-at-main",
-            ],
+            cookie_list=cookie_list,
             profile_path=self.profile_path,
+            amazon_domain=self.amazon_domain,
+            headless=self.headless,
         )
         log.debug("Creating monitoring handler")
         amazon_monitoring = AmazonMonitoringHandler(
@@ -101,6 +107,8 @@ class AmazonStoreHandler(BaseStoreHandler):
             amazon_config=amazon_config,
             tasks=checkout_tasks,
             delay=self.delay,
+            use_proxies=self.use_proxies,
+            checkshipping=self.check_shipping,
         )
         log.debug("Creating checkout worker and monitoring task(s)")
         future = []
@@ -181,7 +189,7 @@ class AmazonStoreHandler(BaseStoreHandler):
                             condition=condition,
                             merchant_id=merchant_id,
                             furl=furl(
-                                url=f"https://smile.amazon.com/gp/aod/ajax?asin={asin}"
+                                url=f"https://{self.amazon_domain}/gp/aod/ajax?asin={asin}"
                             ),
                         )
                     )
