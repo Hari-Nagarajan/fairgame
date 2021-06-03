@@ -225,7 +225,8 @@ class AmazonMonitor(aiohttp.ClientSession):
         end_time = time.time() + delay
         status, response_text = await self.aio_get(url=self.item.furl.url)
 
-        save_html_response("stock-check", status, response_text)
+        # save_html_response(f"{self.item.id}_stock-check_{self.connector.proxy_url}_proxy", status, response_text)
+        save_html_response(f"{self.item.id}_stock-check", status, response_text)
 
         # do this after each request
         fail_counter = check_fail(status=status, fail_counter=fail_counter)
@@ -287,7 +288,9 @@ class AmazonMonitor(aiohttp.ClientSession):
             await wait_timer(end_time)
             end_time = time.time() + delay
             status, response_text = await self.aio_get(url=self.item.furl.url)
-            save_html_response("stock-check", status, response_text)
+            # save_html_response(f"{self.item.id}_stock-check_{self.connector.proxy_url}_proxy", status, response_text)
+            save_html_response(f"{self.item.id}_stock-check", status, response_text)
+            log.debug(f"ASIN {self.item.id} returned HTML status {status} using proxy {self.connector.proxy_url}")
             # do this after each request
             fail_counter = check_fail(status=status, fail_counter=fail_counter)
             if fail_counter == -1:
@@ -488,7 +491,7 @@ def parse_offers(offers: html.HtmlElement, free_shipping_strings, atc_method=Fal
 
 
 @timer
-def get_qualified_seller(item, sellers, check_shipping=False) -> SellerDetail or None:
+def get_qualified_seller(item, sellers, check_shipping=True) -> SellerDetail or None:
     if not sellers:
         return None
     for seller in sellers:
