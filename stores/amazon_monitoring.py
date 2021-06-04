@@ -418,7 +418,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                     )
 
                     tree = check_response(response_text)
-                    if tree is not None:
+                    if tree is not None and status == 200:
                         if captcha_element := has_captcha(tree):
                             log.info(
                                 f"CAPTCHA during monitoring : {self.connector.proxy_url}"
