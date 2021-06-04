@@ -110,7 +110,7 @@ DEFAULT_MAX_TIMEOUT = 10
 HEADERS = {
     "user-agent": "Amazon/354712.0 CFNetwork/1240.0.4 Darwin/20.5.0",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9, image/webp,*/*;q=0.8",
-    "Accept-Encoding": "gzip, deflate, br",
+    "Accept-Encoding": "gzip, deflate, sdch, br",
     "content-type": "application/x-www-form-urlencoded",
 }
 
@@ -168,6 +168,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
                     self.sessions_list.append(
                         AmazonMonitor(
                             headers=HEADERS,
+                            # headers=random_header(),
                             amazon_config=self.amazon_config,
                             connector=connector,
                             delay=delay,
@@ -275,7 +276,7 @@ class AmazonMonitor(aiohttp.ClientSession):
             )
             c = 0
             while c < 3:
-                delay = self.delay + randint(0, 10)
+                delay = self.delay + randint(0, 5)
                 token = False
                 while not token:
                     await self.get(COOKIE_HARVEST_URL)
@@ -287,6 +288,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                             session_token = cookie.value
                             self.headers.update({"session-token": session_token})
                             token = True
+                    await asyncio.sleep(delay)
                 await asyncio.sleep(delay)
                 _, response_text = await self.aio_get(
                     self.atc_json_url(
@@ -335,7 +337,7 @@ class AmazonMonitor(aiohttp.ClientSession):
 
         # Loop will only exit if a qualified seller is returned.
         while True:
-            delay = self.delay + randint(0, 10)
+            delay = self.delay + randint(0, 5)
             try:
                 if self.group_num is self.get_current_group() and not self.validated:
                     validated = await self.validate_session()
@@ -739,7 +741,7 @@ def get_json(path):
 
 
 def random_header():
-    header = Headers(headers=True)
+    header = Headers(os="win", browser="chrome", headers=True)
     header = header.generate()
     return header
 
