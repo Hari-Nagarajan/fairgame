@@ -271,7 +271,7 @@ class AmazonMonitor(aiohttp.ClientSession):
 
     async def validate_session(self):
         try:
-            log.info(
+            log.debug(
                 f"{self.connector.proxy_url} : Getting validated session for monitoring through json endpoint"
             )
             c = 0
@@ -306,7 +306,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                             return True
                     except json.decoder.JSONDecodeError:
                         if captcha_element := has_captcha(tree):
-                            log.info(f"CAPTCHA during validation : {self.connector.proxy_url} : TRY={c+1}")
+                            log.debug(f"CAPTCHA during validation : {self.connector.proxy_url} : TRY={c+1}")
                             await asyncio.sleep(delay)
                             _, response_text = await self.async_captcha_solve(captcha_element[0], self.domain)
                         c += 1
@@ -369,7 +369,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                     and self.item.id in ItemsHandler.offerid_list.keys()
                 ):
                     offering_id = next(ItemsHandler.offerid_list[self.item.id])
-                    log.info(
+                    log.debug(
                         f"{self.item.id} : JSON : {status} : {self.connector.proxy_url} "
                     )
                     log.debug(
@@ -399,7 +399,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                         tree = check_response(response_text)
                         if tree is not None:
                             if captcha_element := has_captcha(tree):
-                                log.info(
+                                log.debug(
                                         f"CAPTCHA during monitoring : {self.connector.proxy_url}"
                                 )
                                 # wait a second so it doesn't continuously hit captchas very quickly
@@ -413,7 +413,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                 else:
                     end_time = time.time() + delay
                     status, response_text = await self.aio_get(url=self.item.furl.url)
-                    log.info(
+                    log.debug(
                             f"{self.item.id} : AJAX : {status} : {self.connector.proxy_url}"
                     )
 
