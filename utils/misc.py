@@ -183,7 +183,7 @@ class ItemsHandler:
 
     @classmethod
     def timer(cls):
-        if time.time() - cls.start > 300:
+        if time.time() - cls.start > 3600:
             return True
 
     @classmethod

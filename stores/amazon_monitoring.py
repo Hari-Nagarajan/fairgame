@@ -34,6 +34,7 @@ from amazoncaptcha.exceptions import ContentTypeError
 from urllib.parse import urlparse
 
 from fake_headers import Headers
+from random import randint
 import re
 
 import requests
@@ -95,7 +96,7 @@ PROXY_FILE_PATH = "config/proxies.json"
 STORE_NAME = "Amazon"
 DEFAULT_MAX_TIMEOUT = 10
 
-executor = PPE(max_workers=6)
+executor = PPE()
 
 # Request
 
@@ -192,7 +193,6 @@ class AmazonMonitor(aiohttp.ClientSession):
     total_groups = 0
     current_group = 1
     group_switch_time = time.time()
-    running_sessions = set()
 
     def __init__(
         self,
@@ -228,7 +228,6 @@ class AmazonMonitor(aiohttp.ClientSession):
             cls.current_group = 1
         log.debug(f"Switching to proxy group {cls.current_group}")
         cls.group_switch_time = time.time()
-        cls.running_sessions.clear()
 
     @classmethod
     def get_group_total(cls):
@@ -336,9 +335,7 @@ class AmazonMonitor(aiohttp.ClientSession):
 
         # Loop will only exit if a qualified seller is returned.
         while True:
-            if self.connector.proxy_url not in self.running_sessions:
-                time.sleep(delay / self.get_group_total())
-                self.running_sessions.add(self.connector.proxy_url)
+            delay = self.delay + randint(0, 10)
             try:
                 if self.group_num is self.get_current_group() and not self.validated:
                     validated = await self.validate_session()
@@ -441,7 +438,6 @@ class AmazonMonitor(aiohttp.ClientSession):
                             # except asyncio.exceptions.InvalidStateError as e:
                             #     log.debug(e)
                             # return
-                        loop = asyncio.get_event_loop()
                         if tree is not None and (
                             sellers := get_item_sellers(
                                 tree,
@@ -451,12 +447,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                                 ],
                             )
                         ):
-                            qualified_seller = await loop.run_in_executor(
-                                    executor,
-                                    get_qualified_seller,
-                                    self.item,
-                                    sellers,
-                            )
+                            qualified_seller = get_qualified_seller(self.item, sellers)
                             if qualified_seller:
                                 log.info(
                                     f"{self.item.id} : {self.connector.proxy_url} : Found an offer which meets criteria"
