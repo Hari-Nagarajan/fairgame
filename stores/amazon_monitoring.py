@@ -413,8 +413,8 @@ class AmazonMonitor(aiohttp.ClientSession):
                 else:
                     end_time = time.time() + delay
                     status, response_text = await self.aio_get(url=self.item.furl.url)
-                    log.debug(
-                        f"{self.item.id} : AJAX : {self.connector.proxy_url} : {status}"
+                    log.info(
+                            f"{self.item.id} : AJAX : {status} : {self.connector.proxy_url}"
                     )
 
                     tree = check_response(response_text)
@@ -465,9 +465,10 @@ class AmazonMonitor(aiohttp.ClientSession):
                                         f"{self.item.id} : {self.connector.proxy_url} : Purchasing is blocked until {self.block_purchase_until}. It is now {time.time()}."
                                     )
                     # failed to find seller. Wait a delay period then check again
-                    log.info(
-                        f"{self.item.id} : AJAX : No offers found which meet product criteria"
-                    )
+                    if status == 200:
+                        log.info(
+                            f"{self.item.id} : AJAX : No offers found which meet product criteria"
+                        )
 
                 fail_counter = check_fail(status=status, fail_counter=fail_counter)
                 if fail_counter == -1:
@@ -558,7 +559,7 @@ def check_fail(status, fail_counter, fail_list=None) -> int:
 
     if fail_list is None:
         fail_list = [503, 999]
-    MAX_FAILS = 5
+    MAX_FAILS = 10
     n = fail_counter
     if status in fail_list:
         n += 1
