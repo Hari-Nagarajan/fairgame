@@ -475,7 +475,8 @@ class AmazonMonitor(aiohttp.ClientSession):
                     log.info(
                         f"{self.connector.proxy_url} failed too many times. Cooldown for 1 hour."
                     )
-                    await asyncio.sleep(3600)
+                    await asyncio.sleep(900)
+                    self.validated = False
                     fail_counter = 0
 
                 await wait_timer(end_time)
@@ -558,7 +559,7 @@ def check_fail(status, fail_counter, fail_list=None) -> int:
 
     if fail_list is None:
         fail_list = [503, 999]
-    MAX_FAILS = 50
+    MAX_FAILS = 10
     n = fail_counter
     if status in fail_list:
         n += 1
