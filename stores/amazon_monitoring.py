@@ -291,7 +291,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                             self.headers.update({"session-token": session_token})
                             token = True
                 await asyncio.sleep(delay)
-                _, response_text = await self.aio_get(
+                status, response_text = await self.aio_get(
                     self.atc_json_url(
                         self.headers.get("session-id"), offering_id=TEST_OFFERID
                     )
@@ -302,7 +302,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                         json_dict = json.loads(response_text)
                         if json_dict["isOK"]:
                             log.debug(json_dict)
-                            log.info(f"Received Session-Token : {self.connector.proxy_url} : TRY={c+1}")
+                            log.info(f"Received Session-Token : {status} : {self.connector.proxy_url} : TRY={c+1}")
                             return True
                     except json.decoder.JSONDecodeError:
                         if captcha_element := has_captcha(tree):
@@ -346,10 +346,9 @@ class AmazonMonitor(aiohttp.ClientSession):
                         self.validated = True
                     else:
                         log.info(
-                            f"{self.connector.proxy_url} failed too many times. Cooldown for 1 hour."
+                            f"{self.connector.proxy_url} failed too many times. Cooldown for 10 minutes."
                         )
-                        await asyncio.sleep(3600)
-                        fail_counter = 0
+                        await asyncio.sleep(600)
                         continue
                 if self.current_group and self.switch_group_timer():
                     self.switch_proxy_group()
@@ -473,9 +472,9 @@ class AmazonMonitor(aiohttp.ClientSession):
                 fail_counter = check_fail(status=status, fail_counter=fail_counter)
                 if fail_counter == -1:
                     log.info(
-                        f"{self.connector.proxy_url} failed too many times. Cooldown for 1 hour."
+                        f"{self.connector.proxy_url} failed too many times. Cooldown for 10 minutes."
                     )
-                    await asyncio.sleep(900)
+                    await asyncio.sleep(600)
                     self.validated = False
                     fail_counter = 0
 
@@ -559,7 +558,7 @@ def check_fail(status, fail_counter, fail_list=None) -> int:
 
     if fail_list is None:
         fail_list = [503, 999]
-    MAX_FAILS = 10
+    MAX_FAILS = 5
     n = fail_counter
     if status in fail_list:
         n += 1
