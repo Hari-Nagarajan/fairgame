@@ -469,6 +469,10 @@ class AmazonMonitor(aiohttp.ClientSession):
                         log.info(
                             f"{self.item.id} : AJAX : No offers found which meet product criteria"
                         )
+                    if status == 503:
+                        log.info(
+                            f"{self.item.id} : AJAX : Skipping check since status is 503"
+                        )
 
                 fail_counter = check_fail(status=status, fail_counter=fail_counter)
                 if fail_counter == -1:
