@@ -28,7 +28,7 @@ from typing import Optional
 import re
 
 import psutil
-from amazoncaptcha import AmazonCaptcha
+from amazoncaptcha_aio import AmazonCaptcha
 from furl import furl
 from lxml import html
 from utils.debugger import timer
