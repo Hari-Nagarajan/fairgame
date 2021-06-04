@@ -107,12 +107,12 @@ DEFAULT_MAX_TIMEOUT = 10
 #     "content-type": "application/x-www-form-urlencoded",
 # }
 
-HEADERS = {
-    "user-agent": "Amazon/354712.0 CFNetwork/1240.0.4 Darwin/20.5.0",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9, image/webp,*/*;q=0.8",
-    "Accept-Encoding": "gzip, deflate, sdch, br",
-    "content-type": "application/x-www-form-urlencoded",
-}
+# HEADERS = {
+#     "user-agent": "Amazon/354712.0 CFNetwork/1240.0.4 Darwin/20.5.0",
+#     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9, image/webp,*/*;q=0.8",
+#     "Accept-Encoding": "gzip, deflate, sdch, br",
+#     "content-type": "application/x-www-form-urlencoded",
+# }
 
 amazon_config = {}
 
@@ -167,8 +167,7 @@ class AmazonMonitoringHandler(BaseStoreHandler):
                     connector = ProxyConnector.from_url(proxy_group[idx])
                     self.sessions_list.append(
                         AmazonMonitor(
-                            headers=HEADERS,
-                            # headers=random_header(),
+                            headers=random_header(),
                             amazon_config=self.amazon_config,
                             connector=connector,
                             delay=delay,
