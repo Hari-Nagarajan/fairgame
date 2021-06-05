@@ -195,6 +195,7 @@ class AmazonMonitor(aiohttp.ClientSession):
     current_group = 1
     group_switch_time = time.time()
     captcha_worker = PPE(max_workers=(cpu_count() - 2))
+    bad_proxies = set()
 
     def __init__(
         self,
@@ -230,6 +231,10 @@ class AmazonMonitor(aiohttp.ClientSession):
             cls.current_group = 1
         log.debug(f"Switching to proxy group {cls.current_group}")
         cls.group_switch_time = time.time()
+        with open("config/bad_proxies.json", 'w') as f:
+            temp = list(cls.bad_proxies)
+            temp.append(f"total: {len(temp)}")
+            json.dump(temp, f, indent=4)
 
     @classmethod
     def get_group_total(cls):
@@ -346,9 +351,9 @@ class AmazonMonitor(aiohttp.ClientSession):
                         self.validated = True
                     else:
                         log.info(
-                            f"{self.connector.proxy_url} failed too many times. Cooldown for 10 minutes."
+                            f"{self.connector.proxy_url} failed too many times. Cooldown for at least 5 minutes."
                         )
-                        await asyncio.sleep(600)
+                        await asyncio.sleep(randint(300, 1500))
                         continue
                 if self.current_group and self.switch_group_timer():
                     self.switch_proxy_group()
@@ -477,9 +482,10 @@ class AmazonMonitor(aiohttp.ClientSession):
                 fail_counter = check_fail(status=status, fail_counter=fail_counter)
                 if fail_counter == -1:
                     log.info(
-                        f"{self.connector.proxy_url} failed too many times. Cooldown for 10 minutes."
+                        f"{self.connector.proxy_url} failed too many times. Cooldown for at least 30 minutes."
                     )
-                    await asyncio.sleep(600)
+                    self.bad_proxies.add(str(self.connector.proxy_url))
+                    await asyncio.sleep(randint(1800, 3600))
                     self.validated = False
                     fail_counter = 0
 
@@ -563,7 +569,7 @@ def check_fail(status, fail_counter, fail_list=None) -> int:
 
     if fail_list is None:
         fail_list = [503, 999]
-    MAX_FAILS = 10
+    MAX_FAILS = 3
     n = fail_counter
     if status in fail_list:
         n += 1
