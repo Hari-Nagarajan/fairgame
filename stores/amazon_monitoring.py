@@ -280,7 +280,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                 f"{self.connector.proxy_url} : Getting validated session for monitoring through json endpoint"
             )
             c = 0
-            while c < 50:
+            while c < 10:
                 delay = self.delay + randint(0, 10)
                 token = False
                 while not token:
@@ -353,7 +353,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                         log.info(
                             f"{self.connector.proxy_url} failed too many times. Cooldown for at least 5 minutes."
                         )
-                        await asyncio.sleep(randint(300, 1500))
+                        await asyncio.sleep(randint(300, 600))
                         continue
                 if self.current_group and self.switch_group_timer():
                     self.switch_proxy_group()
