@@ -353,6 +353,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                         log.info(
                             f"{self.connector.proxy_url} failed too many times. Cooldown for at least 5 minutes."
                         )
+                        self.bad_proxies.add(str(self.connector.proxy_url))
                         await asyncio.sleep(randint(300, 600))
                         continue
                 if self.current_group and self.switch_group_timer():
