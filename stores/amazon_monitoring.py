@@ -280,7 +280,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                 f"{self.connector.proxy_url} : Getting validated session for monitoring through json endpoint"
             )
             c = 0
-            while c < 10:
+            while c < 25:
                 delay = self.delay + randint(0, 10)
                 token = False
                 while not token:
