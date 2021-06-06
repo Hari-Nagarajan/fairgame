@@ -194,7 +194,7 @@ class AmazonMonitor(aiohttp.ClientSession):
     total_groups = 0
     current_group = 1
     group_switch_time = time.time()
-    captcha_worker = PPE(max_workers=(cpu_count() - 2))
+    captcha_worker = PPE(max_workers=(cpu_count() // 2))
     bad_proxies = set()
 
     def __init__(

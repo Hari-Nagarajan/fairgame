@@ -122,10 +122,14 @@ class AmazonStoreHandler(BaseStoreHandler):
             future.append(asyncio.Future())
             future[idx].add_done_callback(recreate_session_callback)
 
-        with PPE(max_workers=1) as checkout_executor:
-            loop = asyncio.get_event_loop()
-            checkout_task = loop.create_task(amazon_checkout.checkout_worker(queue=queue))
-            loop.run_in_executor(checkout_executor, checkout_task)
+        try:
+            with PPE(max_workers=1) as checkout_executor:
+                checkout_task = asyncio.create_task(amazon_checkout.checkout_worker(queue=queue))
+                checkout_task.set_result(None)
+                loop = asyncio.get_event_loop()
+                loop.run_in_executor(checkout_executor, checkout_task)
+        except RuntimeError as e:
+            log.debug(e)
 
         await asyncio.gather(
                 *[
