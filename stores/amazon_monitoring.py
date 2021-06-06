@@ -349,6 +349,8 @@ class AmazonMonitor(aiohttp.ClientSession):
                     validated = await self.validate_session()
                     if validated:
                         self.validated = True
+                        if str(self.connector.proxy_url) in self.bad_proxies:
+                            self.bad_proxies.discard(str(self.connector.proxy_url))
                     else:
                         log.debug(
                             f"{self.connector.proxy_url} failed too many times. Cooldown for at least 5 minutes."
