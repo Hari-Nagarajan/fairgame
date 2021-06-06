@@ -121,7 +121,7 @@ class AmazonStoreHandler(BaseStoreHandler):
             future.append(asyncio.Future())
             future[idx].add_done_callback(recreate_session_callback)
 
-        asyncio.gather(
+        await asyncio.gather(
                 amazon_checkout.checkout_worker(queue=queue),
                 *[
                     amazon_monitoring.sessions_list[idx].stock_check(
