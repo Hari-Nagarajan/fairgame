@@ -20,6 +20,7 @@ from stores.amazon_monitoring import AmazonMonitoringHandler, AmazonMonitor
 from stores.amazon_checkout import AmazonCheckoutHandler
 
 from concurrent.futures import ProcessPoolExecutor as PPE
+from functools import partial
 
 CONFIG_FILE_PATH = "config/amazon_aio_config.json"
 STORE_NAME = "Amazon"
@@ -121,8 +122,10 @@ class AmazonStoreHandler(BaseStoreHandler):
             future.append(asyncio.Future())
             future[idx].add_done_callback(recreate_session_callback)
 
+        loop = asyncio.get_event_loop()
+        checkout_task = loop.create_task(amazon_checkout.checkout_worker(queue=queue))
+        loop.run_in_executor(None, checkout_task)
         await asyncio.gather(
-                amazon_checkout.checkout_worker(queue=queue),
                 *[
                     amazon_monitoring.sessions_list[idx].stock_check(
                         queue, future[idx]
@@ -149,11 +152,6 @@ class AmazonStoreHandler(BaseStoreHandler):
             )
             exit(1)
         log.debug(f"Found {len(self.item_list)} items to track at {STORE_NAME}.")
-
-    # async def parallel_checkout_worker(self, checkout_worker, queue):
-    #     loop = asyncio.new_event_loop()
-    #     checkout_worker = await checkout_worker(queue)
-    #     loop.run_in_executor(None, checkout_worker)
 
     def parse_items(self, json_items):
         for json_item in json_items:
