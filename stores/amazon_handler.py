@@ -122,6 +122,7 @@ class AmazonStoreHandler(BaseStoreHandler):
             future[idx].add_done_callback(recreate_session_callback)
 
         asyncio.gather(
+                amazon_checkout.checkout_worker(queue=queue),
                 *[
                     amazon_monitoring.sessions_list[idx].stock_check(
                         queue, future[idx]
@@ -129,10 +130,6 @@ class AmazonStoreHandler(BaseStoreHandler):
                     for idx in range(len(amazon_monitoring.sessions_list))
                 ],
             )
-        with PPE() as executor:
-            loop = asyncio.get_event_loop()
-            loop.run_in_executor(executor, await amazon_checkout.checkout_worker(queue=queue))
-            # executor.submit(await amazon_checkout.checkout_worker(queue=queue))
         return
 
     def parse_config(self):

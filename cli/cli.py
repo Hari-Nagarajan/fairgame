@@ -37,6 +37,7 @@ from stores.amazon_handler import AmazonStoreHandler as AIO_AmazonStoreHandler
 from utils.logger import log
 from utils.version import is_latest, version, get_latest_version
 
+
 LICENSE_PATH = os.path.join(
     "cli",
     "license",
@@ -141,7 +142,10 @@ def amazon_aio(headless, p, delay, proxies, offerid, uv, checkshipping):
     global tasks
     log.debug("Creating AIO Amazon Store Tasks")
     if uv:
-        uvloop.install()
+        if platform.system() == "Windows":
+            log.info("uvloop is not supported on Windows.")
+        else:
+            uvloop.install()
     tasks = asyncio.run(aio_amazon_obj.run_async())
     if tasks:
         for task in tasks:
