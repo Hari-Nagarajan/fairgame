@@ -391,8 +391,9 @@ class AmazonMonitor(aiohttp.ClientSession):
                         )
                     )
 
-                    if status != 503 and response_text is not None:
-                        stock = await self.parse_json(response_text=response_text)
+                    tree = check_response(response_text)
+                    if tree is not None and status != 503:
+                        stock = self.parse_json(response_text=response_text)
                         if stock:
                             try:
                                 ItemsHandler.trash(self.item)
@@ -402,28 +403,18 @@ class AmazonMonitor(aiohttp.ClientSession):
                                     f"in-stock_{self.item.id}", status, response_text
                                 )
                             except ValueError as e:
-                                pass
-
-                    elif status == 503:
-                        fail_counter = check_fail(status=status, fail_counter=fail_counter)
-                        if fail_counter == -1:
+                                log.exception(e)
+                        if captcha_element := has_captcha(tree):
+                            log.debug(
+                                    f"CAPTCHA during monitoring : {self.connector.proxy_url}"
+                            )
                             self.validated = False
-                            fail_counter = 0
-
-                    else:
-                        tree = check_response(response_text)
-                        if tree is not None:
-                            if captcha_element := has_captcha(tree):
-                                log.debug(
-                                        f"CAPTCHA during monitoring : {self.connector.proxy_url}"
-                                )
-                                # wait a second so it doesn't continuously hit captchas very quickly
-                                # TODO: maybe track captcha hits so that it aborts after several?
-                                await asyncio.sleep(delay)
-                                # get the next response after solving captcha and then continue to next loop iteration
-                                end_time = time.time() + delay
-                                status, response_text = await self.async_captcha_solve(captcha_element[0], self.domain)
-                                # do this after each request
+                            continue
+                    fail_counter = check_fail(status=status, fail_counter=fail_counter)
+                    if fail_counter == -1:
+                        self.validated = False
+                        fail_counter = 0
+                        continue
 
                 else:
                     end_time = time.time() + delay
@@ -540,7 +531,7 @@ class AmazonMonitor(aiohttp.ClientSession):
         except ContentTypeError:
             return None
 
-    async def parse_json(self, response_text):
+    def parse_json(self, response_text):
         json_dict = None
         try:
             json_dict = json.loads(response_text)
