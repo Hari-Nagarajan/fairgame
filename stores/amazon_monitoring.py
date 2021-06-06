@@ -350,7 +350,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                     if validated:
                         self.validated = True
                     else:
-                        log.info(
+                        log.debug(
                             f"{self.connector.proxy_url} failed too many times. Cooldown for at least 5 minutes."
                         )
                         self.bad_proxies.add(str(self.connector.proxy_url))
@@ -482,7 +482,7 @@ class AmazonMonitor(aiohttp.ClientSession):
 
                 fail_counter = check_fail(status=status, fail_counter=fail_counter)
                 if fail_counter == -1:
-                    log.info(
+                    log.debug(
                         f"{self.connector.proxy_url} failed too many times. Cooldown for at least 5 minutes."
                     )
                     self.bad_proxies.add(str(self.connector.proxy_url))
@@ -625,7 +625,7 @@ def get_item_sellers(
     if not offers:
         log.info(f"No offers for {item.id} = {item.short_name}")
         return sellers
-    log.info(f"Found {len(offers)} offers.")
+    log.debug(f"Found {len(offers)} offers.")
     # Parse the found offers
 
     sellers = parse_offers(offers, free_shipping_strings, atc_method=atc_method)
