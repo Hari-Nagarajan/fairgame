@@ -401,6 +401,13 @@ class AmazonMonitor(aiohttp.ClientSession):
                                 )
                             except ValueError as e:
                                 pass
+
+                    elif status == 503:
+                        fail_counter = check_fail(status=status, fail_counter=fail_counter)
+                        if fail_counter == -1:
+                            self.validated = False
+                            fail_counter = 0
+
                     else:
                         tree = check_response(response_text)
                         if tree is not None:
@@ -477,18 +484,9 @@ class AmazonMonitor(aiohttp.ClientSession):
                         )
                     if status == 503:
                         log.info(
-                            f"{self.item.id} : AJAX : Skipping check since status is 503"
+                                f"{self.item.id} : AJAX : 503 : Skipping Checck"
                         )
 
-                fail_counter = check_fail(status=status, fail_counter=fail_counter)
-                if fail_counter == -1:
-                    log.debug(
-                        f"{self.connector.proxy_url} failed too many times. Cooldown for at least 5 minutes."
-                    )
-                    self.bad_proxies.add(str(self.connector.proxy_url))
-                    await asyncio.sleep(randint(300, 600))
-                    self.validated = False
-                    fail_counter = 0
 
                 await wait_timer(end_time)
                 self.check_count += 1
@@ -570,7 +568,7 @@ def check_fail(status, fail_counter, fail_list=None) -> int:
 
     if fail_list is None:
         fail_list = [503, 999]
-    MAX_FAILS = 10
+    MAX_FAILS = 5
     n = fail_counter
     if status in fail_list:
         n += 1
