@@ -297,6 +297,8 @@ class AmazonCheckoutHandler(BaseStoreHandler):
                 idx = (idx + 1) % len(DOTS)
                 time.sleep(0.5)
             print("", end="\r")
+        url = f'https://{self.amazon_domain}/dp/B07K1RZWMC/'
+        self.driver.get(url=url)
         log.info(f'Logged in as {self.amazon_config["username"]}')
 
     def delete_driver(self):
