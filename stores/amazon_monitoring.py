@@ -231,7 +231,8 @@ class AmazonMonitor(aiohttp.ClientSession):
         cls.current_group += 1
         if cls.current_group > cls.total_groups:
             cls.current_group = 1
-        log.info(f"Switching to proxy group {cls.current_group}")
+        if cls.total_groups > 1:
+            log.info(f"Switching to proxy group {cls.current_group}")
         cls.group_switch_time = time.time()
         with open("config/bad_proxies.json", 'w') as f:
             temp = list(cls.bad_proxies)
@@ -298,9 +299,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                                 token = True
                     if status == 503:
                         log.info(f'503 during validation : {proxy}')
-                        self.bad_proxies.add(proxy)
-                        self.good_proxies.discard(proxy)
-                        await asyncio.sleep(randint(300, 1800))
+                        return False
                 await asyncio.sleep(self.delay)
                 status, response_text = await self.aio_get(
                     self.atc_json_url(
@@ -313,7 +312,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                         json_dict = json.loads(response_text)
                         if json_dict["isOK"]:
                             log.debug(json_dict)
-                            log.info(f"Received Session-Token : {status} : {proxy} : TRY={c+1}")
+                            log.debug(f"Received Session-Token : {status} : {proxy} : TRY={c+1}")
                             return True
                     except json.decoder.JSONDecodeError:
                         if captcha_element := has_captcha(tree):
@@ -576,7 +575,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                 log.debug(f"{self.item.id} : {proxy} : CSRF Error")
                 self.validated = False
             else:
-                log.info(f"[{self.group_num}]{self.item.id} : JSON : Not-In-Stock")
+                log.info(f"[{self.group_num}] : {self.item.id} : JSON : Not-In-Stock")
             return False
 
         except json.decoder.JSONDecodeError:
