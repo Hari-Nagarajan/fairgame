@@ -333,7 +333,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                     else:
                         input_dict[form_input.name] = form_input.value
                 if not urlparse(domain).scheme:
-                    domain = f"https://{domain}
+                    domain = f"https://{domain}"
                 f = furl(domain)  # Use the original URL to get the schema and host
                 f = f.set(path=captcha_element.attrib["action"])
                 f.add(args=input_dict)
