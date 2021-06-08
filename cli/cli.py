@@ -28,6 +28,7 @@ import asyncio
 from typing import List
 
 import click
+import uvloop
 
 from common.globalconfig import GlobalConfig
 from notifications.notifications import NotificationHandler, TIME_FORMAT
@@ -35,6 +36,7 @@ from notifications.notifications import NotificationHandler, TIME_FORMAT
 from stores.amazon_handler import AmazonStoreHandler as AIO_AmazonStoreHandler
 from utils.logger import log
 from utils.version import is_latest, version, get_latest_version
+
 
 LICENSE_PATH = os.path.join(
     "cli",
@@ -103,10 +105,22 @@ def main():
     "--delay", type=float, default=5.0, help="Time to wait between checks for item[s]"
 )
 @click.option(
+    "--uv",
+    is_flag=True,
+    default=False,
+    help="Use uvloop to speed up asyncio. Not supported on Windows.",
+)
+@click.option(
     "--proxies",
     is_flag=True,
     default=False,
     help="Use proxies list",
+)
+@click.option(
+    "--offerid",
+    is_flag=True,
+    default=False,
+    help="Use offering_id list",
 )
 @click.option(
     "--checkshipping",
@@ -114,7 +128,7 @@ def main():
     help="Factor shipping costs into reserve price and look for items with a shipping price",
 )
 @notify_on_crash
-def amazon_aio(headless, p, delay, proxies, checkshipping):
+def amazon_aio(headless, p, delay, proxies, offerid, uv, checkshipping):
     log.debug("Creating AIO Amazon Store Handler")
     aio_amazon_obj = AIO_AmazonStoreHandler(
         notification_handler=notification_handler,
@@ -122,10 +136,16 @@ def amazon_aio(headless, p, delay, proxies, checkshipping):
         delay=delay,
         headless=headless,
         use_proxies=proxies,
+        use_offerid=offerid,
         check_shipping=checkshipping,
     )
     global tasks
     log.debug("Creating AIO Amazon Store Tasks")
+    if uv:
+        if platform.system() == "Windows":
+            log.info("uvloop is not supported on Windows.")
+        else:
+            uvloop.install()
     tasks = asyncio.run(aio_amazon_obj.run_async())
     if tasks:
         for task in tasks:

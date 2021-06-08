@@ -297,6 +297,8 @@ class AmazonCheckoutHandler(BaseStoreHandler):
                 idx = (idx + 1) % len(DOTS)
                 time.sleep(0.5)
             print("", end="\r")
+        url = f'https://{self.amazon_domain}/dp/B07K1RZWMC/'
+        self.driver.get(url=url)
         log.info(f'Logged in as {self.amazon_config["username"]}')
 
     def delete_driver(self):
@@ -412,7 +414,7 @@ class AmazonCheckoutHandler(BaseStoreHandler):
             if not qualified_seller:
                 continue
             start_time = time.time()
-            TURBO_INITIATE_MAX_RETRY = 50
+            TURBO_INITIATE_MAX_RETRY = 5
             retry = 0
             pid = None
             anti_csrf = None
@@ -492,22 +494,29 @@ async def aio_get(client, url, data=None):
 async def turbo_initiate(
     domain, s: aiohttp.ClientSession, qualified_seller: Optional[SellerDetail] = None
 ):
-    url = f"https://{domain}/checkout/turbo-initiate?ref_=dp_start-bbf_1_glance_buyNow_4-2&referrer=detail&pipelineType=turbo&clientId=retailwebsite&weblab=RCX_CHECKOUT_TURBO_DESKTOP_NONPRIME_87784&temporaryAddToCart=1"
+    url = f"https://{domain}/checkout/turbo-initiate?ref_=dp_start-bbf_1_glance_buyNow_2-1&referrer=detail&pipelineType=turbo&clientId=retailwebsite&weblab=RCX_CHECKOUT_TURBO_DESKTOP_PRIME_87783&temporaryAddToCart=1"
+    # url = f"https://{domain}/checkout/turbo-initiate?ref_=dp_start-bbf_1_glance_buyNow_4-2&referrer=detail&pipelineType=turbo&clientId=retailwebsite&weblab=RCX_CHECKOUT_TURBO_DESKTOP_NONPRIME_87784&temporaryAddToCart=1"
     pid = None
     anti_csrf = None
 
     if not qualified_seller:
         log.info("qualified seller not provided")
         return pid, anti_csrf
+    if isinstance(qualified_seller, SellerDetail):
+        offering_id = qualified_seller.offering_id
+        log.debug("turbo init received an instance of SellerDetail.")
+    if isinstance(qualified_seller, str):
+        offering_id = qualified_seller
+        log.debug("turbo init received an offerid string.")
     payload_inputs = {
-        "offerListing.1": qualified_seller.offering_id,
+        "offerListing.1": offering_id,
         "quantity.1": "1",
     }
     retry = 0
     MAX_RETRY = 5
     captcha_element = True  # to initialize loop
     status, text = await aio_post(client=s, url=url, data=payload_inputs)
-    save_html_response("turbo-initiate", status, text)
+    # save_html_response("turbo-initiate", status, text)
     tree: Optional[html.HtmlElement] = None
     while retry < MAX_RETRY and captcha_element:
         tree = check_response(text)
@@ -530,16 +539,17 @@ async def turbo_initiate(
         log.debug("turbo-initiate successful")
         return pid, anti_csrf
     log.debug("turbo-initiate unsuccessful")
-    save_html_response(
-        filename="turbo_ini_unsuccessful", status=000, body=tree.text_content()
-    )
+    # save_html_response(
+    #     filename="turbo_ini_unsuccessful", status=000, body=tree.text_content()
+    # )
     return pid, anti_csrf
 
 
 @timer
 async def turbo_checkout(domain, s: aiohttp.ClientSession, pid, anti_csrf):
-    log.debug("trying to checkout")
-    url = f"https://{domain}/checkout/spc/place-order?ref_=chk_spc_placeOrder&clientId=retailwebsite&pipelineType=turbo&pid={pid}"
+    log.info("trying to checkout")
+    # url = f"https://{domain}/checkout/spc/place-order?ref_=chk_spc_placeOrder&clientId=retailwebsite&pipelineType=turbo&pid={pid}"
+    url = f"https://{domain}/checkout/spc/place-order?ref_=chk_spc_placeOrder&_srcRID=&clientId=retailwebsite&pipelineType=turbo&cachebuster=1621370978440&pid={pid}"
     header_update = {"anti-csrftoken-a2z": anti_csrf}
     s.headers.update(header_update)
 

@@ -4,6 +4,7 @@ import typing
 import asyncio
 from furl import furl
 from price_parser import parse_price, Price
+import inspect
 
 from common.amazon_support import (
     AmazonItemCondition,
@@ -17,6 +18,9 @@ from utils.logger import log
 
 from stores.amazon_monitoring import AmazonMonitoringHandler, AmazonMonitor
 from stores.amazon_checkout import AmazonCheckoutHandler
+
+from concurrent.futures import ProcessPoolExecutor as PPE
+from functools import partial
 
 CONFIG_FILE_PATH = "config/amazon_aio_config.json"
 STORE_NAME = "Amazon"
@@ -39,6 +43,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         single_shot=False,
         encryption_pass=None,
         use_proxies=False,
+        use_offerid=False,
         check_shipping=False,
     ) -> None:
         super().__init__()
@@ -57,6 +62,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         self.headless = headless
         self.delay = delay
         self.use_proxies = use_proxies
+        self.use_offerid = use_offerid
         self.check_shipping = check_shipping
 
         from cli.cli import global_config
@@ -74,7 +80,7 @@ class AmazonStoreHandler(BaseStoreHandler):
         log.info(message)
         self.notification_handler.send_notification(message)
 
-    async def run_async(self, checkout_tasks=1):
+    async def run_async(self):
         log.debug("Creating checkout queue")
         global queue
         queue = asyncio.Queue()
@@ -105,9 +111,9 @@ class AmazonStoreHandler(BaseStoreHandler):
             notification_handler=self.notification_handler,
             item_list=self.item_list,
             amazon_config=amazon_config,
-            tasks=checkout_tasks,
             delay=self.delay,
             use_proxies=self.use_proxies,
+            use_offerid=self.use_offerid,
             checkshipping=self.check_shipping,
         )
         log.debug("Creating checkout worker and monitoring task(s)")
@@ -116,13 +122,23 @@ class AmazonStoreHandler(BaseStoreHandler):
             future.append(asyncio.Future())
             future[idx].add_done_callback(recreate_session_callback)
 
+        try:
+            with PPE(max_workers=1) as checkout_executor:
+                checkout_task = asyncio.create_task(amazon_checkout.checkout_worker(queue=queue))
+                checkout_task.set_result(None)
+                loop = asyncio.get_event_loop()
+                loop.run_in_executor(checkout_executor, checkout_task)
+        except RuntimeError as e:
+            log.debug(e)
+
         await asyncio.gather(
-            amazon_checkout.checkout_worker(queue=queue),
-            *[
-                amazon_monitoring.sessions_list[idx].stock_check(queue, future[idx])
-                for idx in range(len(amazon_monitoring.sessions_list))
-            ],
-        )
+                *[
+                    amazon_monitoring.sessions_list[idx].stock_check(
+                        queue, future[idx]
+                    )
+                    for idx in range(len(amazon_monitoring.sessions_list))
+                ],
+            )
         return
 
     def parse_config(self):

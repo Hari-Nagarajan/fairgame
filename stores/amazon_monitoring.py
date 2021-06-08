@@ -25,11 +25,16 @@ import time
 import typing
 from typing import Optional, Iterable, NamedTuple, List, Dict
 from utils.debugger import debug, timer
+
 from fake_useragent import UserAgent
-from amazoncaptcha import AmazonCaptcha
+from amazoncaptcha_aio import AmazonCaptcha
+# from amazoncaptcha_aio.exceptions import ContentTypeError
 
 from urllib.parse import urlparse
 
+from fake_headers import Headers
+from random import randint
+from psutil import cpu_count
 import re
 
 import requests
@@ -41,6 +46,7 @@ from utils.misc import (
     get_timestamp_filename,
     save_html_response,
     check_response,
+    ItemsHandler,
 )
 
 from common.amazon_support import (
@@ -61,27 +67,14 @@ from utils.logger import log
 import asyncio
 import aiohttp
 from aiohttp_proxy import ProxyConnector, ProxyType
+from aiohttp.client_exceptions import ClientConnectorError, InvalidURL
+from concurrent.futures import ProcessPoolExecutor as PPE
+
 
 if platform.system() == "Windows":
     policy = asyncio.WindowsSelectorEventLoopPolicy()
     asyncio.set_event_loop_policy(policy)
 
-# PDP_URL = "https://smile.amazon.com/gp/product/"
-# AMAZON_DOMAIN = "www.amazon.com.au"
-# AMAZON_DOMAIN = "www.amazon.com.br"
-# AMAZON_DOMAIN = "www.amazon.ca"
-# NOT SUPPORTED AMAZON_DOMAIN = "www.amazon.cn"
-# AMAZON_DOMAIN = "www.amazon.fr"
-# AMAZON_DOMAIN = "www.amazon.de"
-# NOT SUPPORTED AMAZON_DOMAIN = "www.amazon.in"
-# AMAZON_DOMAIN = "www.amazon.it"
-# AMAZON_DOMAIN = "www.amazon.co.jp"
-# AMAZON_DOMAIN = "www.amazon.com.mx"
-# AMAZON_DOMAIN = "www.amazon.nl"
-# AMAZON_DOMAIN = "www.amazon.es"
-# AMAZON_DOMAIN = "www.amazon.co.uk"
-# AMAZON_DOMAIN = "www.amazon.com"
-# AMAZON_DOMAIN = "www.amazon.se"
 
 AMAZON_URLS = {
     "BASE_URL": "https://{domain}/",
@@ -93,6 +86,10 @@ AMAZON_URLS = {
     "PYO_POST": "https://{domain}/gp/buy/spc/handlers/static-submit-decoupled.html/ref=ox_spc_place_order?",
 }
 
+TEST_OFFERID = "%2FrmJgLzYPCM5PuSLAyuqjETrxn9wHVxf28UkwHgJklP2XwUnPOVDYg8qh1IUCQkxefKPTuC2Fq0KJO1qmzsREaxAKyMQfymJA8DLkSCDY2l9kSA8D9fsSg%3D%3D"
+COOKIE_HARVEST_URL = "https://www.amazon.com/gp/overlay/display.html"
+OFFERID_PATH = "config/offerid.json"
+
 PDP_PATH = "/dp/"
 REALTIME_INVENTORY_PATH = "gp/aod/ajax?asin="
 
@@ -101,13 +98,23 @@ PROXY_FILE_PATH = "config/proxies.json"
 STORE_NAME = "Amazon"
 DEFAULT_MAX_TIMEOUT = 10
 
+
 # Request
+
 HEADERS = {
     "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
     "Accept-Encoding": "gzip, deflate, sdch, br",
     "content-type": "application/x-www-form-urlencoded",
 }
+
+# HEADERS = {
+#     "user-agent": "Amazon/354712.0 CFNetwork/1240.0.4 Darwin/20.5.0",
+#     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9, image/webp,*/*;q=0.8",
+#     "Accept-Encoding": "gzip, deflate, sdch, br",
+#     "content-type": "application/x-www-form-urlencoded",
+# }
+
 amazon_config = {}
 
 
@@ -122,9 +129,9 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         item_list: List[FGItem],
         delay: float,
         amazon_config,
-        tasks=1,
         checkshipping=False,
         use_proxies=False,
+        use_offerid=False,
     ) -> None:
         log.debug("Initializing AmazonMonitoringHandler")
         super().__init__()
@@ -134,66 +141,105 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         self.notification_handler = notification_handler
         self.check_shipping = checkshipping
         self.item_list: typing.List[FGItem] = item_list
-        self.stock_checks = 0
         self.start_time = int(time.time())
         self.amazon_config = amazon_config
         ua = UserAgent()
 
         if use_proxies:
-            self.proxies = get_proxies(path=PROXY_FILE_PATH)
+            self.proxies = get_json(path=PROXY_FILE_PATH)
         else:
             self.proxies = []
+        if use_offerid:
+            offerid_list = get_json(path=OFFERID_PATH)
+            ItemsHandler.create_oid_pool(offerid_list)
+        else:
+            offerid_list = {}
+        ItemsHandler.create_items_pool(self.item_list)
 
         # Initialize the Session we'll use for stock checking
         log.debug("Initializing Monitoring Sessions")
         self.sessions_list: Optional[List[AmazonMonitor]] = []
-        for idx in range(len(item_list)):
+
+        if self.proxies:
+            for group_num, proxy_group in enumerate(self.proxies, start=1):
+                AmazonMonitor.total_groups += 1
+                AmazonMonitor.lengths_of_groups.update({group_num: len(proxy_group)})
+                for idx in range(len(proxy_group)):
+                    connector = ProxyConnector.from_url(proxy_group[idx])
+                    self.sessions_list.append(
+                        AmazonMonitor(
+                            headers=HEADERS,
+                            amazon_config=self.amazon_config,
+                            connector=connector,
+                            delay=delay,
+                            group_num=group_num,
+                        )
+                    )
+                    self.sessions_list[idx].headers.update({"user-agent": ua.random})
+        else:
+            AmazonMonitor.total_groups += 1
             connector = None
-            if self.proxies and idx < len(self.proxies):
-                connector = ProxyConnector.from_url(self.proxies[idx]["https"])
             self.sessions_list.append(
                 AmazonMonitor(
-                    headers=HEADERS,
-                    item=item_list[idx],
+                    headers=random_header(),
                     amazon_config=self.amazon_config,
                     connector=connector,
                     delay=delay,
+                    group_num=1,
                 )
             )
-            self.sessions_list[idx].headers.update({"user-agent": ua.random})
-
-
-# class Offers(NamedTuple):
-#     asin: str
-#     offerlistingid: str
-#     merchantid: str
-#     price: float
-#     timestamp: float
-#     __slots__ = ()
-#
-#     def __str__(self):
-#         return f"ASIN: {self.asin}; offerListingId: {self.offerlistingid}; merchantId: {self.merchantid}; price: {self.price}"
 
 
 class AmazonMonitor(aiohttp.ClientSession):
+    lengths_of_groups = dict()
+    total_groups = 0
+    current_group = 1
+    group_switch_time = time.time()
+    captcha_worker = PPE(max_workers=(cpu_count() // 2))
+    bad_proxies = set()
+
     def __init__(
         self,
-        item: FGItem,
         amazon_config: Dict,
         delay: float,
+        group_num: int,
         *args,
         **kwargs,
     ):
         super(self.__class__, self).__init__(*args, **kwargs)
-        self.item = item
+        self.validated = False
+        self.group_num = group_num
+        self.item = ItemsHandler.pop()
+        self.check_count = 1
         self.amazon_config = amazon_config
         self.domain = urlparse(self.item.furl.url).netloc
-
         self.delay = delay
-        if item.purchase_delay > 0:
+        if self.item.purchase_delay > 0:
             self.delay = 20
-        self.block_purchase_until = time.time() + item.purchase_delay
+        self.block_purchase_until = time.time() + self.item.purchase_delay
         log.debug("Initializing Monitoring Task")
+
+    @classmethod
+    def switch_group_timer(cls, delay=300):
+        if time.time() - cls.group_switch_time >= delay:
+            return True
+        return False
+
+    @classmethod
+    def switch_proxy_group(cls):
+        cls.current_group += 1
+        if cls.current_group > cls.total_groups:
+            cls.current_group = 1
+        log.info(f"Switching to proxy group {cls.current_group}")
+        cls.group_switch_time = time.time()
+        with open("config/bad_proxies.json", 'w') as f:
+            temp = list(cls.bad_proxies)
+            temp.append(f"total: {len(temp)}")
+            json.dump(temp, f, indent=4)
+
+    @classmethod
+    def get_current_group(cls):
+        return cls.current_group
 
     def assign_config(self, azn_config):
         self.amazon_config = azn_config
@@ -201,105 +247,255 @@ class AmazonMonitor(aiohttp.ClientSession):
     def assign_delay(self, delay: float = 5):
         self.delay = delay
 
-    def assign_item(self, item: FGItem):
-        self.item = item
+    def next_item(self):
+        try:
+            self.item = ItemsHandler.pop()
+        except StopIteration as e:
+            log.debug(e)
+            return
+
+    def atc_json_url(self, session_id, offering_id):
+        url = f"https://smile.amazon.com/gp/add-to-cart/json?session-id={session_id}&clientName=retailwebsite&nextPage=cartitems&ASIN={self.item.id}Q&offerListingID={offering_id}&quantity=1"
+        return url
 
     def fail_recreate(self):
         # Something wrong, start a new task then kill this one
-        log.debug("Max consecutive request fails reached. Restarting session")
+        log.debug("Recreating Session")
         session = AmazonMonitor(
-            item=self.item,
             amazon_config=self.amazon_config,
             delay=self.delay,
             connector=self.connector,
-            headers=HEADERS,
+            headers=self.headers,
+            group_num=self.group_num,
         )
-        session.headers.update({"user-agent": UserAgent().random})
         log.debug("Sesssion Created")
         return session
 
+    async def validate_session(self, proxy):
+        try:
+            log.debug(
+                f"{proxy} : Getting validated session for monitoring through json endpoint"
+            )
+            c = 0
+            while c < 25:
+                token = False
+                while not token:
+                    await asyncio.sleep(self.delay)
+                    status, response_text = await self.aio_get(COOKIE_HARVEST_URL)
+                    if status == 200:
+                        self.bad_proxies.discard(proxy)
+                        for cookie in self.cookie_jar:
+                            if cookie.key == "session-id":
+                                session_id = cookie.value
+                                self.headers.update({"session-id": session_id})
+                            if cookie.key == "session-token":
+                                session_token = cookie.value
+                                self.headers.update({"session-token": session_token})
+                                token = True
+                    if status == 503:
+                        log.info(f'503 during validation : {proxy}')
+                        self.bad_proxies.add(proxy)
+                        await asyncio.sleep(randint(300, 1800))
+                await asyncio.sleep(self.delay)
+                status, response_text = await self.aio_get(
+                    self.atc_json_url(
+                        self.headers.get("session-id"), offering_id=TEST_OFFERID
+                    )
+                )
+                tree = check_response(response_text)
+                if tree is not None:
+                    try:
+                        json_dict = json.loads(response_text)
+                        if json_dict["isOK"]:
+                            log.debug(json_dict)
+                            log.info(f"Received Session-Token : {status} : {proxy} : TRY={c+1}")
+                            return True
+                    except json.decoder.JSONDecodeError:
+                        if captcha_element := has_captcha(tree):
+                            log.debug(f"CAPTCHA during validation : {proxy} : TRY={c+1}")
+                            await asyncio.sleep(self.delay)
+                            _, response_text = await self.async_captcha_solve(captcha_element[0], self.domain)
+                        c += 1
+                if status == 503:
+                    log.info(f'503 during validation : {proxy}')
+                    self.bad_proxies.add(proxy)
+                    await asyncio.sleep(randint(300, 1800))
+            return False
+        except (aiohttp.ServerDisconnectedError, TypeError, ConnectionAbortedError, ClientConnectorError) as e:
+            log.info(e)
+
     async def stock_check(self, queue: asyncio.Queue, future: asyncio.Future):
+        proxy = str(self.connector.proxy_url)
         # Do first response outside of while loop, so we can continue on captcha checks
         # and return to start of while loop with that response. Requires the next response
         # to be grabbed at end of while loop
-        log.debug(f"Monitoring Task Started for {self.item.id}")
 
+        # log.debug(f"Monitoring Task Started for {self.item.id}")
         fail_counter = 0  # Count sequential get fails
         delay = self.delay
         end_time = time.time() + delay
-        status, response_text = await self.aio_get(url=self.item.furl.url)
 
-        save_html_response("stock-check", status, response_text)
+        status, response_text = await self.aio_get(url=self.item.furl.url)
 
         # do this after each request
         fail_counter = check_fail(status=status, fail_counter=fail_counter)
         if fail_counter == -1:
             session = self.fail_recreate()
-            future.set_result(session)
+            try:
+                future.set_result(session)
+            except asyncio.exceptions.InvalidStateError as e:
+                log.debug(e)
             return
 
-        check_count = 1
         # Loop will only exit if a qualified seller is returned.
         while True:
-            log.debug(f"{self.item.id} Stock Check Count: {check_count}")
-            tree = check_response(response_text)
-            if tree is not None:
-                if captcha_element := has_captcha(tree):
-                    log.debug("Captcha found during monitoring task")
-                    # wait a second so it doesn't continuously hit captchas very quickly
-                    # TODO: maybe track captcha hits so that it aborts after several?
+            try:
+                if self.group_num is self.get_current_group() and not self.validated:
+                    validated = await self.validate_session(proxy=proxy)
+                    if validated:
+                        self.validated = True
+                        self.bad_proxies.discard(proxy)
+                    else:
+                        log.debug(
+                            f"{proxy} failed too many times. Cooldown for at least 5 minutes."
+                        )
+                        self.bad_proxies.add(proxy)
+                        await asyncio.sleep(randint(300, 1800))
+                        continue
+                if self.switch_group_timer():
+                    self.switch_proxy_group()
+                while self.group_num is not self.get_current_group():
                     await asyncio.sleep(1)
-                    # get the next response after solving captcha and then continue to next loop iteration
-                    status, response_text = await self.async_captcha_solve(
-                        captcha_element[0], self.domain
+
+                try:
+                    log.debug(
+                        f"{self.item.id} : PROXY_GROUP[{self.current_group}] : {proxy} : Stock Check Count = {self.check_count}"
+                    )
+                except AttributeError:
+                    log.debug(
+                        f"{self.item.id} : Stock Check Count = {self.check_count}"
                     )
 
-                    # do this after each request
+                if (
+                    ItemsHandler.offerid_list
+                    and self.item.id in ItemsHandler.offerid_list.keys()
+                ):
+                    offering_id = next(ItemsHandler.offerid_list[self.item.id])
+                    log.debug(
+                        f"{self.item.id} : JSON : {status} : {proxy} "
+                    )
+                    log.debug(
+                        f"{self.item.id} : {proxy} : offerID={offering_id}"
+                    )
+
+                    end_time = time.time() + delay
+                    status, response_text = await self.aio_get(
+                        self.atc_json_url(
+                            self.headers.get("session-id"), offering_id=offering_id
+                        )
+                    )
+
+                    tree = check_response(response_text)
+                    if tree is not None and status != 503:
+                        stock = self.parse_json(response_text=response_text,
+                                                proxy=proxy)
+                        if stock:
+                            try:
+                                ItemsHandler.trash(self.item)
+                                log.info(f"Placing {self.item.id} on a cooldown")
+                                queue.put_nowait(offering_id)
+                            except ValueError as e:
+                                log.exception(e)
+                        if captcha_element := has_captcha(tree):
+                            log.debug(
+                                    f"CAPTCHA during monitoring : {proxy}"
+                            )
+                            self.validated = False
+                            continue
                     fail_counter = check_fail(status=status, fail_counter=fail_counter)
                     if fail_counter == -1:
-                        session = self.fail_recreate()
-                        future.set_result(session)
-                        return
+                        log.debug(
+                            f"{proxy} failed too many times. Cooldown for at least 5 minutes."
+                        )
+                        self.bad_proxies.add(proxy)
+                        await asyncio.sleep(randint(300, 1800))
+                        self.validated = False
+                        fail_counter = 0
+                        continue
 
-                    await wait_timer(end_time)
+                else:
                     end_time = time.time() + delay
-                    continue
-                if tree is not None and (
-                    sellers := get_item_sellers(
-                        tree,
-                        item=self.item,
-                        free_shipping_strings=self.amazon_config["FREE_SHIPPING"],
+                    status, response_text = await self.aio_get(url=self.item.furl.url)
+                    log.debug(
+                            f"{self.item.id} : AJAX : {status} : {proxy}"
                     )
-                ):
-                    qualified_seller = get_qualified_seller(
-                        item=self.item, sellers=sellers
-                    )
-                    if qualified_seller:
-                        log.debug("Found an offer which meets criteria")
-                        if time.time() > self.block_purchase_until:
-                            await queue.put(qualified_seller)
-                            log.debug("Offer placed in queue")
-                            log.debug("Quitting monitoring task")
-                            future.set_result(None)
-                            return None
-                        else:
-                            log.debug(
-                                f"Purchasing is blocked until {self.block_purchase_until}. It is now {time.time()}."
-                            )
-            # failed to find seller. Wait a delay period then check again
-            log.debug("No offers found which meet product criteria")
-            await wait_timer(end_time)
-            end_time = time.time() + delay
-            status, response_text = await self.aio_get(url=self.item.furl.url)
-            save_html_response("stock-check", status, response_text)
-            # do this after each request
-            fail_counter = check_fail(status=status, fail_counter=fail_counter)
-            if fail_counter == -1:
-                session = self.fail_recreate()
-                future.set_result(session)
-                return
 
-            check_count += 1
+                    tree = check_response(response_text)
+                    if tree is not None and status == 200:
+                        if captcha_element := has_captcha(tree):
+                            log.info(
+                                f"CAPTCHA during monitoring : {proxy}"
+                            )
+                            # wait a second so it doesn't continuously hit captchas very quickly
+                            # TODO: maybe track captcha hits so that it aborts after several?
+                            await asyncio.sleep(delay)
+                            # get the next response after solving captcha and then continue to next loop iteration
+                            end_time = time.time() + delay
+                            status, response_text = await self.async_captcha_solve(captcha_element[0], self.domain)
+                            # do this after each request
+                            # session = self.fail_recreate()
+                            # try:
+                            #     future.set_result(session)
+                            # except asyncio.exceptions.InvalidStateError as e:
+                            #     log.debug(e)
+                            # return
+                        if tree is not None and (
+                            sellers := get_item_sellers(
+                                tree,
+                                item=self.item,
+                                free_shipping_strings=self.amazon_config[
+                                    "FREE_SHIPPING"
+                                ],
+                            )
+                        ):
+                            qualified_seller = get_qualified_seller(self.item, sellers)
+                            if qualified_seller:
+                                log.info(
+                                    f"{self.item.id} : {proxy} : Found an offer which meets criteria"
+                                )
+                                if time.time() > self.block_purchase_until:
+                                    queue.put_nowait(qualified_seller)
+                                    log.info(
+                                        f"{self.item.id} : {proxy} : Offer placed in queue"
+                                    )
+                                    log.info(
+                                        f"{self.item.id} : {proxy} : Quitting monitoring task"
+                                    )
+                                    future.set_result(None)
+                                    return None
+                                else:
+                                    log.debug(
+                                        f"{self.item.id} : {proxy} : Purchasing is blocked until {self.block_purchase_until}. It is now {time.time()}."
+                                    )
+                    # failed to find seller. Wait a delay period then check again
+                    if status == 200:
+                        log.info(
+                            f"{self.item.id} : AJAX : No offers found which meet product criteria"
+                        )
+                    if status == 503:
+                        log.info(
+                                f"{self.item.id} : AJAX : 503 : Skipping Checck"
+                        )
+
+
+                await wait_timer(end_time)
+                self.check_count += 1
+                self.next_item()
+                if ItemsHandler.timer():
+                    ItemsHandler.refresh()
+
+            except (IOError, OSError) as e:
+                log.exception(e)
 
     async def aio_get(self, url):
         text = None
@@ -307,8 +503,8 @@ class AmazonMonitor(aiohttp.ClientSession):
             async with self.get(url) as resp:
                 status = resp.status
                 text = await resp.text()
-        except (aiohttp.ClientError, asyncio.TimeoutError, OSError) as e:
-            log.debug(e)
+        except (asyncio.TimeoutError, aiohttp.ClientError) as e:
+            log.exception(e)
             status = 999
         return status, text
 
@@ -321,10 +517,11 @@ class AmazonMonitor(aiohttp.ClientSession):
         if captcha_images:
             link = captcha_images[0].attrib["src"]
             # link = 'https://images-na.ssl-images-amazon.com/captcha/usvmgloq/Captcha_kwrrnqwkph.jpg'
-            captcha = AmazonCaptcha.fromlink(link)
-            solution = captcha.solve()
+            captcha = await AmazonCaptcha.fromlink(link)
+            loop = asyncio.get_event_loop()
+            solution = await loop.run_in_executor(self.captcha_worker, captcha.solve)
             if solution:
-                log.info(f"solution is:{solution} ")
+                log.debug(f"solution is:{solution} ")
                 form_inputs = captcha_element.xpath(".//input")
                 input_dict = {}
                 for form_input in form_inputs:
@@ -340,6 +537,28 @@ class AmazonMonitor(aiohttp.ClientSession):
                 status, response = await self.aio_get(f.url)
                 return status, response
         return None
+
+    def parse_json(self, response_text, proxy):
+        json_dict = None
+        try:
+            json_dict = json.loads(response_text)
+            log.debug(f"{self.item.id} : {proxy} : {json_dict}")
+            if json_dict["isOK"] and json_dict["items"]:
+                for item in json_dict["items"]:
+                    if item["ASIN"] == self.item.id:
+                        log.info(
+                            f"{self.item.id} : In-Stock! Passing task to checkout worker."
+                        )
+                        return True
+            elif not json_dict["isOK"]:
+                log.debug(f"{self.item.id} : {proxy} : CSRF Error")
+                self.validated = False
+            else:
+                log.info(f"[{self.group_num}]{self.item.id} : JSON : Not-In-Stock")
+            return False
+
+        except json.decoder.JSONDecodeError:
+            return False
 
 
 def check_fail(status, fail_counter, fail_list=None) -> int:
@@ -402,7 +621,7 @@ def get_item_sellers(
     offers = tree.xpath("//div[@id='aod-sticky-pinned-offer'] | //div[@id='aod-offer']")
     # Exit if no offers found
     if not offers:
-        log.debug(f"No offers for {item.id} = {item.short_name}")
+        log.info(f"No offers for {item.id} = {item.short_name}")
         return sellers
     log.debug(f"Found {len(offers)} offers.")
     # Parse the found offers
@@ -435,7 +654,7 @@ def parse_offers(offers: html.HtmlElement, free_shipping_strings, atc_method=Fal
                     merchant_id = find_merchant_id.group(1)
             except IndexError:
                 pass
-        log.info(f"merchant_id: {merchant_id}")
+        log.debug(f"merchant_id: {merchant_id}")
         # log failure to find merchant ID
         if not merchant_id:
             log.debug("No Merchant ID found")
@@ -447,17 +666,17 @@ def parse_offers(offers: html.HtmlElement, free_shipping_strings, atc_method=Fal
             log.debug("No price found for this offer, skipping")
             continue
         price = parse_price(price_text)
-        log.info(f"price: {price.amount_text}")
+        log.debug(f"price: {price.amount_text}")
         # Get Seller shipping cost
         shipping_cost = get_shipping_costs(offer, free_shipping_strings)
-        log.info(f"shipping: {shipping_cost.amount_text}")
+        log.debug(f"shipping: {shipping_cost.amount_text}")
         # Get Seller product condition
         condition_heading = offer.xpath(".//div[@id='aod-offer-heading']/h5")
         if condition_heading:
             condition = AmazonItemCondition.from_str(condition_heading[0].text.strip())
         else:
             condition = AmazonItemCondition.Unknown
-        log.info(f"condition: {str(condition)}")
+        log.debug(f"condition: {str(condition)}")
 
         # Get Seller item offerListingId
         offer_ids = offer.xpath(f".//input[@name='offeringID.1']")
@@ -466,7 +685,7 @@ def parse_offers(offers: html.HtmlElement, free_shipping_strings, atc_method=Fal
         else:
             log.error("No offer ID found for this offer, skipping")
             continue
-        log.info(f"offer id: {offer_id}")
+        log.debug(f"offer id: {offer_id}")
 
         # get info for ATC post
         # only use if doing ATC method
@@ -521,16 +740,20 @@ def get_qualified_seller(item, sellers, check_shipping=False) -> SellerDetail or
         return seller
 
 
-def get_proxies(path=PROXY_FILE_PATH):
+def get_json(path):
     """Initialize proxies from json configuration file"""
-    proxies = []
-
     # TODO: verify format of json?
     if os.path.exists(path):
-        proxy_json = json.load(open(path))
-        proxies = proxy_json.get("proxies", [])
+        with open(path) as f:
+            return json.load(f)
+    else:
+        return None
 
-    return proxies
+
+def random_header():
+    header = Headers(os="win", browser="chrome", headers=True)
+    header = header.generate()
+    return header
 
     # def verify(self):
     #     log.debug("Verifying item list...")
@@ -650,3 +873,33 @@ def get_proxies(path=PROXY_FILE_PATH):
     #     pickle.dump(item_cache, open(item_cache_file, "wb"))
     #
     #     return True
+
+
+# class Offers(NamedTuple):
+#     asin: str
+#     offerlistingid: str
+#     merchantid: str
+#     price: float
+#     timestamp: float
+#     __slots__ = ()
+#
+#     def __str__(self):
+#         return f"ASIN: {self.asin}; offerListingId: {self.offerlistingid}; merchantId: {self.merchantid}; price: {self.price}"
+
+
+# PDP_URL = "https://smile.amazon.com/gp/product/"
+# AMAZON_DOMAIN = "www.amazon.com.au"
+# AMAZON_DOMAIN = "www.amazon.com.br"
+# AMAZON_DOMAIN = "www.amazon.ca"
+# NOT SUPPORTED AMAZON_DOMAIN = "www.amazon.cn"
+# AMAZON_DOMAIN = "www.amazon.fr"
+# AMAZON_DOMAIN = "www.amazon.de"
+# NOT SUPPORTED AMAZON_DOMAIN = "www.amazon.in"
+# AMAZON_DOMAIN = "www.amazon.it"
+# AMAZON_DOMAIN = "www.amazon.co.jp"
+# AMAZON_DOMAIN = "www.amazon.com.mx"
+# AMAZON_DOMAIN = "www.amazon.nl"
+# AMAZON_DOMAIN = "www.amazon.es"
+# AMAZON_DOMAIN = "www.amazon.co.uk"
+# AMAZON_DOMAIN = "www.amazon.com"
+# AMAZON_DOMAIN = "www.amazon.se"

@@ -16,11 +16,13 @@
 #
 #      The author may be contacted through the project's GitHub, at:
 #      https://github.com/Hari-Nagarajan/fairgame
-
 from typing import Optional, List
 
 import time
+import os.path
+import json
 from datetime import datetime
+from itertools import cycle
 
 import psutil
 import requests
@@ -39,6 +41,7 @@ from utils.logger import log
 
 
 DEFAULT_MAX_TIMEOUT = 5
+BAD_PROXIES_PATH = "config/bad_proxies.json"
 
 
 def create_webdriver_wait(driver, wait_time=10):
@@ -79,7 +82,7 @@ def get_timestamp_filename(name, extension):
     """Utility method to create a filename with a timestamp appended to the root and before
     the provided file extension"""
     now = datetime.now()
-    date = now.strftime("%m-%d-%Y_%H_%M_%S")
+    date = now.strftime("%m-%d-%Y_%H:%M:%S:%f")
     if extension.startswith("."):
         return name + "_" + date + extension
     else:
@@ -139,3 +142,50 @@ def parse_html_source(data):
     except html.etree.ParserError:
         log.debug("html parser error")
     return tree
+
+
+class ItemsHandler:
+    @classmethod
+    def create_items_pool(cls, item_list):
+        cls.start = time.time()
+        cls.removed_items = list()
+        cls.items = item_list
+        cls.circular_array = cycle(cls.items)
+
+    @classmethod
+    def create_oid_pool(cls, offerid_list):
+        cls.offerid_list = offerid_list
+        to_del = list()
+        if offerid_list:
+            for asin in cls.offerid_list.keys():
+                if cls.offerid_list[asin]:
+                    cls.offerid_list[asin] = cycle(cls.offerid_list[asin])
+                else:
+                    to_del.append(asin)
+        if to_del:
+            for asin in to_del:
+                del cls.offerid_list[asin]
+
+    @classmethod
+    def trash(cls, item):
+        i = cls.items.index(item)
+        cls.removed_items.append(cls.items.pop(i))
+        cls.circular_array = cycle(cls.items)
+        cls.start = time.time()
+
+    @classmethod
+    def refresh(cls):
+        cls.start = time.time()
+        if cls.removed_items:
+            for _ in range(len(cls.removed_items)):
+                cls.items.append(cls.removed_items.pop())
+        cls.circular_array = cycle(cls.items)
+
+    @classmethod
+    def timer(cls):
+        if time.time() - cls.start > 3600:
+            return True
+
+    @classmethod
+    def pop(cls):
+        return next(cls.circular_array)

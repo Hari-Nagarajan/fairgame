@@ -79,7 +79,7 @@ log.setLevel(logging.DEBUG)
 log.dev = MethodType(dev, log)
 
 if version.is_devrelease or version.is_prerelease:
-    LOGLEVEL = logging.DEBUG
+    LOGLEVEL = logging.INFO
 else:
     LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
 # LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
