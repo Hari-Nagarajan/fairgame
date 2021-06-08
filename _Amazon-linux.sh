@@ -1,0 +1,1 @@
+exec python -m pipenv run python app.py amazon --test
