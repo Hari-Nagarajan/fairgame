@@ -180,7 +180,8 @@ class AmazonCheckoutHandler(BaseStoreHandler):
         remember_me = self.wait_get_clickable_amazon_element("LOGIN_REMEMBER_ME")
         if remember_me:
             try:
-                remember_me.click()
+                if not remember_me.is_selected():
+                    remember_me.click()
             except WebDriverException as e:
                 log.debug("Could not click remember me checkbox")
         else:
