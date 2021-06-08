@@ -28,7 +28,7 @@ from typing import Optional
 import re
 
 import psutil
-from amazoncaptcha_aio import AmazonCaptcha
+from amazoncaptcha import AmazonCaptcha
 from furl import furl
 from lxml import html
 from utils.debugger import timer
@@ -516,7 +516,7 @@ async def turbo_initiate(
     MAX_RETRY = 5
     captcha_element = True  # to initialize loop
     status, text = await aio_post(client=s, url=url, data=payload_inputs)
-    save_html_response("turbo-initiate", status, text)
+    # save_html_response("turbo-initiate", status, text)
     tree: Optional[html.HtmlElement] = None
     while retry < MAX_RETRY and captcha_element:
         tree = check_response(text)
@@ -539,9 +539,9 @@ async def turbo_initiate(
         log.debug("turbo-initiate successful")
         return pid, anti_csrf
     log.debug("turbo-initiate unsuccessful")
-    save_html_response(
-        filename="turbo_ini_unsuccessful", status=000, body=tree.text_content()
-    )
+    # save_html_response(
+    #     filename="turbo_ini_unsuccessful", status=000, body=tree.text_content()
+    # )
     return pid, anti_csrf
 
 
