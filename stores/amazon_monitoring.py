@@ -316,6 +316,8 @@ class AmazonMonitor(aiohttp.ClientSession):
                             return True
                     except json.decoder.JSONDecodeError:
                         if captcha_element := has_captcha(tree):
+                            self.bad_proxies.add(proxy)
+                            self.good_proxies.discard(proxy)
                             log.debug(f"CAPTCHA during validation : {proxy} : TRY={c+1}")
                             await asyncio.sleep(self.delay)
                             _, response_text = await self.async_captcha_solve(captcha_element[0], self.domain)
@@ -326,7 +328,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                     self.good_proxies.discard(proxy)
                     await asyncio.sleep(randint(300, 1800))
             return False
-        except (aiohttp.ServerDisconnectedError, TypeError, ConnectionAbortedError, ClientConnectorError) as e:
+        except (aiohttp.ServerDisconnectedError, TypeError, ConnectionAbortedError, ClientConnectorError):
             # log.exception(e)
             pass
 
@@ -536,7 +538,7 @@ class AmazonMonitor(aiohttp.ClientSession):
             if captcha_images:
                 link = captcha_images[0].attrib["src"]
                 # link = 'https://images-na.ssl-images-amazon.com/captcha/usvmgloq/Captcha_kwrrnqwkph.jpg'
-                captcha = await AmazonCaptcha.fromlink(link)
+                captcha = await AmazonCaptcha.fromlink(link, session=self)
                 loop = asyncio.get_event_loop()
                 solution = await loop.run_in_executor(self.captcha_worker, captcha.solve)
                 if solution:

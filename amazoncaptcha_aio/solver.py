@@ -227,7 +227,7 @@ class AmazonCaptcha(object):
         return cls.fromdriver(driver, devmode)
 
     @classmethod
-    async def fromlink(cls, image_link, devmode=False):
+    async def fromlink(cls, image_link, session=ClientSession(), devmode=False):
         """
         Requests the given link and stores the content of the response
         as `io.BytesIO`, which is then used to create AmazonCaptcha instance.
@@ -248,12 +248,10 @@ class AmazonCaptcha(object):
 
         """
 
-        s = ClientSession()
-        async with s.get(image_link) as response:
+        async with session.get(image_link) as response:
             if response.headers['Content-Type'] not in SUPPORTED_CONTENT_TYPES:
                 raise ContentTypeError(response.headers['Content-Type'])
             content = await response.content.read()
-
             image_bytes_array = BytesIO(content)
 
         return cls(image_bytes_array, image_link, devmode)
