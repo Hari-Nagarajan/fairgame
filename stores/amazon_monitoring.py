@@ -239,7 +239,7 @@ class AmazonMonitor(aiohttp.ClientSession):
             json.dump(temp, f, indent=4)
         with open("config/good_proxies.json", 'w') as f:
             temp = [list(cls.good_proxies)]
-            temp[0].append(f"total: {len(temp)}")
+            temp[0].append(f"total: {len(temp[0])}")
             json.dump(temp, f, indent=4)
 
     @classmethod
