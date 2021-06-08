@@ -28,7 +28,7 @@ from utils.debugger import debug, timer
 
 from fake_useragent import UserAgent
 from amazoncaptcha_aio import AmazonCaptcha
-# from amazoncaptcha_aio.exceptions import ContentTypeError
+from amazoncaptcha_aio.exceptions import ContentTypeError
 
 from urllib.parse import urlparse
 
@@ -67,7 +67,8 @@ from utils.logger import log
 import asyncio
 import aiohttp
 from aiohttp_proxy import ProxyConnector, ProxyType
-from aiohttp.client_exceptions import ClientConnectorError, InvalidURL
+from aiohttp_proxy.errors import SocksConnectionError
+from aiohttp.client_exceptions import ClientConnectorError, ServerDisconnectedError
 from concurrent.futures import ProcessPoolExecutor as PPE
 
 
@@ -168,14 +169,13 @@ class AmazonMonitoringHandler(BaseStoreHandler):
                     connector = ProxyConnector.from_url(proxy_group[idx])
                     self.sessions_list.append(
                         AmazonMonitor(
-                            headers=HEADERS,
+                            headers=random_header(),
                             amazon_config=self.amazon_config,
                             connector=connector,
                             delay=delay,
                             group_num=group_num,
                         )
                     )
-                    self.sessions_list[idx].headers.update({"user-agent": ua.random})
         else:
             AmazonMonitor.total_groups += 1
             connector = None
@@ -197,6 +197,7 @@ class AmazonMonitor(aiohttp.ClientSession):
     group_switch_time = time.time()
     captcha_worker = PPE(max_workers=(cpu_count() // 2))
     bad_proxies = set()
+    good_proxies = set()
 
     def __init__(
         self,
@@ -220,7 +221,7 @@ class AmazonMonitor(aiohttp.ClientSession):
         log.debug("Initializing Monitoring Task")
 
     @classmethod
-    def switch_group_timer(cls, delay=300):
+    def switch_group_timer(cls, delay=60):
         if time.time() - cls.group_switch_time >= delay:
             return True
         return False
@@ -235,6 +236,10 @@ class AmazonMonitor(aiohttp.ClientSession):
         with open("config/bad_proxies.json", 'w') as f:
             temp = list(cls.bad_proxies)
             temp.append(f"total: {len(temp)}")
+            json.dump(temp, f, indent=4)
+        with open("config/good_proxies.json", 'w') as f:
+            temp = [list(cls.good_proxies)]
+            temp[0].append(f"total: {len(temp)}")
             json.dump(temp, f, indent=4)
 
     @classmethod
@@ -284,6 +289,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                     status, response_text = await self.aio_get(COOKIE_HARVEST_URL)
                     if status == 200:
                         self.bad_proxies.discard(proxy)
+                        self.good_proxies.add(proxy)
                         for cookie in self.cookie_jar:
                             if cookie.key == "session-id":
                                 session_id = cookie.value
@@ -295,6 +301,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                     if status == 503:
                         log.info(f'503 during validation : {proxy}')
                         self.bad_proxies.add(proxy)
+                        self.good_proxies.discard(proxy)
                         await asyncio.sleep(randint(300, 1800))
                 await asyncio.sleep(self.delay)
                 status, response_text = await self.aio_get(
@@ -319,10 +326,12 @@ class AmazonMonitor(aiohttp.ClientSession):
                 if status == 503:
                     log.info(f'503 during validation : {proxy}')
                     self.bad_proxies.add(proxy)
+                    self.good_proxies.discard(proxy)
                     await asyncio.sleep(randint(300, 1800))
             return False
         except (aiohttp.ServerDisconnectedError, TypeError, ConnectionAbortedError, ClientConnectorError) as e:
-            log.info(e)
+            # log.exception(e)
+            pass
 
     async def stock_check(self, queue: asyncio.Queue, future: asyncio.Future):
         proxy = str(self.connector.proxy_url)
@@ -349,17 +358,20 @@ class AmazonMonitor(aiohttp.ClientSession):
 
         # Loop will only exit if a qualified seller is returned.
         while True:
+            delay = self.delay + randint(0, 3)
             try:
                 if self.group_num is self.get_current_group() and not self.validated:
                     validated = await self.validate_session(proxy=proxy)
                     if validated:
                         self.validated = True
+                        self.good_proxies.add(proxy)
                         self.bad_proxies.discard(proxy)
                     else:
                         log.debug(
-                            f"{proxy} failed too many times. Cooldown for at least 5 minutes."
+                            f"{proxy} couldn't be validated. Cooldown for at least 5 minutes."
                         )
                         self.bad_proxies.add(proxy)
+                        self.good_proxies.discard(proxy)
                         await asyncio.sleep(randint(300, 1800))
                         continue
                 if self.switch_group_timer():
@@ -411,6 +423,8 @@ class AmazonMonitor(aiohttp.ClientSession):
                                     f"CAPTCHA during monitoring : {proxy}"
                             )
                             self.validated = False
+                            self.bad_proxies.add(proxy)
+                            self.good_proxies.discard(proxy)
                             continue
                     fail_counter = check_fail(status=status, fail_counter=fail_counter)
                     if fail_counter == -1:
@@ -418,6 +432,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                             f"{proxy} failed too many times. Cooldown for at least 5 minutes."
                         )
                         self.bad_proxies.add(proxy)
+                        self.good_proxies.discard(proxy)
                         await asyncio.sleep(randint(300, 1800))
                         self.validated = False
                         fail_counter = 0
@@ -433,6 +448,8 @@ class AmazonMonitor(aiohttp.ClientSession):
                     tree = check_response(response_text)
                     if tree is not None and status == 200:
                         if captcha_element := has_captcha(tree):
+                            self.bad_proxies.add(proxy)
+                            self.good_proxies.discard(proxy)
                             log.info(
                                 f"CAPTCHA during monitoring : {proxy}"
                             )
@@ -479,10 +496,14 @@ class AmazonMonitor(aiohttp.ClientSession):
                                     )
                     # failed to find seller. Wait a delay period then check again
                     if status == 200:
+                        self.bad_proxies.discard(proxy)
+                        self.good_proxies.add(proxy)
                         log.info(
                             f"{self.item.id} : AJAX : No offers found which meet product criteria"
                         )
                     if status == 503:
+                        self.bad_proxies.add(proxy)
+                        self.good_proxies.discard(proxy)
                         log.info(
                                 f"{self.item.id} : AJAX : 503 : Skipping Checck"
                         )
@@ -494,8 +515,8 @@ class AmazonMonitor(aiohttp.ClientSession):
                 if ItemsHandler.timer():
                     ItemsHandler.refresh()
 
-            except (IOError, OSError) as e:
-                log.exception(e)
+            except (IOError, OSError, SocksConnectionError) as e:
+                pass
 
     async def aio_get(self, url):
         text = None
@@ -503,7 +524,7 @@ class AmazonMonitor(aiohttp.ClientSession):
             async with self.get(url) as resp:
                 status = resp.status
                 text = await resp.text()
-        except (asyncio.TimeoutError, aiohttp.ClientError) as e:
+        except (asyncio.TimeoutError, aiohttp.ClientError, ServerDisconnectedError) as e:
             log.exception(e)
             status = 999
         return status, text
@@ -514,29 +535,32 @@ class AmazonMonitor(aiohttp.ClientSession):
         captcha_images = captcha_element.xpath(
             '//img[contains(@src, "amazon.com/captcha/")]'
         )
-        if captcha_images:
-            link = captcha_images[0].attrib["src"]
-            # link = 'https://images-na.ssl-images-amazon.com/captcha/usvmgloq/Captcha_kwrrnqwkph.jpg'
-            captcha = await AmazonCaptcha.fromlink(link)
-            loop = asyncio.get_event_loop()
-            solution = await loop.run_in_executor(self.captcha_worker, captcha.solve)
-            if solution:
-                log.debug(f"solution is:{solution} ")
-                form_inputs = captcha_element.xpath(".//input")
-                input_dict = {}
-                for form_input in form_inputs:
-                    if form_input.type == "text":
-                        input_dict[form_input.name] = solution
-                    else:
-                        input_dict[form_input.name] = form_input.value
-                if not urlparse(domain).scheme:
-                    domain = f"https://{domain}"
-                f = furl(domain)  # Use the original URL to get the schema and host
-                f = f.set(path=captcha_element.attrib["action"])
-                f.add(args=input_dict)
-                status, response = await self.aio_get(f.url)
-                return status, response
-        return None
+        try:
+            if captcha_images:
+                link = captcha_images[0].attrib["src"]
+                # link = 'https://images-na.ssl-images-amazon.com/captcha/usvmgloq/Captcha_kwrrnqwkph.jpg'
+                captcha = await AmazonCaptcha.fromlink(link)
+                loop = asyncio.get_event_loop()
+                solution = await loop.run_in_executor(self.captcha_worker, captcha.solve)
+                if solution:
+                    log.debug(f"solution is:{solution} ")
+                    form_inputs = captcha_element.xpath(".//input")
+                    input_dict = {}
+                    for form_input in form_inputs:
+                        if form_input.type == "text":
+                            input_dict[form_input.name] = solution
+                        else:
+                            input_dict[form_input.name] = form_input.value
+                    if not urlparse(domain).scheme:
+                        domain = f"https://{domain}"
+                    f = furl(domain)  # Use the original URL to get the schema and host
+                    f = f.set(path=captcha_element.attrib["action"])
+                    f.add(args=input_dict)
+                    status, response = await self.aio_get(f.url)
+                    return status, response
+            return None
+        except ContentTypeError:
+            return 999, None
 
     def parse_json(self, response_text, proxy):
         json_dict = None
