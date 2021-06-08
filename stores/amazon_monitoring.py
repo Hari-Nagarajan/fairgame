@@ -288,8 +288,6 @@ class AmazonMonitor(aiohttp.ClientSession):
                     await asyncio.sleep(self.delay)
                     status, response_text = await self.aio_get(COOKIE_HARVEST_URL)
                     if status == 200:
-                        self.bad_proxies.discard(proxy)
-                        self.good_proxies.add(proxy)
                         for cookie in self.cookie_jar:
                             if cookie.key == "session-id":
                                 session_id = cookie.value
@@ -505,7 +503,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                         self.bad_proxies.add(proxy)
                         self.good_proxies.discard(proxy)
                         log.info(
-                                f"{self.item.id} : AJAX : 503 : Skipping Checck"
+                                f"{self.item.id} : AJAX : 503 : Skipping Check"
                         )
 
 
