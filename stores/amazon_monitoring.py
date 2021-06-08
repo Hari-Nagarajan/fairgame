@@ -316,7 +316,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                             await asyncio.sleep(self.delay)
                             _, response_text = await self.async_captcha_solve(captcha_element[0], self.domain)
                         c += 1
-                else:
+                if status == 503:
                     log.info(f'503 during validation : {proxy}')
                     self.bad_proxies.add(proxy)
                     await asyncio.sleep(randint(300, 1800))
