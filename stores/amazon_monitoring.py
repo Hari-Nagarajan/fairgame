@@ -128,7 +128,6 @@ class AmazonMonitoringHandler(BaseStoreHandler):
         notification_handler: NotificationHandler,
         item_list: List[FGItem],
         delay: float,
-        domain: str,
         amazon_config,
         checkshipping=False,
         use_proxies=False,
@@ -174,7 +173,6 @@ class AmazonMonitoringHandler(BaseStoreHandler):
                             connector=connector,
                             delay=delay,
                             group_num=group_num,
-                            domain=domain,
                         )
                     )
                     self.sessions_list[idx].headers.update({"user-agent": ua.random})
@@ -188,7 +186,6 @@ class AmazonMonitoringHandler(BaseStoreHandler):
                     connector=connector,
                     delay=delay,
                     group_num=1,
-                    domain=domain
                 )
             )
 
@@ -206,7 +203,6 @@ class AmazonMonitor(aiohttp.ClientSession):
         amazon_config: Dict,
         delay: float,
         group_num: int,
-        domain: str,
         *args,
         **kwargs,
     ):
@@ -216,8 +212,7 @@ class AmazonMonitor(aiohttp.ClientSession):
         self.item = ItemsHandler.pop()
         self.check_count = 1
         self.amazon_config = amazon_config
-        # self.domain = urlparse(self.item.furl.url).netloc
-        self.domain = f"https://{domain}"
+        self.domain = urlparse(self.item.furl.url).netloc
         self.delay = delay
         if self.item.purchase_delay > 0:
             self.delay = 20

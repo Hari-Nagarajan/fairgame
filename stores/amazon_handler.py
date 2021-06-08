@@ -115,7 +115,6 @@ class AmazonStoreHandler(BaseStoreHandler):
             use_proxies=self.use_proxies,
             use_offerid=self.use_offerid,
             checkshipping=self.check_shipping,
-            domain=self.amazon_domain,
         )
         log.debug("Creating checkout worker and monitoring task(s)")
         future = []
