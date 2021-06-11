@@ -33,7 +33,7 @@ from amazoncaptcha_aio.exceptions import ContentTypeError
 from urllib.parse import urlparse
 
 from fake_headers import Headers
-from random import randint
+from random import randint, choice
 from psutil import cpu_count
 import re
 
@@ -774,7 +774,12 @@ def get_json(path):
 
 
 def random_header():
-    header = Headers(os="win", browser="chrome", headers=True)
+    os = choice(["win", "mac"])
+    browser = ["chrome", "firefox", "opera"]
+    if os == "mac":
+        browser.append("safari")
+    browser = choice(browser)
+    header = Headers(os=os, browser=browser, headers=True)
     header = header.generate()
     return header
 

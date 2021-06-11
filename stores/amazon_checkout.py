@@ -504,10 +504,10 @@ async def turbo_initiate(
         return pid, anti_csrf
     if isinstance(qualified_seller, SellerDetail):
         offering_id = qualified_seller.offering_id
-        log.debug("turbo init received an instance of SellerDetail.")
+        log.info("turbo init received an instance of SellerDetail.")
     if isinstance(qualified_seller, str):
         offering_id = qualified_seller
-        log.debug("turbo init received an offerid string.")
+        log.info("turbo init received an offerid string.")
     payload_inputs = {
         "offerListing.1": offering_id,
         "quantity.1": "1",
@@ -516,7 +516,7 @@ async def turbo_initiate(
     MAX_RETRY = 5
     captcha_element = True  # to initialize loop
     status, text = await aio_post(client=s, url=url, data=payload_inputs)
-    # save_html_response("turbo-initiate", status, text)
+    save_html_response("turbo-initiate", status, text)
     tree: Optional[html.HtmlElement] = None
     while retry < MAX_RETRY and captcha_element:
         tree = check_response(text)
@@ -536,12 +536,12 @@ async def turbo_initiate(
     if find_anti_csrf:
         anti_csrf = find_anti_csrf.group(1)
     if pid and anti_csrf:
-        log.debug("turbo-initiate successful")
+        log.info("turbo-initiate successful")
         return pid, anti_csrf
-    log.debug("turbo-initiate unsuccessful")
-    # save_html_response(
-    #     filename="turbo_ini_unsuccessful", status=000, body=tree.text_content()
-    # )
+    log.info("turbo-initiate unsuccessful")
+    save_html_response(
+        filename="turbo_ini_unsuccessful", status=000, body=tree.text_content()
+    )
     return pid, anti_csrf
 
 
@@ -556,7 +556,7 @@ async def turbo_checkout(domain, s: aiohttp.ClientSession, pid, anti_csrf):
     status, text = await aio_post(client=s, url=url)
     save_html_response("turbo_checkout", status, text)
     if status == 200 or status == 500:
-        log.debug("Checkout maybe successful, check order page!")
+        log.info("Checkout maybe successful, check order page!")
         # TODO: Implement GET request to confirm checkout
         return True
 
