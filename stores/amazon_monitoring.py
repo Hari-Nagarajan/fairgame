@@ -20,6 +20,7 @@
 import json
 import os
 import platform
+from sys import exit
 
 import time
 import typing
@@ -68,7 +69,7 @@ import asyncio
 import aiohttp
 from aiohttp_proxy import ProxyConnector, ProxyType
 from aiohttp_proxy.errors import SocksConnectionError
-from aiohttp.client_exceptions import ClientConnectorError, ServerDisconnectedError
+from aiohttp.client_exceptions import ClientConnectorError, ServerDisconnectedError, ClientPayloadError
 from concurrent.futures import ProcessPoolExecutor as PPE
 
 
@@ -415,6 +416,7 @@ class AmazonMonitor(aiohttp.ClientSession):
                                 ItemsHandler.trash(self.item)
                                 log.info(f"Placing {self.item.id} on a cooldown")
                                 queue.put_nowait(offering_id)
+                                save_html_response(f'stock_{self.item.id}', status, response_text)
                             except ValueError as e:
                                 log.exception(e)
                         if captcha_element := has_captcha(tree):
@@ -523,8 +525,7 @@ class AmazonMonitor(aiohttp.ClientSession):
             async with self.get(url) as resp:
                 status = resp.status
                 text = await resp.text()
-        except (asyncio.TimeoutError, aiohttp.ClientError, ServerDisconnectedError) as e:
-            log.exception(e)
+        except (asyncio.TimeoutError, aiohttp.ClientError, ServerDisconnectedError, ClientPayloadError):
             status = 999
         return status, text
 
