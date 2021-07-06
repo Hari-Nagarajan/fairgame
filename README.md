@@ -2,7 +2,8 @@
 
 # Table of Contents:
 * [About FairGame](#About-FairGame)
-    * [Current Functionality](#Current-Functionality)  
+    * [Current Functionality](#Current-Functionality)
+    * [Disclaimer](#Disclaimer) 
 * [Installation](#Installation)
     * [Requirements](#Requirements)
     * [Quick Start](#Quick-Start)
@@ -11,12 +12,14 @@
         * [Downloading FairGame](#Downloading-FairGame)
         * [Installing Dependencies](#Installing-Dependencies)
         * [Configuration](#Configuration)
+        * [Proxies](#Proxies)
         * [Running the program](#Running-the-program)
+        * [Optional settings](#Optional-settings)
         * [Start Up](#Start-Up)
     * [Other Installation Help](#Other-Installation-Help)
         * [ASINs](#ASINs)
         * [Platform Specific](#Platform-Specific)
-* [Advanced Configuration](#Advanced-Configuration) 
+* [Advanced Configuration](#Advanced-Configuration)
     * [Notifications](#Notifications)
         * [Sounds](#Sounds)
         * [Apprise](#Apprise)
@@ -32,7 +35,7 @@
 
 # Quick Links
  * [Discord](https://discord.gg/4rfbNKrmnC) **DO NOT ASK QUESTIONS IN DISCORD BEFORE READING THIS DOCUMENT**
- * [Python Download (3.8.8)](https://www.python.org/downloads/release/python-388/)
+ * [Python Download (3.8.9)](https://www.python.org/downloads/release/python-389/)
 
 # About FairGame
 
@@ -47,21 +50,34 @@ for MSRP.
 
 ## Current Functionality
 
-FairGame only works on Amazon and can automatically place an order.
+**ALPHA BRANCH IS A WORK IN PROGRESS, ANY OF THE FOLLOWING STEPS IN THIS README ARE SUBJECT TO CHANGE**
+
+FairGame Alpha only works on Amazon using smile.amazon.com as the domain and can automatically place an order.
 ### Other Notes on Functionality
-* By default, FairGame will only purchase new items with free shipping. This can be changed with options on the command
-  line, see [Configuration](#Configuration).
-* FairGame is designed to check if each product is in stock sequentially, not concurrently (by choice). While 
-  more than one instance of the program can be run concurrently, we do not encourage nor support this and will not 
+* By default, FairGame Alpha will only purchase items with free shipping. Please see [Configuration](#Configuration) 
+  if you would like to change this.
+* FairGame Alpha is designed to check if each product is in stock simultaneously. It does this by creating a monitoring session for each ASIN in your `amazon_aio_config.json` file. If   you're checking 5 ASIN's with your configuration, all 5 ASIN's will be checked every 5 seconds by default with their own monitoring session that is not logged in to your Amazon account. If you're using proxies each monitoring session will be running through one proxy in your `proxies.json` file. If you're not using proxies each monitoring      session will run on your home IP. *DO NOT* expect support if you are running several ASIN's without proxies and get softbanned. See [Disclaimer](#Disclaimer).
+* More than one instance of the program can be run concurrently, we do not encourage nor support this and will not 
   provide help in doing so.
 * There is no functionality to stop and confirm information with your bank during checkout (sorry EU). If someone from
   EU wants to figure this out and submit a pull request, that would be great.
 * FairGame organizes the products being checked into lists, and each list is subject to a minimum and maximum 
-  purchase price range. Once an item is purchased from a list, that list is removed, and it will no longer 
-  purchase an item from that list.
-  * If you want to set purchase price ranges for several different products, but only want FairGame to purchase
-    one of any of the products you've included in the configuration file, use the `--single-shot` option, see
-    [Running the program](#Running-the-program)    
+  purchase price range. Once an item is purchased from any list the checkout worker will close and the bot will need to be restarted in order to make more purchase.
+* If Fairgame catches a drop and you see several `turbo-initiate` pages with a 200 status code this **VERY LIKELY** means that the drop is already gone and Amazon is serving you   a garbage page!
+
+### Disclaimer 
+
+WARNING: The use of this software can result in a Amazon restricting access to your account and make it difficult 
+for you to purchase products, with or without the bot. By using this software, you acknowledge these risks. These restrictions
+cannot and will not be resolved by the developer(s), nor can they be detected/resolved by the standard Amazon Customer Support,
+as far as we are aware. If this happens, the only resolution is to stop all Amazon monitors (e.g., FairGame, Distill.io,
+or other bots, etc.), wait, and hope the limits are lifted within a few days. If this is a major issue you should
+consider avoiding use of this software. 
+
+Account restrictions may be triggered by any of the following: 1) running multiple instances on one device, 2) running multiple instances on different devices, using the same account, regardless of their IP, proxy, or location, 3) configuring an instance to check stock too frequently/aggressively (default settings not guaranteed to be safe). 
+
+Symptoms of account restrictions include: 1) Fly-out (offers) window is missing/completely blank, even if there are listings for the ASIN, 2) frequent CAPTCHA checks, 3) inability to access the My Account page, add items to your cart, or complete purchases; usually displayed as a 503 error (Amazon Dogs & “SORRY we couldn’t find that page” message). You’ll likely have to sit-out a few days of drops to resolve the throttle.
+
 # Installation
 
 ## Requirements
@@ -69,7 +85,7 @@ FairGame only works on Amazon and can automatically place an order.
 ***!!! YOU WILL NEED TO USE THE 3.8 BRANCH OF PYTHON, ANY OTHER BRANCH/VERSION (Anaconda, 2.7, 3.9.x, 3.10, 4.0,
 toaster, etc.) BREAKS DEPENDENCIES !!!***
 
-It is best if you use the newest version of **3.8** (at this time, 3.8.8) but 3.8.5, 3.8.6, and 3.8.7 should also work. 
+It is best if you use the newest version of **3.8** (at this time, 3.8.9) but 3.8.5, 3.8.6, 3.8.7, and 3.8.8 should also work. 
 
 It also requires a working Chrome installation. 
 Running it on a potato (<2GB of RAM) is not suggested. 
@@ -81,87 +97,89 @@ regardless of your OS (obviously you aren't running .bat files if you aren't on 
 available on your OS). See [Platform Specific](#Platform-Specific) instructions for help installing Python and
 dependencies in other operating systems:
 1. [Turn on your computer](https://www.google.com/search?q=how+do+I+turn+on+my+computer)
-2. Install Python 3.8.5, 3.8.6, 3.8.7 or 3.8.8. Install to some location that does not include spaces in the path 
+2. [Install Python 3.8.9](https://www.python.org/downloads/release/python-389/). Install to some location that does not include spaces in the path 
    (we suggest C:\Python38). Click the checkbox that says Add Python 3.8 to PATH (or something similar) 
    during the installation.
    
    ![Add Python 3.8 to PATH](https://github.com/Hari-Nagarajan/fairgame/blob/master/docs/images/PythonInstalltoPath.png)
    
-3. Download GitHub Desktop and Open the FairGame Repository with GitHub Desktop (or download the zip file). 
+3. Download GitHub Desktop and Open the FairGame Repository for the [alpha branch](https://github.com/Hari-Nagarajan/fairgame/tree/alpha) with GitHub Desktop (or download the      zip file). 
    Again, make sure this installs to a location without spaces in the path, but it is *STRONGLY* suggested that you install
    to the root of the drive (e.g., C:\fairgame). If you need help with GitHub Desktop, look at the
    [Wiki](https://github.com/Hari-Nagarajan/fairgame/wiki/How-to-use-GitHub-Desktop-App).
+   ![Step3](https://user-images.githubusercontent.com/20719891/117584052-6aae9300-b0bf-11eb-99a9-2734a3e594bc.jpg)
+   
 4. Open the FairGame folder in File Explorer. Double click __INSTALL (RUN FIRST).bat ***DON'T USE ADMINISTRATIVE MODE***.
    
-   ![Run Install RUN FIRST.bat](https://github.com/Hari-Nagarajan/fairgame/blob/master/docs/images/Step4.png)
+   ![Run Install Batch file](https://user-images.githubusercontent.com/20719891/117584073-8c0f7f00-b0bf-11eb-9ddc-992ed0ca3436.jpg)
    
 5. After this finishes (it could take a few minutes or longer), open the `config` folder in the FairGame folder, make 
-   a copy of the amazon_config.template_json file and rename it to amazon_config.json. If you don't know how to rename
+   a copy of the amazon_aio_config.template_json file and rename it to amazon_config.json. If you don't know how to rename
    file extensions, look it up on [Google](https://www.google.com/search?q=how+do+I+rename+file+extensions+in+Windows).
    
-   ![Config Folder](https://github.com/Hari-Nagarajan/fairgame/blob/master/docs/images/step5a.png)
+   ![Config Folder](https://user-images.githubusercontent.com/20719891/117584140-004a2280-b0c0-11eb-8bdd-aa3ec2cf4c9f.jpg)
    
-   **Ignore extra files in this folder. Screenshot is based on development files. Just follow instructions as written!**
-   ![Copy template](https://github.com/Hari-Nagarajan/fairgame/blob/master/docs/images/Step5b.png)
-   
-6. Edit the amazon_config.json, this assumes US using smile.amazon.com. Using Amazon Smile requires that you select
+   ![Copy Template](https://user-images.githubusercontent.com/20719891/117584198-6cc52180-b0c0-11eb-8956-76e51f69c785.png)
+
+6. Edit the amazon_aio_config.json, this assumes US using smile.amazon.com. Using Amazon Smile requires that you select
    a charity. If you do not know how to do this, use 
    [Google](https://www.google.com/search?q=how+do+i+select+a+charity+on+amazon+smile). 
    Find a product, like a USB stick that is in stock, and put the 
-   [ASIN](https://www.google.com/search?q=what+is+an+ASIN) for that product in place of the B07JH53M4T listed below 
-   (or use that if it is in stock). Change the reserve_min_1 and reserve_max_1 to be below and above the price of the
-   item, respectively: 
-```json
-{
-  "asin_groups": 1,
-  "asin_list_1": ["B07JH53M4T"],
-  "reserve_min_1": 5,
-  "reserve_max_1": 15,
-  "amazon_website": "smile.amazon.com"
-}
-```
+   [ASIN](https://www.google.com/search?q=what+is+an+ASIN) for that product in place of the B001XURP8G listed below 
+   (or use that if it is in stock). Change the min-price and max-price to be below and above the price of the
+   item, respectively. More about condition and merchant ID explained in [Configuration](#Configuration)
+   ```json
+   {
+     "items": [
+       {
+         "asins": ["B001XURP8G"],
+         "min-price": 9,
+         "max-price": 11,
+         "condition": "New",
+         "merchant_id": "amazon"
+       }
+     ],
+     "amazon_domain": "smile.amazon.com"
+   }
+   ```
    
-   ![Edit config file](https://github.com/Hari-Nagarajan/fairgame/blob/master/docs/images/Step6.png)
+   ![Edit Config file](https://user-images.githubusercontent.com/20719891/117584427-c5e18500-b0c1-11eb-9e0a-d17700b82742.jpg)
+
    
-7. In File Explorer, double click the `_Amazon.bat` file in the FairGame folder. ***DON'T USE ADMINISTRATIVE MODE***. 
+7. In File Explorer, double click the `_Amazon_aio.bat` file in the FairGame folder. ***DON'T USE ADMINISTRATIVE MODE***. 
    Type in your amazon email address when asked for your amazon login ID. Type in your amazon account password when 
    asked for your amazon password. Type in a password for your credentials (this can be whatever you want, it just 
    encrypts your account email/password file)
    
-   ![Run Amazon.bat](https://github.com/Hari-Nagarajan/fairgame/blob/master/docs/images/Step7.png)
+   ![AIO Bat file](https://user-images.githubusercontent.com/20719891/117584570-8cf5e000-b0c2-11eb-84c3-1de203014f58.jpg)
    
-8. Verify that the bot successfully makes it to the place your order page with the item you put in the config file. 
+8. Verify that the bot successfully places an order with the item you put in the config file. **NOTE: WITH ALPHA, TEST MODE NO LONGER FUNCTIONS THE SAME WAY. YOU SHOULD TRY AND BUY SOMETHING TO VERIFY THE BOT WORKS FOR YOU!**
    If it does not, then:
    * You messed something up above, and need to fix it; or,
-   * If it is asking you for your address and payment info, you need to do all of the following in a separate
-     tab within the bots browser:
+   * If the bot will not make a purchase on an in stock item and you are not softbanned, you need to do all of the following in a separate
+     tab within the bots browser. Start the bot, wait for the homepage to load, then close out of the command prompt. This should allow you to perform the following steps in the      bots browser:
      * Make sure one-click purchasing is set up for your account, 
      * Verify there is a default payment method and default address associated with that payment method,
      * And then make a purchase manually in that separate tab of the bot's browser and verify that it 
        correctly sets your defaults for the browser. 
      * See [#faq on our Discord](https://discord.gg/GEsarYKMAw) for additional information.
      * ALSO see notes regarding EU and [current functionality](#Other-Notes-on-Functionality)
-9. Edit the `amazon_config.json` file with the item(s) you want to look for. See [Configuration](#Configuration) 
+9. Edit the `amazon_aio_config.json` file with the item(s) you want to look for. See [Configuration](#Configuration) 
    and [Configuration Examples](#Configuration-Examples) for additional information
-10. Remove `--test` from `_Amazon.bat`. 
-[How do I edit .bat files?](https://www.google.com/search?q=how+to+edit+bat+file+in+windows+10)
    
-   ![Remove Test](https://github.com/Hari-Nagarajan/fairgame/blob/master/docs/images/Step10.png)
-   
-11. Run `_Amazon.bat` and wait
+10. Run `_Amazon_aio.bat` and wait
 
-**Note:** If the terminal indicates that it attempts to add to cart and proceed to checkout, but it can't find the
-button to proceed to checkout and there are no items in your cart, or it has reached its maximum add to cart attempts,
-that means that it tried to add the product to cart, and it failed. This is exactly what happens if you were to try
-and and attempt to do this manually.
 
-![image](https://user-images.githubusercontent.com/74267670/115074770-2832d580-9ec8-11eb-8475-864d00e91d50.png)
+Every request Fairgame performs is saved in the `html_saves` folder. Whenever something comes in stock you will see a file called `turbo-initiate_...` (assuming the bot saw the stock). Iff turbo-initiate is succesful the bot will try to call turbo_checkout which will save a file called `turbo_checkout_...`, and if it thinks it placed an order it will save a file called `order-confirm_...`
 
-![image](https://user-images.githubusercontent.com/74267670/115074822-354fc480-9ec8-11eb-8cb6-075898ca20de.png)
+![html_saves_success](https://user-images.githubusercontent.com/20719891/117584813-db57ae80-b0c3-11eb-991c-034b689c4e24.jpg)
 
-Furthermore, if the terminal indicates something about picking your address, and you did Step 8 above correctly (i.e.,
-tested the bot and it does not normally ask you for your address when checking out), then it is **VERY LIKELY** the product
-was already out of stock and Amazon is sending you to a garbage page.
+For regular stock checks on an out of stock item you will most commonly see:
+   * `stock-check_200...`
+   * `stock-check_503...`
+ 
+The bot will not be able to purchase items if it is getting served a 503 page. Check [Disclaimer](#Disclaimer) for more info about 503 pages. The `html_saves` folder is an excellent tool to help diagnose issues.
+
 
 Additional information about running FairGame can be found in the rest of the documentation.
 
@@ -202,110 +220,239 @@ pipenv install
 
 ### Configuration
 
-In the `config` folder, make a copy of `amazon_config.template_json` and 
-[rename](https://www.google.com/search?q=how+to+change+file+extensions+on+windows+10) it to `amazon_config.json`. Edit it 
+In the `config` folder, make a copy of `amazon_aio_config.template_json` and 
+[rename](https://www.google.com/search?q=how+to+change+file+extensions+on+windows+10) it to `amazon_aio_config.json`. Edit it 
 according to the 
 [ASINs](https://www.datafeedwatch.com/blog/amazon-asin-number-what-is-it-and-how-do-you-get-it#how-to-find-asin) you are
 interested in purchasing. You can find a list of ASINs for some common products people are looking for on our 
 Discord [#asins](https://discord.gg/DuVXAN5FnN). If it's not in there, you have to look it up yourself.
 
-* `asin_groups` indicates the number of ASIN groups (or lists) you want to use.
-* `asin_list_x` list of ASINs for products you want to purchase. You must locate these for the products you want, use 
-  the links above to get started.
-    * The first time an item from list "x" is in stock and under its associated reserve, it will purchase it. FairGame 
-      will continue to loop through the other lists until it purchases one item from each (unless the `--single-shot` 
-      option is enabled, in which case it stops after the first purchase).
-    * If the purchase is successful, the bot will not buy anything else from list "x".
-    * Use sequential numbers for x, starting from 1. x can be any integer from 1 to 18,446,744,073,709,551,616
-* `reserve_min_x` set a minimum limit to consider for purchasing an item. If a seller has a listing for a 700 dollar
+* `items`: items is a list that contains [Python dictionaries](https://www.w3schools.com/python/python_dictionaries.asp) with the following keys: (asins, min-price, max-price,     condition, and merchant_id). You can create multiple dictionaries using these keys if you want to check multiple ASINs with a different min/max price or                         condition/merchant_id.
+    * The first time an item from any `asins` list is in stock and under its associated reserve, it will attempt to purchase it. Currently, FairGame 
+      will continue to loop through the other ASIN's, but the checkout worker will only make one purchase so the bot must be started again to make further purchases.
+* `min-price`: set a minimum limit to consider for purchasing an item. If a seller has a listing for a 700 dollar
   item a 1 dollar, it's likely fake.
-* `reserve_max_x` is the most amount you want to spend for a single item (i.e., ASIN) in `asin_list_x`. Does not include
-  tax. If `--checkshipping` flag is active, this includes shipping listed on offer page.
-* `amazon_website` amazon domain you want to use. smile subdomain appears to work better, if available in your
-  country. [*What is Smile?*](https://org.amazon.com/) Note that using Amazon Smile requires you to pick a charity.
-  If you do not do so, you will not be able to purchase anything, and you will likely have problems running FairGame.
+* `max-price`: is the most amount you want to spend for a single item (i.e., ASIN) in `asins`. Does not include
+  tax.
+* `condition`: Please see the image below to determine the different values that can be used. As an example, if you put `Used` in your config it will attempt to purchase anything that is Used or above it (Good, Refurbished, New, etc)
+![alpha_conditions](https://user-images.githubusercontent.com/20719891/117585270-59b55000-b0c6-11eb-8fed-72c468022f96.jpg)
 
-##### Configuration Examples
+* `merchant_id`: Use `amazon` if you want to only consider offers that are sold by Amazon. Use `any` if you want to consider offers from Amazon and Third Parties (potential scalpers or scammers)
 
-One unique product with one ASIN (e.g., Segway Ninebot S and GoKart Drift Kit Bundle) :
+* `amazon_domain`: **(CURRENTLY ONLY SUPPORTING smile.amazon.com SO AS OF RIGHT NOW DOES NOTHING)**
+   Amazon domain you want to use. smile subdomain appears to work better, if available in your
+   country. [*What is Smile?*](https://org.amazon.com/) Note that using Amazon Smile requires you to pick a charity.
+   If you do not do so, you will not be able to purchase anything, and you will likely have problems running FairGame.
+
+#### Adjusting Delay
+
+The default delay is 5 seconds. Check [optional settings](#Optional-settings) for details on how to change the delay.
+
+#### Check ASIN's with a Shipping Price
+
+In order to adjust the `check_shipping` option you must edit the `amazon_monitoring.py` file the same as above.
+
+Use `CTRL+F` to search for `check_shipping` and find the line: 
+
+`def get_qualified_seller(item, sellers, check_shipping=False) -> SellerDetail or None:`
+
+Replace 'False' with 'True' and save. Your bot will now consider offers that have a shipping price.
+
+#### Configuration Examples
+
+One unique product with one ASIN (e.g., Segway Ninebot S and GoKart Drift Kit Bundle), seraching for New offers from Amazon only:
 
 ```json
 {
-  "asin_groups": 1,
-  "asin_list_1": [
-    "B07K7NLDGT"
+  "items": [
+    {
+      "asins": ["B07K7NLDGT"],
+      "min-price": 400,
+      "max-price": 500,
+      "condition": "New",
+      "merchant_id": "amazon"
+    }
   ],
-  "reserve_min_1": 450,
-  "reserve_max_1": 500,
-  "amazon_website": "smile.amazon.com"
+  "amazon_domain": "smile.amazon.com"
 }
 ```
 
-One general product with multiple ASINS (e.g 16 GB USB drive 2 pack)
+One general product with multiple ASINS (e.g 16 GB USB drive 2 pack),  searching for New offers from any seller:
 
 ```json
 {
-  "asin_groups": 1,
-  "asin_list_1": [
-    "B07JH53M4T",
-    "B085M1SQ9S",
-    "B00E9W1ULS"
+  "items": [
+    {
+      "asins": ["B07K7NLDGT", "B085M1SQ9S", "B00E9W1ULS"],
+      "min-price": 15,
+      "max-price": 20,
+      "condition": "New",
+      "merchant_id": "any"
+    }
   ],
-  "reserve_min_1": 15,
-  "reserve_max_1": 20,
-  "amazon_website": "smile.amazon.com"
+  "amazon_domain": "smile.amazon.com"
 }
 ```
 
 Two general products with multiple ASINS and different price points (e.g. 16 GB USB drive 2 pack and a statue of The
-Thinker)
+Thinker). Both are checking for Used (or above) condition, and only considering offers from Amazon.
 
 ```json
 {
-  "asin_groups": 2,
-  "asin_list_1": [
-    "B07JH53M4T",
-    "B085M1SQ9S",
-    "B00E9W1ULS"
+  "items": [
+    {
+      "asins": ["B07JH53M4T", "B085M1SQ9S", "B00E9W1ULS"],
+      "min-price": 15,
+      "max-price": 20,
+      "condition": "Used",
+      "merchant_id": "amazon"
+    },
+    {
+      "asins": ["B006HPI2A2", "B00N54S1WW"],
+      "min-price": 50,
+      "max-price": 75,
+      "condition": "Used",
+      "merchant_id": "amazon"
+    }
   ],
-  "reserve_min_1": 15,
-  "reserve_max_1": 20,
-  "asin_list_2": [
-    "B006HPI2A2",
-    "B00N54S1WW"
-  ],
-  "reserve_min_2": 50,
-  "reserve_max_2": 75,
-  "amazon_website": "smile.amazon.com"
+  "amazon_domain": "smile.amazon.com"
 }
 ```
-If you wanted to watch another product, you'd add a third list (e.g. `asin_list_3`) and associated min/max pricing and
-increase the `asin_groups` to 3. Add as many lists as are needed, keeping in mind that the main distinction between
-lists is the min/max price boundaries. Once any ASIN is purchased from an ASIN list, that list is remove from the hunt
-until FairGame is restarted.
+If you wanted to watch another product, you'd add a third dictionary to the `items` list (copy and paste) and  adjust the associated asins, min/max pricing, condition, and
+merchant_id. Add as many dictionaries as are needed, keeping in mind that the main distinction between
+dictionaries is the min/max price boundaries. Once any ASIN is purchased from an `asins` list the checkout worker will stop and the program must be restarted in order to purchase again.
 
 To verify that your JSON is well formatted, paste and validate it at https://jsonlint.com/
 
-### Running the program
-If you are on Windows, we suggest making a copy of `_Amazon.bat` and adding the options of your choice to the end of 
-line (see Options below). Run the program by double clicking on the _Amazon.bat file (or whatever you renamed it to). 
-***DO NOT RUN THE BATCH FILE WITH ADMINISTRATIVE MODE***
+### Proxies
 
-**NOTE:** `--test` flag has been added to `_Amazon.bat` file by default. **This should be deleted after you've verified 
-that the bot works correctly for you.** If you don't want your `_Amazon.bat` to be deleted when you update, you should
-copy it and rename it to something else as mentioned above.
+In the `config` folder, make a copy of `proxies.template_json` and 
+[rename](https://www.google.com/search?q=how+to+change+file+extensions+on+windows+10) it to `proxies.json`. Edit it 
+according to your proxy list, the process for editing the proxies json is the same as editing the aio_config json.
+
+We do not have any recommendations for which proxies are better or worse, try asking [Google](https://www.google.com/search?q=where+to+buy+proxies).
+
+#### Examples
+
+Http User/Pass Authentication:
+```json
+{
+    "proxies": [
+        {
+            "http": "http://user:password@ipaddress:port",
+            "https": "http://user:password@ipaddress:port"
+        },
+        {
+            "http": "http://joe:my_pass!2@192.111.222.333:1234",
+            "https": "http://joe:my_pass!2@192.111.222.333:1234"
+        }
+    ]
+}
+```
+
+Socks5 User/Pass Authentication:
+```json
+{
+    "proxies": [
+        {
+            "http": "socks5://user:password@ipaddress:port",
+            "https": "socks5://user:password@ipaddress:port"
+        },
+        {
+            "http": "socks5://joe:my_pass!2@192.111.222.333:1234",
+            "https": "socks5://joe:my_pass!2@192.111.222.333:1234"
+        }
+    ]
+}
+```
+
+Http IP Authentication: **You must authenticate your IP with your proxy provider in order to use this format**
+```json
+{
+    "proxies": [
+        {
+            "http": "http://ipaddress:port",
+            "https": "http://ipaddress:port"
+        },
+        {
+            "http": "http://192.111.222.333:1234",
+            "https": "http://192.111.222.333:1234"
+        }
+    ]
+}
+```
+
+Socks5 IP Authentication: **You must authenticate your IP with your proxy provider in order to use this format**
+```json
+{
+    "proxies": [
+        {
+            "http": "socks5://ipaddress:port",
+            "https": "socks5://ipaddress:port"
+        },
+        {
+            "http": "socks5://192.111.222.333:1234",
+            "https": "socks5://192.111.222.333:1234"
+        }
+    ]
+}
+```
+[What is a Python dictionary?](https://www.w3schools.com/python/python_dictionaries.asp)
+
+The second dictionary in each example contains values so you can see what it should look like with actual values. Each proxy gets assigned to one dictionary and each dictionary has a value for the http and https keys. Putting the same proxy for both keys ensures the proxy is used for both http and https requests.
+
+Make a dictionary for each proxy you want to add. If you have 10 ASIN's in your aio_config file and 10 dictionaries in your proxies config file then each monitoring session will get assigned an ASIN. The first dictionary will get assigned to the first ASIN, second dictionary gets assigned to the second ASIN, etc.
+
+#### Troubleshooting Proxies
+
+You can easily diagnose which proxies are giving you issues by utilizing the `html_saves` folder. Each check will store a save of the HTML page it received and sometimes you may see 503 errors only appearing for certain ASINs. 
+
+![proxy_503](https://user-images.githubusercontent.com/20719891/117586652-5a51e480-b0ce-11eb-95c5-7cdc0285b0b7.jpg)
+
+You can see in the above image how I am only receiving 503 errors for ASIN's: B08L8HPKR6 & B08L8L71SM. This tells me that I likely need to replace those proxies (or at the very least give them a break).
+
+![proxies_troubleshoot](https://user-images.githubusercontent.com/20719891/117586748-f0860a80-b0ce-11eb-9ddb-294630bfea67.jpg)
+
+By looking at your config you will be able to determine which proxies need to be replaced. In the above example I can see that the proxies in the 2nd and 7th dictionaries need to be replaced in the `proxies.json` file.
+
+If you want to add the ASIN to your html_saves files, open `amazon_monitoring.py` with a text editor. The file is located in the `stores` folder. If you do not know how to open files with a text editor do not attempt this step.
+
+   1. `CTRL+F` and search for `save_html`
+   2. Find the line `save_html_response("stock-check", status, response_text)` and replace it with: 
+      
+      `save_html_response(f"{self.item.id}_stock-check", status, response_text)`
+   4. There are 2 lines that need to be changed.
+   
+### Running the program
+Run the program by double clicking on the _Amazon_aio.bat file (or whatever you renamed it to). 
+***DO NOT RUN THE BATCH FILE WITH ADMINISTRATIVE MODE***
 
 If you are not on Windows, you can run the bot with the following command:
 
 ```shell
-pipenv run python app.py amazon [Options]
+pipenv run python app.py amazon-aio
+```
+
+#### Optional settings
+
+```options
+pipenv run python app.py amazon-aio [Options]
+
+Options:
+   --delay FLOAT       Time to wait between the end of one stock check and the beginning of the next stock check.
+```
+
+**!*!*Currently thes options below are not available with the Alpha branch, but some may be added again in the future!*!***
+
+```old_options
+pipenv run python app.py amazon-aio [Options]
 
 Options:
   --headless          Runs Chrome in headless mode.
   
-  --test              Run the checkout flow but do not actually purchase the item[s]
-
-  --delay FLOAT       Time to wait between the end of one stock check and the beginning of the next stock check.
+  --test              Run the checkout flow but do not actually purchase the item[s]. Only functional with `--alt-checkout` mode.
+  
+  --alt-checkout      Utilize the old add to cart method of checkout.
   
   --checkshipping     Also include items with a shipping price in the search.
                       Shipping costs are factored into reserve price check calculation.
@@ -339,27 +486,13 @@ Options:
                       option, so bot may still fail during checkout
                       
   --help              Show this message and exit.
-
 ```
-* [What is Headless](https://www.google.com/search?q=what+is+headless+chrome)
-* [What is Page Load Strategy?](https://www.google.com/search?q=what+is+page+load+strategy) 
-
 
 #### Examples
 
-Running FairGame with default functionality:
+Running FairGame with default functionality (Only currently supported option with alpha):
 ```shell
-pipenv run python app.py amazon
-```
-
-Running FairGame to look for new and used items, and also include items that may have a shipping cost:
-```shell
-pipenv run python app.py amazon --used --checkshipping
-```
-
-Running Fairgame with delay of 4.5 seconds, and automatically putting in the credentials password of `abcd1234`
-```shell
-pipenv run python app.py amazon --delay=4.5 --p=abcd1234
+pipenv run python app.py amazon-aio
 ```
 
 ### Start Up
@@ -436,6 +569,9 @@ Open terminal. Either right click desktop and go to Open In Terminal, or search 
 
 Install Google Chrome:
 `wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && sudo dpkg -i google-chrome-stable_current_amd64.deb`
+
+Add Universe repo (this might be optional depending on your distro):
+`sudo add-apt-repository universe && sudo apt update`
 
 Install Pip:
 `sudo apt install python3-pip`
@@ -661,22 +797,37 @@ export PIPENV_VENV_IN_PROJECT=1 (Linux/Other)
 ## Frequently Asked Questions
 
 To keep up with questions, the Discord channel [#FAQ](https://discord.gg/GEsarYKMAw) is where you'll find the latest
-answers. If you don't find it there, ask in #tech-support. 
+answers. If you don't find it there, ask in #tech-support.
 
+1. **Why didn't Fairgame buy this GPU that I can see in my browser?**
+   
+   If Fairgame didn't attempt to buy it, then Fairgame didn't ever see it as in stock. Many stock alert services are
+   sending out affiliate URLs that appear to cache offers for some period of time, regardless of whether or not the item
+   is still in-stock and purchaseable. Many people have reported that they can see an item as in stock in their browser
+   but Fairgame either didn't see it, failed to check out, or logged some weird error condition.
+   
+   If you are trying to purchase an Nvidia 30-series or an AMD 6000-series GPU in 2021 then this may happen frequently for you.
+   These items appear to sell out within fractions of a second and a large a mount of luck will be involved. Please do not
+   create issues or ask for help when Fairgame "misses" a drop or tries to checkout but can't find the item in your cart.
+   We know that it's hard to buy these things right now - that's why we're all here. Good luck!
+   
 1. **Can I run multiple instances of the bot?**
+   
    It is possible, however we do not support running multiple instances nor any issues that may be encountered while doing so.
-
-2. **Does Fairgame automatically bypass CAPTCHA's on the store sites?**
+   
+1. **Does Fairgame automatically bypass CAPTCHA's on the store sites?**
+   
    The bot will try and auto-solve CAPTCHA's during the checkout process.
-
-3. **Does `--headless` work?**
+   
+1. **Does `--headless` work?**
+   
    Yes!  A community user identified the issue with the headless option while running on a Raspberry Pi. This allowed
    the developers to update the codebase to consistently work correctly on headless server environments. Give it a try
    and let us know if you have any issues.
-
-4. **Does Fairgame run on a Raspberry Pi?**
+   
+1. **Does Fairgame run on a Raspberry Pi?**
+   
    Yes, with caveats. Most people seem to have success with Raspberry Pi 4. The 2 GB model may need to run the headless
    option due to the smaller memory footprint. Still awaiting community feedback on running on a Pi 3. CPU and memory
    capacity seem to be the limiting factor for older Pi models. The Pi is also much slower then even a semi-recent
    (5 years or less) laptop. 
-

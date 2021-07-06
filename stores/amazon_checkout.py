@@ -18,30 +18,20 @@
 #      https://github.com/Hari-Nagarajan/fairgame
 
 import stdiomask
-import fileinput
-import os
 import platform
 import time
-import typing
 from contextlib import contextmanager
-from datetime import datetime
-import queue
 import asyncio
 import aiohttp
-from typing import Optional, List
+from typing import Optional
 
-import secrets
 import re
 
 import psutil
-import requests
 from amazoncaptcha import AmazonCaptcha
-from chromedriver_py import binary_path
 from furl import furl
 from lxml import html
-from price_parser import parse_price, Price
-from selenium import webdriver
-from utils.debugger import debug, timer
+from utils.debugger import timer
 
 from selenium.common.exceptions import (
     NoSuchElementException,
@@ -51,8 +41,7 @@ from selenium.common.exceptions import (
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
-from selenium.webdriver.support import expected_conditions as EC, wait
-from selenium.webdriver.support.expected_conditions import staleness_of
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 from notifications.notifications import NotificationHandler
@@ -70,15 +59,11 @@ from utils.selenium_utils import (
 from common.amazon_support import SellerDetail, has_captcha
 from utils.misc import (
     check_response,
-    parse_html_source,
     join_xpaths,
     wait_for_element_by_xpath,
     save_html_response,
-    get_timestamp_filename,
     get_webdriver_pids,
 )
-
-from functools import wraps
 
 AMAZON_URLS = {
     "BASE_URL": "https://{domain}/",
@@ -113,10 +98,9 @@ class AmazonCheckoutHandler(BaseStoreHandler):
         amazon_config,
         profile_path,
         headless=False,
-        username=None,
-        password=None,
         timer=7200,
         cookie_list=None,
+        amazon_domain="smile.amazon.com",
     ):
         log.debug("Initializing AmazonCheckoutHandler")
         self.profile_path = profile_path
@@ -125,6 +109,7 @@ class AmazonCheckoutHandler(BaseStoreHandler):
             enable_headless()
         self.amazon_config = amazon_config
         self.notification_handler = notification_handler
+        self.amazon_domain = amazon_domain
 
         # Selenium setup
         selenium_initialization(options=options, profile_path=self.profile_path)
@@ -150,16 +135,21 @@ class AmazonCheckoutHandler(BaseStoreHandler):
         return cookies
 
     def login(self):
-        domain = "smile.amazon.com"
-        log.info(f"Logging in to {domain}...")
-
-        amazonsmile_url = "https://smile.amazon.com/ap/signin/ref=smi_ge2_ul_si_rl?_encoding=UTF8&ie=UTF8&openid.assoc_handle=amzn_smile&openid.claimed_id=http://specs.openid.net/auth/2.0/identifier_select&openid.identity=http://specs.openid.net/auth/2.0/identifier_select&openid.mode=checkid_setup&openid.ns=http://specs.openid.net/auth/2.0&openid.ns.pape=http://specs.openid.net/extensions/pape/1.0&openid.pape.max_auth_age=0&openid.return_to=https://smile.amazon.com/gp/charity/homepage.html?ie=UTF8&newts=1&orig=%2F"
-        amazoncom_url = "https://www.amazon.com/ap/signin?openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2Fwww.amazon.com%2F%3Fref_%3Dnav_signin&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.assoc_handle=usflex&openid.mode=checkid_setup&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&"
+        log.info(f"Logging in to {self.amazon_domain}...")
+        tld = self.amazon_domain.split(".")[-1]
+        smile_handle = f"amzn_smile_desktop_{tld}"
+        if tld == "com":
+            smile_handle = "amzn_smile"
+            tld = "us"
+        if tld == "uk":
+            tld = "gb"
+        amazonsmile_url = f"https://{self.amazon_domain}/ap/signin/ref=smi_ge2_ul_si_rl?_encoding=UTF8&ie=UTF8&openid.assoc_handle={smile_handle}&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.mode=checkid_setup&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&openid.ns.pape=http%3A%2F%2Fspecs.openid.net%2Fextensions%2Fpape%2F1.0&openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2F{self.amazon_domain}%2Fgp%2Fcharity%2Fhomepage.html%3Fie%3DUTF8%26%252AVersion%252A%3D1%26%252Aentries%252A%3D0%26newts%3D1%26ref_%3Dsmi_chpf_redirect"
+        amazoncom_url = f"https://{self.amazon_domain}/ap/signin?openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2F{self.amazon_domain}%2F%3Fref_%3Dnav_signin&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.assoc_handle={tld}flex&openid.mode=checkid_setup&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&"
         email_field: Optional[WebElement] = None
         remember_me: Optional[WebElement] = None
         password_field: Optional[WebElement] = None
 
-        if "smile" in domain:
+        if "smile" in self.amazon_domain:
             url = amazonsmile_url
         else:
             url = amazoncom_url
@@ -190,7 +180,8 @@ class AmazonCheckoutHandler(BaseStoreHandler):
         remember_me = self.wait_get_clickable_amazon_element("LOGIN_REMEMBER_ME")
         if remember_me:
             try:
-                remember_me.click()
+                if not remember_me.is_selected():
+                    remember_me.click()
             except WebDriverException as e:
                 log.debug("Could not click remember me checkbox")
         else:
@@ -412,8 +403,7 @@ class AmazonCheckoutHandler(BaseStoreHandler):
             self.checkout_session.headers["x-amz-checkout-csrf-token"] = session_id
         self.checkout_session.cookie_jar.update_cookies(cookies)
         # It appears the amazon session is valid for 366 days.
-        domain = "smile.amazon.com"
-        resp = await self.checkout_session.get(f"https://{domain}")
+        resp = await self.checkout_session.get(f"https://{self.amazon_domain}")
         html_text = await resp.text()
         save_html_response("session-get", resp.status, html_text)
         while True:
@@ -432,14 +422,19 @@ class AmazonCheckoutHandler(BaseStoreHandler):
             anti_csrf = None
             while (not (pid and anti_csrf)) and retry < TURBO_INITIATE_MAX_RETRY:
                 pid, anti_csrf = await turbo_initiate(
-                    s=self.checkout_session, qualified_seller=qualified_seller
+                    domain=self.amazon_domain,
+                    s=self.checkout_session,
+                    qualified_seller=qualified_seller,
                 )
                 retry += 1
             print("HERE 1")
             if pid and anti_csrf:
                 print("HERE 2")
                 if await turbo_checkout(
-                    s=self.checkout_session, pid=pid, anti_csrf=anti_csrf
+                    domain=self.amazon_domain,
+                    s=self.checkout_session,
+                    pid=pid,
+                    anti_csrf=anti_csrf,
                 ):
                     log.info("Maybe completed checkout")
                     time_difference = time.time() - start_time
@@ -449,7 +444,7 @@ class AmazonCheckoutHandler(BaseStoreHandler):
                     try:
                         status, text = await aio_get(
                             self.checkout_session,
-                            f"https://{domain}/gp/buy/thankyou/handlers/display.html?_from=cheetah&checkMFA=1&purchaseId={pid}&referrer=yield&pid={pid}&pipelineType=turbo&clientId=retailwebsite&temporaryAddToCart=1&hostPage=detail&weblab=RCX_CHECKOUT_TURBO_DESKTOP_PRIME_87783",
+                            f"https://{self.amazon_domain}/gp/buy/thankyou/handlers/display.html?_from=cheetah&checkMFA=1&purchaseId={pid}&referrer=yield&pid={pid}&pipelineType=turbo&clientId=retailwebsite&temporaryAddToCart=1&hostPage=detail&weblab=RCX_CHECKOUT_TURBO_DESKTOP_PRIME_87783",
                         )
                         save_html_response("order-confirm", status, text)
                     except aiohttp.ClientError:
@@ -476,7 +471,7 @@ class AmazonCheckoutHandler(BaseStoreHandler):
         return None
 
     def send_notification(self, message, page_name, take_screenshot=True):
-        """Sends a notification to registered agents """
+        """Sends a notification to registered agents"""
         if take_screenshot:
             file_name = save_screenshot(self.driver, page_name)
             self.notification_handler.send_notification(message, file_name)
@@ -501,10 +496,9 @@ async def aio_get(client, url, data=None):
 
 @timer
 async def turbo_initiate(
-    s: aiohttp.ClientSession, qualified_seller: Optional[SellerDetail] = None
+    domain, s: aiohttp.ClientSession, qualified_seller: Optional[SellerDetail] = None
 ):
-    domain = "smile.amazon.com"
-    url = f"https://{domain}/checkout/turbo-initiate?ref_=dp_start-bbf_1_glance_buyNow_2-1&pipelineType=turbo&weblab=RCX_CHECKOUT_TURBO_DESKTOP_NONPRIME_87784&temporaryAddToCart=1"
+    url = f"https://{domain}/checkout/turbo-initiate?ref_=dp_start-bbf_1_glance_buyNow_4-2&referrer=detail&pipelineType=turbo&clientId=retailwebsite&weblab=RCX_CHECKOUT_TURBO_DESKTOP_NONPRIME_87784&temporaryAddToCart=1"
     pid = None
     anti_csrf = None
 
@@ -561,8 +555,7 @@ async def turbo_initiate(
 
 
 @timer
-async def turbo_checkout(s: aiohttp.ClientSession, pid, anti_csrf):
-    domain = "smile.amazon.com"
+async def turbo_checkout(domain, s: aiohttp.ClientSession, pid, anti_csrf):
     log.debug("trying to checkout")
     url = f"https://{domain}/checkout/spc/place-order?ref_=chk_spc_placeOrder&clientId=retailwebsite&pipelineType=turbo&pid={pid}"
     header_update = {"anti-csrftoken-a2z": anti_csrf}
