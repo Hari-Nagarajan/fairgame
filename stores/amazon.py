@@ -780,12 +780,16 @@ class Amazon:
                 )
                 log.info("Adding to cart")
                 # Get the offering ID
-                offering_id_elements = atc_button.find_elements_by_xpath(
-                    "./preceding::input[@name='offeringID.1'][1] | ./preceding::input[@id='offerListingID']"
-                )
-                if offering_id_elements:
+                try:
+                    atc_action : List[WebElement] = atc_button.find_elements_by_xpath("./ancestor::span[@data-action='aod-atc-action']")
+                    full_atc_action_string = atc_action[0].get_attribute('data-aod-atc-action')
+                    offering_id = json.loads(full_atc_action_string)["oid"]
+                except:
+                    log.error("Unable to find OfferID...")
+                    return False
+                
+                if offering_id:
                     log.info("Attempting Add To Cart with offer ID...")
-                    offering_id = offering_id_elements[0].get_attribute("value")
                     if not self.alt_checkout:
                         if self.buy_it_now(offering_id, max_atc_retries=20):
                             return True
