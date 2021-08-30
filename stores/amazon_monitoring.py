@@ -459,14 +459,19 @@ def parse_offers(offers: html.HtmlElement, free_shipping_strings, atc_method=Fal
             condition = AmazonItemCondition.Unknown
         log.info(f"condition: {str(condition)}")
 
-        # Get Seller item offerListingId
-        offer_ids = offer.xpath(f".//input[@name='offeringID.1']")
-        if len(offer_ids) > 0:
-            offer_id = offer_ids[0].value
-        else:
-            log.error("No offer ID found for this offer, skipping")
-            continue
-        log.info(f"offer id: {offer_id}")
+        # Get the offer ID 
+        try:
+            atc_action = offer.xpath("//ancestor::span[@data-action='aod-atc-action']")
+            full_atc_action_string = atc_action[0].get('data-aod-atc-action')
+            offer_id = json.loads(full_atc_action_string)["oid"]
+        except Exception as e:
+            log.error(str(e))
+            log.error("Unable to find OfferID...")
+            return False
+        
+        if offer_id:
+            log.info("Attempting Add To Cart with offer ID...")
+
 
         # get info for ATC post
         # only use if doing ATC method
