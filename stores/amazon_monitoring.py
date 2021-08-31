@@ -472,7 +472,7 @@ def parse_offers(offers: html.HtmlElement, free_shipping_strings, atc_method=Fal
                 full_atc_action_string = atc_action[0].get('data-aod-atc-action')
                 offer_id = json.loads(full_atc_action_string)["oid"]
                 if offer_id:
-                    log.info(f"Offer ID Found with new method! Attempting Add To Cart with offer ID...")
+                    log.debug(f"Offer ID Found with new method! Attempting Add To Cart with offer ID...")
             except Exception as e:
                 log.error(str(e))
                 log.error("Unable to find OfferID with either method...")
