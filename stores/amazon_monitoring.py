@@ -459,19 +459,24 @@ def parse_offers(offers: html.HtmlElement, free_shipping_strings, atc_method=Fal
             condition = AmazonItemCondition.Unknown
         log.info(f"condition: {str(condition)}")
 
-        # Get the offer ID 
-        try:
-            atc_action = offer.xpath("//ancestor::span[@data-action='aod-atc-action']")
-            full_atc_action_string = atc_action[0].get('data-aod-atc-action')
-            offer_id = json.loads(full_atc_action_string)["oid"]
-        except Exception as e:
-            log.error(str(e))
-            log.error("Unable to find OfferID...")
-            return False
-        
-        if offer_id:
-            log.info("Attempting Add To Cart with offer ID...")
-
+        # Get Seller item offerid
+        offer_ids = offer.xpath(f".//input[@name='offeringID.1']")
+        if len(offer_ids) > 0:
+            offer_id = offer_ids[0].value
+            log.info(f"Offer ID Found with old method! Attempting Add To Cart with offer ID...")
+        else:
+            # Attempt to get the new offerid using the new html format
+            log.info("No offer ID found with old html format. Trying with new format.")
+            try:
+                atc_action = offer.xpath("//ancestor::span[@data-action='aod-atc-action']")
+                full_atc_action_string = atc_action[0].get('data-aod-atc-action')
+                offer_id = json.loads(full_atc_action_string)["oid"]
+                if offer_id:
+                    log.info(f"Offer ID Found with new method! Attempting Add To Cart with offer ID...")
+            except Exception as e:
+                log.error(str(e))
+                log.error("Unable to find OfferID with either method...")
+                return False
 
         # get info for ATC post
         # only use if doing ATC method
