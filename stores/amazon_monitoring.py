@@ -372,12 +372,13 @@ def get_item_sellers(
     """Parse out information to from the aod-offer nodes populate ItemDetail instances for each item"""
     sellers: Optional[List[SellerDetail]] = []
     if tree is None:
-        return sellers
+        return sellers 
 
-    # Default response
+    # Default response 
     found_asin = "[NO ASIN FOUND ON PAGE]"
     # First see if ASIN can be found with xpath
     # look for product ASIN
+    #print(html.tostring(tree))
     page_asin = tree.xpath("//input[@id='ftSelectAsin' or @id='ddmSelectAsin']")
     if page_asin:
         try:
@@ -387,7 +388,7 @@ def get_item_sellers(
     # if cannot find with xpath, try regex
     else:
         find_asin = re.search(
-            r"asin\s?(?:=|\.)?\s?\"?([A-Z0-9]+)\"?", tree.text_content()
+            r"asin\s?\"?\:?\s?\"?([A-Z0-9]+)\"?", str(html.tostring(tree))
         )
         if find_asin:
             found_asin = find_asin.group(1)
