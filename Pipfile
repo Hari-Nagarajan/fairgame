@@ -7,7 +7,7 @@ verify_ssl = true
 pyinstaller = "*"
 
 [packages]
-requests = "==2.24.0"
+requests = "*"
 click = "*"
 selenium = "*"
 chromedriver-py = "==94.0.4606.41"
