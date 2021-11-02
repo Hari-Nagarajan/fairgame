@@ -41,8 +41,13 @@ if os.path.exists("LICENSE") and sha256sum("LICENSE") in license_hash:
         under certain conditions; for details start the program with
         the `show --c' option.\n
     """
+    
+    alpha_note = """
+    Some functionality of the ALPHA branch may be broken due to changes Amazon
+    has made to the web page. Use at your own risk.\n  
+    """
 
-    print(s)
+    print(s, alpha_note)
 else:
     print("License File Changed or Missing. Quitting Program.")
     exit(0)
