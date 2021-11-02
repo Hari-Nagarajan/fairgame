@@ -1,5 +1,7 @@
 # FairGame README
 
+**Note: Development is no longer active on this project. Pull requests submitted by the community will still be reviewed and approved, if valid and functional.**
+
 # Table of Contents:
 * [About FairGame](#About-FairGame)
     * [Current Functionality](#Current-Functionality)
