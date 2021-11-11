@@ -10,7 +10,7 @@ pyinstaller = "*"
 requests = {extras = ["socks"], version = "*"}
 click = "*"
 selenium = "*"
-chromedriver-py = "~=92.0.4515.43"
+chromedriver-py = "~=95.0.4638.17"
 furl = "*"
 twilio = "*"
 discord-webhook = "*"
