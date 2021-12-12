@@ -40,7 +40,7 @@
 # About FairGame
 
 We built this in response to the severe tech scalping situation that's happening right now. Almost every tech product
-that's coming out right now is being instantly brought out by scalping groups and then resold at at insane prices. $699
+that's coming out right now is being instantly bought out by scalping groups and then resold at at insane prices. $699
 GPUs are being listed for $1700 on eBay, and these scalpers are buying 40 cards while normal consumers can't get a
 single one. Preorders for the PS5 are being resold for nearly $1000. Our take on this is that if we release a bot that
 anyone can use, for free, then the number of items that scalpers can buy goes down and normal consumers can buy items
