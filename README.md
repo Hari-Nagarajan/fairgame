@@ -1,5 +1,7 @@
 # FairGame README
 
+**Note: Development is no longer active on this project. Pull requests submitted by the community will still be reviewed and approved, if valid and functional.**
+
 # Table of Contents:
 * [About FairGame](#About-FairGame)
     * [Current Functionality](#Current-Functionality)
@@ -33,7 +35,7 @@
 
 # Quick Links
  * [Discord](https://discord.gg/4rfbNKrmnC) **DO NOT ASK QUESTIONS IN DISCORD BEFORE READING THIS DOCUMENT**
- * [Python Download (3.8.8)](https://www.python.org/downloads/release/python-388/)
+ * [Python Download (3.8.9)](https://www.python.org/downloads/release/python-389/)
 
 # About FairGame
 
@@ -84,7 +86,7 @@ Symptoms of account restrictions include: 1) Fly-out (offers) window is missing/
 ***!!! YOU WILL NEED TO USE THE 3.8 BRANCH OF PYTHON, ANY OTHER BRANCH/VERSION (Anaconda, 2.7, 3.9.x, 3.10, 4.0,
 toaster, etc.) BREAKS DEPENDENCIES !!!***
 
-It is best if you use the newest version of **3.8** (at this time, 3.8.8) but 3.8.5, 3.8.6, and 3.8.7 should also work. 
+It is best if you use the newest version of **3.8** (at this time, 3.8.9) but 3.8.5, 3.8.6, 3.8.7, and 3.8.8 should also work. 
 
 It also requires a working Chrome installation. 
 Running it on a potato (<2GB of RAM) is not suggested. 
@@ -96,7 +98,7 @@ regardless of your OS (obviously you aren't running .bat files if you aren't on 
 available on your OS). See [Platform Specific](#Platform-Specific) instructions for help installing Python and
 dependencies in other operating systems:
 1. [Turn on your computer](https://www.google.com/search?q=how+do+I+turn+on+my+computer)
-2. Install Python 3.8.5, 3.8.6, 3.8.7 or 3.8.8. Install to some location that does not include spaces in the path 
+2. [Install Python 3.8.9](https://www.python.org/downloads/release/python-389/). Install to some location that does not include spaces in the path 
    (we suggest C:\Python38). Click the checkbox that says Add Python 3.8 to PATH (or something similar) 
    during the installation.
    
@@ -145,7 +147,7 @@ dependencies in other operating systems:
    
    ![Run Amazon.bat](https://github.com/Hari-Nagarajan/fairgame/blob/master/docs/images/Step7.png)
    
-8. Verify that the bot successfully makes it to the place your order page with the item you put in the config file. 
+8. Verify that the bot successfully makes it to the place an order screen with the item you put in the config file.
    If it does not, then:
    * You messed something up above, and need to fix it; or,
    * If it is asking you for your address and payment info, you need to do all of the following in a separate
@@ -318,7 +320,7 @@ pipenv run python app.py amazon [Options]
 Options:
   --headless          Runs Chrome in headless mode.
   
-  --test              Run the checkout flow but do not actually purchase the item[s]
+  --test              Run the checkout flow but do not actually purchase the item[s].  
 
   --delay FLOAT       Time to wait between the end of one stock check and the beginning of the next stock check.
   

@@ -7,10 +7,10 @@ verify_ssl = true
 pyinstaller = "*"
 
 [packages]
-requests = "==2.24.0"
+requests = "*"
 click = "*"
 selenium = "*"
-chromedriver-py = "~=90.0"
+chromedriver-py = "==95.0.4638.17"
 furl = "*"
 twilio = "*"
 discord-webhook = "*"
