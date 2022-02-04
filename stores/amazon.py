@@ -712,7 +712,7 @@ class Amazon:
             for idx, offer in enumerate(offer_container):
                 tree = html.fromstring(offer.get_attribute("innerHTML"))
                 shipping_prices.append(
-                    get_shipping_costs(tree, amazon_config["FREE_SHIPPING"])
+                    get_shipping_costs(tree)
                 )
             if shipping_prices:
                 break
@@ -787,7 +787,7 @@ class Amazon:
                 except:
                     log.error("Unable to find OfferID...")
                     return False
-                
+
                 if offering_id:
                     log.info("Attempting Add To Cart with offer ID...")
                     if not self.alt_checkout:
@@ -1834,7 +1834,43 @@ def get_timestamp_filename(name, extension):
         return name + "_" + date + "." + extension
 
 
-def get_shipping_costs(tree, free_shipping_string):
+def get_shipping_costs(tree):
+    # Top level wrapper method to be be called by the main code.  Various
+    # implementations should be called from here.  This allows newer mechanisms
+    # to be developed while still retaining fallback versions for older code
+    shipping_costs = get_shipping_costs_v3(tree)
+    if not shipping_costs:
+        shipping_costs = get_shipping_costs_v2(tree)
+    if not shipping_costs:
+        shipping_costs = get_alt_shipping_costs(tree, amazon_config["FREE_SHIPPING"])
+    return shipping_costs
+
+
+def get_shipping_costs_v3(tree):
+    # This version expects to find shipping in a element attribute called
+    # "data-csa-c-delivery-price" and it will either be text indicating
+    # that it's free or the fixed price as a float
+    shipping_price_xpath = ".//span/@data-csa-c-delivery-price"
+    shipping_price_nodes = tree.xpath(shipping_price_xpath)
+    if len(shipping_price_nodes) > 0:
+        shipping_text = shipping_price_nodes[0].upper()
+        if any(
+                shipping_text.upper() in free_message
+                for free_message in ["FREE", "FASTEST"]
+        ):
+            # We found some version of "free" inside the span.. but this relies on a match
+            log.debug(
+                f"Assuming free shipping based on this message: '{shipping_text}'"
+            )
+            return FREE_SHIPPING_PRICE
+        else:
+            log.debug(f"Found {shipping_text} as a price.  Using that.")
+            shipping_cost: Price = parse_price(shipping_text)
+            return shipping_cost
+    return None
+
+
+def get_shipping_costs_v2(tree):
     # This version expects to find the shipping pricing within a div with the explicit ID 'delivery-message'
     shipping_xpath = ".//div[@id='delivery-message']"
     shipping_nodes = tree.xpath(shipping_xpath)
