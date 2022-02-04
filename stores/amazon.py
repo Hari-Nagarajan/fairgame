@@ -734,7 +734,7 @@ class Amazon:
             # any condition hurdle.
             if not buy_box:
                 condition: List[WebElement] = atc_button.find_elements_by_xpath(
-                    "./ancestor::form[@method='post']"
+                    "./following::form[@method='get']"
                 )
                 if condition:
                     atc_form_action = condition[0].get_attribute("action")
