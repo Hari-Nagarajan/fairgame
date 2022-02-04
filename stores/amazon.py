@@ -610,16 +610,11 @@ class Amazon:
                         continue
                     else:
                         log.error("Could not open offers link")
-                elif (
-                    offer_container.get_attribute("aria-labelledby")
-                    == "submit.add-to-cart-announce"
-                ):
+                elif offer_id == "add-to-cart-button":
                     # Use the Buy Box as an Offer as a last resort since it is not guaranteed to be a good offer
                     buy_box = True
-                    upper_case = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-                    lower_case = 'abcdefghijklmnopqrstuvwxyz'
                     offer_count = self.driver.find_elements_by_xpath(
-                        "//div[@id='qualifiedBuybox']//input[@id='add-to-cart-button'] | //div[contains(translate(@id, upper_case, lower_case), 'qualifiedbuybox')]//input[@id='add-to-cart-button']"
+                        "//div[@id='qualifiedBuybox']//input[@id='add-to-cart-button'] | //div[contains(translate(@id, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'qualifiedbuybox')]//input[@id='add-to-cart-button']"
                     )
                 else:
                     log.warning(
@@ -683,8 +678,11 @@ class Amazon:
         timeout = self.get_timeout()
         while True:
             if buy_box:
+                # prices = self.driver.find_elements_by_xpath(
+                #     "//span[@id='price_inside_buybox']"
+                # )
                 prices = self.driver.find_elements_by_xpath(
-                    "//span[@id='price_inside_buybox']"
+                    "//div[@id='corePrice_feature_div']//span[contains(@class, 'a-price')]//span[@class='a-offscreen']"
                 )
             else:
                 prices = self.driver.find_elements_by_xpath(
