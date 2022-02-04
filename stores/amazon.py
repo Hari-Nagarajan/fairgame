@@ -1899,8 +1899,8 @@ def get_shipping_costs_v2(tree):
                         f"Found parseable price with currency symbol: {shipping_cost.currency}"
                     )
                     return shipping_cost
-    # Try the alternative method...
-    return get_alt_shipping_costs(tree, free_shipping_string)
+
+    return None
 
 
 def get_alt_shipping_costs(tree, free_shipping_string) -> Price:
