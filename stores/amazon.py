@@ -939,7 +939,7 @@ class Amazon:
                     log.error("Failed to get page")
                     atc_attempts += 1
                     continue
-            xpath = "//input[@value='add' and @name='add']"
+            xpath = "//*[@id='a-autoid-0']/span/input"
             continue_btn = None
             if wait_for_element_by_xpath(self.driver, xpath):
                 try:
