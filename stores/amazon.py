@@ -937,7 +937,7 @@ class Amazon:
                     log.error("Failed to get page")
                     atc_attempts += 1
                     continue
-            xpath = "//input[@value='add' and @name='add']"
+            xpath = "//form[@id='activeCartViewForm']//input[@type='submit']"
             continue_btn = None
             if wait_for_element_by_xpath(self.driver, xpath):
                 try:
