@@ -24,6 +24,7 @@ import os
 import platform
 import time
 import re
+import urllib
 from contextlib import contextmanager
 from datetime import datetime
 from enum import Enum
@@ -781,7 +782,7 @@ class Amazon:
                 try:
                     atc_action : List[WebElement] = atc_button.find_elements(By.XPATH, "./ancestor::span[@data-action='aod-atc-action']")
                     full_atc_action_string = atc_action[0].get_attribute('data-aod-atc-action')
-                    offering_id = json.loads(full_atc_action_string)["oid"]
+                    offering_id = urllib.parse.unquote(json.loads(full_atc_action_string)["oid"])
                 except:
                     log.error("Unable to find OfferID...")
                     return False
