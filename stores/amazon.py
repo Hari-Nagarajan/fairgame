@@ -396,7 +396,7 @@ class Amazon:
             except sel_exceptions.TimeoutException:
                 log.error("User did not solve One Time Password prompt in time.")
 
-        if self.driver.find_elements_by_xpath('//*[@id="auth-error-message-box"]'):
+        if self.driver.find_elements(By.XPATH, '//*[@id="auth-error-message-box"]'):
             log.error("Login failed, delete your credentials file")
             time.sleep(240)
             exit(1)
@@ -541,7 +541,7 @@ class Amazon:
                     return False
                 elif offer_id == "aod-container":
                     # Offer Flyout or Ajax call ... count the 'aod-offer' divs that we 'see'
-                    offer_count = self.driver.find_elements_by_xpath(
+                    offer_count = self.driver.find_elements(By.XPATH,
                         "//div[@id='aod-pinned-offer' or @id='aod-offer']//input[@name='submit.addToCart']"
                     )
                 elif (
@@ -561,7 +561,7 @@ class Amazon:
                         pass
 
                     # Now check to see if we're already loading the flyout...
-                    flyout = self.driver.find_elements_by_xpath(
+                    flyout = self.driver.find_elements(By.XPATH,
                         "/html/body/div[@id='all-offers-display']"
                     )
                     if flyout:
@@ -613,7 +613,7 @@ class Amazon:
                 elif offer_id == "add-to-cart-button":
                     # Use the Buy Box as an Offer as a last resort since it is not guaranteed to be a good offer
                     buy_box = True
-                    offer_count = self.driver.find_elements_by_xpath(
+                    offer_count = self.driver.find_elements(By.XPATH,
                         "//div[@id='qualifiedBuybox']//input[@id='add-to-cart-button'] | //div[contains(translate(@id, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'qualifiedbuybox')]//input[@id='add-to-cart-button']"
                     )
                 else:
@@ -678,14 +678,14 @@ class Amazon:
         timeout = self.get_timeout()
         while True:
             if buy_box:
-                # prices = self.driver.find_elements_by_xpath(
+                # prices = self.driver.find_elements(By.XPATH,
                 #     "//span[@id='price_inside_buybox']"
                 # )
-                prices = self.driver.find_elements_by_xpath(
+                prices = self.driver.find_elements(By.XPATH,
                     "//div[@id='corePrice_feature_div']//span[contains(@class, 'a-price')]//span[@class='a-offscreen']"
                 )
             else:
-                prices = self.driver.find_elements_by_xpath(
+                prices = self.driver.find_elements(By.XPATH,
                     "//div[@id='aod-pinned-offer' or @id='aod-offer']//span[@class='a-price']//span[@class='a-offscreen']"
                 )
             if prices:
@@ -706,7 +706,7 @@ class Amazon:
                     "//div[@id='aod-offer' and .//input[@name='submit.addToCart']] | "
                     "//div[@id='aod-pinned-offer' and .//input[@name='submit.addToCart']]"
                 )
-            offer_container = self.driver.find_elements_by_xpath(offer_xpath)
+            offer_container = self.driver.find_elements(By.XPATH, offer_xpath)
             for idx, offer in enumerate(offer_container):
                 tree = html.fromstring(offer.get_attribute("innerHTML"))
                 shipping_prices.append(
@@ -731,7 +731,7 @@ class Amazon:
             # with the assumption that anything in the Buy Box on the PDP *must* be New and therefor will clear
             # any condition hurdle.
             if not buy_box:
-                condition: List[WebElement] = atc_button.find_elements_by_xpath(
+                condition: List[WebElement] = atc_button.find_elements(By.XPATH,
                     "./following::form[@method='get']"
                 )
                 if condition:
@@ -779,7 +779,7 @@ class Amazon:
                 log.info("Adding to cart")
                 # Get the offering ID
                 try:
-                    atc_action : List[WebElement] = atc_button.find_elements_by_xpath("./ancestor::span[@data-action='aod-atc-action']")
+                    atc_action : List[WebElement] = atc_button.find_elements(By.XPATH, "./ancestor::span[@data-action='aod-atc-action']")
                     full_atc_action_string = atc_action[0].get_attribute('data-aod-atc-action')
                     offering_id = json.loads(full_atc_action_string)["oid"]
                 except:
@@ -832,7 +832,7 @@ class Amazon:
                         return False
                     self.wait_for_page_change(current_title)
                     # log.info(f"page title is {self.driver.title}")
-                    emtpy_cart_elements = self.driver.find_elements_by_xpath(
+                    emtpy_cart_elements = self.driver.find_elements(By.XPATH,
                         "//div[contains(@class, 'sc-your-amazon-cart-is-empty') or contains(@class, 'sc-empty-cart')]"
                     )
 
@@ -1209,7 +1209,7 @@ class Amazon:
         )
 
     def get_amazon_elements(self, key):
-        return self.driver.find_elements_by_xpath(
+        return self.driver.find_elements(By.XPATH,
             join_xpaths(amazon_config["XPATHS"][key])
         )
 
