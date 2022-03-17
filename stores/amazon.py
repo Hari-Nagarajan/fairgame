@@ -273,6 +273,8 @@ class Amazon:
                 self.remove_asin_list(asin)
                 if not self.asin_list or self.single_shot:
                     continue_stock_check = False
+                self.navigate_pages(test)
+
             else:
                 # found something in stock and under reserve
                 # initialize loop limiter variables
