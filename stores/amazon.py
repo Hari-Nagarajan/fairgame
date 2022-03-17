@@ -24,7 +24,6 @@ import os
 import platform
 import time
 import re
-import urllib
 from contextlib import contextmanager
 from datetime import datetime
 from enum import Enum
@@ -58,6 +57,7 @@ AMAZON_URLS = {
     "OFFER_URL": "https://{domain}/dp/",
     "CART_URL": "https://{domain}/gp/cart/view.html",
     "ATC_URL": "https://{domain}/gp/aws/cart/add.html",
+    "BIN_URL": "https://{domain}/gp/checkoutportal/enter-checkout.html"
 }
 CHECKOUT_URL = "https://{domain}/gp/cart/desktop/go-to-checkout.html/ref=ox_sc_proceed?partialCheckoutCart=1&isToBeGiftWrappedBefore=0&proceedToRetailCheckout=Proceed+to+checkout&proceedToCheckout=1&cartInitiateId={cart_id}"
 
@@ -782,7 +782,7 @@ class Amazon:
                 try:
                     atc_action : List[WebElement] = atc_button.find_elements(By.XPATH, "./ancestor::span[@data-action='aod-atc-action']")
                     full_atc_action_string = atc_action[0].get_attribute('data-aod-atc-action')
-                    offering_id = urllib.parse.unquote(json.loads(full_atc_action_string)["oid"])
+                    offering_id = json.loads(full_atc_action_string)["oid"]
                 except:
                     log.error("Unable to find OfferID...")
                     return False
@@ -882,7 +882,7 @@ class Amazon:
         retry = 0
         successful = False
         while not successful:
-            buy_it_now_url = f"https://{self.amazon_website}/checkout/turbo-initiate?ref_=dp_start-bbf_1_glance_buyNow_2-1&pipelineType=turbo&weblab=RCX_CHECKOUT_TURBO_DESKTOP_NONPRIME_87784&temporaryAddToCart=1&offerListing.1={offering_id}&quantity.1=1"
+            buy_it_now_url = f"{AMAZON_URLS['BIN_URL']}?buyNow=1&skipCart=1&offeringID={offering_id}&quantity=1"
             with self.wait_for_page_content_change():
                 self.driver.get(buy_it_now_url)
             timeout = self.get_timeout(5)
@@ -895,7 +895,7 @@ class Amazon:
                 continue
             try:
                 place_order_button = self.driver.find_element_by_xpath(
-                    "//input[@id='turbo-checkout-pyo-button' and @type='submit']"
+                    "//input[@name='placeYourOrder1' and @type='submit']"
                 )
             except sel_exceptions.NoSuchElementException:
                 log.info("No PYO button found, don't ask why")
@@ -938,7 +938,7 @@ class Amazon:
                     log.error("Failed to get page")
                     atc_attempts += 1
                     continue
-            xpath = "//form[@id='activeCartViewForm']//input[@type='submit']"
+            xpath = "//*[@id='a-autoid-0']/span/input"
             continue_btn = None
             if wait_for_element_by_xpath(self.driver, xpath):
                 try:
