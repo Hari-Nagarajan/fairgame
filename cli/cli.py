@@ -236,7 +236,7 @@ def amazon(
         log.info(f"Removing existing Amazon credentials from {AMAZON_CREDENTIAL_FILE}")
         os.remove(AMAZON_CREDENTIAL_FILE)
 
-    amzn_obj = Amazon(
+    amzn_obj =  Amazon(
         headless=headless,
         notification_handler=notification_handler,
         checkshipping=checkshipping,
@@ -250,7 +250,7 @@ def amazon(
         encryption_pass=p,
         log_stock_check=log_stock_check,
         shipping_bypass=shipping_bypass,
-        alt_checkout=True,
+        alt_checkout=alt_checkout,
         wait_on_captcha_fail=captcha_wait,
     )
     try:
