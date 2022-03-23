@@ -803,7 +803,7 @@ class Amazon:
                             self.save_page_source("failed-atc")
                             return False
                     else:
-                        if self.attempt_atc(offering_id):
+                        if self.attempt_atc(offering_id, asin):
                             return True
                         else:
                             self.send_notification(
@@ -928,9 +928,9 @@ class Amazon:
                     successful = True
         return True
 
-    def attempt_atc(self, offering_id, max_atc_retries=DEFAULT_MAX_ATC_TRIES):
+    def attempt_atc(self, offering_id, asin, max_atc_retries=DEFAULT_MAX_ATC_TRIES):
         # Open the add.html URL in Selenium
-        f = f"{AMAZON_URLS['ATC_URL']}?OfferListingId.1={offering_id}&Quantity.1=1"
+        f = f"{AMAZON_URLS['ATC_URL']}?OfferListingId.1={offering_id}&Quantity.1=1&ASIN.1={asin}"
         atc_attempts = 0
         while atc_attempts < max_atc_retries:
             with self.wait_for_page_content_change(timeout=5):
