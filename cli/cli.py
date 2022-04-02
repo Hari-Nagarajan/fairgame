@@ -200,25 +200,25 @@ def main():
 )
 @notify_on_crash
 def amazon(
-    no_image,
-    headless,
-    test,
-    delay,
-    checkshipping,
-    detailed,
-    used,
-    single_shot,
-    no_screenshots,
-    disable_presence,
-    disable_sound,
-    slow_mode,
-    p,
-    log_stock_check,
-    shipping_bypass,
-    clean_profile,
-    clean_credentials,
-    alt_checkout,
-    captcha_wait,
+        no_image,
+        headless,
+        test,
+        delay,
+        checkshipping,
+        detailed,
+        used,
+        single_shot,
+        no_screenshots,
+        disable_presence,
+        disable_sound,
+        slow_mode,
+        p,
+        log_stock_check,
+        shipping_bypass,
+        clean_profile,
+        clean_credentials,
+        alt_checkout,
+        captcha_wait,
 ):
     notification_handler.sound_enabled = not disable_sound
     if not notification_handler.sound_enabled:
@@ -236,7 +236,7 @@ def amazon(
         log.info(f"Removing existing Amazon credentials from {AMAZON_CREDENTIAL_FILE}")
         os.remove(AMAZON_CREDENTIAL_FILE)
 
-    amzn_obj =  Amazon(
+    amzn_obj = Amazon(
         headless=headless,
         notification_handler=notification_handler,
         checkshipping=checkshipping,
