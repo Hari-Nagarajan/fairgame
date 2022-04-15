@@ -118,7 +118,7 @@ def get_scrypt_cost_factor(mem_percentage=0.5):
     mem = math.floor(virtual_memory().total * mem_percentage / 1024)
     # Value must be a power of 2
     exponent = math.floor(math.log(mem, 2))
-    return min(2 ** 20, 2 ** exponent)
+    return min(2**20, 2**exponent)
 
 
 # def main():
