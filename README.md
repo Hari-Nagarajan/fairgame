@@ -66,18 +66,43 @@ FairGame only works on Amazon and can automatically place an order.
     one of any of the products you've included in the configuration file, use the `--single-shot` option, see
     [Running the program](#Running-the-program)    
 
-### Disclaimer 
+# Disclaimer 
 
-WARNING: The use of this software can result in a Amazon restricting access to your account and make it difficult 
-for you to purchase products, with or without the bot. By using this software, you acknowledge these risks. These restrictions
-cannot and will not be resolved by the developer(s), nor can they be detected/resolved by the standard Amazon Customer Support,
-as far as we are aware. If this happens, the only resolution is to stop all Amazon monitors (e.g., FairGame, Distill.io,
-or other bots, etc.), wait, and hope the limits are lifted within a few days. If this is a major issue you should
-consider avoiding use of this software. 
+WARNING: The use of this software can result in Amazon temporarily restricting access to (i.e., "shadow ban") your Amazon account, making it 
+difficult for you to purchase certain products, with or without the bot (discussed in the next section). This open-source software offers no guarantees of success, and its developer(s) cannont be held responsible for any personal damages resulting from its use.*
 
-Account restrictions may be triggered by any of the following: 1) running multiple instances on one device, 2) running multiple instances on different devices, using the same account, regardless of their IP, proxy, or location, 3) configuring an instance to check stock too frequently/aggressively (default settings not guaranteed to be safe). 
+### ***By using this software, you acknowledge these risks and are solely liable for any consequnces therein.***
 
-Symptoms of account restrictions include: 1) Fly-out (offers) window is missing/completely blank, even if there are listings for the ASIN, 2) frequent CAPTCHA checks, 3) inability to access the My Account page, add items to your cart, or complete purchases; usually displayed as a 503 error (Amazon Dogs & “SORRY we couldn’t find that page” message). You’ll likely have to sit-out a few days of drops to resolve the throttle.
+
+## About Amazon Account Restrictions
+
+The majority of issues FairGame may encounter are simply a consequense of Amazon's anti-botting measures. Firstly, *don't pacnic.*
+
+Symptoms of account restrictions include: 
+* Inability to access the My Account page (*Amazon Dogs* and “SORRY we couldn’t find that page” message) 
+* Difficulty adding certain items to cart or completing purchases
+* Missing or Blank fly-out (i.e., "offers") window , even if there *are* listings for the ASIN
+* Frequent CAPTCHA checks
+
+If your Amazon account is restricted then the only solution is to **stop all Amazon monitors** (e.g., *FairGame*, *Distill.io*, or other 
+bots), **wait patiently**, and hope that the limits are lifted within a day or so. These restrictions cannot be resolved by the 
+FairGame developer(s), nor can they be detected/resolved by Amazon Customer Support (please do not waste their time). 
+
+**Most restrictions will self-resolve within 24-48 hours *after* all botting has ceased.** 
+
+You may still use your Amazon account organically during this intermission, albeit with limited functionality. If this is a critical issue then avoid use of this software. 
+
+Account restrictions can be triggered by several factors, including: 
+* Configuring any FairGame instance(s) to poll too frequently/aggressively (even the default settings are *not guaranteed* to be safe) 
+* Running multiple FairGame instances on one device, regardless of the Amazon account(s) used
+* Running multiple FairGame instances on different devices using one Amazon account, regardless of IP, proxy, or geo-location filter
+* Accessing your Amazon account from a different device or location while bots are running elsewhere
+* Using other bots concurrently with FairGame
+
+For this reason and others, the developer(s) **DO NOT** support running multiple FairGame instances nor any issues you may encountered when doing so. 
+
+Before opening an issue on GitHub or Discord, please stop all Amazon bots/monitors on your account and wait **at least 48 hours** to see if the problem self-resolves. *Issues raised matching this description will be ignored because you neglected to read the README and have no respect for others' time.* 
+
 
 # Installation
 
