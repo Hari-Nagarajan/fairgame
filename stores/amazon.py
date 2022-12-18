@@ -340,7 +340,7 @@ class Amazon:
             )
 
             try:
-                self.driver.find_element_by_xpath(xpath).click()
+                self.driver.find_element(By.XPATH,xpath).click()
             except sel_exceptions.NoSuchElementException:
                 log.error("Log in button does not exist")
             log.info("Wait for Sign In page")
@@ -349,7 +349,7 @@ class Amazon:
     @debug
     def is_logged_in(self):
         try:
-            text = self.driver.find_element_by_id("nav-link-accountList").text
+            text = self.driver.find_element(By.ID,"nav-link-accountList").text
             return not any(sign_in in text for sign_in in amazon_config["SIGN_IN_TEXT"])
         except sel_exceptions.NoSuchElementException:
 
@@ -363,11 +363,11 @@ class Amazon:
         timeout = self.get_timeout()
         while True:
             try:
-                email_field = self.driver.find_element_by_xpath('//*[@id="ap_email"]')
+                email_field = self.driver.find_element(By.XPATH,'//*[@id="ap_email"]')
                 break
             except sel_exceptions.NoSuchElementException:
                 try:
-                    password_field = self.driver.find_element_by_xpath(
+                    password_field = self.driver.find_element(By.XPATH,
                         '//*[@id="ap_password"]'
                     )
                     break
@@ -408,7 +408,7 @@ class Amazon:
 
         log.info("Remember me checkbox")
         try:
-            self.driver.find_element_by_xpath('//*[@name="rememberMe"]').click()
+            self.driver.find_element(By.XPATH,'//*[@name="rememberMe"]').click()
         except sel_exceptions.NoSuchElementException:
             log.error("Remember me checkbox did not exist")
 
@@ -418,7 +418,7 @@ class Amazon:
         current_page = self.driver.title
         while True:
             try:
-                password_field = self.driver.find_element_by_xpath(
+                password_field = self.driver.find_element(By.XPATH,
                     '//*[@id="ap_password"]'
                 )
                 break
@@ -432,7 +432,7 @@ class Amazon:
             password_field.send_keys(amazon_config["password"])
             # check for captcha
             try:
-                captcha_entry = self.driver.find_element_by_xpath(
+                captcha_entry = self.driver.find_element(By.XPATH,
                     '//form[contains(@action,"validateCaptcha")]'
                 )
             except sel_exceptions.NoSuchElementException:
@@ -529,7 +529,7 @@ class Amazon:
                 offer_container = WebDriverWait(
                     self.driver, timeout=DEFAULT_MAX_TIMEOUT
                 ).until(
-                    lambda d: d.find_element_by_xpath(
+                    lambda d: d.find_element(By.XPATH,
                         "//div[@id='aod-container'] | "
                         "//div[@id='backInStock' or @id='outOfStock'] |"
                         "//span[@data-action='show-all-offers-display'] | "
@@ -557,7 +557,7 @@ class Amazon:
                     open_offers_link = None
                     try:
                         open_offers_link: WebElement = (
-                            self.driver.find_element_by_xpath(
+                            self.driver.find_element(By.XPATH,
                                 "//span[@data-action='show-all-offers-display']//a"
                             )
                         )
@@ -576,7 +576,7 @@ class Amazon:
                             "Found a loading flyout div.  Waiting for offers to load..."
                         )
                         WebDriverWait(self.driver, timeout=DEFAULT_MAX_TIMEOUT).until(
-                            lambda d: d.find_element_by_xpath(
+                            lambda d: d.find_element(By.XPATH,
                                 "//div[@id='aod-container']  "
                             )
                         )
@@ -601,7 +601,7 @@ class Amazon:
                             WebDriverWait(
                                 self.driver, timeout=DEFAULT_MAX_TIMEOUT
                             ).until(
-                                lambda d: d.find_element_by_xpath(
+                                lambda d: d.find_element(By.XPATH,
                                     "//div[@id='aod-container']"
                                 )
                             )
@@ -668,7 +668,7 @@ class Amazon:
 
             test = None
             try:
-                test = self.driver.find_element_by_xpath(
+                test = self.driver.find_element(By.XPATH,
                     '//*[@id="olpOfferList"]/div/p'
                 )
             except sel_exceptions.NoSuchElementException:
@@ -903,7 +903,7 @@ class Amazon:
                     return False
                 continue
             try:
-                place_order_button = self.driver.find_element_by_xpath(
+                place_order_button = self.driver.find_element(By.XPATH,
                     "//input[@name='placeYourOrder1' and @type='submit']"
                 )
             except sel_exceptions.NoSuchElementException:
@@ -1047,7 +1047,7 @@ class Amazon:
             element = None
             # check page for order complete?
             try:
-                element = self.driver.find_element_by_xpath(
+                element = self.driver.find_element(By.XPATH,
                     '//*[@class="a-box a-alert a-alert-success"]'
                 )
             except sel_exceptions.NoSuchElementException:
@@ -1214,7 +1214,7 @@ class Amazon:
         return False
 
     def get_amazon_element(self, key):
-        return self.driver.find_element_by_xpath(
+        return self.driver.find_element(By.XPATH,
             join_xpaths(amazon_config["XPATHS"][key])
         )
 
@@ -1410,7 +1410,7 @@ class Amazon:
         timeout = self.get_timeout()
         while True:
             try:
-                button = self.driver.find_element_by_xpath(self.button_xpaths[0])
+                button = self.driver.find_element(By.XPATH,self.button_xpaths[0])
             except sel_exceptions.NoSuchElementException:
                 if self.shipping_bypass:
                     try:
@@ -1491,7 +1491,7 @@ class Amazon:
         time.sleep(DEFAULT_MAX_WEIRD_PAGE_DELAY)
         current_page = self.driver.title
         try:
-            if not check_presence or self.driver.find_element_by_xpath(
+            if not check_presence or self.driver.find_element(By.XPATH,
                 '//form[contains(@action,"validateCaptcha")]'
             ):
                 try:
@@ -1545,7 +1545,7 @@ class Amazon:
                                 "Solving catpcha", "captcha", self.take_screenshots
                             )
                         try:
-                            captcha_field = self.driver.find_element_by_xpath(
+                            captcha_field = self.driver.find_element(By.XPATH,
                                 '//*[@id="captchacharacters"]'
                             )
                         except sel_exceptions.NoSuchElementException:
@@ -1576,7 +1576,7 @@ class Amazon:
         timeout = self.get_timeout()
         while True:
             try:
-                button = self.driver.find_element_by_xpath(
+                button = self.driver.find_element(By.XPATH,
                     '//*[@id="a-autoid-0"]/span/input'
                 )
                 break
@@ -1621,7 +1621,7 @@ class Amazon:
     @contextmanager
     def wait_for_page_content_change(self, timeout=5):
         """Utility to help manage selenium waiting for a page to load after an action, like a click"""
-        old_page = self.driver.find_element_by_tag_name("html")
+        old_page = self.driver.find_element(By.TAG_NAME,"html")
         yield
         try:
             WebDriverWait(self.driver, timeout).until(EC.staleness_of(old_page))
@@ -1671,7 +1671,7 @@ class Amazon:
         check_cart_element = None
         current_page = []
         try:
-            check_cart_element = self.driver.find_element_by_xpath(
+            check_cart_element = self.driver.find_element(By.XPATH,
                 '//*[@id="nav-cart"]'
             )
         except sel_exceptions.NoSuchElementException:

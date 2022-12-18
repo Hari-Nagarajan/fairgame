@@ -125,7 +125,7 @@ def field_send_keys(d, field, keys):
     """
     Uses webdriver(d) to fiend a field(field), clears it and sends keys(keys)
     """
-    elem = d.find_element_by_name(field)
+    elem = d.find_element(By.NAME,field)
     elem.clear()
     elem.send_keys(keys)
 
