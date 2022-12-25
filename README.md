@@ -461,7 +461,7 @@ Install Pip:
 `sudo apt install python3-pip`
 
 Install pipenv:
-`pip3 install pipenv`
+`sudo pip3 install pipenv`
 
 Add /home/$USER/.local/bin to PATH:
 `export PATH="/home/$USER/.local/bin:$PATH"`
@@ -518,7 +518,7 @@ sudo python3.8 -m pip install --upgrade pip
 
 git clone https://github.com/Hari-Nagarajan/fairgame
 cd fairgame/
-pip3 install pipenv
+sudo pip3 install pipenv
 export PATH=$PATH:/home/$USER/.local/bin
 pipenv shell 
 pipenv install
