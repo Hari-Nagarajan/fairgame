@@ -449,7 +449,24 @@ class Amazon:
                 # Wait for the user to enter 2FA
                 time.sleep(2)
         log.info(f'Logged in as {amazon_config["username"]}')
-
+    
+    @debug
+    def relogin(self):
+        while True:
+            try:
+                self.get_page(url=AMAZON_URLS["BASE_URL"])
+                break
+            except sel_exceptions.WebDriverException:
+                log.error(
+                    "Couldn't talk to "
+                    + AMAZON_URLS["BASE_URL"]
+                    + ", if the address is right, there might be a network outage..."
+                )
+                time.sleep(3)
+                pass
+        self.handle_startup()
+        self.login()
+                 
     @debug
     def run_asins(self, delay):
         found_asin = False
@@ -640,6 +657,8 @@ class Amazon:
                     return False
                 if len(offer_count) == 0:
                     log.info("No offers found.  Moving on.")
+                    if not self.is_logged_in():
+                        self.relogin()
                     return False
                 log.info(
                     f"Found {len(offer_count)} offers for {asin}.  Evaluating offers..."
