@@ -22,6 +22,7 @@ import json
 import math
 import os
 import platform
+import stdiomask
 import time
 import re
 from contextlib import contextmanager
@@ -444,10 +445,69 @@ class Amazon:
         if captcha_entry:
             self.handle_captcha(False)
         if self.driver.title in amazon_config["TWOFA_TITLES"]:
-            log.info("enter in your two-step verification code in browser")
-            while self.driver.title in amazon_config["TWOFA_TITLES"]:
-                # Wait for the user to enter 2FA
+            otp_select = None
+            timeout = self.get_timeout()
+            while True:
+                try:
+                    otp_select = self.driver.find_element_by_xpath(
+                        '//*[@id="auth-select-device-form"]'
+                    )
+                    break
+                except sel_exceptions.NoSuchElementException:
+                    pass
+                if time.time() > timeout:
+                    break
+            if otp_select:
+                log.info("OTP choice selection, trying to check TOTP (app) option")
+                try:
+                    self.driver.find_element_by_xpath(
+                        '//*[contains(@class, "auth-TOTP")]/label'
+                    ).click()
+                except sel_exceptions.NoSuchElementException:
+                    log.error("OTP TOTP choice not present!")
+                self.driver.find_element_by_xpath('//*[@id="auth-send-code"]').click()
                 time.sleep(2)
+
+            self.notification_handler.play_notify_sound()
+            self.send_notification(
+                "Bot requires OTP input, please see console and/or browser window!",
+                "otp-page",
+                self.take_screenshots,
+            )
+            otp_field = None
+            timeout = self.get_timeout()
+            while True:
+                try:
+                    otp_field = self.driver.find_element_by_xpath(
+                        '//*[@id="auth-mfa-otpcode"]'
+                    )
+                    break
+                except sel_exceptions.NoSuchElementException:
+                    pass
+                if time.time() > timeout:
+                    break
+            if otp_field:
+                log.info("OTP Remember me checkbox")
+                try:
+                    self.driver.find_element_by_xpath(
+                        '//*[@name="rememberDevice"]'
+                    ).click()
+                except sel_exceptions.NoSuchElementException:
+                    log.error("OTP Remember me checkbox did not exist")
+                otp = stdiomask.getpass(
+                    prompt="enter in your two-step verification code: ", mask="*"
+                )
+                otp_field.send_keys(otp + Keys.RETURN)
+                time.sleep(2)
+                if self.driver.title in amazon_config["TWOFA_TITLES"]:
+                    log.error("Something went wrong, please check browser manually...")
+                while self.driver.title in amazon_config["TWOFA_TITLES"]:
+                    time.sleep(2)
+            else:
+                log.error("OTP entry box did not exist, please fill in OTP manually...")
+                while self.driver.title in amazon_config["TWOFA_TITLES"]:
+                    # Wait for the user to enter 2FA
+                    time.sleep(2)
         log.info(f'Logged in as {amazon_config["username"]}')
 
     @debug
